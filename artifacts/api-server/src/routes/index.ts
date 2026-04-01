@@ -1,8 +1,8 @@
-import { Router, type IRouter } from "express";
-import healthRouter from "./health";
+import type { FastifyPluginAsync } from "fastify";
+import healthRoutes from "./health";
 
-const router: IRouter = Router();
+const routes: FastifyPluginAsync = async (app) => {
+  app.register(healthRoutes);
+};
 
-router.use(healthRouter);
-
-export default router;
+export default routes;

@@ -1,4 +1,4 @@
-import app from "./app";
+import { buildApp } from "./app";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -15,7 +15,9 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
+const app = buildApp();
+
+app.listen({ port, host: "0.0.0.0" }, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
