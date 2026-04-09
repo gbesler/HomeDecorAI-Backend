@@ -6,7 +6,6 @@ import {
   getGenerationsByUser,
   type GenerationDoc,
 } from "../lib/firestore.js";
-import { downloadAndUploadToS3, isOwnS3Url } from "../lib/storage.js";
 import { logger } from "../lib/logger.js";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -56,8 +55,8 @@ export async function generateInteriorDesign(
 ): Promise<GenerateInteriorDesignResult> {
   const { userId, imageUrl, roomType, designStyle } = input;
 
-  if (!isOwnS3Url(imageUrl, userId)) {
-    throw new ValidationError("imageUrl must point to a previously uploaded image");
+  if (!/^https?:\/\//i.test(imageUrl)) {
+    throw new ValidationError("imageUrl must use http or https scheme");
   }
 
   const toolConfig = TOOL_TYPES.interiorDesign;
@@ -83,13 +82,8 @@ export async function generateInteriorDesign(
       imageUrl,
     });
 
-    const s3Url = await downloadAndUploadToS3(result.imageUrl, {
-      folder: "generations",
-      userId,
-    });
-
     await updateGeneration(generationId, {
-      outputImageUrl: s3Url,
+      outputImageUrl: result.imageUrl,
       provider: result.provider,
       status: "completed",
       durationMs: result.durationMs,
@@ -97,7 +91,7 @@ export async function generateInteriorDesign(
 
     return {
       id: generationId,
-      outputImageUrl: s3Url,
+      outputImageUrl: result.imageUrl,
       provider: result.provider,
       durationMs: result.durationMs,
     };
