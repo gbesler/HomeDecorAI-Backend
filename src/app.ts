@@ -59,6 +59,7 @@ export function buildApp() {
 
   app.register(fastifySwaggerUi, {
     routePrefix: "/docs",
+    logo: { type: "image/svg+xml", content: "" },
     uiConfig: {
       docExpansion: "list",
       deepLinking: true,
