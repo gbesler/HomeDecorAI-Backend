@@ -27,15 +27,17 @@ designCircuitBreaker.onTransition = (name, from, to, stats) => {
   }
 };
 
-// Periodic circuit breaker status log (every 30 seconds)
+// Periodic circuit breaker status log (every 30 seconds, only when not healthy)
 const statusInterval = setInterval(() => {
   const state = designCircuitBreaker.getState();
-  const provider = designCircuitBreaker.shouldUseFallback()
-    ? "fal.ai"
-    : "replicate";
-  logger.info(
-    `Circuit breaker: ${provider} (${state})`,
-  );
+  if (state !== CircuitState.CLOSED) {
+    const provider = designCircuitBreaker.shouldUseFallback()
+      ? "fal.ai"
+      : "replicate";
+    logger.info(
+      `Circuit breaker: ${provider} (${state})`,
+    );
+  }
 }, 30_000);
 
 // Periodic Slack status report (every 30 minutes) when circuit is not CLOSED

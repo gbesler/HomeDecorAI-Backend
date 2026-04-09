@@ -17,5 +17,8 @@ export function buildApp() {
   app.register(firebaseAuthPlugin);
   app.register(routes, { prefix: "/api" });
 
+  // Root health check for Render
+  app.get("/", async () => ({ status: "ok" }));
+
   return app;
 }
