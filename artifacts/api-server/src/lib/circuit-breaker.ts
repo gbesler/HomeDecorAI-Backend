@@ -1,12 +1,13 @@
 import { logger } from "./logger.js";
+import type { Provider } from "./ai-providers/types.js";
+
+export type { Provider };
 
 export enum CircuitState {
   CLOSED = "CLOSED",
   OPEN = "OPEN",
   HALF_OPEN = "HALF_OPEN",
 }
-
-export type Provider = "replicate" | "falai";
 
 interface RequestRecord {
   success: boolean;

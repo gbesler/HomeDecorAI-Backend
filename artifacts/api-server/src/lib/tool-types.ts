@@ -1,11 +1,17 @@
+import type { RoomType, DesignStyle } from "@workspace/api-zod";
 import { buildInteriorDesignPrompt } from "./prompts.js";
 
-interface ToolTypeConfig {
+interface InteriorDesignPromptParams {
+  roomType: RoomType;
+  designStyle: DesignStyle;
+}
+
+interface ToolTypeConfig<T = Record<string, string>> {
   models: {
     replicate: `${string}/${string}`;
     falai: string;
   };
-  buildPrompt: (params: Record<string, string>) => string;
+  buildPrompt: (params: T) => string;
 }
 
 export const TOOL_TYPES = {
@@ -14,11 +20,7 @@ export const TOOL_TYPES = {
       replicate: "prunaai/p-image-edit" as const,
       falai: "fal-ai/flux-2/klein/9b/edit",
     },
-    buildPrompt: (params) =>
+    buildPrompt: (params: InteriorDesignPromptParams) =>
       buildInteriorDesignPrompt(params.roomType, params.designStyle),
-  },
-  // Future tools:
-  // exteriorDesign: { ... },
-  // gardenDesign: { ... },
-  // objectRemoval: { ... },
-} as const satisfies Record<string, ToolTypeConfig>;
+  } satisfies ToolTypeConfig<InteriorDesignPromptParams>,
+};

@@ -1,5 +1,7 @@
 import pino from "pino";
 
+// Uses process.env directly instead of env.ts to avoid circular dependency —
+// logger must be available before env validation runs.
 const isProduction = process.env.NODE_ENV === "production";
 
 export const logger = pino({

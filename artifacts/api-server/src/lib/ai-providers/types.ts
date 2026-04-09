@@ -1,4 +1,4 @@
-import type { Provider } from "../circuit-breaker.js";
+export type Provider = "replicate" | "falai";
 
 export interface GenerationInput {
   prompt: string;

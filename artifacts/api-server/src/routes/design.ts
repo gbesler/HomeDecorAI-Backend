@@ -1,7 +1,11 @@
 import type { FastifyPluginAsync } from "fastify";
-import { CreateInteriorDesignBody } from "@workspace/api-zod";
+import {
+  CreateInteriorDesignBody,
+  CreateInteriorDesignResponse,
+} from "@workspace/api-zod";
+import type { ErrorResponse } from "@workspace/api-zod";
 import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
-import { callDesignGeneration } from "../lib/ai-providers/index.js";
+import { callDesignGeneration } from "../lib/ai-providers";
 import { TOOL_TYPES } from "../lib/tool-types.js";
 import { createGeneration, updateGeneration } from "../lib/firestore.js";
 import { downloadAndUploadToS3 } from "../lib/storage.js";
@@ -24,7 +28,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           message: parsed.error.issues
             .map((i) => `${i.path.join(".")}: ${i.message}`)
             .join(", "),
-        };
+        } satisfies ErrorResponse;
       }
 
       const { imageUrl, roomType, designStyle } = parsed.data;
@@ -37,7 +41,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         return {
           error: "Validation Error",
           message: "imageUrl must use http or https scheme",
-        };
+        } satisfies ErrorResponse;
       }
 
       const prompt = toolConfig.buildPrompt({ roomType, designStyle });
@@ -60,14 +64,17 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         });
       } catch (error) {
         request.log.error(
-          { userId, error: error instanceof Error ? error.message : String(error) },
+          {
+            userId,
+            error: error instanceof Error ? error.message : String(error),
+          },
           "Failed to create generation record in Firestore",
         );
         reply.code(503);
         return {
           error: "Service Unavailable",
           message: "Unable to initialize generation. Please try again.",
-        };
+        } satisfies ErrorResponse;
       }
 
       request.log.info(
@@ -103,12 +110,12 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           "Interior design generation completed",
         );
 
-        return {
+        return CreateInteriorDesignResponse.parse({
           id: generationId,
           outputImageUrl: s3Url,
           provider: result.provider,
           durationMs: result.durationMs,
-        };
+        });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -131,7 +138,13 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           });
         } catch (updateErr) {
           request.log.error(
-            { generationId, error: updateErr instanceof Error ? updateErr.message : String(updateErr) },
+            {
+              generationId,
+              error:
+                updateErr instanceof Error
+                  ? updateErr.message
+                  : String(updateErr),
+            },
             "Failed to update generation status in Firestore",
           );
         }
@@ -140,7 +153,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         return {
           error: "Generation Failed",
           message: "Failed to generate interior design. Please try again.",
-        };
+        } satisfies ErrorResponse;
       }
     },
   );

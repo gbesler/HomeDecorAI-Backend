@@ -1,9 +1,7 @@
 import {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand,
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { env } from "./env.js";
 
@@ -41,21 +39,6 @@ export async function uploadToS3(
   );
 
   return `https://${BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com/${key}`;
-}
-
-/**
- * Generate a presigned URL for reading a private S3 object.
- */
-export async function getPresignedUrl(
-  key: string,
-  expiresInSeconds = 3600,
-): Promise<string> {
-  const command = new GetObjectCommand({
-    Bucket: BUCKET,
-    Key: key,
-  });
-
-  return getSignedUrl(s3, command, { expiresIn: expiresInSeconds });
 }
 
 /**

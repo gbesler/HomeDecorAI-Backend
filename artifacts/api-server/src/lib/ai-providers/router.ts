@@ -74,7 +74,16 @@ export async function callDesignGeneration(
       "Replicate failed after retries, trying fal.ai fallback",
     );
 
-    // Immediate fallback for this request
-    return callFalAI(models.falai, input);
+    // Immediate fallback for this request (with retry for consistency)
+    return withRetry(() => callFalAI(models.falai, input), {
+      maxRetries: 1,
+      delayMs: 1000,
+      onRetry: (error, attempt) => {
+        logger.warn(
+          { error: error.message, attempt },
+          "fal.ai immediate fallback failed, retrying",
+        );
+      },
+    });
   }
 }

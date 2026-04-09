@@ -1,4 +1,6 @@
 import admin from "firebase-admin";
+import type { RoomType, DesignStyle } from "@workspace/api-zod";
+import type { Provider } from "./ai-providers/types.js";
 
 function getFirestore(): admin.firestore.Firestore {
   return admin.firestore();
@@ -6,17 +8,19 @@ function getFirestore(): admin.firestore.Firestore {
 
 // ─── Generation Document ────────────────────────────────────────────────────
 
+export type GenerationStatus = "pending" | "completed" | "failed";
+
 export interface GenerationDoc {
   id: string;
   userId: string;
   toolType: string;
-  roomType: string | null;
-  designStyle: string | null;
+  roomType: RoomType | null;
+  designStyle: DesignStyle | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
   prompt: string;
-  provider: string;
-  status: "pending" | "completed" | "failed";
+  provider: Provider | "pending";
+  status: GenerationStatus;
   errorMessage: string | null;
   durationMs: number | null;
   createdAt: admin.firestore.Timestamp;

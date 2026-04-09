@@ -1,10 +1,11 @@
+import type { RoomType, DesignStyle } from "@workspace/api-zod";
+
 /**
  * Convert camelCase enum values to human-readable strings.
  * e.g. "livingRoom" -> "living room", "artDeco" -> "art deco", "midCentury" -> "mid-century"
  */
-function humanize(camelCase: string): string {
-  // Special cases
-  const specialCases: Record<string, string> = {
+function humanize(camelCase: RoomType | DesignStyle): string {
+  const specialCases: Partial<Record<RoomType | DesignStyle, string>> = {
     midCentury: "mid-century modern",
     artDeco: "art deco",
     homeOffice: "home office",
@@ -25,8 +26,8 @@ function humanize(camelCase: string): string {
 }
 
 export function buildInteriorDesignPrompt(
-  roomType: string,
-  designStyle: string,
+  roomType: RoomType,
+  designStyle: DesignStyle,
 ): string {
   const room = humanize(roomType);
   const style = humanize(designStyle);
