@@ -59,7 +59,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         summary: "Generate an interior design transformation",
         description:
           "Accepts a room photo URL, room type, and design style. Uses Replicate (primary) or fal.ai (fallback) to generate an AI-redesigned interior. Requires Firebase authentication and is rate-limited.",
-        security: [{ bearerAuth: [] }],
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
         body: {
           type: "object",
           required: ["imageUrl", "roomType", "designStyle"],
@@ -154,7 +154,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         summary: "Get generation history",
         description:
           "Returns the authenticated user's past interior design generations, ordered by creation date (newest first).",
-        security: [{ bearerAuth: [] }],
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
         querystring: {
           type: "object",
           properties: {

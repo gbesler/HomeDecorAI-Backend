@@ -27,6 +27,7 @@ const envSchema = z.object({
       }
       return parsed;
     }),
+  SWAGGER_API_KEY: z.string().min(1).optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),
   LOG_LEVEL: z.string().optional().default("info"),
   NODE_ENV: z
