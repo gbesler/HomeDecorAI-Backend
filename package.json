@@ -10,9 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3",
-    "@aws-sdk/s3-request-presigner": "^3",
-    "@fal-ai/client": "^1",
+"@fal-ai/client": "^1",
     "@fastify/cors": "^11.2.0",
     "@fastify/formbody": "^8.0.2",
     "@fastify/multipart": "^9",

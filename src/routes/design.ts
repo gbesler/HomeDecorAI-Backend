@@ -4,7 +4,7 @@ import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
 import { callDesignGeneration } from "../lib/ai-providers/index.js";
 import { TOOL_TYPES } from "../lib/tool-types.js";
 import { createGeneration, updateGeneration } from "../lib/firestore.js";
-import { downloadAndUploadToS3 } from "../lib/storage.js";
+
 
 const designRoutes: FastifyPluginAsync = async (app) => {
   app.post(
@@ -81,14 +81,8 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           imageUrl,
         });
 
-        // Download generated image from provider CDN and upload to S3
-        const s3Url = await downloadAndUploadToS3(result.imageUrl, {
-          folder: "generations",
-          userId,
-        });
-
         await updateGeneration(generationId, {
-          outputImageUrl: s3Url,
+          outputImageUrl: result.imageUrl,
           provider: result.provider,
           status: "completed",
           durationMs: result.durationMs,
@@ -105,7 +99,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
 
         return {
           id: generationId,
-          outputImageUrl: s3Url,
+          outputImageUrl: result.imageUrl,
           provider: result.provider,
           durationMs: result.durationMs,
         };
