@@ -1,0 +1,131 @@
+import { callDesignGeneration } from "../lib/ai-providers";
+import { TOOL_TYPES } from "../lib/tool-types.js";
+import {
+  createGeneration,
+  updateGeneration,
+  getGenerationsByUser,
+  type GenerationDoc,
+} from "../lib/firestore.js";
+import { downloadAndUploadToS3, isOwnS3Url } from "../lib/storage.js";
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+export interface GenerateInteriorDesignInput {
+  userId: string;
+  imageUrl: string;
+  roomType: string;
+  designStyle: string;
+}
+
+export interface GenerateInteriorDesignResult {
+  id: string;
+  outputImageUrl: string;
+  provider: string;
+  durationMs: number;
+}
+
+export interface HistoryItem {
+  id: string;
+  toolType: string;
+  roomType: string | null;
+  designStyle: string | null;
+  inputImageUrl: string;
+  outputImageUrl: string | null;
+  status: string;
+  provider: string;
+  durationMs: number | null;
+  createdAt: string;
+}
+
+// ─── Validation ─────────────────────────────────────────────────────────────
+
+export function validateImageUrl(imageUrl: string): string | null {
+  if (!isOwnS3Url(imageUrl)) {
+    return "imageUrl must point to a previously uploaded image";
+  }
+  return null;
+}
+
+// ─── Interior Design Generation ─────────────────────────────────────────────
+
+export async function generateInteriorDesign(
+  input: GenerateInteriorDesignInput,
+): Promise<GenerateInteriorDesignResult> {
+  const { userId, imageUrl, roomType, designStyle } = input;
+  const toolConfig = TOOL_TYPES.interiorDesign;
+  const prompt = toolConfig.buildPrompt({ roomType, designStyle });
+
+  const generationId = await createGeneration({
+    userId,
+    toolType: "interiorDesign",
+    roomType,
+    designStyle,
+    inputImageUrl: imageUrl,
+    outputImageUrl: null,
+    prompt,
+    provider: "pending",
+    status: "pending",
+    errorMessage: null,
+    durationMs: null,
+  });
+
+  try {
+    const result = await callDesignGeneration(toolConfig.models, {
+      prompt,
+      imageUrl,
+    });
+
+    const s3Url = await downloadAndUploadToS3(result.imageUrl, {
+      folder: "generations",
+      userId,
+    });
+
+    await updateGeneration(generationId, {
+      outputImageUrl: s3Url,
+      provider: result.provider,
+      status: "completed",
+      durationMs: result.durationMs,
+    });
+
+    return {
+      id: generationId,
+      outputImageUrl: s3Url,
+      provider: result.provider,
+      durationMs: result.durationMs,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : String(error);
+
+    await updateGeneration(generationId, {
+      status: "failed",
+      errorMessage: errorMessage.slice(0, 500),
+    }).catch(() => {
+      // Firestore update failure is non-critical here
+    });
+
+    throw error;
+  }
+}
+
+// ─── Generation History ─────────────────────────────────────────────────────
+
+export async function getDesignHistory(
+  userId: string,
+  limit: number,
+): Promise<HistoryItem[]> {
+  const docs = await getGenerationsByUser(userId, limit);
+
+  return docs.map((doc) => ({
+    id: doc.id,
+    toolType: doc.toolType,
+    roomType: doc.roomType,
+    designStyle: doc.designStyle,
+    inputImageUrl: doc.inputImageUrl,
+    outputImageUrl: doc.outputImageUrl,
+    status: doc.status,
+    provider: doc.provider,
+    durationMs: doc.durationMs,
+    createdAt: doc.createdAt?.toDate().toISOString() ?? new Date().toISOString(),
+  }));
+}

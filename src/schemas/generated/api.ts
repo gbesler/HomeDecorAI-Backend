@@ -69,3 +69,25 @@ export const CreateInteriorDesignResponse = zod.object({
   provider: zod.string().describe("AI provider used (replicate or falai)"),
   durationMs: zod.number().describe("Generation duration in milliseconds"),
 });
+
+/**
+ * @summary Generation history item
+ */
+export const GenerationStatus = zod.enum(["pending", "completed", "failed"]);
+
+export const GenerationHistoryItem = zod.object({
+  id: zod.string(),
+  toolType: zod.string(),
+  roomType: zod.string().nullable(),
+  designStyle: zod.string().nullable(),
+  inputImageUrl: zod.string().url(),
+  outputImageUrl: zod.string().url().nullable(),
+  status: GenerationStatus,
+  provider: zod.string(),
+  durationMs: zod.number().nullable(),
+  createdAt: zod.string().describe("ISO 8601 timestamp"),
+});
+
+export const GenerationHistoryResponse = zod.object({
+  generations: zod.array(GenerationHistoryItem),
+});

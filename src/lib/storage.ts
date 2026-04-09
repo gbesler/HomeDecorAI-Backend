@@ -59,6 +59,19 @@ export async function getPresignedUrl(
 }
 
 /**
+ * Check if a URL points to our own S3 bucket's uploads prefix.
+ */
+export function isOwnS3Url(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const expectedHost = `${BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`;
+    return parsed.hostname === expectedHost && parsed.pathname.startsWith("/uploads/");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Download an image from a URL and upload it to S3.
  * Used to persist AI-generated images from provider CDNs.
  */
