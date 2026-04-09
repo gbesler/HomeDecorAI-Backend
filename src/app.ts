@@ -54,6 +54,13 @@ export function buildApp() {
             description:
               "Firebase Authentication ID token. Obtain via Firebase Auth SDK on the client. Requests must also include a `User-Agent: HomeDecorAI/<version>` header.",
           },
+          apiKey: {
+            type: "apiKey",
+            in: "header",
+            name: "X-API-Key",
+            description:
+              "API key for Swagger testing. Bypasses Firebase auth and User-Agent check.",
+          },
         },
       },
     },

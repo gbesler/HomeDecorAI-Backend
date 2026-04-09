@@ -32,6 +32,7 @@ const envSchema = z.object({
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
   AWS_CLOUDFRONT_HOST: z.string().min(1).optional(),
+  SWAGGER_API_KEY: z.string().min(1).optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),
   LOG_LEVEL: z.string().optional().default("info"),
   NODE_ENV: z
