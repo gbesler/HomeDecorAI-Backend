@@ -5,13 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "node ./build.mjs",
-    "start": "node --enable-source-maps --env-file=.env ./dist/index.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
     "dev": "NODE_ENV=development npm run build && npm run start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3",
-    "@aws-sdk/s3-request-presigner": "^3",
     "@fal-ai/client": "^1",
     "@fastify/cors": "^11.2.0",
     "@fastify/formbody": "^8.0.2",
