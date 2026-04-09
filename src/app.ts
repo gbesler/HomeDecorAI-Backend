@@ -1,3 +1,5 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyFormbody from "@fastify/formbody";
@@ -59,7 +61,7 @@ export function buildApp() {
 
   app.register(fastifySwaggerUi, {
     routePrefix: "/docs",
-    logo: { type: "image/svg+xml", content: "" },
+    baseDir: join(dirname(fileURLToPath(import.meta.url)), "static"),
     uiConfig: {
       docExpansion: "list",
       deepLinking: true,
