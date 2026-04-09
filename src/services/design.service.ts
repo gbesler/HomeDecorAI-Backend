@@ -7,6 +7,7 @@ import {
   type GenerationDoc,
 } from "../lib/firestore.js";
 import { downloadAndUploadToS3, isOwnS3Url } from "../lib/storage.js";
+import { logger } from "../lib/logger.js";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,8 @@ export interface GenerateInteriorDesignResult {
   durationMs: number;
 }
 
+export type GenerationStatus = "pending" | "completed" | "failed";
+
 export interface HistoryItem {
   id: string;
   toolType: string;
@@ -31,19 +34,19 @@ export interface HistoryItem {
   designStyle: string | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
-  status: string;
+  status: GenerationStatus;
   provider: string;
   durationMs: number | null;
-  createdAt: string;
+  createdAt: string | null;
 }
 
-// ─── Validation ─────────────────────────────────────────────────────────────
+// ─── Errors ─────────────────────────────────────────────────────────────────
 
-export function validateImageUrl(imageUrl: string): string | null {
-  if (!isOwnS3Url(imageUrl)) {
-    return "imageUrl must point to a previously uploaded image";
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
   }
-  return null;
 }
 
 // ─── Interior Design Generation ─────────────────────────────────────────────
@@ -52,6 +55,11 @@ export async function generateInteriorDesign(
   input: GenerateInteriorDesignInput,
 ): Promise<GenerateInteriorDesignResult> {
   const { userId, imageUrl, roomType, designStyle } = input;
+
+  if (!isOwnS3Url(imageUrl, userId)) {
+    throw new ValidationError("imageUrl must point to a previously uploaded image");
+  }
+
   const toolConfig = TOOL_TYPES.interiorDesign;
   const prompt = toolConfig.buildPrompt({ roomType, designStyle });
 
@@ -100,8 +108,11 @@ export async function generateInteriorDesign(
     await updateGeneration(generationId, {
       status: "failed",
       errorMessage: errorMessage.slice(0, 500),
-    }).catch(() => {
-      // Firestore update failure is non-critical here
+    }).catch((firestoreError) => {
+      logger.error(
+        { generationId, error: firestoreError instanceof Error ? firestoreError.message : String(firestoreError) },
+        "Failed to update generation status to failed — record may be stuck in pending",
+      );
     });
 
     throw error;
@@ -126,6 +137,6 @@ export async function getDesignHistory(
     status: doc.status,
     provider: doc.provider,
     durationMs: doc.durationMs,
-    createdAt: doc.createdAt?.toDate().toISOString() ?? new Date().toISOString(),
+    createdAt: doc.createdAt?.toDate().toISOString() ?? null,
   }));
 }

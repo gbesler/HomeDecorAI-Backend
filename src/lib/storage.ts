@@ -58,14 +58,22 @@ export async function getPresignedUrl(
   return getSignedUrl(s3, command, { expiresIn: expiresInSeconds });
 }
 
+const UPLOADS_FOLDER = "uploads";
+const S3_HOST = `${BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`;
+const CLOUDFRONT_HOST = env.AWS_CLOUDFRONT_HOST ?? "";
+
 /**
- * Check if a URL points to our own S3 bucket's uploads prefix.
+ * Check if a URL points to our own S3/CloudFront bucket's uploads prefix
+ * and belongs to the given user.
  */
-export function isOwnS3Url(url: string): boolean {
+export function isOwnS3Url(url: string, userId: string): boolean {
   try {
     const parsed = new URL(url);
-    const expectedHost = `${BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`;
-    return parsed.hostname === expectedHost && parsed.pathname.startsWith("/uploads/");
+    const isValidHost =
+      parsed.hostname === S3_HOST ||
+      (CLOUDFRONT_HOST !== "" && parsed.hostname === CLOUDFRONT_HOST);
+    const isValidPath = parsed.pathname.startsWith(`/${UPLOADS_FOLDER}/${userId}/`);
+    return isValidHost && isValidPath;
   } catch {
     return false;
   }

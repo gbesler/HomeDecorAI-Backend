@@ -2,12 +2,13 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import {
   CreateInteriorDesignBody,
+  GenerationHistoryItem,
   GenerationHistoryResponse,
 } from "../schemas";
 import {
-  validateImageUrl,
   generateInteriorDesign,
   getDesignHistory,
+  ValidationError,
 } from "../services/design.service.js";
 
 // ─── POST /interior ─────────────────────────────────────────────────────────
@@ -16,6 +17,12 @@ export async function createInteriorDesign(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
+  const userId = request.userId;
+  if (!userId) {
+    reply.code(401);
+    return { error: "Unauthorized", message: "Authentication required" };
+  }
+
   const parsed = CreateInteriorDesignBody.safeParse(request.body);
   if (!parsed.success) {
     reply.code(400);
@@ -28,13 +35,6 @@ export async function createInteriorDesign(
   }
 
   const { imageUrl, roomType, designStyle } = parsed.data;
-  const userId = request.userId!;
-
-  const validationError = validateImageUrl(imageUrl);
-  if (validationError) {
-    reply.code(400);
-    return { error: "Validation Error", message: validationError };
-  }
 
   request.log.info(
     { userId, roomType, designStyle },
@@ -60,6 +60,11 @@ export async function createInteriorDesign(
 
     return result;
   } catch (error) {
+    if (error instanceof ValidationError) {
+      reply.code(400);
+      return { error: "Validation Error", message: error.message };
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : String(error);
     const isTimeout = errorMessage.includes("timeout");
@@ -83,20 +88,42 @@ export async function createInteriorDesign(
 
 // ─── GET /history ───────────────────────────────────────────────────────────
 
-const limitSchema = z.coerce.number().int().min(1).max(100).default(50);
+const limitSchema = z.coerce.number().int().min(1).max(100);
 
 export async function getHistory(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const userId = request.userId!;
+  const userId = request.userId;
+  if (!userId) {
+    reply.code(401);
+    return { error: "Unauthorized", message: "Authentication required" };
+  }
+
   const query = request.query as Record<string, unknown>;
-  const limitResult = limitSchema.safeParse(query.limit ?? undefined);
-  const limit = limitResult.success ? limitResult.data : 50;
+  const limitResult = limitSchema.safeParse(query.limit);
+  let limit: number;
+  if (query.limit === undefined || query.limit === null) {
+    limit = 50;
+  } else if (!limitResult.success) {
+    reply.code(400);
+    return {
+      error: "Validation Error",
+      message: "limit must be an integer between 1 and 100",
+    };
+  } else {
+    limit = limitResult.data;
+  }
 
   try {
     const generations = await getDesignHistory(userId, limit);
-    return GenerationHistoryResponse.parse({ generations });
+
+    // Filter out items that don't match the schema instead of failing entirely
+    const validGenerations = generations.filter((item) =>
+      GenerationHistoryItem.safeParse(item).success,
+    );
+
+    return GenerationHistoryResponse.parse({ generations: validGenerations });
   } catch (error) {
     request.log.error(
       { userId, error: error instanceof Error ? error.message : String(error) },

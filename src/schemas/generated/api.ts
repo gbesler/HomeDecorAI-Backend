@@ -80,12 +80,12 @@ export const GenerationHistoryItem = zod.object({
   toolType: zod.string(),
   roomType: zod.string().nullable(),
   designStyle: zod.string().nullable(),
-  inputImageUrl: zod.string().url(),
-  outputImageUrl: zod.string().url().nullable(),
+  inputImageUrl: zod.string(),
+  outputImageUrl: zod.string().nullable(),
   status: GenerationStatus,
   provider: zod.string(),
   durationMs: zod.number().nullable(),
-  createdAt: zod.string().describe("ISO 8601 timestamp"),
+  createdAt: zod.string().nullable().describe("ISO 8601 timestamp"),
 });
 
 export const GenerationHistoryResponse = zod.object({
