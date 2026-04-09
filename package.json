@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node ./build.mjs",
-    "start": "node --enable-source-maps --env-file=.env ./dist/index.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
     "dev": "NODE_ENV=development npm run build && npm run start",
     "typecheck": "tsc --noEmit"
   },
