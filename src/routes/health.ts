@@ -14,7 +14,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
             type: "object",
             description: "Server is healthy",
             properties: {
-              status: { type: "string", example: "ok" },
+              status: { type: "string" },
             },
             required: ["status"],
           },

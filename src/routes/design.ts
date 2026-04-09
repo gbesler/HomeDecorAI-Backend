@@ -68,19 +68,16 @@ const designRoutes: FastifyPluginAsync = async (app) => {
               type: "string",
               format: "uri",
               description: "Public URL of the room photo to redesign (must use http or https scheme)",
-              example: "https://example.com/room.jpg",
             },
             roomType: {
               type: "string",
               enum: roomTypes,
               description: "Type of room in the photo",
-              example: "livingRoom",
             },
             designStyle: {
               type: "string",
               enum: designStyles,
               description: "Target design style for the transformation",
-              example: "modern",
             },
           },
         },
@@ -181,7 +178,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
                   type: "object",
                   properties: {
                     id: { type: "string", description: "Generation record ID" },
-                    toolType: { type: "string", description: "Tool type used", example: "interiorDesign" },
+                    toolType: { type: "string", description: "Tool type used" },
                     roomType: { type: "string", nullable: true, description: "Room type" },
                     designStyle: { type: "string", nullable: true, description: "Design style" },
                     inputImageUrl: { type: "string", description: "Original room photo URL" },
