@@ -416,9 +416,66 @@ package.json                                       (updated: add check:prompts +
 
 Plan is organized into 5 phases with 14 implementation units. Phase 0 is blocking: U1–U3 MUST complete before U4 begins. Phase 1–4 within are dependency-ordered but loosely parallelizable among themselves.
 
-### Phase 0: Pre-Implementation Validation (blocking)
+### Phase 0: Pre-Implementation Validation (manual, blocking)
 
-- [ ] **Unit 1: Prompt baseline & cheap-fix A/B harness**
+Phase 0 is a **manual research pass**, NOT automated scripts. Three questions must be answered before Phase 1 implementation begins; each is answered by a short focused activity measured in minutes, not an engineering unit with tests and CI integration. The plan originally had U1–U3 as script units; scoped down after recognizing research automation was overkill for a solo-owned small repo.
+
+**P0.A — Cheap-fix viability check (replaces original U1)**
+
+Goal: answer "is the full R1–R7 rewrite worth the effort, or does a 1-day cheap fix close most of the gap?"
+
+Method:
+1. Open the existing iOS app (or dev backend) and generate 5–8 recent interior designs across a representative mix of styles/rooms using the current production prompt. These are your baseline references.
+2. Temporarily patch `src/lib/prompts.ts` with three additions: (a) verb change `Redesign` → `Convert`, (b) structural preservation clause "while preserving the exact wall positions, window count, ceiling height, door placements, camera angle, lens perspective, and room geometry", (c) positive-avoidance tail "Minimal clutter, sharp focus, rectilinear verticals, natural color balance, unoccupied room, realistic proportions".
+3. Re-run the same 5–8 {style × room} combinations with the patched prompt. Same input photos.
+4. Eyeball both sets side by side.
+
+Pre-committed decision rule (F1):
+- **"Cheap fix sufficient"** → patched outputs show meaningfully better structural fidelity AND no new failure modes AND edge cases (christmas+bathroom, airbnb+gamingRoom, minimalist+stairway) do not regress. **Ship the cheap fix as a 1-day PR, compress Phase 1–4 scope to U4+U6+U11+U12 only (minimal). U7–U10 and U13 become out of scope.**
+- **"Full rewrite warranted"** → patched outputs do not visibly improve, OR new artifacts appear, OR edge cases regress. Proceed with the full plan as written.
+- **"Ambiguous middle"** → some improvement but not dramatic. Default ship the cheap fix first, observe production for 1–2 weeks, only then decide on full rewrite.
+
+Estimated time: 30–60 minutes including generation waits. Cost: ~$0.50–1.00 in API calls.
+
+**P0.B — Provider capability confirmation (replaces original U2)**
+
+Goal: confirm the external-research assumptions (D1: no negative_prompt; D2: Pruna no guidance_scale; D4: token budgets) against real API behavior.
+
+Method:
+1. Open the Replicate web UI, navigate to `prunaai/p-image-edit`, inspect the input schema visibly. Confirm: no `negative_prompt` field, no `guidance_scale` field, no `num_inference_steps` field. These are already documented per Pruna docs; the visible check takes 2 minutes.
+2. Same for fal.ai `fal-ai/flux-2/klein/9b/edit` — inspect the schema page. Confirm: `guidance_scale` present (default 2.5, range 0-20), no `negative_prompt`, no `enable_prompt_expansion`.
+3. (Optional) One deliberate curl/SDK call to each with a `negative_prompt` field to observe silent-drop vs 422 behavior. 5 minutes.
+4. Record findings inline as comments in `src/lib/ai-providers/capabilities.ts` during U5 implementation, citing the docs URLs and the date of verification. No JSON fixture, no codegen — just hand-authored constants with provenance comments.
+
+Defensive defaults for capabilities.ts (use these unless manual check reveals otherwise):
+```
+PROVIDER_CAPABILITIES = {
+  "prunaai/p-image-edit":        { provider: "replicate", supportsNegativePrompt: false, supportsGuidanceScale: false, maxPromptTokens: 200 },
+  "fal-ai/flux-2/klein/9b/edit": { provider: "falai",     supportsNegativePrompt: false, supportsGuidanceScale: true,  maxPromptTokens: 250 }
+}
+```
+Estimated time: 10–15 minutes.
+
+**P0.C — Style pick distribution & regen rate baseline (replaces original U3)**
+
+Goal: inform U8 editorial effort prioritization AND capture a regen rate baseline for Success Criteria user-outcome metric.
+
+Method:
+1. Open Firebase console → Firestore → `generations` collection.
+2. Run a quick filter/query: `toolType == "interiorDesign"`, orderBy `createdAt desc`, limit 500. Sort results by `designStyle` in your head or export to CSV.
+3. Estimate: which 4–6 styles dominate? Which 4–5 rooms dominate? Write the rough distribution as a paragraph in a brief note (can be a comment at the top of the eventual `design-styles.ts`, or a scratch note — does not need to be a formal research doc).
+4. For regen rate: same console, count how many {same userId + same {roomType, designStyle}} pairs appear within a 20-minute window. If tedious to count manually, either (a) skip and use post-launch 2-week window as baseline, or (b) run a one-off 20-line Firestore query in the console.
+5. If generation history has fewer than ~100 interior-design records, accept the "insufficient data" path: the Success Criteria user-outcome metric will be measured against a post-launch 2-week window instead of a pre-launch baseline. Document this decision in the plan.
+
+Estimated time: 10–20 minutes.
+
+Phase 0 is complete when P0.A, P0.B, and P0.C have been answered and the answers are recorded (in plan comments, code comments, or scratch notes — no formal research artifacts needed). The answers feed U8 (dict priority), U5 (capabilities constants), and the Phase 1 scope decision (cheap-fix vs full rewrite).
+
+(Sections below that reference "U1", "U2", or "U3" are historical artifacts of an earlier plan draft. The current plan implementation units start at Unit 4 — the rest of the plan uses the original numbering to keep cross-references intact.)
+
+---
+
+- [ ] **Unit 1: Prompt baseline & cheap-fix A/B harness** *(SUPERSEDED by P0.A manual methodology — this unit is intentionally not implemented)*
 
 **Goal:** Produce empirical evidence that the premise of this rewrite (richer prompts → meaningfully better output) holds, per brainstorm P0.1 and P0.2. Either confirms the full 7-layer plan is worth shipping, or scopes it down to a cheap fix if the cheap fix already solves most failures.
 
@@ -470,7 +527,7 @@ Deliverables:
 
 ---
 
-- [ ] **Unit 2: Provider capability probe script**
+- [ ] **Unit 2: Provider capability probe script** *(SUPERSEDED by P0.B manual methodology — this unit is intentionally not implemented)*
 
 **Goal:** Empirically determine what each provider actually accepts and rejects. Resolves brainstorm P0.3 (token budget), P0.4 (negative prompt schema), and seeds `src/lib/ai-providers/capabilities.ts` (R28) with verified values.
 
@@ -512,7 +569,7 @@ Deliverables:
 
 ---
 
-- [ ] **Unit 3: Analytics pull — style pick distribution & user outcome baseline**
+- [ ] **Unit 3: Analytics pull — style pick distribution & user outcome baseline** *(SUPERSEDED by P0.C manual methodology — this unit is intentionally not implemented)*
 
 **Goal:** Per brainstorm P0.5 and P0.6, surface the actual user-facing baseline. Determines (a) which of the 18 styles are actually picked (so dict-authoring effort in U8 can be prioritized), (b) the current regeneration/save rate baseline for the Success Criteria user-outcome metric.
 
@@ -603,17 +660,15 @@ Deliverables:
 **Dependencies:** U2 (provides the empirical values), U4 (types are defined)
 
 **Files:**
-- Create: `src/lib/ai-providers/capabilities.ts` (generated from U2 JSON fixture per F5)
-- Create: `scripts/gen-capabilities.ts` (codegen script reading `scripts/fixtures/provider-capabilities.json`)
+- Create: `src/lib/ai-providers/capabilities.ts` (hand-authored per P0.B findings)
 - Modify: `src/lib/prompts/validate.ts` (fill implementation, support `DICTIONARY_STRICT_MODE`)
 - Modify: `src/lib/env.ts` (add `PROMPT_BUILDER_VERSION` and `DICTIONARY_STRICT_MODE` env vars per D17)
 - Modify: `.env.example` (document new env vars)
 - Modify: `src/index.ts` (call `validateDictionaries()` between buildApp and listen, lines 58–67)
-- Modify: `package.json` (add `"gen:capabilities": "tsx scripts/gen-capabilities.ts"` script)
 
 **Approach:**
-- **F5 mechanical handoff:** `capabilities.ts` is generated from `scripts/fixtures/provider-capabilities.json` (produced by U2), NOT hand-authored. Approach: either (a) commit a small codegen script `scripts/gen-capabilities.ts` that reads the JSON and writes `src/lib/ai-providers/capabilities.ts` as a `.ts` file with `as const satisfies Record<ModelId, ProviderCapabilities>`, OR (b) ship `capabilities.ts` as a thin loader that `import`s the JSON at module load time (TypeScript supports JSON imports with `resolveJsonModule: true` — check tsconfig during implementation). Path (a) is more explicit and keeps capability values visible in grep/code review; Path (b) is simpler. Recommend (a) for auditability.
-- `capabilities.ts` exports `PROVIDER_CAPABILITIES: Record<ModelId, ProviderCapabilities>` keyed by model id (per D8 refinement from ADV-008), with fields `{ provider, supportsNegativePrompt, supportsGuidanceScale, maxPromptTokens, defaultAspectRatio?, defaultImageSize? }`. If `scripts/fixtures/provider-capabilities.json` does not exist when U5 runs, the build fails fast with a clear error message asking the implementer to run U2 (`npm run probe:providers`) first. Fallback values are hardcoded in the codegen script for development-time bootstrap ONLY, marked with a `// TODO: U2 probe not yet run` comment in the generated output.
+- `capabilities.ts` is **hand-authored** (not codegen-generated — the earlier F5 JSON fixture + codegen plan was scoped down along with the U2 probe script). Values come from the P0.B manual docs check. Each field carries an inline comment citing the source doc and verification date.
+- `capabilities.ts` exports `PROVIDER_CAPABILITIES: Record<ModelId, ProviderCapabilities>` keyed by model id (per D8 refinement from ADV-008), with fields `{ provider, supportsNegativePrompt, supportsGuidanceScale, maxPromptTokens, defaultAspectRatio?, defaultImageSize? }`. Defensive defaults match external-research findings (Pruna: no neg/no guidance, 200 tokens; fal Klein: no neg, yes guidance, 250 tokens).
 - `validate.ts` exports `validateDictionaries()` function that iterates every `DesignStyle` key and every `RoomType` key, checks every R2 field is present and non-empty, checks `references.length >= 3` per R25, checks `rooms` has a full `focusSlots` for every key. On failure in `DICTIONARY_STRICT_MODE=strict` (default), throws `new Error("Dictionary validation failed: ...")` with an explicit list of missing fields — the bootstrap in `src/index.ts` will let this crash the process before Fastify binds to a port (fail-fast pattern matching `src/lib/env.ts:46-52`). In `DICTIONARY_STRICT_MODE=degraded` (per D17 F2 safety valve), logs `logger.error({event: "prompt.dictionary_degraded", missingFields}, "Dictionary incomplete — running in degraded mode")` and continues boot; the runtime fallback path is used for affected style/room combinations.
 - `src/index.ts` bootstrap additions: between `const app = buildApp()` (line 58) and `app.listen(...)` (line 67), call `validateDictionaries()`. In strict mode, unhandled throw crashes the process; in degraded mode, continues.
 - `env.ts` additions (per D17 F2): add `PROMPT_BUILDER_VERSION` (default `"v1"`, allowed `"legacy" | "v1"`) and `DICTIONARY_STRICT_MODE` (default `"strict"`, allowed `"strict" | "degraded"`) as validated env vars. Invalid values crash bootstrap (existing env fail-fast pattern).

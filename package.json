@@ -7,11 +7,7 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps --env-file=.env ./dist/index.mjs",
     "dev": "NODE_ENV=development npm run build && npm run start",
-    "typecheck": "tsc --noEmit",
-    "typecheck:scripts": "tsc --noEmit --project scripts/tsconfig.json",
-    "baseline:prompts": "tsx --env-file=.env scripts/baseline-prompts.ts",
-    "probe:providers": "tsx --env-file=.env scripts/probe-providers.ts",
-    "analytics:baseline": "tsx --env-file=.env scripts/analytics-baseline.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3",
