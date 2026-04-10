@@ -3,6 +3,7 @@ import { env } from "./lib/env.js";
 
 import { buildApp } from "./app.js";
 import { logger } from "./lib/logger.js";
+import { validateDictionaries } from "./lib/prompts/validate.js";
 import {
   designCircuitBreaker,
   CircuitState,
@@ -56,6 +57,24 @@ const slackStatusInterval = setInterval(() => {
 
 const port = env.PORT;
 const app = buildApp();
+
+// Validate prompt dictionaries before accepting traffic. In strict mode
+// (default) this throws on incomplete entries and crashes the process
+// before Fastify binds — matching env.ts fail-fast pattern. In degraded
+// mode (D17 F2 safety valve) this logs and continues, and affected
+// style/room combinations use the runtime fallback path.
+try {
+  validateDictionaries({ mode: env.DICTIONARY_STRICT_MODE });
+} catch (error) {
+  logger.error(
+    {
+      event: "prompt.dictionary_validation_failed",
+      error: error instanceof Error ? error.message : String(error),
+    },
+    "Dictionary validation failed — refusing to start",
+  );
+  process.exit(1);
+}
 
 // Cleanup on shutdown
 app.addHook("onClose", async () => {

@@ -39,6 +39,16 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .optional()
     .default("development"),
+  // Production safety valves for the interior prompt rewrite (D17 F2).
+  // Flip these at runtime to roll back without a code deploy.
+  PROMPT_BUILDER_VERSION: z
+    .enum(["legacy", "v1"])
+    .optional()
+    .default("v1"),
+  DICTIONARY_STRICT_MODE: z
+    .enum(["strict", "degraded"])
+    .optional()
+    .default("strict"),
 });
 
 const parsed = envSchema.safeParse(process.env);
