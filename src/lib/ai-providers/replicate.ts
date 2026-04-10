@@ -15,7 +15,7 @@ export async function callReplicate(
 
   const replicateInput: Record<string, unknown> = {
     prompt: input.prompt,
-    image: input.imageUrl,
+    images: [input.imageUrl],
     output_format: input.outputFormat ?? "jpg",
     go_fast: true,
   };

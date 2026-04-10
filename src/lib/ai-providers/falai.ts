@@ -15,7 +15,7 @@ export async function callFalAI(
   const result = await fal.subscribe(model, {
     input: {
       prompt: input.prompt,
-      image_url: input.imageUrl,
+      image_urls: [input.imageUrl],
       num_images: 1,
       output_format: input.outputFormat ?? "jpeg",
       ...(input.guidanceScale !== undefined && {
