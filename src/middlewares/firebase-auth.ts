@@ -37,11 +37,13 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
   fastify.decorate(
     "authenticate",
     async function (request: FastifyRequest, reply: FastifyReply) {
-      // API key bypass for Swagger testing
-      const apiKey = request.headers["x-api-key"] as string | undefined;
-      if (apiKey && env.SWAGGER_API_KEY && apiKey === env.SWAGGER_API_KEY) {
-        request.userId = "swagger-test-user";
-        return;
+      // API key bypass for Swagger testing (development only)
+      if (env.NODE_ENV === "development") {
+        const apiKey = request.headers["x-api-key"] as string | undefined;
+        if (apiKey && env.SWAGGER_API_KEY && apiKey === env.SWAGGER_API_KEY) {
+          request.userId = "swagger-test-user";
+          return;
+        }
       }
 
       const userAgent = request.headers["user-agent"];
