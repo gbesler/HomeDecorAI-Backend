@@ -4,6 +4,7 @@ import {
   createGeneration,
   updateGeneration,
   getGenerationsByUser,
+  truncatePromptForPersistence,
   type GenerationDoc,
 } from "../lib/firestore.js";
 import { logger } from "../lib/logger.js";
@@ -61,7 +62,22 @@ export async function generateInteriorDesign(
   }
 
   const toolConfig = TOOL_TYPES.interiorDesign;
-  const prompt = toolConfig.buildPrompt({ roomType, designStyle });
+  const promptResult = toolConfig.buildPrompt({ roomType, designStyle });
+
+  logger.info(
+    {
+      event: "generation.start",
+      userId,
+      roomType,
+      designStyle,
+      actionMode: promptResult.actionMode,
+      guidanceBand: promptResult.guidanceBand,
+      promptVersion: promptResult.promptVersion,
+    },
+    "Starting interior design generation",
+  );
+
+  const persistedPrompt = truncatePromptForPersistence(promptResult.prompt);
 
   const generationId = await createGeneration({
     userId,
@@ -70,7 +86,10 @@ export async function generateInteriorDesign(
     designStyle,
     inputImageUrl: imageUrl,
     outputImageUrl: null,
-    prompt,
+    prompt: persistedPrompt,
+    actionMode: promptResult.actionMode,
+    guidanceBand: promptResult.guidanceBand,
+    promptVersion: promptResult.promptVersion,
     provider: "pending",
     status: "pending",
     errorMessage: null,
@@ -79,8 +98,9 @@ export async function generateInteriorDesign(
 
   try {
     const result = await callDesignGeneration(toolConfig.models, {
-      prompt,
+      prompt: promptResult.prompt,
       imageUrl,
+      guidanceScale: promptResult.guidanceScale,
     });
 
     await updateGeneration(generationId, {

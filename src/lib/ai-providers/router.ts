@@ -24,7 +24,10 @@ export async function callDesignGeneration(
   const useFallback = designCircuitBreaker.shouldUseFallback();
 
   if (useFallback) {
-    logger.info("Circuit open — routing to fal.ai fallback");
+    logger.info(
+      { event: "provider.circuit_open", provider: "falai" },
+      "Circuit open — routing to fal.ai fallback",
+    );
 
     // Fire-and-forget probe to check if Replicate has recovered
     const now = Date.now();
@@ -40,7 +43,7 @@ export async function callDesignGeneration(
       delayMs: 1000,
       onRetry: (error, attempt) => {
         logger.warn(
-          { error: error.message, attempt },
+          { event: "provider.retry", provider: "falai", error: error.message, attempt },
           "fal.ai fallback call failed, retrying",
         );
       },
@@ -57,7 +60,7 @@ export async function callDesignGeneration(
         delayMs: 1000,
         onRetry: (error, attempt) => {
           logger.warn(
-            { error: error.message, attempt },
+            { event: "provider.retry", provider: "replicate", error: error.message, attempt },
             "Replicate call failed, retrying",
           );
         },
@@ -70,7 +73,11 @@ export async function callDesignGeneration(
     designCircuitBreaker.record(false);
 
     logger.error(
-      { error: error instanceof Error ? error.message : String(error) },
+      {
+        event: "provider.fallback",
+        provider: "falai",
+        error: error instanceof Error ? error.message : String(error),
+      },
       "Replicate failed after retries, trying fal.ai fallback",
     );
 

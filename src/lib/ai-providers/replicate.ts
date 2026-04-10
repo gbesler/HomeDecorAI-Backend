@@ -1,5 +1,6 @@
 import Replicate from "replicate";
 import { env } from "../env.js";
+import { PROVIDER_CAPABILITIES } from "./capabilities.js";
 import type { GenerationInput, GenerationOutput } from "./types.js";
 
 const replicate = new Replicate({ auth: env.REPLICATE_API_TOKEN });
@@ -19,7 +20,16 @@ export async function callReplicate(
     go_fast: true,
   };
 
-  if (input.guidanceScale !== undefined) {
+  // Only forward guidance_scale to models that actually expose it. Pruna
+  // p-image-edit is a distilled sub-second model with no CFG knob; sending
+  // the field would be either silently dropped or schema-rejected. The
+  // capabilities module is keyed by model id, so a future second Replicate
+  // model with different capabilities can coexist without touching this file.
+  const capabilities = PROVIDER_CAPABILITIES[model];
+  if (
+    input.guidanceScale !== undefined &&
+    capabilities?.supportsGuidanceScale === true
+  ) {
     replicateInput.guidance_scale = input.guidanceScale;
   }
 
