@@ -53,8 +53,24 @@ export interface GenerationDoc {
   id: string;
   userId: string;
   toolType: string;
+  /**
+   * Legacy interior-only top-level field. Kept populated for interior writes
+   * so the iOS history listener keeps working; exterior/garden leave it null.
+   */
   roomType: string | null;
+  /**
+   * Legacy interior-only top-level field. Same rationale as `roomType`.
+   */
   designStyle: string | null;
+  /**
+   * Tool-agnostic parameter blob captured at enqueue time. Each tool's
+   * `toToolParams`/`fromToolParams` round-trips its validated body fields
+   * through this shape. Nullable for legacy documents that predate the
+   * registry refactor — those carry their data in the top-level
+   * `roomType`/`designStyle` columns and the processor falls back to
+   * reading them.
+   */
+  toolParams: Record<string, unknown> | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
   prompt: string;
@@ -110,8 +126,21 @@ export interface CreateQueuedGenerationInput {
   generationId: string;
   userId: string;
   toolType: string;
+  /**
+   * Legacy interior-only mirrored field. Pass null for new tools; the
+   * write path populates it from `toolParams.roomType` when present for
+   * backwards-compat with the iOS history listener.
+   */
   roomType: string | null;
+  /**
+   * Legacy interior-only mirrored field. Same rationale as `roomType`.
+   */
   designStyle: string | null;
+  /**
+   * Tool-agnostic parameter blob. Produced by `ToolTypeConfig.toToolParams`
+   * and round-tripped back via `fromToolParams` inside the processor.
+   */
+  toolParams: Record<string, unknown> | null;
   inputImageUrl: string;
   language: SupportedLanguage;
 }

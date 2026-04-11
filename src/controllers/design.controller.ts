@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import {
-  CreateInteriorDesignBody,
   GenerationHistoryItem,
   GenerationHistoryResponse,
 } from "../schemas";
@@ -14,6 +13,7 @@ import {
 import { enqueueGenerationTask } from "../lib/cloud-tasks.js";
 import { resolveLanguage } from "../lib/notifications/i18n.js";
 import type { SupportedLanguage } from "../lib/generation/types.js";
+import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 
 // ─── Language resolution ────────────────────────────────────────────────────
 
@@ -31,148 +31,206 @@ function resolveGenerationLanguage(
 ): SupportedLanguage {
   if (bodyLanguage) return bodyLanguage;
   if (acceptLanguageHeader && acceptLanguageHeader.length > 0) {
-    // Accept-Language can be `tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7` — take the
-    // first tag and let resolveLanguage handle `tr-TR` → `tr`.
     const firstTag = acceptLanguageHeader.split(",")[0]?.trim();
     if (firstTag) return resolveLanguage(firstTag);
   }
   return "en";
 }
 
-// ─── POST /interior ─────────────────────────────────────────────────────────
-
-/**
- * Enqueue an interior design generation job.
- *
- * Returns 202 Accepted with a generationId. The caller subscribes to the
- * Firestore document at `generations/{generationId}` to track status, and
- * optionally receives an FCM push when the terminal state is reached.
- *
- * Hard cutover: the previous synchronous response shape is no longer returned.
- */
-export async function createInteriorDesign(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const userId = request.userId;
-  const firebaseIdToken = request.firebaseIdToken;
-  if (!userId || !firebaseIdToken) {
-    reply.code(401);
-    return { error: "Unauthorized", message: "Authentication required" };
-  }
-
-  const BodySchema = CreateInteriorDesignBody.extend({
-    language: LanguageField,
-  });
-
-  const parsed = BodySchema.safeParse(request.body);
-  if (!parsed.success) {
-    reply.code(400);
+function validateImageUrlScheme(
+  imageUrl: unknown,
+): { ok: true } | { ok: false; message: string } {
+  if (typeof imageUrl !== "string" || !/^https?:\/\//i.test(imageUrl)) {
     return {
-      error: "Validation Error",
-      message: parsed.error.issues
-        .map((i) => `${i.path.join(".")}: ${i.message}`)
-        .join(", "),
-    };
-  }
-
-  const { imageUrl, roomType, designStyle, language: bodyLanguage } = parsed.data;
-
-  if (!/^https?:\/\//i.test(imageUrl)) {
-    reply.code(400);
-    return {
-      error: "Validation Error",
+      ok: false,
       message: "imageUrl must use http or https scheme",
     };
   }
+  return { ok: true };
+}
 
-  const acceptLanguageHeader =
-    typeof request.headers["accept-language"] === "string"
-      ? request.headers["accept-language"]
-      : undefined;
+// ─── Generic enqueue handler factory ────────────────────────────────────────
 
-  const language = resolveGenerationLanguage(bodyLanguage, acceptLanguageHeader);
-  const generationId = randomUUID();
-
-  // Create Firestore record first. If Cloud Tasks enqueue subsequently fails,
-  // we update the same record to failed(ENQUEUE_FAILED) so there is no
-  // orphaned task and the client listener surfaces the error immediately.
-  try {
-    await createQueuedGeneration({
-      generationId,
-      userId,
-      toolType: "interiorDesign",
-      roomType,
-      designStyle,
-      inputImageUrl: imageUrl,
-      language,
-    });
-  } catch (err) {
-    request.log.error(
-      {
-        event: "generation.firestore_create_failed",
-        userId,
-        error: err instanceof Error ? err.message : String(err),
-      },
-      "Failed to create queued generation record",
-    );
-    reply.code(500);
-    return {
-      error: "Internal Error",
-      message: "Failed to queue generation. Please try again.",
-    };
-  }
-
-  try {
-    await enqueueGenerationTask({ generationId, firebaseIdToken });
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    request.log.error(
-      {
-        event: "generation.enqueue_failed",
-        generationId,
-        userId,
-        error: errorMessage,
-      },
-      "Cloud Tasks enqueue failed — marking generation failed",
-    );
-    await markEnqueueFailed(generationId, errorMessage).catch((firestoreErr) => {
-      request.log.error(
-        {
-          generationId,
-          error:
-            firestoreErr instanceof Error
-              ? firestoreErr.message
-              : String(firestoreErr),
-        },
-        "Failed to mark generation as enqueue_failed — record may be stuck in queued",
-      );
-    });
-    reply.code(503);
-    return {
-      error: "Service Unavailable",
-      message: "Failed to enqueue generation. Please try again.",
-    };
-  }
-
-  request.log.info(
-    {
-      event: "generation.enqueued",
-      generationId,
-      userId,
-      roomType,
-      designStyle,
-      language,
-    },
-    "Generation queued",
+/**
+ * Build a Fastify POST handler for a tool. The factory closes over a
+ * `ToolTypeConfig` entry so a single implementation serves every tool in
+ * the registry — interior, exterior, garden, and any future tool that
+ * registers itself.
+ *
+ * Flow:
+ *  1. Auth check (userId + firebaseIdToken on the request)
+ *  2. Parse + validate body via `tool.bodySchema.extend({ language })`
+ *  3. Validate imageUrl scheme (http/https only)
+ *  4. Resolve language (body → Accept-Language → "en")
+ *  5. Project validated body via `tool.toToolParams`, mirroring legacy
+ *     top-level `roomType`/`designStyle` for interior so the iOS history
+ *     listener stays compatible.
+ *  6. Create queued Firestore record
+ *  7. Enqueue Cloud Tasks job; roll back the record if enqueue fails
+ *  8. Return 202 `{ generationId, status: "queued" }`
+ */
+export function makeCreateGenerationHandler<TParams>(
+  tool: ToolTypeConfig<TParams>,
+) {
+  const BodySchema = tool.bodySchema.and(
+    z.object({ language: LanguageField }),
   );
 
-  reply.code(202);
-  return {
-    generationId,
-    status: "queued" as const,
+  return async function createGeneration(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const userId = request.userId;
+    const firebaseIdToken = request.firebaseIdToken;
+    if (!userId || !firebaseIdToken) {
+      reply.code(401);
+      return { error: "Unauthorized", message: "Authentication required" };
+    }
+
+    const parsed = BodySchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return {
+        error: "Validation Error",
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join(", "),
+      };
+    }
+
+    const body = parsed.data as TParams & { language?: SupportedLanguage };
+    const { language: bodyLanguage, ...toolBody } = body as Record<
+      string,
+      unknown
+    > & { language?: SupportedLanguage };
+
+    const imageUrlCheck = validateImageUrlScheme(
+      (toolBody as { imageUrl?: unknown }).imageUrl,
+    );
+    if (!imageUrlCheck.ok) {
+      reply.code(400);
+      return {
+        error: "Validation Error",
+        message: imageUrlCheck.message,
+      };
+    }
+
+    const imageUrl = (toolBody as { imageUrl: string }).imageUrl;
+
+    const acceptLanguageHeader =
+      typeof request.headers["accept-language"] === "string"
+        ? request.headers["accept-language"]
+        : undefined;
+
+    const language = resolveGenerationLanguage(
+      bodyLanguage,
+      acceptLanguageHeader,
+    );
+    const generationId = randomUUID();
+
+    // Tool-specific projection. The processor will round-trip this back via
+    // `tool.fromToolParams` — it never touches tool-specific fields directly.
+    const toolParams = tool.toToolParams(parsed.data as TParams);
+
+    // Legacy interior top-level mirror: only interiorDesign populates these
+    // so the iOS history view continues to read them for existing docs.
+    const legacyRoomType =
+      tool.toolKey === "interiorDesign"
+        ? ((toolParams["roomType"] as string | undefined) ?? null)
+        : null;
+    const legacyDesignStyle =
+      tool.toolKey === "interiorDesign"
+        ? ((toolParams["designStyle"] as string | undefined) ?? null)
+        : null;
+
+    try {
+      await createQueuedGeneration({
+        generationId,
+        userId,
+        toolType: tool.toolKey,
+        roomType: legacyRoomType,
+        designStyle: legacyDesignStyle,
+        toolParams,
+        inputImageUrl: imageUrl,
+        language,
+      });
+    } catch (err) {
+      request.log.error(
+        {
+          event: "generation.firestore_create_failed",
+          toolType: tool.toolKey,
+          userId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        "Failed to create queued generation record",
+      );
+      reply.code(500);
+      return {
+        error: "Internal Error",
+        message: "Failed to queue generation. Please try again.",
+      };
+    }
+
+    try {
+      await enqueueGenerationTask({ generationId, firebaseIdToken });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      request.log.error(
+        {
+          event: "generation.enqueue_failed",
+          generationId,
+          toolType: tool.toolKey,
+          userId,
+          error: errorMessage,
+        },
+        "Cloud Tasks enqueue failed — marking generation failed",
+      );
+      await markEnqueueFailed(generationId, errorMessage).catch(
+        (firestoreErr) => {
+          request.log.error(
+            {
+              generationId,
+              error:
+                firestoreErr instanceof Error
+                  ? firestoreErr.message
+                  : String(firestoreErr),
+            },
+            "Failed to mark generation as enqueue_failed — record may be stuck in queued",
+          );
+        },
+      );
+      reply.code(503);
+      return {
+        error: "Service Unavailable",
+        message: "Failed to enqueue generation. Please try again.",
+      };
+    }
+
+    request.log.info(
+      {
+        event: "generation.enqueued",
+        generationId,
+        toolType: tool.toolKey,
+        userId,
+        toolParams,
+        language,
+      },
+      "Generation queued",
+    );
+
+    reply.code(202);
+    return {
+      generationId,
+      status: "queued" as const,
+    };
   };
 }
+
+// ─── Pre-built interior handler (kept as named export for callers/tests) ──
+
+export const createInteriorDesign = makeCreateGenerationHandler(
+  TOOL_TYPES.interiorDesign,
+);
 
 // ─── GET /history ───────────────────────────────────────────────────────────
 
@@ -206,7 +264,6 @@ export async function getHistory(
   try {
     const generations = await getDesignHistory(userId, limit);
 
-    // Filter out items that don't match the schema instead of failing entirely.
     const validGenerations = generations.filter((item) =>
       GenerationHistoryItem.safeParse(item).success,
     );

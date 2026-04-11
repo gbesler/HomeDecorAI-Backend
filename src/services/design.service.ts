@@ -6,8 +6,16 @@ export type { GenerationStatus };
 export interface HistoryItem {
   id: string;
   toolType: string;
+  /** Legacy interior-only mirrored field. Kept for iOS backwards compat. */
   roomType: string | null;
+  /** Legacy interior-only mirrored field. Kept for iOS backwards compat. */
   designStyle: string | null;
+  /**
+   * Tool-agnostic parameter blob. Carries the original request fields for
+   * exterior / garden / future tools (roomType + designStyle are still the
+   * canonical fields for interior, mirrored from toolParams at write time).
+   */
+  toolParams: Record<string, unknown> | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
   status: GenerationStatus;
@@ -27,6 +35,7 @@ export async function getDesignHistory(
     toolType: doc.toolType,
     roomType: doc.roomType,
     designStyle: doc.designStyle,
+    toolParams: doc.toolParams,
     inputImageUrl: doc.inputImageUrl,
     outputImageUrl: doc.outputImageUrl,
     status: doc.status,

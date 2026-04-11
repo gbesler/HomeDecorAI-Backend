@@ -12,3 +12,12 @@ export * from "./healthStatus";
 export * from "./interiorDesignRequest";
 export * from "./interiorDesignResponse";
 export * from "./roomType";
+// Hand-edited additions for exterior + garden tools (not produced by orval).
+// Must be propagated to the upstream OpenAPI spec in a follow-up.
+export * from "./buildingType";
+export * from "./gardenStyle";
+export * from "./gardenItem";
+export * from "./exteriorColorMode";
+export * from "./gardenColorMode";
+export * from "./exteriorColorPalette";
+export * from "./gardenColorPalette";

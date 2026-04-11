@@ -1,5 +1,5 @@
 import { callDesignGeneration } from "../lib/ai-providers";
-import { TOOL_TYPES } from "../lib/tool-types.js";
+import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 import {
   claimProcessing,
   getGenerationById,
@@ -280,20 +280,53 @@ type AiRunResult =
   | { kind: "failed"; code: GenerationErrorCode; message: string };
 
 async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
-  const { id: generationId, userId, roomType, designStyle, inputImageUrl } = doc;
+  const { id: generationId, userId, toolType, inputImageUrl } = doc;
 
-  if (!roomType || !designStyle) {
+  // Registry lookup — every tool plugs in here.
+  const tool = TOOL_TYPES[toolType as keyof typeof TOOL_TYPES] as
+    | ToolTypeConfig<unknown>
+    | undefined;
+  if (!tool) {
     return {
       kind: "failed",
       code: "VALIDATION_FAILED",
-      message: "Missing roomType or designStyle on queued record",
+      message: `Unknown toolType on queued record: ${toolType}`,
     };
   }
 
-  const toolConfig = TOOL_TYPES.interiorDesign;
+  // Recover validated params from either the new `toolParams` blob (standard
+  // path) or the legacy top-level roomType/designStyle columns (in-flight
+  // interior docs created before the registry refactor).
+  let params: unknown;
+  try {
+    if (doc.toolParams) {
+      params = tool.fromToolParams(doc.toolParams);
+    } else if (doc.roomType && doc.designStyle) {
+      // Legacy interior fallback — only valid for interiorDesign.
+      params = tool.fromToolParams({
+        imageUrl: doc.inputImageUrl,
+        roomType: doc.roomType,
+        designStyle: doc.designStyle,
+      });
+    } else {
+      return {
+        kind: "failed",
+        code: "VALIDATION_FAILED",
+        message:
+          "Missing toolParams and legacy roomType/designStyle on queued record",
+      };
+    }
+  } catch (err) {
+    return {
+      kind: "failed",
+      code: "VALIDATION_FAILED",
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
+
   let promptResult;
   try {
-    promptResult = toolConfig.buildPrompt({ roomType, designStyle });
+    promptResult = tool.buildPrompt(params);
   } catch (err) {
     return {
       kind: "failed",
@@ -307,8 +340,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       event: "processor.ai.start",
       generationId,
       userId,
-      roomType,
-      designStyle,
+      toolType,
+      toolParams: doc.toolParams,
       actionMode: promptResult.actionMode,
       guidanceBand: promptResult.guidanceBand,
       promptVersion: promptResult.promptVersion,
@@ -317,7 +350,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
   );
 
   try {
-    const result = await callDesignGeneration(toolConfig.models, {
+    const result = await callDesignGeneration(tool.models, {
       prompt: promptResult.prompt,
       imageUrl: inputImageUrl,
       guidanceScale: promptResult.guidanceScale,

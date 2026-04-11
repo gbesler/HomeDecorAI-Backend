@@ -102,6 +102,7 @@ export async function createQueuedGeneration(
     toolType: input.toolType,
     roomType: input.roomType,
     designStyle: input.designStyle,
+    toolParams: input.toolParams,
     inputImageUrl: input.inputImageUrl,
     outputImageUrl: null,
     prompt: "", // processor fills this when it builds the prompt
@@ -289,6 +290,7 @@ function mapDocToGeneration(
     toolType: data["toolType"],
     roomType: data["roomType"] ?? null,
     designStyle: data["designStyle"] ?? null,
+    toolParams: (data["toolParams"] as Record<string, unknown> | undefined) ?? null,
     inputImageUrl: data["inputImageUrl"],
     outputImageUrl: data["outputImageUrl"] ?? null,
     prompt: data["prompt"],
