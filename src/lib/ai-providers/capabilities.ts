@@ -30,7 +30,9 @@
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export type ProviderId = "replicate" | "falai";
+import type { ProviderId } from "./types.js";
+
+export type { ProviderId };
 
 export interface ProviderCapabilities {
   provider: ProviderId;

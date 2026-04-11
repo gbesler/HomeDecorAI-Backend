@@ -6,6 +6,15 @@ import { env } from "../lib/env.js";
 declare module "fastify" {
   interface FastifyRequest {
     userId?: string;
+    /**
+     * Raw Firebase ID token string extracted from the Authorization header,
+     * *after* successful verification. Exposed so the async generation
+     * pipeline can pass the token through to Cloud Tasks → processor →
+     * Cognito federation without re-minting it.
+     *
+     * Never log this field. It's a short-lived credential.
+     */
+    firebaseIdToken?: string;
   }
   interface FastifyInstance {
     authenticate: (
@@ -33,6 +42,7 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
   initializeFirebase();
 
   fastify.decorateRequest("userId", undefined);
+  fastify.decorateRequest("firebaseIdToken", undefined);
 
   fastify.decorate(
     "authenticate",
@@ -73,6 +83,7 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
       try {
         const decodedToken = await admin.auth().verifyIdToken(token);
         request.userId = decodedToken.uid;
+        request.firebaseIdToken = token;
       } catch (error) {
         request.log.error(
           {

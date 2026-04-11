@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Firestore security rules for HomeDecorAI.
+//
+// Writes are always performed by the backend using the admin SDK, which
+// bypasses these rules entirely. These rules govern reads (and writes) from
+// the iOS client via the Firebase SDK.
+//
+// iOS uses anonymous Firebase Auth — `request.auth.uid` is still populated for
+// anon users, so owner-based rules work without any special handling.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Generations: read-your-own, writes are backend-only ──────────────
+    match /generations/{generationId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.userId;
+      allow write: if false;
+    }
+
+    // ─── Users: read-your-own; FCM token writes go through the backend ────
+    // The /api/users/me/fcm-token REST endpoint performs the actual write
+    // using the admin SDK, so client-side writes are disabled.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // ─── Public config (revcat, mixpanel, aws) ────────────────────────────
+    // The iOS ConfigService reads these documents at launch. They contain
+    // public, non-sensitive SDK configuration — no secrets.
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

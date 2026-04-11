@@ -1,4 +1,8 @@
-import type { Provider } from "../circuit-breaker.js";
+/**
+ * Canonical identifier for an AI provider. Used across the circuit breaker,
+ * provider router, and capability matrix. Add new providers here only.
+ */
+export type ProviderId = "replicate" | "falai";
 
 export interface GenerationInput {
   prompt: string;
@@ -9,7 +13,7 @@ export interface GenerationInput {
 
 export interface GenerationOutput {
   imageUrl: string;
-  provider: Provider;
+  provider: ProviderId;
   durationMs: number;
   requestId?: string;
 }

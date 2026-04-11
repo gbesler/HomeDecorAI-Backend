@@ -7,7 +7,9 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { logger } from "./lib/logger.js";
 import firebaseAuthPlugin from "./middlewares/firebase-auth.js";
+import cloudTasksAuthPlugin from "./middlewares/cloud-tasks-auth.js";
 import routes from "./routes/index.js";
+import internalRoutes from "./routes/internal.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -44,6 +46,10 @@ export function buildApp() {
           name: "Design",
           description: "AI interior design generation and history",
         },
+        {
+          name: "Users",
+          description: "Authenticated user settings (FCM token registration)",
+        },
       ],
       components: {
         securitySchemes: {
@@ -79,7 +85,12 @@ export function buildApp() {
   app.register(fastifyCors, { origin: false });
   app.register(fastifyFormbody);
   app.register(firebaseAuthPlugin);
+  app.register(cloudTasksAuthPlugin);
   app.register(routes, { prefix: "/api" });
+  // Internal endpoints are deliberately mounted OUTSIDE /api so that the
+  // public auth + rate-limit chain does not apply. Cloud Tasks authenticates
+  // via OIDC through the `verifyCloudTask` preHandler inside this plugin.
+  app.register(internalRoutes, { prefix: "/internal" });
 
   // Root health check for Render
   app.get("/", async () => ({ status: "ok" }));

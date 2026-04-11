@@ -28,7 +28,7 @@ export async function callReplicate(
   const capabilities = PROVIDER_CAPABILITIES[model];
   if (
     input.guidanceScale !== undefined &&
-    capabilities?.supportsGuidanceScale === true
+    capabilities?.supportsGuidanceScale
   ) {
     replicateInput.guidance_scale = input.guidanceScale;
   }

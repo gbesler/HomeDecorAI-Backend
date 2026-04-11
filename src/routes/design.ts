@@ -56,9 +56,9 @@ const designRoutes: FastifyPluginAsync = async (app) => {
     {
       schema: {
         tags: ["Design"],
-        summary: "Generate an interior design transformation",
+        summary: "Enqueue an interior design transformation",
         description:
-          "Accepts a room photo URL, room type, and design style. Uses Replicate (primary) or fal.ai (fallback) to generate an AI-redesigned interior. Requires Firebase authentication and is rate-limited.",
+          "Accepts a room photo URL, room type, and design style. Creates a generation record and enqueues an async Cloud Tasks job that generates the design with Replicate (primary) or fal.ai (fallback), uploads to S3, and notifies the client via Firestore listener + FCM push. Returns 202 with a generationId; the client subscribes to `generations/{generationId}` for status updates.",
         security: [{ bearerAuth: [] }, { apiKey: [] }],
         body: {
           type: "object",
@@ -79,33 +79,30 @@ const designRoutes: FastifyPluginAsync = async (app) => {
               enum: designStyles,
               description: "Target design style for the transformation",
             },
+            language: {
+              type: "string",
+              enum: ["tr", "en"],
+              description:
+                "Optional UI language snapshot for FCM push notifications. If omitted, backend falls back to Accept-Language header, then `en`.",
+            },
           },
         },
         response: {
-          200: {
+          202: {
             type: "object",
-            description: "Design generation completed successfully",
+            description: "Generation accepted and enqueued",
             properties: {
-              id: {
+              generationId: {
                 type: "string",
-                description: "Firestore generation record ID",
+                description: "Firestore document ID for real-time listener",
               },
-              outputImageUrl: {
+              status: {
                 type: "string",
-                format: "uri",
-                description: "URL of the AI-generated design image",
-              },
-              provider: {
-                type: "string",
-                enum: ["replicate", "falai"],
-                description: "AI provider that generated the image",
-              },
-              durationMs: {
-                type: "number",
-                description: "Generation duration in milliseconds",
+                enum: ["queued"],
+                description: "Initial lifecycle status",
               },
             },
-            required: ["id", "outputImageUrl", "provider", "durationMs"],
+            required: ["generationId", "status"],
           },
           400: {
             ...errorResponse,
@@ -134,7 +131,11 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           },
           500: {
             ...errorResponse,
-            description: "AI generation failed (timeout or provider error)",
+            description: "Failed to create the queued generation record",
+          },
+          503: {
+            ...errorResponse,
+            description: "Failed to enqueue the Cloud Tasks job",
           },
         },
       },
@@ -185,8 +186,8 @@ const designRoutes: FastifyPluginAsync = async (app) => {
                     outputImageUrl: { type: "string", nullable: true, description: "Generated design URL" },
                     status: {
                       type: "string",
-                      enum: ["pending", "completed", "failed"],
-                      description: "Generation status",
+                      enum: ["pending", "queued", "processing", "completed", "failed"],
+                      description: "Generation lifecycle status",
                     },
                     provider: { type: "string", description: "AI provider used" },
                     durationMs: { type: "number", nullable: true, description: "Generation duration in ms" },

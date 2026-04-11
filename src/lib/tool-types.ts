@@ -1,7 +1,12 @@
 import { env } from "./env.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
-import { buildInteriorPrompt } from "./prompts/tools/interior-design.js";
+import {
+  buildInteriorPrompt,
+  type InteriorParams,
+} from "./prompts/tools/interior-design.js";
 import type { PromptResult } from "./prompts/types.js";
+
+export type { InteriorParams };
 
 /**
  * Tool registry entry shape. Generic over the parameter type and return
@@ -18,17 +23,6 @@ export interface ToolTypeConfig<
     falai: string;
   };
   buildPrompt: (params: TParams) => TResult;
-}
-
-/**
- * Parameters for the interiorDesign tool. Matches what the iOS wizard
- * wizard sends: POST `/api/design/interior` body (`imageUrl`, `roomType`,
- * `designStyle`) — only roomType and designStyle flow into the builder;
- * imageUrl goes directly to the provider call.
- */
-export interface InteriorParams {
-  roomType: string;
-  designStyle: string;
 }
 
 /**
