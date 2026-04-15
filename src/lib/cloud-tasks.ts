@@ -18,7 +18,10 @@ import { logger } from "./logger.js";
  *   for Render cold start + AI generation + S3 upload.
  */
 
-let cachedClient: CloudTasksClient | null = null;
+// Keyed by projectId so a changed environment (hot reload, credentials
+// rotation, test harness) cannot serve a stale client to the wrong project.
+// In production GCP_PROJECT_ID is static and the map stays at size 1.
+const clientCache = new Map<string, CloudTasksClient>();
 
 /**
  * Assert that the async-pipeline env vars are configured. Called at the entry
@@ -52,20 +55,22 @@ function requireAsyncEnv(): {
 }
 
 function getClient(projectId: string): CloudTasksClient {
-  if (!cachedClient) {
-    // Authenticate with the same Firebase service account credentials so that
-    // staging/prod deployments don't need a separate credential file — the
-    // service account just needs the cloudtasks.enqueuer + iam.serviceAccountUser
-    // roles in addition to its existing Firebase roles.
-    cachedClient = new CloudTasksClient({
-      credentials: {
-        client_email: env.FIREBASE_SERVICE_ACCOUNT_KEY["client_email"] as string,
-        private_key: env.FIREBASE_SERVICE_ACCOUNT_KEY["private_key"] as string,
-      },
-      projectId,
-    });
-  }
-  return cachedClient;
+  const cached = clientCache.get(projectId);
+  if (cached) return cached;
+
+  // Authenticate with the same Firebase service account credentials so that
+  // staging/prod deployments don't need a separate credential file — the
+  // service account just needs the cloudtasks.enqueuer + iam.serviceAccountUser
+  // roles in addition to its existing Firebase roles.
+  const client = new CloudTasksClient({
+    credentials: {
+      client_email: env.FIREBASE_SERVICE_ACCOUNT_KEY["client_email"] as string,
+      private_key: env.FIREBASE_SERVICE_ACCOUNT_KEY["private_key"] as string,
+    },
+    projectId,
+  });
+  clientCache.set(projectId, client);
+  return client;
 }
 
 function queuePath(projectId: string): string {
