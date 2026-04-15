@@ -37,13 +37,39 @@ function resolveGenerationLanguage(
   return "en";
 }
 
+// SSRF guard for user-supplied image URLs that the backend forwards to
+// external AI providers. We reject hostnames that resolve to the IPv4
+// link-local metadata range, RFC-1918 private networks, loopback, the
+// "0.0.0.0" any-address, and explicit `localhost` literals before the URL
+// is ever sent to Replicate / fal.ai. Provider workers that fetch the URL
+// run in cloud datacenters where these ranges typically reach internal
+// metadata services (e.g. AWS IMDSv1 at 169.254.169.254). DNS-based
+// rebinding attacks are out of scope here — the provider performs its own
+// fetch, so DNS resolution happens in the provider's network namespace.
+const PRIVATE_HOST_RE =
+  /^(?:127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0$|localhost$|::1$|fc[0-9a-f][0-9a-f]:|fe80:|172\.(?:1[6-9]|2[0-9]|3[01])\.)/i;
+
 function validateImageUrlScheme(
   imageUrl: unknown,
+  fieldName: string,
 ): { ok: true } | { ok: false; message: string } {
   if (typeof imageUrl !== "string" || !/^https?:\/\//i.test(imageUrl)) {
     return {
       ok: false,
-      message: "imageUrl must use http or https scheme",
+      message: `${fieldName} must use http or https scheme`,
+    };
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(imageUrl);
+  } catch {
+    return { ok: false, message: `${fieldName} is not a valid URL` };
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (PRIVATE_HOST_RE.test(host)) {
+    return {
+      ok: false,
+      message: `${fieldName} resolves to a disallowed host range`,
     };
   }
   return { ok: true };
@@ -104,18 +130,41 @@ export function makeCreateGenerationHandler<TParams>(
       unknown
     > & { language?: SupportedLanguage };
 
-    const imageUrlCheck = validateImageUrlScheme(
-      (toolBody as { imageUrl?: unknown }).imageUrl,
-    );
-    if (!imageUrlCheck.ok) {
-      reply.code(400);
-      return {
-        error: "Validation Error",
-        message: imageUrlCheck.message,
-      };
+    // Validate every image URL field declared by the tool. The first field
+    // of `imageUrlFields` is the canonical input image written to
+    // `inputImageUrl`; any remaining fields (e.g. reference-style's
+    // `referenceImageUrl`) live in toolParams and are forwarded to the
+    // provider. `optionalImageUrlFields` is validated only when the field
+    // is actually present (e.g. paint-walls customStyle-with-reference).
+    //
+    // Type contract: `imageUrlFields` is a non-empty tuple of `keyof TParams`,
+    // so the [0] index is always present and field names are compile-time
+    // checked against the body schema.
+    const bodyRecord = toolBody as Record<string, unknown>;
+    for (const field of tool.imageUrlFields) {
+      const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return {
+          error: "Validation Error",
+          message: check.message,
+        };
+      }
+    }
+    for (const field of tool.optionalImageUrlFields ?? []) {
+      if (bodyRecord[field] === undefined) continue;
+      const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return {
+          error: "Validation Error",
+          message: check.message,
+        };
+      }
     }
 
-    const imageUrl = (toolBody as { imageUrl: string }).imageUrl;
+    const primaryImageField = tool.imageUrlFields[0];
+    const imageUrl = bodyRecord[primaryImageField] as string;
 
     const acceptLanguageHeader =
       typeof request.headers["accept-language"] === "string"
@@ -130,7 +179,9 @@ export function makeCreateGenerationHandler<TParams>(
 
     // Tool-specific projection. The processor will round-trip this back via
     // `tool.fromToolParams` — it never touches tool-specific fields directly.
-    const toolParams = tool.toToolParams(parsed.data as TParams);
+    // Pass `toolBody` (language stripped) so the persisted blob does not
+    // duplicate the language column written separately on the doc.
+    const toolParams = tool.toToolParams(toolBody as TParams);
 
     // Legacy interior top-level mirror: only interiorDesign populates these
     // so the iOS history view continues to read them for existing docs.
@@ -225,12 +276,6 @@ export function makeCreateGenerationHandler<TParams>(
     };
   };
 }
-
-// ─── Pre-built interior handler (kept as named export for callers/tests) ──
-
-export const createInteriorDesign = makeCreateGenerationHandler(
-  TOOL_TYPES.interiorDesign,
-);
 
 // ─── GET /history ───────────────────────────────────────────────────────────
 

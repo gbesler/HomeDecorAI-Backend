@@ -27,4 +27,20 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Reference-style consumes two uploaded images and routes through more
+  // expensive multi-reference models (fal-ai/flux-2/edit at ~$0.036/run vs
+  // Klein at ~$0.012). Start with the same envelope as the other tools, but
+  // tighten if cost telemetry warrants it.
+  referenceStyle: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
+  // Paint-walls texture mode is single-image (same cost as interior);
+  // customStyle mode may add a reference image. Same envelope as the rest.
+  paintWalls: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
 };

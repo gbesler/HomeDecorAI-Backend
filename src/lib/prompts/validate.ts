@@ -21,12 +21,14 @@ import { GardenColorPalette } from "../../schemas/generated/types/gardenColorPal
 import { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
 import { RoomType } from "../../schemas/generated/types/roomType.js";
+import { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 import { buildingTypes } from "./dictionaries/building-types.js";
 import { exteriorPalettes, gardenPalettes } from "./dictionaries/color-palettes.js";
 import { designStyles } from "./dictionaries/design-styles.js";
 import { gardenItems } from "./dictionaries/garden-items.js";
 import { gardenStyles } from "./dictionaries/garden-styles.js";
 import { rooms } from "./dictionaries/rooms.js";
+import { wallTextures } from "./dictionaries/wall-textures.js";
 import { logger } from "../logger.js";
 import type {
   BuildingEntry,
@@ -34,6 +36,7 @@ import type {
   GardenItemEntry,
   RoomEntry,
   StyleEntry,
+  WallTextureEntry,
 } from "./types.js";
 
 // ─── Public API ─────────────────────────────────────────────────────────────
@@ -95,6 +98,14 @@ export function validateDictionaries(options: ValidationOptions): void {
       Object.values(GardenColorPalette),
       gardenPalettes,
       checkPaletteEntry,
+    ),
+  );
+  failures.push(
+    ...runValidator(
+      "wallTextures",
+      Object.values(WallTexture),
+      wallTextures,
+      checkWallTextureEntry,
     ),
   );
 
@@ -199,6 +210,22 @@ function checkGardenItemEntry(
     return [`${prefix}.phrase is empty`];
   }
   return [];
+}
+
+function checkWallTextureEntry(
+  prefix: string,
+  entry: WallTextureEntry,
+): string[] {
+  const failures: string[] = [];
+  if (!entry.label) failures.push(`${prefix}.label is empty`);
+  if (!entry.description) failures.push(`${prefix}.description is empty`);
+  if (!entry.descriptors || entry.descriptors.length < 2) {
+    failures.push(`${prefix}.descriptors must have >= 2 entries`);
+  }
+  if (!entry.lightingCharacter) {
+    failures.push(`${prefix}.lightingCharacter is empty`);
+  }
+  return failures;
 }
 
 function checkPaletteEntry(

@@ -12,6 +12,7 @@ import type { GardenColorPalette } from "../../schemas/generated/types/gardenCol
 import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
 import type { RoomType } from "../../schemas/generated/types/roomType.js";
+import type { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 
 // ─── Mode enums ─────────────────────────────────────────────────────────────
 
@@ -213,3 +214,32 @@ export type ExteriorColorPalettesDict = Partial<
 export type GardenColorPalettesDict = Partial<
   Record<GardenColorPalette, ColorPaletteEntry>
 >;
+
+// ─── Paint-walls tool entries ─────────────────────────────────────────────
+
+/**
+ * A single wall texture preset (one of the 18 ids the iOS wizard exposes).
+ * The entries feed the `texture` branch of the paint-walls prompt builder.
+ * Each entry contributes a short material descriptor and a recommended
+ * lighting character — the builder composes them into the standard
+ * 5-layer prompt alongside `structural-preservation` and `photography-quality`.
+ */
+export interface WallTextureEntry {
+  /** Category bucket — matches the iOS WallStyleCategory enum. */
+  category:
+    | "paintFinish"
+    | "plaster"
+    | "stoneBrick"
+    | "wood"
+    | "decorative";
+  /** Human-readable label used inline in the prompt's action directive. */
+  label: string;
+  /** One-sentence description of the finish's appearance. */
+  description: string;
+  /** 2-3 material descriptor tokens (e.g., "non-reflective", "velvet-like"). */
+  descriptors: string[];
+  /** Ideal lighting character for this wall finish. */
+  lightingCharacter: string;
+}
+
+export type WallTexturesDict = Partial<Record<WallTexture, WallTextureEntry>>;
