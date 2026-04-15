@@ -55,16 +55,20 @@ const envSchema = z.object({
     .optional()
     .default("strict"),
   // ─── Async generation pipeline (Cloud Tasks + FCM) ───────────────────────
-  GCP_PROJECT_ID: z.string().min(1),
+  // TEMPORARY: These four variables are optional while the /sync tool
+  // endpoints are used for manual testing. The async Cloud Tasks path will
+  // throw at runtime if invoked without them set — see `enqueueGenerationTask`
+  // and `verifyCloudTask`. Make them required again before re-enabling async.
+  GCP_PROJECT_ID: z.string().min(1).optional(),
   GCP_LOCATION: z.string().min(1).optional().default("us-central1"),
   GCP_QUEUE_NAME: z.string().min(1).optional().default("design-generation"),
-  GCP_SERVICE_ACCOUNT_EMAIL: z.string().email(),
+  GCP_SERVICE_ACCOUNT_EMAIL: z.string().email().optional(),
   // Public URL of this backend, used by Cloud Tasks as the HTTP target.
   // Example: https://homedecorai-backend-pv3k.onrender.com
-  BACKEND_PUBLIC_URL: z.string().url(),
+  BACKEND_PUBLIC_URL: z.string().url().optional(),
   // OIDC audience the internal endpoint validates tokens against.
   // Typically equals BACKEND_PUBLIC_URL + "/internal/process-generation".
-  INTERNAL_TASK_AUDIENCE: z.string().url(),
+  INTERNAL_TASK_AUDIENCE: z.string().url().optional(),
   // Hard kill-switch for FCM. Useful during staging/dev.
   FCM_ENABLED: z
     .enum(["true", "false"])

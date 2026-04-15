@@ -18,31 +18,67 @@ import { logger } from "./logger.js";
  *   for Render cold start + AI generation + S3 upload.
  */
 
-let cachedClient: CloudTasksClient | null = null;
+// Keyed by projectId so a changed environment (hot reload, credentials
+// rotation, test harness) cannot serve a stale client to the wrong project.
+// In production GCP_PROJECT_ID is static and the map stays at size 1.
+const clientCache = new Map<string, CloudTasksClient>();
 
-function getClient(): CloudTasksClient {
-  if (!cachedClient) {
-    // Authenticate with the same Firebase service account credentials so that
-    // staging/prod deployments don't need a separate credential file — the
-    // service account just needs the cloudtasks.enqueuer + iam.serviceAccountUser
-    // roles in addition to its existing Firebase roles.
-    cachedClient = new CloudTasksClient({
-      credentials: {
-        client_email: env.FIREBASE_SERVICE_ACCOUNT_KEY["client_email"] as string,
-        private_key: env.FIREBASE_SERVICE_ACCOUNT_KEY["private_key"] as string,
-      },
-      projectId: env.GCP_PROJECT_ID,
-    });
+/**
+ * Assert that the async-pipeline env vars are configured. Called at the entry
+ * of `enqueueGenerationTask`. While the temporary /sync endpoints are in use
+ * these env vars are optional — invoking the async path without them is a
+ * configuration error surfaced here rather than hiding as a null reference.
+ */
+function requireAsyncEnv(): {
+  projectId: string;
+  serviceAccountEmail: string;
+  backendUrl: string;
+  internalAudience: string;
+} {
+  const missing: string[] = [];
+  if (!env.GCP_PROJECT_ID) missing.push("GCP_PROJECT_ID");
+  if (!env.GCP_SERVICE_ACCOUNT_EMAIL) missing.push("GCP_SERVICE_ACCOUNT_EMAIL");
+  if (!env.BACKEND_PUBLIC_URL) missing.push("BACKEND_PUBLIC_URL");
+  if (!env.INTERNAL_TASK_AUDIENCE) missing.push("INTERNAL_TASK_AUDIENCE");
+  if (missing.length > 0) {
+    throw new Error(
+      `Async Cloud Tasks pipeline is not configured. Missing env: ${missing.join(", ")}. ` +
+        `Use the /sync endpoints for testing, or set these to enable async.`,
+    );
   }
-  return cachedClient;
+  return {
+    projectId: env.GCP_PROJECT_ID!,
+    serviceAccountEmail: env.GCP_SERVICE_ACCOUNT_EMAIL!,
+    backendUrl: env.BACKEND_PUBLIC_URL!,
+    internalAudience: env.INTERNAL_TASK_AUDIENCE!,
+  };
 }
 
-function queuePath(): string {
-  return `projects/${env.GCP_PROJECT_ID}/locations/${env.GCP_LOCATION}/queues/${env.GCP_QUEUE_NAME}`;
+function getClient(projectId: string): CloudTasksClient {
+  const cached = clientCache.get(projectId);
+  if (cached) return cached;
+
+  // Authenticate with the same Firebase service account credentials so that
+  // staging/prod deployments don't need a separate credential file — the
+  // service account just needs the cloudtasks.enqueuer + iam.serviceAccountUser
+  // roles in addition to its existing Firebase roles.
+  const client = new CloudTasksClient({
+    credentials: {
+      client_email: env.FIREBASE_SERVICE_ACCOUNT_KEY["client_email"] as string,
+      private_key: env.FIREBASE_SERVICE_ACCOUNT_KEY["private_key"] as string,
+    },
+    projectId,
+  });
+  clientCache.set(projectId, client);
+  return client;
 }
 
-function taskPath(generationId: string): string {
-  return `${queuePath()}/tasks/${generationId}`;
+function queuePath(projectId: string): string {
+  return `projects/${projectId}/locations/${env.GCP_LOCATION}/queues/${env.GCP_QUEUE_NAME}`;
+}
+
+function taskPath(projectId: string, generationId: string): string {
+  return `${queuePath(projectId)}/tasks/${generationId}`;
 }
 
 const PROCESS_GENERATION_PATH = "/internal/process-generation";
@@ -68,10 +104,11 @@ export interface EnqueueGenerationTaskInput {
 export async function enqueueGenerationTask(
   input: EnqueueGenerationTaskInput,
 ): Promise<void> {
-  const client = getClient();
-  const parent = queuePath();
-  const name = taskPath(input.generationId);
-  const url = `${env.BACKEND_PUBLIC_URL}${PROCESS_GENERATION_PATH}`;
+  const asyncEnv = requireAsyncEnv();
+  const client = getClient(asyncEnv.projectId);
+  const parent = queuePath(asyncEnv.projectId);
+  const name = taskPath(asyncEnv.projectId, input.generationId);
+  const url = `${asyncEnv.backendUrl}${PROCESS_GENERATION_PATH}`;
 
   const payload = JSON.stringify({
     generationId: input.generationId,
@@ -88,8 +125,8 @@ export async function enqueueGenerationTask(
       },
       body: Buffer.from(payload).toString("base64"),
       oidcToken: {
-        serviceAccountEmail: env.GCP_SERVICE_ACCOUNT_EMAIL,
-        audience: env.INTERNAL_TASK_AUDIENCE,
+        serviceAccountEmail: asyncEnv.serviceAccountEmail,
+        audience: asyncEnv.internalAudience,
       },
     },
     dispatchDeadline: {

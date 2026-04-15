@@ -443,13 +443,32 @@ export function makeSyncGenerationHandler<TParams>(
         };
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       request.log.error(
         {
           event: "generation.sync.processor_threw",
           generationId,
-          error: err instanceof Error ? err.message : String(err),
+          error: errorMessage,
         },
         "Sync processor threw unexpectedly",
+      );
+      // Force the doc to a terminal state so the iOS listener settles and
+      // history is not polluted with stuck queued/processing records. The
+      // error handler for markFailed is best-effort — a double-failure is
+      // logged but does not override the outer 500 we already decided to
+      // return.
+      await markFailed(generationId, "AI_PROVIDER_FAILED", errorMessage).catch(
+        (firestoreErr) =>
+          request.log.error(
+            {
+              generationId,
+              error:
+                firestoreErr instanceof Error
+                  ? firestoreErr.message
+                  : String(firestoreErr),
+            },
+            "Failed to mark sync generation as failed after processor throw — doc may be stuck",
+          ),
       );
       reply.code(500);
       return {
@@ -480,6 +499,28 @@ export function makeSyncGenerationHandler<TParams>(
         status: "failed" as const,
         errorCode: finalDoc.errorCode ?? ("AI_PROVIDER_FAILED" as const),
         errorMessage: finalDoc.errorMessage ?? "Generation failed",
+      };
+    }
+
+    // Defensive guard: the happy path below assumes a populated outputImageUrl
+    // alongside a `completed` status. If processGeneration returned action:"ok"
+    // but the doc is still non-terminal, surface the inconsistency explicitly
+    // rather than handing the client a 200 with a null image URL.
+    if (finalDoc.status !== "completed" || !finalDoc.outputImageUrl) {
+      request.log.error(
+        {
+          event: "generation.sync.unexpected_state",
+          generationId,
+          status: finalDoc.status,
+          hasOutputImageUrl: Boolean(finalDoc.outputImageUrl),
+        },
+        "Sync generation reached handler end in unexpected state",
+      );
+      reply.code(500);
+      return {
+        error: "Internal Error",
+        message: `Unexpected terminal state: ${finalDoc.status}`,
+        generationId,
       };
     }
 
