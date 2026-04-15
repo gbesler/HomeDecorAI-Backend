@@ -51,4 +51,11 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Virtual staging is single-image input; same cost profile as interior.
+  // Same envelope as the rest pending usage telemetry.
+  virtualStaging: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
 };
