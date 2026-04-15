@@ -103,7 +103,9 @@ export async function processGeneration(
   // the in-memory doc still reports it as null (the transaction snapshot was
   // read before the update). We only use this local value as the anchor when
   // the Firestore field is absent — retries see the original server timestamp
-  // and correctly short-circuit the pad.
+  // and correctly short-circuit the pad. Anchored at function entry so the
+  // `elapsedMs` calculation inside `holdForMinimumLoadingWindow` accounts for
+  // AI + S3 time and can short-circuit the pad when upstream was slow.
   const invocationStartedAtMs = Date.now();
 
   // Step 1 — claim the record.
