@@ -62,6 +62,23 @@ async function cloudTasksAuthPlugin(fastify: FastifyInstance) {
   fastify.decorate(
     "verifyCloudTask",
     async function (request: FastifyRequest, reply: FastifyReply) {
+      // Async path env vars are optional while /sync testing is active.
+      // If this handler is invoked without them configured, fail fast —
+      // the internal endpoint is unreachable anyway without them.
+      if (!env.INTERNAL_TASK_AUDIENCE || !env.GCP_SERVICE_ACCOUNT_EMAIL) {
+        request.log.warn(
+          { event: "cloudtasks.auth.not_configured" },
+          "Cloud Tasks env vars not configured — async pipeline disabled",
+        );
+        reply.code(503).send({
+          error: "Service Unavailable",
+          message: "Async Cloud Tasks pipeline is not configured",
+        });
+        return;
+      }
+      const expectedAudience = env.INTERNAL_TASK_AUDIENCE;
+      const expectedEmail = env.GCP_SERVICE_ACCOUNT_EMAIL;
+
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         request.log.warn(
@@ -80,7 +97,7 @@ async function cloudTasksAuthPlugin(fastify: FastifyInstance) {
       try {
         const ticket = await authClient.verifyIdToken({
           idToken: token,
-          audience: env.INTERNAL_TASK_AUDIENCE,
+          audience: expectedAudience,
         });
         const payload = ticket.getPayload();
 
@@ -88,11 +105,11 @@ async function cloudTasksAuthPlugin(fastify: FastifyInstance) {
           throw new Error("OIDC token has no payload");
         }
 
-        if (payload.email !== env.GCP_SERVICE_ACCOUNT_EMAIL) {
+        if (payload.email !== expectedEmail) {
           request.log.warn(
             {
               event: "cloudtasks.auth.email_mismatch",
-              expected: env.GCP_SERVICE_ACCOUNT_EMAIL,
+              expected: expectedEmail,
               actual: payload.email,
             },
             "OIDC token email does not match configured service account",
