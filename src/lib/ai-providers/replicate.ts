@@ -32,11 +32,15 @@ export async function callReplicate(
     ? [input.imageUrl, input.referenceImageUrl as string]
     : [input.imageUrl];
 
+  // Pruna p-image-edit schema (docs.pruna.ai) accepts only:
+  //   images, prompt, reference_image, aspect_ratio, width, height, seed,
+  //   disable_safety_checker.
+  // `output_format` and `go_fast` are not in the schema. They are silently
+  // dropped today but passing unrecognized params has been observed to
+  // contribute to empty responses. Keep the payload tight.
   const replicateInput: Record<string, unknown> = {
     prompt: input.prompt,
     images,
-    output_format: input.outputFormat ?? "jpg",
-    go_fast: true,
   };
 
   if (hasReference) {
@@ -81,6 +85,34 @@ export async function callReplicate(
   } else if (Array.isArray(output) && output.length > 0) {
     imageUrl = typeof output[0] === "string" ? output[0] : String(output[0]);
   } else {
+    // Empty response from Replicate is usually one of:
+    //   - Pruna safety filter hit on input or output
+    //   - Billing/quota exhausted on the account
+    //   - Transient deployment issue (cold start, worker death)
+    // Log the raw response shape so future regressions can be diagnosed
+    // without re-instrumenting. Token/PII-free: we log the JS type + a
+    // truncated stringified snapshot, never the user's image URL.
+    const outputType = output === null ? "null" : typeof output;
+    const outputShape = Array.isArray(output)
+      ? `array(length=${(output as unknown[]).length})`
+      : outputType;
+    const outputSnapshot = (() => {
+      try {
+        return JSON.stringify(output).slice(0, 200);
+      } catch {
+        return "[unserializable]";
+      }
+    })();
+    logger.warn(
+      {
+        event: "provider.replicate.empty_response",
+        model,
+        outputShape,
+        outputSnapshot,
+        durationMs,
+      },
+      "Replicate returned no images — empty response",
+    );
     throw new Error("Replicate returned no images");
   }
 
