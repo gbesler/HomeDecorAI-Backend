@@ -307,6 +307,102 @@ export const CreatePaintWallsBody = zod
     },
   );
 
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a single room photo URL + a floor style choice. Two mutually
+ * exclusive modes: `texture` (picks one of the 16 preset floor textures)
+ * and `customStyle` (freeform prompt + optional reference photo).
+ *
+ * Mirrors the iOS floor-restyle wizard (FloorRestyleWizardViewModel,
+ * FloorStyleMode, FloorTexture). The mode-specific required fields are
+ * enforced via cross-field refinements so Zod rejects mode/payload
+ * mismatches before the request reaches the processor.
+ *
+ * @summary Generate a floor-restyle transformation
+ */
+const FLOOR_TEXTURE_VALUES = [
+  "oakWood",
+  "walnut",
+  "bamboo",
+  "cherry",
+  "whiteMarble",
+  "travertine",
+  "greenMarble",
+  "beigeMarble",
+  "patternTile",
+  "checkerboard",
+  "hexagon",
+  "terracotta",
+  "naturalPlank",
+  "whitewashedPlank",
+  "darkPlank",
+  "herringbone",
+] as const;
+
+export const CreateFloorRestyleBody = zod
+  .object({
+    imageUrl: zod
+      .string()
+      .url()
+      .describe("Public URL of the room photo whose flooring should be restyled"),
+    floorStyleMode: zod.enum(["texture", "customStyle"]),
+    textureId: zod.enum(FLOOR_TEXTURE_VALUES).optional(),
+    customPrompt: zod.string().min(1).max(500).optional(),
+    // Optional secondary image — only accepted in customStyle mode, and
+    // forwarded to the provider as the reference image (restyle the flooring
+    // in the aesthetic of this reference while preserving room geometry).
+    referenceImageUrl: zod.string().url().optional(),
+    language: zod.enum(["tr", "en"]).optional(),
+  })
+  .refine(
+    (b) => (b.floorStyleMode === "texture" ? b.textureId !== undefined : true),
+    {
+      message: "textureId is required when floorStyleMode is 'texture'",
+      path: ["textureId"],
+    },
+  )
+  .refine(
+    (b) =>
+      b.floorStyleMode === "customStyle" ? b.customPrompt !== undefined : true,
+    {
+      message: "customPrompt is required when floorStyleMode is 'customStyle'",
+      path: ["customPrompt"],
+    },
+  )
+  .refine(
+    (b) =>
+      b.floorStyleMode === "texture"
+        ? b.customPrompt === undefined && b.referenceImageUrl === undefined
+        : true,
+    {
+      message:
+        "customPrompt and referenceImageUrl must be omitted when floorStyleMode is 'texture'",
+      path: ["floorStyleMode"],
+    },
+  )
+  .refine(
+    (b) =>
+      b.floorStyleMode === "customStyle"
+        ? b.textureId === undefined
+        : true,
+    {
+      message:
+        "textureId must be omitted when floorStyleMode is 'customStyle'",
+      path: ["textureId"],
+    },
+  )
+  .refine(
+    (b) =>
+      b.referenceImageUrl === undefined ||
+      b.referenceImageUrl !== b.imageUrl,
+    {
+      message:
+        "referenceImageUrl and imageUrl must point to different images",
+      path: ["referenceImageUrl"],
+    },
+  );
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod

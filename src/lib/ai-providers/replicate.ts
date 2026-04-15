@@ -4,7 +4,16 @@ import { logger } from "../logger.js";
 import { PROVIDER_CAPABILITIES } from "./capabilities.js";
 import type { GenerationInput, GenerationOutput } from "./types.js";
 
-const replicate = new Replicate({ auth: env.REPLICATE_API_TOKEN });
+// useFileOutput: false restores pre-v1 behavior. Replicate client v1+ wraps
+// file outputs in FileOutput stream objects by default — those JSON.stringify
+// to "{}" and fail our `typeof === "string"` / `Array.isArray` checks, which
+// surfaced as "Replicate returned no images" even on successful predictions.
+// We consume the URL directly and hand it to the S3 upload step, so the
+// stream wrapper buys us nothing.
+const replicate = new Replicate({
+  auth: env.REPLICATE_API_TOKEN,
+  useFileOutput: false,
+});
 
 const TIMEOUT_MS = 60_000;
 

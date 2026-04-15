@@ -12,6 +12,7 @@ import type { GardenColorPalette } from "../../schemas/generated/types/gardenCol
 import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
 import type { RoomType } from "../../schemas/generated/types/roomType.js";
+import type { FloorTexture } from "../../schemas/generated/types/floorTexture.js";
 import type { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 
 // ─── Mode enums ─────────────────────────────────────────────────────────────
@@ -243,3 +244,26 @@ export interface WallTextureEntry {
 }
 
 export type WallTexturesDict = Partial<Record<WallTexture, WallTextureEntry>>;
+
+// ─── Floor-restyle tool entries ────────────────────────────────────────────
+
+/**
+ * A single floor texture preset (one of the 16 ids the iOS wizard exposes).
+ * Feeds the `texture` branch of the floor-restyle prompt builder. Same
+ * shape as `WallTextureEntry` except the `category` union matches the iOS
+ * `FloorStyleCategory` enum (4 categories vs walls' 5).
+ */
+export interface FloorTextureEntry {
+  /** Category bucket — matches the iOS FloorStyleCategory enum. */
+  category: "wood" | "marble" | "porcelain" | "planks";
+  /** Human-readable label used inline in the prompt's action directive. */
+  label: string;
+  /** One-sentence description of the finish's appearance. */
+  description: string;
+  /** 2-3 material descriptor tokens (e.g., "warm grain", "tight planks"). */
+  descriptors: string[];
+  /** Ideal lighting character for this floor finish. */
+  lightingCharacter: string;
+}
+
+export type FloorTexturesDict = Partial<Record<FloorTexture, FloorTextureEntry>>;
