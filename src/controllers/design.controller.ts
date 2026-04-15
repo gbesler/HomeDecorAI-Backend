@@ -8,9 +8,12 @@ import {
 import { getDesignHistory } from "../services/design.service.js";
 import {
   createQueuedGeneration,
+  getGenerationById,
   markEnqueueFailed,
+  markFailed,
 } from "../lib/firestore.js";
 import { enqueueGenerationTask } from "../lib/cloud-tasks.js";
+import { processGeneration } from "../services/generation-processor.js";
 import { resolveLanguage } from "../lib/notifications/i18n.js";
 import type { SupportedLanguage } from "../lib/generation/types.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
@@ -273,6 +276,221 @@ export function makeCreateGenerationHandler<TParams>(
     return {
       generationId,
       status: "queued" as const,
+    };
+  };
+}
+
+// ─── TEMPORARY: Sync generation handler factory ────────────────────────────
+
+/**
+ * Temporary sync variant of {@link makeCreateGenerationHandler}. Runs the full
+ * async pipeline (validation → Firestore queued → AI → S3 → Firestore completed)
+ * inline on the request thread and returns 200 with the final `outputImageUrl`.
+ *
+ * Exists only to unblock manual testing of tool features without the Cloud
+ * Tasks round trip and 30–60s loading-window pad. The async enqueue handler,
+ * Cloud Tasks pipeline, and iOS Firestore listener flow remain the canonical
+ * path — this sync variant shares their code paths but skips the queue.
+ *
+ * To remove: delete this function, remove the sync route registration in
+ * `src/routes/design.ts`, and drop the `skipLoadingPad` parameter on
+ * `processGeneration`.
+ */
+export function makeSyncGenerationHandler<TParams>(
+  tool: ToolTypeConfig<TParams>,
+) {
+  const BodySchema = tool.bodySchema.and(
+    z.object({ language: LanguageField }),
+  );
+
+  return async function createGenerationSync(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const userId = request.userId;
+    const firebaseIdToken = request.firebaseIdToken;
+    if (!userId || !firebaseIdToken) {
+      reply.code(401);
+      return { error: "Unauthorized", message: "Authentication required" };
+    }
+
+    const parsed = BodySchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return {
+        error: "Validation Error",
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join(", "),
+      };
+    }
+
+    const body = parsed.data as TParams & { language?: SupportedLanguage };
+    const { language: bodyLanguage, ...toolBody } = body as Record<
+      string,
+      unknown
+    > & { language?: SupportedLanguage };
+
+    const bodyRecord = toolBody as Record<string, unknown>;
+    for (const field of tool.imageUrlFields) {
+      const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return { error: "Validation Error", message: check.message };
+      }
+    }
+    for (const field of tool.optionalImageUrlFields ?? []) {
+      if (bodyRecord[field] === undefined) continue;
+      const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return { error: "Validation Error", message: check.message };
+      }
+    }
+
+    const primaryImageField = tool.imageUrlFields[0];
+    const imageUrl = bodyRecord[primaryImageField] as string;
+
+    const acceptLanguageHeader =
+      typeof request.headers["accept-language"] === "string"
+        ? request.headers["accept-language"]
+        : undefined;
+
+    const language = resolveGenerationLanguage(
+      bodyLanguage,
+      acceptLanguageHeader,
+    );
+    const generationId = randomUUID();
+
+    const toolParams = tool.toToolParams(toolBody as TParams);
+
+    const legacyRoomType =
+      tool.toolKey === "interiorDesign"
+        ? ((toolParams["roomType"] as string | undefined) ?? null)
+        : null;
+    const legacyDesignStyle =
+      tool.toolKey === "interiorDesign"
+        ? ((toolParams["designStyle"] as string | undefined) ?? null)
+        : null;
+
+    try {
+      await createQueuedGeneration({
+        generationId,
+        userId,
+        toolType: tool.toolKey,
+        roomType: legacyRoomType,
+        designStyle: legacyDesignStyle,
+        toolParams,
+        inputImageUrl: imageUrl,
+        language,
+      });
+    } catch (err) {
+      request.log.error(
+        {
+          event: "generation.sync.firestore_create_failed",
+          toolType: tool.toolKey,
+          userId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        "Failed to create queued generation record (sync path)",
+      );
+      reply.code(500);
+      return {
+        error: "Internal Error",
+        message: "Failed to create generation record. Please try again.",
+      };
+    }
+
+    request.log.info(
+      {
+        event: "generation.sync.start",
+        generationId,
+        toolType: tool.toolKey,
+        userId,
+        toolParams,
+        language,
+      },
+      "Sync generation started",
+    );
+
+    try {
+      const result = await processGeneration({
+        generationId,
+        firebaseIdToken,
+        retryCount: 0,
+        skipLoadingPad: true,
+      });
+
+      if (result.action === "retry") {
+        // Sync path has no retry mechanism — promote transient storage
+        // failures to a terminal fail so the doc does not linger in `processing`.
+        await markFailed(
+          generationId,
+          "STORAGE_FAILED",
+          "Transient storage error in sync mode (no retry)",
+        ).catch((e) =>
+          request.log.error(
+            { generationId, error: e instanceof Error ? e.message : String(e) },
+            "Failed to mark sync generation as failed after storage retry",
+          ),
+        );
+        reply.code(502);
+        return {
+          generationId,
+          status: "failed" as const,
+          errorCode: "STORAGE_FAILED" as const,
+          errorMessage: "Storage upload failed",
+        };
+      }
+    } catch (err) {
+      request.log.error(
+        {
+          event: "generation.sync.processor_threw",
+          generationId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        "Sync processor threw unexpectedly",
+      );
+      reply.code(500);
+      return {
+        error: "Internal Error",
+        message: "Sync generation failed",
+        generationId,
+      };
+    }
+
+    const finalDoc = await getGenerationById(generationId);
+    if (!finalDoc) {
+      request.log.error(
+        { event: "generation.sync.doc_missing", generationId },
+        "Generation doc missing after sync processing",
+      );
+      reply.code(500);
+      return {
+        error: "Internal Error",
+        message: "Generation record missing after processing",
+        generationId,
+      };
+    }
+
+    if (finalDoc.status === "failed") {
+      reply.code(502);
+      return {
+        generationId,
+        status: "failed" as const,
+        errorCode: finalDoc.errorCode ?? ("AI_PROVIDER_FAILED" as const),
+        errorMessage: finalDoc.errorMessage ?? "Generation failed",
+      };
+    }
+
+    reply.code(200);
+    return {
+      generationId,
+      status: "completed" as const,
+      outputImageUrl: finalDoc.outputImageUrl,
+      provider: finalDoc.provider,
+      durationMs: finalDoc.durationMs,
+      toolType: finalDoc.toolType,
     };
   };
 }

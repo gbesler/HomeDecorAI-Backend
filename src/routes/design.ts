@@ -3,6 +3,7 @@ import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
 import {
   getHistory,
   makeCreateGenerationHandler,
+  makeSyncGenerationHandler,
 } from "../controllers/design.controller.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 
@@ -66,6 +67,66 @@ const enqueueResponseSchemas = {
   503: {
     ...errorResponse,
     description: "Failed to enqueue the Cloud Tasks job",
+  },
+};
+
+// Temporary sync endpoint response schemas. Sync variants return the fully
+// processed generation in a single response — 200 with outputImageUrl, or
+// 502 with a structured failure. Keep separate from `enqueueResponseSchemas`
+// so removing the sync routes is a self-contained revert.
+const syncResponseSchemas = {
+  200: {
+    type: "object" as const,
+    description: "Generation completed synchronously",
+    properties: {
+      generationId: { type: "string" as const },
+      status: {
+        type: "string" as const,
+        enum: ["completed"] as const,
+      },
+      outputImageUrl: { type: "string" as const, nullable: true },
+      provider: { type: "string" as const, nullable: true },
+      durationMs: { type: "number" as const, nullable: true },
+      toolType: { type: "string" as const },
+    },
+    required: ["generationId", "status", "toolType"] as const,
+  },
+  400: {
+    ...errorResponse,
+    description: "Validation error (invalid body or imageUrl scheme)",
+  },
+  401: {
+    ...errorResponse,
+    description: "Missing, invalid, or expired Firebase token",
+  },
+  403: {
+    ...errorResponse,
+    description: "Invalid User-Agent header (must be HomeDecorAI/*)",
+  },
+  429: {
+    type: "object" as const,
+    description: "Rate limit exceeded",
+    properties: {
+      error: { type: "string" as const },
+      message: { type: "string" as const },
+      retryAfterMs: { type: "number" as const },
+    },
+    required: ["error", "message"] as const,
+  },
+  500: {
+    ...errorResponse,
+    description: "Internal error during sync generation",
+  },
+  502: {
+    type: "object" as const,
+    description: "Upstream (AI provider or storage) failure",
+    properties: {
+      generationId: { type: "string" as const },
+      status: { type: "string" as const, enum: ["failed"] as const },
+      errorCode: { type: "string" as const },
+      errorMessage: { type: "string" as const },
+    },
+    required: ["generationId", "status", "errorCode", "errorMessage"] as const,
   },
 };
 
@@ -185,6 +246,31 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         ],
       },
       makeCreateGenerationHandler(tool),
+    );
+
+    // Temporary sync variant for manual testing of tool features. Shares
+    // validation, Firestore, AI, and S3 pipeline with the async path but
+    // blocks the request until processing completes. Remove alongside
+    // `makeSyncGenerationHandler` when done testing.
+    app.post(
+      `${tool.routePath}/sync`,
+      {
+        schema: {
+          tags: ["Design", "Sync (Testing Only)"],
+          summary: `${tool.summary} (SYNC — test only)`,
+          description:
+            "Temporary sync variant of the async tool endpoint for testing. " +
+            "Blocks until AI generation and S3 upload finish, then returns the final outputImageUrl.",
+          security: [{ bearerAuth: [] }, { apiKey: [] }],
+          body: tool.bodyJsonSchema,
+          response: syncResponseSchemas,
+        },
+        preHandler: [
+          app.authenticate,
+          createRateLimitPreHandler(tool.rateLimitKey),
+        ],
+      },
+      makeSyncGenerationHandler(tool),
     );
   }
 

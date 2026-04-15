@@ -96,7 +96,7 @@ function getFirebaseTokenRemainingSeconds(token: string): number | null {
 export async function processGeneration(
   input: ProcessGenerationInput,
 ): Promise<ProcessGenerationResult> {
-  const { generationId, firebaseIdToken, retryCount } = input;
+  const { generationId, firebaseIdToken, retryCount, skipLoadingPad } = input;
 
   // Local fallback anchor for the loading-window pad. `claimProcessing`
   // writes a server timestamp to `processingStartedAt`, but on a fresh claim
@@ -211,12 +211,15 @@ export async function processGeneration(
       // Hold the `completed` transition so the iOS spinner stays visible for
       // a random 30–60s window even when AI + S3 returned quickly. Anchored
       // on `processingStartedAt` when available (retry path) so the pad is
-      // not re-applied on each attempt.
-      await holdForMinimumLoadingWindow(
-        generationId,
-        doc.processingStartedAt,
-        invocationStartedAtMs,
-      );
+      // not re-applied on each attempt. Sync HTTP path opts out — the client
+      // is waiting on the response, not a Firestore listener.
+      if (!skipLoadingPad) {
+        await holdForMinimumLoadingWindow(
+          generationId,
+          doc.processingStartedAt,
+          invocationStartedAtMs,
+        );
+      }
 
       await recordStorageResult({
         generationId,
