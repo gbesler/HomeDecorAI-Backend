@@ -47,19 +47,28 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
   fastify.decorate(
     "authenticate",
     async function (request: FastifyRequest, reply: FastifyReply) {
-      // Swagger API key (shared secret). When present and valid it relaxes
-      // the HomeDecorAI/* User-Agent gate so the hosted Swagger UI (browser
-      // User-Agent) can reach the API. It does NOT replace Firebase auth on
-      // its own — endpoints that need a real Cognito-federated identity
-      // (POST /api/design/*, /sync) still require a valid Bearer token.
+      // Two ways to relax the HomeDecorAI/* User-Agent gate:
+      //   1. A valid Bearer token — strong Firebase auth subsumes the UA
+      //      heuristic, so any browser / Swagger UI presenting a verified
+      //      token is allowed through.
+      //   2. A valid SWAGGER_API_KEY — shared-secret bypass for endpoints
+      //      that don't need a real user (e.g. GET /history via Swagger).
       // Rotate SWAGGER_API_KEY if it leaks.
       const apiKey = request.headers["x-api-key"] as string | undefined;
       const hasValidApiKey = Boolean(
         apiKey && env.SWAGGER_API_KEY && apiKey === env.SWAGGER_API_KEY,
       );
 
-      // User-Agent gate — skipped when a valid Swagger API key is present.
-      if (!hasValidApiKey) {
+      const authHeader = request.headers.authorization;
+      const hasBearer = Boolean(authHeader && authHeader.startsWith("Bearer "));
+
+      // User-Agent gate — skipped when either a Bearer token is presented
+      // (token validity is enforced below) or a valid Swagger API key is
+      // present. An invalid Bearer that bypasses the UA here will still be
+      // rejected by verifyIdToken with 401, so the net surface area exposed
+      // by this relaxation is "presence of Authorization header" not "valid
+      // identity."
+      if (!hasBearer && !hasValidApiKey) {
         const userAgent = request.headers["user-agent"];
         if (!userAgent || !userAgent.startsWith("HomeDecorAI/")) {
           request.log.error({ userAgent }, "Invalid User-Agent");
@@ -70,9 +79,6 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
           return;
         }
       }
-
-      const authHeader = request.headers.authorization;
-      const hasBearer = Boolean(authHeader && authHeader.startsWith("Bearer "));
 
       if (hasBearer) {
         // Real Firebase token path — populates both userId and firebaseIdToken
