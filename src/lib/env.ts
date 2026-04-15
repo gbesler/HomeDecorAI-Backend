@@ -82,7 +82,7 @@ const envSchema = z.object({
     .string()
     .min(1)
     .optional()
-    .default("replicate.delivery,pbxt.replicate.delivery,fal.media,v3.fal.media,storage.googleapis.com")
+    .default("replicate.delivery,pbxt.replicate.delivery,fal.media,v3.fal.media,v3b.fal.media,storage.googleapis.com")
     .transform((raw) =>
       raw
         .split(",")
