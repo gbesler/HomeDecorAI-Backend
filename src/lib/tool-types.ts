@@ -26,6 +26,10 @@ import {
   buildReferenceStylePrompt,
   type ReferenceStyleParams,
 } from "./prompts/tools/reference-style.js";
+import {
+  buildVirtualStagingPrompt,
+  type VirtualStagingParams,
+} from "./prompts/tools/virtual-staging.js";
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateExteriorDesignBody,
@@ -34,6 +38,7 @@ import {
   CreateInteriorDesignBody,
   CreatePaintWallsBody,
   CreateReferenceStyleBody,
+  CreateVirtualStagingBody,
 } from "../schemas/generated/api.js";
 
 export type {
@@ -43,6 +48,7 @@ export type {
   ReferenceStyleParams,
   PaintWallsParams,
   FloorRestyleParams,
+  VirtualStagingParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -527,6 +533,68 @@ const referenceStyleBodyJsonSchema = {
   },
 };
 
+const STAGING_PALETTES = [
+  "surpriseMe",
+  "warmTones",
+  "earthyNeutrals",
+  "pastelBreeze",
+  "monochromeElegance",
+  "laidBackBlues",
+  "forestGreens",
+  "oceanBreeze",
+  "sunsetGlow",
+  "peachyMeadow",
+  "highContrast",
+  "desertSand",
+] as const;
+
+const virtualStagingBodyJsonSchema = {
+  type: "object" as const,
+  required: [
+    "imageUrl",
+    "roomType",
+    "designStyle",
+    "colorPalette",
+    "stagingMode",
+  ] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo to stage (must use http or https scheme)",
+    },
+    roomType: {
+      type: "string" as const,
+      enum: ROOM_TYPES,
+      description: "Type of room in the photo",
+    },
+    designStyle: {
+      type: "string" as const,
+      enum: DESIGN_STYLES,
+      description: "Target design style for the staging",
+    },
+    colorPalette: {
+      type: "string" as const,
+      enum: STAGING_PALETTES,
+      description:
+        "Color palette id. `surpriseMe` lets the style drive the palette.",
+    },
+    stagingMode: {
+      type: "string" as const,
+      enum: ["keepLayout", "fullStaging"] as const,
+      description:
+        "keepLayout: preserve any existing furniture, add complementary pieces. fullStaging: stage as if the room were empty.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 // ─── Tool registry ─────────────────────────────────────────────────────────
 
 export const TOOL_TYPES = {
@@ -673,6 +741,28 @@ export const TOOL_TYPES = {
     imageUrlFields: ["roomImageUrl", "referenceImageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateReferenceStyleBody>,
+    PromptResult
+  >,
+
+  virtualStaging: {
+    toolKey: "virtualStaging",
+    routePath: "/virtual-staging",
+    rateLimitKey: "virtualStaging",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateVirtualStagingBody,
+    bodyJsonSchema: virtualStagingBodyJsonSchema,
+    summary: "Enqueue a virtual staging transformation",
+    description:
+      "Stages empty or sparsely furnished rooms with furniture and decor. Unlike Interior Design which transforms existing furnishings, this tool adds furniture to empty spaces. Supports two modes: `keepLayout` preserves existing furniture and adds complementary pieces; `fullStaging` stages the room as if empty. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildVirtualStagingPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateVirtualStagingBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateVirtualStagingBody>,
     PromptResult
   >,
 } as const;
