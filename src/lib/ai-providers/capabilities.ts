@@ -38,6 +38,14 @@ export interface ProviderCapabilities {
   provider: ProviderId;
   supportsNegativePrompt: boolean;
   supportsGuidanceScale: boolean;
+  /**
+   * Whether the model accepts a second image as a style reference alongside
+   * the primary input image. Pruna p-image-edit exposes this via `images[]`
+   * (1-5 items) + `reference_image` index. fal.ai flux-2/edit accepts
+   * multiple `image_urls`. Single-image models (flux-klein-edit) leave this
+   * false so the provider layer does not silently drop the second URL.
+   */
+  supportsReferenceImage: boolean;
   maxPromptTokens: number;
   defaultAspectRatio?: string;
   defaultImageSize?: string;
@@ -50,6 +58,9 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     provider: "replicate",
     supportsNegativePrompt: false, // Flux family + Pruna schema does not expose it
     supportsGuidanceScale: false, // Distilled sub-second model, no CFG knob
+    // Native reference-style support via images[] + reference_image index.
+    // Docs: https://docs.pruna.ai/en/stable/docs_pruna_endpoints/performance_models/p-image-edit.html
+    supportsReferenceImage: true,
     maxPromptTokens: 200, // Defensive Schnell-class assumption
     defaultAspectRatio: "16:9",
   },
@@ -57,6 +68,11 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     provider: "falai",
     supportsNegativePrompt: false, // BFL: Flux 2 does not support negative prompts
     supportsGuidanceScale: true, // Documented: default 2.5, range 0-20
+    // Klein 9B Edit schema accepts `image_urls` as an array; the
+    // reference-style tool ships both target and reference here. Behavior is
+    // not formally documented as multi-reference editing — A/B against the
+    // primary (Pruna) before relying on the fallback for production traffic.
+    supportsReferenceImage: true,
     maxPromptTokens: 250, // fal Klein guide sweet spot
     defaultImageSize: "landscape_4_3",
   },

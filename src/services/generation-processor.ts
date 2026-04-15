@@ -96,7 +96,7 @@ function getFirebaseTokenRemainingSeconds(token: string): number | null {
 export async function processGeneration(
   input: ProcessGenerationInput,
 ): Promise<ProcessGenerationResult> {
-  const { generationId, firebaseIdToken, retryCount } = input;
+  const { generationId, firebaseIdToken, retryCount, skipLoadingPad } = input;
 
   // Local fallback anchor for the loading-window pad. `claimProcessing`
   // writes a server timestamp to `processingStartedAt`, but on a fresh claim
@@ -211,12 +211,15 @@ export async function processGeneration(
       // Hold the `completed` transition so the iOS spinner stays visible for
       // a random 30–60s window even when AI + S3 returned quickly. Anchored
       // on `processingStartedAt` when available (retry path) so the pad is
-      // not re-applied on each attempt.
-      await holdForMinimumLoadingWindow(
-        generationId,
-        doc.processingStartedAt,
-        invocationStartedAtMs,
-      );
+      // not re-applied on each attempt. Sync HTTP path opts out — the client
+      // is waiting on the response, not a Firestore listener.
+      if (!skipLoadingPad) {
+        await holdForMinimumLoadingWindow(
+          generationId,
+          doc.processingStartedAt,
+          invocationStartedAtMs,
+        );
+      }
 
       await recordStorageResult({
         generationId,
@@ -283,8 +286,11 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
   const { id: generationId, userId, toolType, inputImageUrl } = doc;
 
   // Registry lookup — every tool plugs in here.
-  const tool = TOOL_TYPES[toolType as keyof typeof TOOL_TYPES] as
-    | ToolTypeConfig<unknown>
+  // Cast to a permissive `Record<string, unknown>` TParams so the
+  // `imageUrlFields: keyof TParams` constraint widens to `string` here;
+  // the per-tool config still enforces field-name correctness at registration.
+  const tool = TOOL_TYPES[toolType as keyof typeof TOOL_TYPES] as unknown as
+    | ToolTypeConfig<Record<string, unknown>>
     | undefined;
   if (!tool) {
     return {
@@ -296,8 +302,12 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
 
   // Recover validated params from either the new `toolParams` blob (standard
   // path) or the legacy top-level roomType/designStyle columns (in-flight
-  // interior docs created before the registry refactor).
-  let params: unknown;
+  // interior docs created before the registry refactor). The cast widens
+  // the registry's narrow TParams (now `Record<string, unknown>`) so the
+  // parsed params object is also typed as a record without losing field
+  // information at call sites — buildPrompt and the imageUrlFields lookup
+  // both index by string.
+  let params: Record<string, unknown>;
   try {
     if (doc.toolParams) {
       params = tool.fromToolParams(doc.toolParams);
@@ -349,10 +359,30 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
     "Starting AI generation",
   );
 
+  // Forward a secondary image URL to the provider only when the tool's
+  // contract declares one — as a mandatory second field in `imageUrlFields`
+  // (reference-style) OR as an optional `referenceImageUrl` in
+  // `optionalImageUrlFields` (paint-walls customStyle). Reading from the
+  // registry (rather than a hardcoded key) means:
+  //   - single-image tools (interior/exterior/garden) skip extraction
+  //     entirely, so a stray `referenceImageUrl` field accidentally written
+  //     to a non-multi-image doc cannot corrupt that tool's generation.
+  //   - any future multi-image tool with a different field name works
+  //     without touching this file — declaration-driven, not name-driven.
+  // The value is read from the already-typed `params` (post-Zod parse) so
+  // it inherits the body schema's URL validation.
+  const secondaryField =
+    tool.imageUrlFields[1] ?? tool.optionalImageUrlFields?.[0];
+  const referenceImageUrl =
+    secondaryField !== undefined
+      ? (params[secondaryField] as string | undefined)
+      : undefined;
+
   try {
     const result = await callDesignGeneration(tool.models, {
       prompt: promptResult.prompt,
       imageUrl: inputImageUrl,
+      referenceImageUrl,
       guidanceScale: promptResult.guidanceScale,
     });
 

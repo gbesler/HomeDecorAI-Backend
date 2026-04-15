@@ -1,5 +1,5 @@
 import type { FastifySchema } from "fastify";
-import type { z } from "zod";
+import { type z } from "zod";
 import { env } from "./env.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
@@ -14,14 +14,30 @@ import {
   buildInteriorPrompt,
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
+import {
+  buildPaintWallsPrompt,
+  type PaintWallsParams,
+} from "./prompts/tools/paint-walls.js";
+import {
+  buildReferenceStylePrompt,
+  type ReferenceStyleParams,
+} from "./prompts/tools/reference-style.js";
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateExteriorDesignBody,
   CreateGardenDesignBody,
   CreateInteriorDesignBody,
+  CreatePaintWallsBody,
+  CreateReferenceStyleBody,
 } from "../schemas/generated/api.js";
 
-export type { InteriorParams, ExteriorParams, GardenParams };
+export type {
+  InteriorParams,
+  ExteriorParams,
+  GardenParams,
+  ReferenceStyleParams,
+  PaintWallsParams,
+};
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
 
@@ -71,6 +87,32 @@ export interface ToolTypeConfig<
   toToolParams: (params: TParams) => Record<string, unknown>;
   /** Re-validate the Firestore `toolParams` blob into typed params. */
   fromToolParams: (raw: Record<string, unknown>) => TParams;
+  /**
+   * Body fields that carry image URLs. Every entry is validated against the
+   * http/https scheme allowlist by the controller. The FIRST entry is the
+   * canonical "input image" written to `GenerationDoc.inputImageUrl` — other
+   * entries live in `toolParams` and are forwarded to the provider as the
+   * `referenceImageUrl` slot (e.g. reference-style tool).
+   *
+   * Type constraint: a non-empty tuple of body field names. Constraining to
+   * `keyof TParams` means a typo'd field name is caught at compile time
+   * rather than at runtime as a 400 with the wrong field in the error
+   * message. The non-empty tuple shape (`[K, ...K[]]`) also lets the
+   * controller index `[0]` without a defensiveness check for an empty array.
+   */
+  imageUrlFields: readonly [
+    keyof TParams & string,
+    ...(keyof TParams & string)[],
+  ];
+  /**
+   * Body fields that MAY carry image URLs but are not always present
+   * (e.g. paint-walls `referenceImageUrl` — only set in customStyle mode).
+   * Each entry is validated against the http/https scheme allowlist only
+   * when the field is defined on the request. Used by the processor to
+   * resolve a secondary reference image when `imageUrlFields` does not
+   * include one.
+   */
+  optionalImageUrlFields?: readonly (keyof TParams & string)[];
 }
 
 // ─── Interior prompt dispatch (legacy safety valve) ─────────────────────────
@@ -174,6 +216,27 @@ const EXTERIOR_PALETTES = [
   "oceanBreeze",
   "monochromeElegance",
   "desertSand",
+] as const;
+
+const WALL_TEXTURES = [
+  "matte",
+  "satin",
+  "glossy",
+  "eggshell",
+  "venetianPlaster",
+  "limewash",
+  "stucco",
+  "concrete",
+  "brick",
+  "naturalStone",
+  "marble",
+  "slate",
+  "woodPaneling",
+  "shiplap",
+  "reclaimedWood",
+  "wallpaper",
+  "geometric",
+  "textured",
 ] as const;
 
 const GARDEN_PALETTES = [
@@ -321,6 +384,80 @@ const gardenBodyJsonSchema = {
   },
 };
 
+const paintWallsBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "wallStyleMode"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo whose walls should be restyled (http or https)",
+    },
+    wallStyleMode: {
+      type: "string" as const,
+      enum: ["texture", "customStyle"] as const,
+      description:
+        "Two modes: `texture` picks from an 18-item preset list (textureId required); `customStyle` uses a freeform user prompt (customPrompt required) and an optional reference image.",
+    },
+    textureId: {
+      type: "string" as const,
+      enum: WALL_TEXTURES,
+      description:
+        "Required when wallStyleMode is 'texture'. One of the 18 preset finishes.",
+    },
+    customPrompt: {
+      type: "string" as const,
+      minLength: 1,
+      maxLength: 500,
+      description:
+        "Required when wallStyleMode is 'customStyle'. Freeform description of the desired wall finish.",
+    },
+    referenceImageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Optional; only accepted in customStyle mode. Public URL of a reference image whose wall finish should be emulated.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
+const referenceStyleBodyJsonSchema = {
+  type: "object" as const,
+  required: ["roomImageUrl", "referenceImageUrl", "spaceType"] as const,
+  properties: {
+    roomImageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the user's room photo to restyle (must use http or https scheme)",
+    },
+    referenceImageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the reference photo whose aesthetic should be applied (must use http or https scheme)",
+    },
+    spaceType: {
+      type: "string" as const,
+      enum: ["interior", "exterior"] as const,
+      description: "Whether the user's photo is an interior room or exterior building",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 // ─── Tool registry ─────────────────────────────────────────────────────────
 
 export const TOOL_TYPES = {
@@ -340,7 +477,11 @@ export const TOOL_TYPES = {
     buildPrompt: buildInteriorPromptDispatch,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateInteriorDesignBody.parse(raw),
-  } satisfies ToolTypeConfig<InteriorParams, PromptResult>,
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateInteriorDesignBody>,
+    PromptResult
+  >,
 
   exteriorDesign: {
     toolKey: "exteriorDesign",
@@ -358,7 +499,11 @@ export const TOOL_TYPES = {
     buildPrompt: buildExteriorPrompt,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateExteriorDesignBody.parse(raw),
-  } satisfies ToolTypeConfig<ExteriorParams, PromptResult>,
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateExteriorDesignBody>,
+    PromptResult
+  >,
 
   gardenDesign: {
     toolKey: "gardenDesign",
@@ -376,7 +521,64 @@ export const TOOL_TYPES = {
     buildPrompt: buildGardenPrompt,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateGardenDesignBody.parse(raw),
-  } satisfies ToolTypeConfig<GardenParams, PromptResult>,
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateGardenDesignBody>,
+    PromptResult
+  >,
+
+  paintWalls: {
+    toolKey: "paintWalls",
+    routePath: "/paint-walls",
+    rateLimitKey: "paintWalls",
+    models: {
+      // Pruna primary — Pruna's `images[]` + `reference_image` schema makes
+      // the customStyle-with-reference path a multi-image call without any
+      // new provider code. Texture mode and customStyle-without-reference
+      // degrade cleanly to single-image input.
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreatePaintWallsBody,
+    bodyJsonSchema: paintWallsBodyJsonSchema,
+    summary: "Enqueue a paint-walls transformation",
+    description:
+      "Restyles only the wall surfaces of a room while preserving furniture, flooring, ceiling, fixtures, and decor. Two modes: `texture` picks from 18 presets (matte, satin, glossy, eggshell, Venetian plaster, limewash, stucco, concrete, brick, natural stone, marble, slate, wood paneling, shiplap, reclaimed wood, wallpaper, geometric, textured). `customStyle` accepts a freeform prompt plus an optional reference image whose wall finish the AI should emulate. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildPaintWallsPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreatePaintWallsBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+    optionalImageUrlFields: ["referenceImageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreatePaintWallsBody>,
+    PromptResult
+  >,
+
+  referenceStyle: {
+    toolKey: "referenceStyle",
+    routePath: "/reference-style",
+    rateLimitKey: "referenceStyle",
+    models: {
+      // Pruna native multi-image support: images[]=[room, ref] + reference_image="2".
+      replicate: "prunaai/p-image-edit" as const,
+      // Klein 9B Edit accepts `image_urls` as an array; we send both target
+      // and reference here. Quality vs purpose-built multi-ref editors should
+      // be A/B tested in production.
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateReferenceStyleBody,
+    bodyJsonSchema: referenceStyleBodyJsonSchema,
+    summary: "Enqueue a reference-style design transformation",
+    description:
+      "Accepts a user room/building photo URL plus a reference photo URL whose aesthetic to apply. Style is conveyed entirely by the reference image — no style or palette enums. Creates a generation record and enqueues an async Cloud Tasks job; the provider call passes both images and asks the model to restyle image 1 to match image 2 while preserving image 1's geometry. Returns 202 with a generationId. Note: this endpoint uses `roomImageUrl` (not `imageUrl`) and `referenceImageUrl` to match the iOS contract; both must be distinct http/https URLs.",
+    buildPrompt: buildReferenceStylePrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateReferenceStyleBody.parse(raw),
+    imageUrlFields: ["roomImageUrl", "referenceImageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateReferenceStyleBody>,
+    PromptResult
+  >,
 } as const;
 
 export type ToolTypeKey = keyof typeof TOOL_TYPES;
