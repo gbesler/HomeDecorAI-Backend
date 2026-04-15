@@ -36,7 +36,7 @@ const envSchema = z.object({
   // No developer provider, no per-backend role mapping. The token itself is
   // not minted on the backend — it arrives through the async-pipeline task
   // payload, produced by the iOS client at enqueue time.
-  COGNITO_IDENTITY_POOL_ID: z.string().regex(/^[a-z0-9-]+:[0-9a-f-]+$/),
+  AWS_COGNITO_IDENTITY_POOL_ID: z.string().regex(/^[a-z0-9-]+:[0-9a-f-]+$/),
   SWAGGER_API_KEY: z.string().min(1).optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),
   LOG_LEVEL: z.string().optional().default("info"),

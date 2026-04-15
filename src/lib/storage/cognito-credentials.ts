@@ -133,7 +133,7 @@ export async function getUserAwsCredentials(
   const getIdResp = await client
     .send(
       new GetIdCommand({
-        IdentityPoolId: env.COGNITO_IDENTITY_POOL_ID,
+        IdentityPoolId: env.AWS_COGNITO_IDENTITY_POOL_ID,
         Logins: { [providerKey]: firebaseIdToken },
       }),
     )
