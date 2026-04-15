@@ -1,22 +1,75 @@
-# Build
+# Build output
 dist/
+build/
 *.tsbuildinfo
 
 # Dependencies
 node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
 
-# Environment
+# Environment & secrets
 .env
-.env.local
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+firebase-adminsdk*.json
+gcp-*.json
+credentials.json
 
-# IDE
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test & coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Caches
+.cache/
+.eslintcache
+.parcel-cache/
+.turbo/
+
+# IDE / editors
 .idea/
 .vscode/
 *.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Logs
-npm-debug.log
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Local scratch
+tmp/
+temp/
+.scratch/

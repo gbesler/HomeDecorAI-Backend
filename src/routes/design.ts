@@ -1,9 +1,12 @@
 import type { FastifyPluginAsync } from "fastify";
 import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
 import {
-  createInteriorDesign,
   getHistory,
+  makeCreateGenerationHandler,
 } from "../controllers/design.controller.js";
+import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
+
+// ─── Shared response schemas (hoisted to avoid per-route duplication) ──────
 
 const errorResponse = {
   type: "object" as const,
@@ -14,137 +17,176 @@ const errorResponse = {
   required: ["error", "message"] as const,
 };
 
-const roomTypes = [
-  "livingRoom",
-  "bedroom",
-  "kitchen",
-  "underStairSpace",
-  "diningRoom",
-  "bathroom",
-  "entryway",
-  "stairway",
-  "office",
-  "homeOffice",
-  "studyRoom",
-  "gamingRoom",
-] as const;
+const enqueueResponseSchemas = {
+  202: {
+    type: "object" as const,
+    description: "Generation accepted and enqueued",
+    properties: {
+      generationId: {
+        type: "string" as const,
+        description: "Firestore document ID for real-time listener",
+      },
+      status: {
+        type: "string" as const,
+        enum: ["queued"] as const,
+        description: "Initial lifecycle status",
+      },
+    },
+    required: ["generationId", "status"] as const,
+  },
+  400: {
+    ...errorResponse,
+    description: "Validation error (invalid body or imageUrl scheme)",
+  },
+  401: {
+    ...errorResponse,
+    description: "Missing, invalid, or expired Firebase token",
+  },
+  403: {
+    ...errorResponse,
+    description: "Invalid User-Agent header (must be HomeDecorAI/*)",
+  },
+  429: {
+    type: "object" as const,
+    description: "Rate limit exceeded",
+    properties: {
+      error: { type: "string" as const },
+      message: { type: "string" as const },
+      retryAfterMs: {
+        type: "number" as const,
+        description: "Milliseconds until the rate limit resets",
+      },
+    },
+    required: ["error", "message"] as const,
+  },
+  500: {
+    ...errorResponse,
+    description: "Failed to create the queued generation record",
+  },
+  503: {
+    ...errorResponse,
+    description: "Failed to enqueue the Cloud Tasks job",
+  },
+};
 
-const designStyles = [
-  "modern",
-  "minimalist",
-  "scandinavian",
-  "industrial",
-  "bohemian",
-  "contemporary",
-  "midCentury",
-  "coastal",
-  "farmhouse",
-  "japandi",
-  "artDeco",
-  "traditional",
-  "tropical",
-  "rustic",
-  "luxury",
-  "cozy",
-  "christmas",
-  "airbnb",
-] as const;
-
-const designRoutes: FastifyPluginAsync = async (app) => {
-  app.post(
-    "/interior",
-    {
-      schema: {
-        tags: ["Design"],
-        summary: "Generate an interior design transformation",
-        description:
-          "Accepts a room photo URL, room type, and design style. Uses Replicate (primary) or fal.ai (fallback) to generate an AI-redesigned interior. Requires Firebase authentication and is rate-limited.",
-        security: [{ bearerAuth: [] }, { apiKey: [] }],
-        body: {
-          type: "object",
-          required: ["imageUrl", "roomType", "designStyle"],
+const historyResponseSchemas = {
+  200: {
+    type: "object" as const,
+    description: "Generation history retrieved successfully",
+    properties: {
+      generations: {
+        type: "array" as const,
+        items: {
+          type: "object" as const,
           properties: {
-            imageUrl: {
-              type: "string",
-              format: "uri",
-              description: "Public URL of the room photo to redesign (must use http or https scheme)",
-            },
+            id: { type: "string" as const, description: "Generation record ID" },
+            toolType: { type: "string" as const, description: "Tool type used" },
             roomType: {
-              type: "string",
-              enum: roomTypes,
-              description: "Type of room in the photo",
+              type: "string" as const,
+              nullable: true,
+              description: "Legacy interior-only room type mirror",
             },
             designStyle: {
-              type: "string",
-              enum: designStyles,
-              description: "Target design style for the transformation",
+              type: "string" as const,
+              nullable: true,
+              description: "Legacy interior-only design style mirror",
+            },
+            toolParams: {
+              type: "object" as const,
+              additionalProperties: true,
+              nullable: true,
+              description:
+                "Tool-agnostic parameters blob — carries exterior/garden/future-tool fields",
+            },
+            inputImageUrl: {
+              type: "string" as const,
+              description: "Original input photo URL",
+            },
+            outputImageUrl: {
+              type: "string" as const,
+              nullable: true,
+              description: "Generated image URL",
+            },
+            status: {
+              type: "string" as const,
+              enum: [
+                "pending",
+                "queued",
+                "processing",
+                "completed",
+                "failed",
+              ] as const,
+              description: "Generation lifecycle status",
+            },
+            provider: {
+              type: "string" as const,
+              description: "AI provider used",
+            },
+            durationMs: {
+              type: "number" as const,
+              nullable: true,
+              description: "Generation duration in ms",
+            },
+            createdAt: {
+              type: "string" as const,
+              nullable: true,
+              format: "date-time",
+              description: "ISO 8601 timestamp",
             },
           },
-        },
-        response: {
-          200: {
-            type: "object",
-            description: "Design generation completed successfully",
-            properties: {
-              id: {
-                type: "string",
-                description: "Firestore generation record ID",
-              },
-              outputImageUrl: {
-                type: "string",
-                format: "uri",
-                description: "URL of the AI-generated design image",
-              },
-              provider: {
-                type: "string",
-                enum: ["replicate", "falai"],
-                description: "AI provider that generated the image",
-              },
-              durationMs: {
-                type: "number",
-                description: "Generation duration in milliseconds",
-              },
-            },
-            required: ["id", "outputImageUrl", "provider", "durationMs"],
-          },
-          400: {
-            ...errorResponse,
-            description: "Validation error (invalid body or imageUrl scheme)",
-          },
-          401: {
-            ...errorResponse,
-            description: "Missing, invalid, or expired Firebase token",
-          },
-          403: {
-            ...errorResponse,
-            description: "Invalid User-Agent header (must be HomeDecorAI/*)",
-          },
-          429: {
-            type: "object",
-            description: "Rate limit exceeded",
-            properties: {
-              error: { type: "string" },
-              message: { type: "string" },
-              retryAfterMs: {
-                type: "number",
-                description: "Milliseconds until the rate limit resets",
-              },
-            },
-            required: ["error", "message"],
-          },
-          500: {
-            ...errorResponse,
-            description: "AI generation failed (timeout or provider error)",
-          },
+          required: [
+            "id",
+            "toolType",
+            "inputImageUrl",
+            "status",
+            "provider",
+          ] as const,
         },
       },
-      preHandler: [
-        app.authenticate,
-        createRateLimitPreHandler("interiorDesign"),
-      ],
     },
-    createInteriorDesign,
-  );
+    required: ["generations"] as const,
+  },
+  400: { ...errorResponse, description: "Invalid limit parameter" },
+  401: {
+    ...errorResponse,
+    description: "Missing, invalid, or expired Firebase token",
+  },
+  403: { ...errorResponse, description: "Invalid User-Agent header" },
+  500: { ...errorResponse, description: "Failed to fetch generation history" },
+};
+
+// ─── Routes ────────────────────────────────────────────────────────────────
+
+const designRoutes: FastifyPluginAsync = async (app) => {
+  // Registry-driven enqueue routes. Adding a new tool is a config-only change:
+  // register it in `TOOL_TYPES` and this loop produces the route.
+  //
+  // Widened iteration type: `Object.values(TOOL_TYPES)` narrows to the first
+  // entry's parameter shape, but at the route layer we don't need per-tool
+  // param types — the handler closure carries them internally.
+  const tools: ReadonlyArray<ToolTypeConfig<unknown>> = Object.values(
+    TOOL_TYPES,
+  ) as unknown as ReadonlyArray<ToolTypeConfig<unknown>>;
+  for (const tool of tools) {
+    app.post(
+      tool.routePath,
+      {
+        schema: {
+          tags: ["Design"],
+          summary: tool.summary,
+          description: tool.description,
+          security: [{ bearerAuth: [] }, { apiKey: [] }],
+          body: tool.bodyJsonSchema,
+          response: enqueueResponseSchemas,
+        },
+        preHandler: [
+          app.authenticate,
+          createRateLimitPreHandler(tool.rateLimitKey),
+        ],
+      },
+      makeCreateGenerationHandler(tool),
+    );
+  }
 
   app.get(
     "/history",
@@ -153,7 +195,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         tags: ["Design"],
         summary: "Get generation history",
         description:
-          "Returns the authenticated user's past interior design generations, ordered by creation date (newest first).",
+          "Returns the authenticated user's past generations across all tools, ordered by creation date (newest first).",
         security: [{ bearerAuth: [] }, { apiKey: [] }],
         querystring: {
           type: "object",
@@ -167,54 +209,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
             },
           },
         },
-        response: {
-          200: {
-            type: "object",
-            description: "Generation history retrieved successfully",
-            properties: {
-              generations: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: { type: "string", description: "Generation record ID" },
-                    toolType: { type: "string", description: "Tool type used" },
-                    roomType: { type: "string", nullable: true, description: "Room type" },
-                    designStyle: { type: "string", nullable: true, description: "Design style" },
-                    inputImageUrl: { type: "string", description: "Original room photo URL" },
-                    outputImageUrl: { type: "string", nullable: true, description: "Generated design URL" },
-                    status: {
-                      type: "string",
-                      enum: ["pending", "completed", "failed"],
-                      description: "Generation status",
-                    },
-                    provider: { type: "string", description: "AI provider used" },
-                    durationMs: { type: "number", nullable: true, description: "Generation duration in ms" },
-                    createdAt: { type: "string", nullable: true, format: "date-time", description: "ISO 8601 timestamp" },
-                  },
-                  required: ["id", "toolType", "inputImageUrl", "status", "provider"],
-                },
-              },
-            },
-            required: ["generations"],
-          },
-          400: {
-            ...errorResponse,
-            description: "Invalid limit parameter",
-          },
-          401: {
-            ...errorResponse,
-            description: "Missing, invalid, or expired Firebase token",
-          },
-          403: {
-            ...errorResponse,
-            description: "Invalid User-Agent header",
-          },
-          500: {
-            ...errorResponse,
-            description: "Failed to fetch generation history",
-          },
-        },
+        response: historyResponseSchemas,
       },
       preHandler: [app.authenticate],
     },

@@ -28,31 +28,6 @@ designCircuitBreaker.onTransition = (name, from, to, stats) => {
   }
 };
 
-// Periodic circuit breaker status log (every 30 seconds, only when not healthy)
-const statusInterval = setInterval(() => {
-  const state = designCircuitBreaker.getState();
-  if (state !== CircuitState.CLOSED) {
-    const provider = designCircuitBreaker.shouldUseFallback()
-      ? "fal.ai"
-      : "replicate";
-    logger.info(
-      `Circuit breaker: ${provider} (${state})`,
-    );
-  }
-}, 30_000);
-
-// Periodic Slack status report (every 30 minutes) when circuit is not CLOSED
-const slackStatusInterval = setInterval(() => {
-  const state = designCircuitBreaker.getState();
-  if (state !== CircuitState.CLOSED) {
-    notifyCircuitStatus(
-      designCircuitBreaker.name,
-      state,
-      designCircuitBreaker.getStats(),
-    );
-  }
-}, 30 * 60 * 1000);
-
 // ─── Server ─────────────────────────────────────────────────────────────────
 
 const port = env.PORT;
@@ -75,6 +50,30 @@ try {
   );
   process.exit(1);
 }
+
+// Start intervals only after validation passes
+const statusInterval = setInterval(() => {
+  const state = designCircuitBreaker.getState();
+  if (state !== CircuitState.CLOSED) {
+    const provider = designCircuitBreaker.shouldUseFallback()
+      ? "fal.ai"
+      : "replicate";
+    logger.info(
+      `Circuit breaker: ${provider} (${state})`,
+    );
+  }
+}, 30_000);
+
+const slackStatusInterval = setInterval(() => {
+  const state = designCircuitBreaker.getState();
+  if (state !== CircuitState.CLOSED) {
+    notifyCircuitStatus(
+      designCircuitBreaker.name,
+      state,
+      designCircuitBreaker.getStats(),
+    );
+  }
+}, 30 * 60 * 1000);
 
 // Cleanup on shutdown
 app.addHook("onClose", async () => {

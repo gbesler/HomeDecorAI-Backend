@@ -1,12 +1,11 @@
 import { logger } from "./logger.js";
+import type { ProviderId } from "./ai-providers/types.js";
 
 export enum CircuitState {
   CLOSED = "CLOSED",
   OPEN = "OPEN",
   HALF_OPEN = "HALF_OPEN",
 }
-
-export type Provider = "replicate" | "falai";
 
 interface RequestRecord {
   success: boolean;
@@ -65,7 +64,7 @@ export class CircuitBreaker {
   }
 
   /** Returns the provider to use based on current circuit state */
-  getProvider(): Provider {
+  getProvider(): ProviderId {
     return this.state === CircuitState.CLOSED ? "replicate" : "falai";
   }
 

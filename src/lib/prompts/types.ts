@@ -5,7 +5,12 @@
  * stay in sync with the public API enum values.
  */
 
+import type { BuildingType } from "../../schemas/generated/types/buildingType.js";
 import type { DesignStyle } from "../../schemas/generated/types/designStyle.js";
+import type { ExteriorColorPalette } from "../../schemas/generated/types/exteriorColorPalette.js";
+import type { GardenColorPalette } from "../../schemas/generated/types/gardenColorPalette.js";
+import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
+import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
 import type { RoomType } from "../../schemas/generated/types/roomType.js";
 
 // ─── Mode enums ─────────────────────────────────────────────────────────────
@@ -146,3 +151,65 @@ export type RoomsDict = Partial<Record<RoomType, RoomEntry>>;
 
 /** Per-room Christmas recipe dictionary. Only whitelist rooms are keyed. */
 export type ChristmasRecipesDict = Partial<Record<RoomType, ChristmasRecipe>>;
+
+// ─── Exterior tool entries ─────────────────────────────────────────────────
+
+/**
+ * Per-building-type compositional hints. Feeds the exterior builder's action
+ * directive and building-focus layer with type-specific massing vocabulary.
+ */
+export interface BuildingEntry {
+  /** Human-readable type label used in the action directive. */
+  label: string;
+  /** Short massing descriptor (e.g., "low horizontal mass", "tall block"). */
+  massingDescriptor: string;
+  /** 2-3 signature features that define this building type visually. */
+  signatureFeatures: string[];
+}
+
+export type BuildingTypesDict = Partial<Record<BuildingType, BuildingEntry>>;
+
+// ─── Garden tool entries ───────────────────────────────────────────────────
+
+/**
+ * Per-garden-style dictionary entry. Shares the same shape as `StyleEntry`
+ * so the interior validator (`checkStyleEntry`) can be reused for garden
+ * styles without duplication.
+ */
+export type GardenStyleEntry = StyleEntry;
+
+export type GardenStylesDict = Partial<Record<GardenStyle, GardenStyleEntry>>;
+
+/**
+ * Per-garden-item dictionary entry. Provides the human-readable phrase used
+ * in the items layer of the garden prompt.
+ */
+export interface GardenItemEntry {
+  /** Phrase injected into the items list (e.g., "a stone fire pit"). */
+  phrase: string;
+  /** Optional placement hint (e.g., "centered in a gravel clearing"). */
+  placementHint?: string;
+}
+
+export type GardenItemsDict = Partial<Record<GardenItem, GardenItemEntry>>;
+
+// ─── Color palette catalog (shared between exterior and garden) ────────────
+
+/**
+ * A color palette entry. Keyed by the FE palette id; `surpriseMe` is
+ * tolerated with an empty swatch array to signal "no override — let the
+ * style drive the palette".
+ */
+export interface ColorPaletteEntry {
+  /** 3-5 concrete color names. Empty for the `surpriseMe` sentinel. */
+  swatch: string[];
+  /** 1-2 word mood descriptor injected alongside the palette. */
+  mood: string;
+}
+
+export type ExteriorColorPalettesDict = Partial<
+  Record<ExteriorColorPalette, ColorPaletteEntry>
+>;
+export type GardenColorPalettesDict = Partial<
+  Record<GardenColorPalette, ColorPaletteEntry>
+>;

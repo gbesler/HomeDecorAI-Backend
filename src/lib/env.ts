@@ -27,6 +27,16 @@ const envSchema = z.object({
       }
       return parsed;
     }),
+  AWS_S3_BUCKET: z.string().min(1),
+  AWS_S3_REGION: z.string().min(1),
+  AWS_CLOUDFRONT_HOST: z.string().min(1).optional(),
+  // Cognito Identity Pool shared with iOS. Backend federates the same
+  // Firebase ID token (`securetoken.google.com/<projectId>`) that iOS uses,
+  // so backend writes land on the same Cognito Identity ID as iOS uploads.
+  // No developer provider, no per-backend role mapping. The token itself is
+  // not minted on the backend — it arrives through the async-pipeline task
+  // payload, produced by the iOS client at enqueue time.
+  COGNITO_IDENTITY_POOL_ID: z.string().regex(/^[a-z0-9-]+:[0-9a-f-]+$/),
   SWAGGER_API_KEY: z.string().min(1).optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),
   LOG_LEVEL: z.string().optional().default("info"),
@@ -44,6 +54,37 @@ const envSchema = z.object({
     .enum(["strict", "degraded"])
     .optional()
     .default("strict"),
+  // ─── Async generation pipeline (Cloud Tasks + FCM) ───────────────────────
+  GCP_PROJECT_ID: z.string().min(1),
+  GCP_LOCATION: z.string().min(1).optional().default("us-central1"),
+  GCP_QUEUE_NAME: z.string().min(1).optional().default("design-generation"),
+  GCP_SERVICE_ACCOUNT_EMAIL: z.string().email(),
+  // Public URL of this backend, used by Cloud Tasks as the HTTP target.
+  // Example: https://homedecorai-backend-pv3k.onrender.com
+  BACKEND_PUBLIC_URL: z.string().url(),
+  // OIDC audience the internal endpoint validates tokens against.
+  // Typically equals BACKEND_PUBLIC_URL + "/internal/process-generation".
+  INTERNAL_TASK_AUDIENCE: z.string().url(),
+  // Hard kill-switch for FCM. Useful during staging/dev.
+  FCM_ENABLED: z
+    .enum(["true", "false"])
+    .optional()
+    .default("true")
+    .transform((v) => v === "true"),
+  // Comma-separated host allowlist for AI provider output URLs that the
+  // backend will fetch and upload to S3. SSRF guard — any host outside
+  // this list is rejected before any network call is made.
+  ALLOWED_AI_DOWNLOAD_HOSTS: z
+    .string()
+    .min(1)
+    .optional()
+    .default("replicate.delivery,pbxt.replicate.delivery,fal.media,v3.fal.media,storage.googleapis.com")
+    .transform((raw) =>
+      raw
+        .split(",")
+        .map((h) => h.trim().toLowerCase())
+        .filter((h) => h.length > 0),
+    ),
 });
 
 const parsed = envSchema.safeParse(process.env);
