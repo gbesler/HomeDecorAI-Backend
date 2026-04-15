@@ -43,4 +43,12 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Floor-restyle mirrors paint-walls cost profile: texture mode is
+  // single-image; customStyle mode may add a reference image. Same envelope
+  // as the rest pending usage telemetry.
+  floorRestyle: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
 };

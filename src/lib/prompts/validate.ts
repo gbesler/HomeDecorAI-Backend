@@ -17,6 +17,7 @@
 import { BuildingType } from "../../schemas/generated/types/buildingType.js";
 import { DesignStyle } from "../../schemas/generated/types/designStyle.js";
 import { ExteriorColorPalette } from "../../schemas/generated/types/exteriorColorPalette.js";
+import { FloorTexture } from "../../schemas/generated/types/floorTexture.js";
 import { GardenColorPalette } from "../../schemas/generated/types/gardenColorPalette.js";
 import { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
@@ -25,6 +26,7 @@ import { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 import { buildingTypes } from "./dictionaries/building-types.js";
 import { exteriorPalettes, gardenPalettes } from "./dictionaries/color-palettes.js";
 import { designStyles } from "./dictionaries/design-styles.js";
+import { floorTextures } from "./dictionaries/floor-textures.js";
 import { gardenItems } from "./dictionaries/garden-items.js";
 import { gardenStyles } from "./dictionaries/garden-styles.js";
 import { rooms } from "./dictionaries/rooms.js";
@@ -33,6 +35,7 @@ import { logger } from "../logger.js";
 import type {
   BuildingEntry,
   ColorPaletteEntry,
+  FloorTextureEntry,
   GardenItemEntry,
   RoomEntry,
   StyleEntry,
@@ -106,6 +109,14 @@ export function validateDictionaries(options: ValidationOptions): void {
       Object.values(WallTexture),
       wallTextures,
       checkWallTextureEntry,
+    ),
+  );
+  failures.push(
+    ...runValidator(
+      "floorTextures",
+      Object.values(FloorTexture),
+      floorTextures,
+      checkFloorTextureEntry,
     ),
   );
 
@@ -215,6 +226,22 @@ function checkGardenItemEntry(
 function checkWallTextureEntry(
   prefix: string,
   entry: WallTextureEntry,
+): string[] {
+  const failures: string[] = [];
+  if (!entry.label) failures.push(`${prefix}.label is empty`);
+  if (!entry.description) failures.push(`${prefix}.description is empty`);
+  if (!entry.descriptors || entry.descriptors.length < 2) {
+    failures.push(`${prefix}.descriptors must have >= 2 entries`);
+  }
+  if (!entry.lightingCharacter) {
+    failures.push(`${prefix}.lightingCharacter is empty`);
+  }
+  return failures;
+}
+
+function checkFloorTextureEntry(
+  prefix: string,
+  entry: FloorTextureEntry,
 ): string[] {
   const failures: string[] = [];
   if (!entry.label) failures.push(`${prefix}.label is empty`);

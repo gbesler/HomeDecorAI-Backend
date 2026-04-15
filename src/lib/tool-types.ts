@@ -15,6 +15,10 @@ import {
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
 import {
+  buildFloorRestylePrompt,
+  type FloorRestyleParams,
+} from "./prompts/tools/floor-restyle.js";
+import {
   buildPaintWallsPrompt,
   type PaintWallsParams,
 } from "./prompts/tools/paint-walls.js";
@@ -25,6 +29,7 @@ import {
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateExteriorDesignBody,
+  CreateFloorRestyleBody,
   CreateGardenDesignBody,
   CreateInteriorDesignBody,
   CreatePaintWallsBody,
@@ -37,6 +42,7 @@ export type {
   GardenParams,
   ReferenceStyleParams,
   PaintWallsParams,
+  FloorRestyleParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -216,6 +222,25 @@ const EXTERIOR_PALETTES = [
   "oceanBreeze",
   "monochromeElegance",
   "desertSand",
+] as const;
+
+const FLOOR_TEXTURES = [
+  "oakWood",
+  "walnut",
+  "bamboo",
+  "cherry",
+  "whiteMarble",
+  "travertine",
+  "greenMarble",
+  "beigeMarble",
+  "patternTile",
+  "checkerboard",
+  "hexagon",
+  "terracotta",
+  "naturalPlank",
+  "whitewashedPlank",
+  "darkPlank",
+  "herringbone",
 ] as const;
 
 const WALL_TEXTURES = [
@@ -428,6 +453,50 @@ const paintWallsBodyJsonSchema = {
   },
 };
 
+const floorRestyleBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "floorStyleMode"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo whose flooring should be restyled (http or https)",
+    },
+    floorStyleMode: {
+      type: "string" as const,
+      enum: ["texture", "customStyle"] as const,
+      description:
+        "Two modes: `texture` picks from a 16-item preset list (textureId required); `customStyle` uses a freeform user prompt (customPrompt required) and an optional reference image.",
+    },
+    textureId: {
+      type: "string" as const,
+      enum: FLOOR_TEXTURES,
+      description:
+        "Required when floorStyleMode is 'texture'. One of the 16 preset floor finishes.",
+    },
+    customPrompt: {
+      type: "string" as const,
+      minLength: 1,
+      maxLength: 500,
+      description:
+        "Required when floorStyleMode is 'customStyle'. Freeform description of the desired floor finish.",
+    },
+    referenceImageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Optional; only accepted in customStyle mode. Public URL of a reference image whose floor finish should be emulated.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 const referenceStyleBodyJsonSchema = {
   type: "object" as const,
   required: ["roomImageUrl", "referenceImageUrl", "spaceType"] as const,
@@ -551,6 +620,33 @@ export const TOOL_TYPES = {
     optionalImageUrlFields: ["referenceImageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreatePaintWallsBody>,
+    PromptResult
+  >,
+
+  floorRestyle: {
+    toolKey: "floorRestyle",
+    routePath: "/floor-restyle",
+    rateLimitKey: "floorRestyle",
+    models: {
+      // Same stack as paint-walls: Pruna primary (multi-image `images[]` +
+      // `reference_image` for customStyle with reference), Klein 9B fallback.
+      // Floor surfaces are planar like walls; the same guidance profile
+      // (faithful) + structural-preservation primitive apply.
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateFloorRestyleBody,
+    bodyJsonSchema: floorRestyleBodyJsonSchema,
+    summary: "Enqueue a floor-restyle transformation",
+    description:
+      "Restyles only the flooring of a room while preserving furniture, walls, ceiling, fixtures, and decor. Two modes: `texture` picks from 16 presets across four categories (wood: oakWood/walnut/bamboo/cherry; marble: whiteMarble/travertine/greenMarble/beigeMarble; porcelain: patternTile/checkerboard/hexagon/terracotta; planks: naturalPlank/whitewashedPlank/darkPlank/herringbone). `customStyle` accepts a freeform prompt plus an optional reference image whose floor finish the AI should emulate. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildFloorRestylePrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateFloorRestyleBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+    optionalImageUrlFields: ["referenceImageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateFloorRestyleBody>,
     PromptResult
   >,
 
