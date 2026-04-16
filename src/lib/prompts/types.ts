@@ -14,6 +14,7 @@ import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
 import type { PatioStyle } from "../../schemas/generated/types/patioStyle.js";
 import type { PoolStyle } from "../../schemas/generated/types/poolStyle.js";
+import type { OutdoorLightingStyle } from "../../schemas/generated/types/outdoorLightingStyle.js";
 import type { RoomType } from "../../schemas/generated/types/roomType.js";
 import type { FloorTexture } from "../../schemas/generated/types/floorTexture.js";
 import type { WallTexture } from "../../schemas/generated/types/wallTexture.js";
@@ -200,6 +201,16 @@ export type PatioStylesDict = Partial<Record<PatioStyle, PatioStyleEntry>>;
 export type PoolStyleEntry = StyleEntry;
 
 export type PoolStylesDict = Partial<Record<PoolStyle, PoolStyleEntry>>;
+
+/**
+ * Per-outdoor-lighting-style dictionary entry. Same shape reuse as garden/
+ * patio/pool so `checkStyleEntry` validates all four without duplication.
+ */
+export type OutdoorLightingStyleEntry = StyleEntry;
+
+export type OutdoorLightingStylesDict = Partial<
+  Record<OutdoorLightingStyle, OutdoorLightingStyleEntry>
+>;
 
 /**
  * Per-garden-item dictionary entry. Provides the human-readable phrase used

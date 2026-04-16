@@ -18,6 +18,8 @@ export * from "./buildingType";
 export * from "./gardenStyle";
 export * from "./gardenItem";
 export * from "./patioStyle";
+export * from "./poolStyle";
+export * from "./outdoorLightingStyle";
 export * from "./exteriorColorMode";
 export * from "./gardenColorMode";
 export * from "./exteriorColorPalette";

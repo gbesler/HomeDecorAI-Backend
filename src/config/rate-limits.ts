@@ -41,6 +41,13 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Outdoor lighting mirrors patio/pool: single-style overlay on top of a
+  // single input image. Same envelope pending usage telemetry.
+  outdoorLightingDesign: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
   // Reference-style consumes two uploaded images and routes through more
   // expensive multi-reference models (fal-ai/flux-2/edit at ~$0.036/run vs
   // Klein at ~$0.012). Start with the same envelope as the other tools, but

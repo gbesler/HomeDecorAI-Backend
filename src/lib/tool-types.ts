@@ -19,6 +19,10 @@ import {
   type PoolParams,
 } from "./prompts/tools/pool-design.js";
 import {
+  buildOutdoorLightingPrompt,
+  type OutdoorLightingParams,
+} from "./prompts/tools/outdoor-lighting-design.js";
+import {
   buildInteriorPrompt,
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
@@ -57,6 +61,7 @@ import {
   CreatePaintWallsBody,
   CreatePatioDesignBody,
   CreatePoolDesignBody,
+  CreateOutdoorLightingDesignBody,
   CreateReferenceStyleBody,
   CreateVirtualStagingBody,
 } from "../schemas/generated/api.js";
@@ -67,6 +72,7 @@ export type {
   GardenParams,
   PatioParams,
   PoolParams,
+  OutdoorLightingParams,
   ReferenceStyleParams,
   PaintWallsParams,
   FloorRestyleParams,
@@ -252,6 +258,19 @@ const POOL_STYLES = [
   "grotto",
   "beachEntry",
   "mosaicTile",
+] as const;
+
+const OUTDOOR_LIGHTING_STYLES = [
+  "warmAmbient",
+  "stringLights",
+  "pathwayLighting",
+  "uplighting",
+  "lantern",
+  "modernArchitectural",
+  "moody",
+  "festiveHoliday",
+  "poolside",
+  "torchlight",
 ] as const;
 
 const GARDEN_ITEMS_LIST = [
@@ -505,6 +524,30 @@ const poolBodyJsonSchema = {
       type: "string" as const,
       enum: POOL_STYLES,
       description: "Target pool style for the transformation",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
+const outdoorLightingBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "lightingStyle"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the outdoor photo to relight (must use http or https scheme)",
+    },
+    lightingStyle: {
+      type: "string" as const,
+      enum: OUTDOOR_LIGHTING_STYLES,
+      description: "Target outdoor lighting style for the transformation",
     },
     language: {
       type: "string" as const,
@@ -876,6 +919,28 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreatePoolDesignBody>,
+    PromptResult
+  >,
+
+  outdoorLightingDesign: {
+    toolKey: "outdoorLightingDesign",
+    routePath: "/outdoor-lighting",
+    rateLimitKey: "outdoorLightingDesign",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateOutdoorLightingDesignBody,
+    bodyJsonSchema: outdoorLightingBodyJsonSchema,
+    summary: "Enqueue an outdoor lighting transformation",
+    description:
+      "Accepts an outdoor photo URL and a lighting style. Creates a generation record and enqueues an async Cloud Tasks job with the same async pipeline and FCM notification as the other tools. Returns 202 with a generationId.",
+    buildPrompt: buildOutdoorLightingPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateOutdoorLightingDesignBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateOutdoorLightingDesignBody>,
     PromptResult
   >,
 
