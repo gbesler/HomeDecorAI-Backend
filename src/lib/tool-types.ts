@@ -34,10 +34,15 @@ import {
   buildCleanOrganizePrompt,
   type CleanOrganizeParams,
 } from "./prompts/tools/clean-organize.js";
+import {
+  buildExteriorPaintingPrompt,
+  type ExteriorPaintingParams,
+} from "./prompts/tools/exterior-painting.js";
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateCleanOrganizeBody,
   CreateExteriorDesignBody,
+  CreateExteriorPaintingBody,
   CreateFloorRestyleBody,
   CreateGardenDesignBody,
   CreateInteriorDesignBody,
@@ -55,6 +60,7 @@ export type {
   FloorRestyleParams,
   VirtualStagingParams,
   CleanOrganizeParams,
+  ExteriorPaintingParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -554,6 +560,50 @@ const STAGING_PALETTES = [
   "desertSand",
 ] as const;
 
+const EXTERIOR_MATERIALS = [
+  "keepOriginal",
+  "texturedBrick",
+  "vinylSiding",
+  "smoothStucco",
+  "naturalStone",
+  "woodCladding",
+  "metalPanel",
+  "fiberCement",
+  "limestoneFacade",
+  "concreteFacade",
+] as const;
+
+const exteriorPaintingBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "colorPalette", "material"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the building photo to repaint (must use http or https scheme)",
+    },
+    colorPalette: {
+      type: "string" as const,
+      enum: EXTERIOR_PALETTES,
+      description:
+        "Color palette id. `surpriseMe` lets the model pick a balanced palette.",
+    },
+    material: {
+      type: "string" as const,
+      enum: EXTERIOR_MATERIALS,
+      description:
+        "Exterior cladding material. `keepOriginal` repaints without swapping the material; any other value replaces the cladding with the named material.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 const DECLUTTER_LEVELS = ["full", "light"] as const;
 
 const cleanOrganizeBodyJsonSchema = {
@@ -796,6 +846,32 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateVirtualStagingBody>,
+    PromptResult
+  >,
+
+  exteriorPainting: {
+    toolKey: "exteriorPainting",
+    routePath: "/exterior-painting",
+    rateLimitKey: "exteriorPainting",
+    models: {
+      // Surface-level edit: same Pruna/Klein stack as paint-walls and
+      // floor-restyle. Pruna's faithful-band I2I preserves building massing
+      // well for color-only and material-swap edits; Klein 9B is the
+      // proven fallback with explicit guidance-scale support.
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateExteriorPaintingBody,
+    bodyJsonSchema: exteriorPaintingBodyJsonSchema,
+    summary: "Enqueue an exterior painting transformation",
+    description:
+      "Repaints a building's exterior surfaces with a chosen color palette and optionally swaps the cladding material. Narrower than Exterior Design — no building type, no design style, no color mode. Two modes: `material: keepOriginal` repaints the existing material; any other material id replaces the cladding with the selected material finished in the chosen palette. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildExteriorPaintingPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateExteriorPaintingBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateExteriorPaintingBody>,
     PromptResult
   >,
 

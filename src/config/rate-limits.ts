@@ -65,4 +65,11 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Exterior painting is single-image input on the same Pruna/Klein stack
+  // (surface / material edit). Same envelope pending usage telemetry.
+  exteriorPainting: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
 };

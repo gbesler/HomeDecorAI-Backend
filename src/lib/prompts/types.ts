@@ -8,6 +8,7 @@
 import type { BuildingType } from "../../schemas/generated/types/buildingType.js";
 import type { DesignStyle } from "../../schemas/generated/types/designStyle.js";
 import type { ExteriorColorPalette } from "../../schemas/generated/types/exteriorColorPalette.js";
+import type { ExteriorMaterial } from "../../schemas/generated/types/exteriorMaterial.js";
 import type { GardenColorPalette } from "../../schemas/generated/types/gardenColorPalette.js";
 import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
@@ -267,3 +268,27 @@ export interface FloorTextureEntry {
 }
 
 export type FloorTexturesDict = Partial<Record<FloorTexture, FloorTextureEntry>>;
+
+// ─── Exterior-painting tool entries ────────────────────────────────────────
+
+/**
+ * A single exterior cladding material preset (9 of the 10 ids the iOS
+ * wizard exposes — `keepOriginal` is a sentinel handled inline in the
+ * builder, not dictionary-driven).
+ *
+ * Feeds the material-swap branch of the exterior-painting prompt builder.
+ * Each entry contributes a short material descriptor that layers on top
+ * of the chosen color palette.
+ */
+export interface ExteriorMaterialEntry {
+  /** Human-readable label used inline in the prompt's action directive. */
+  label: string;
+  /** One-sentence description of the material's appearance. */
+  description: string;
+  /** 2-3 material descriptor tokens (e.g., "hand-laid", "matte finish"). */
+  descriptors: string[];
+}
+
+export type ExteriorMaterialsDict = Partial<
+  Record<ExteriorMaterial, ExteriorMaterialEntry>
+>;
