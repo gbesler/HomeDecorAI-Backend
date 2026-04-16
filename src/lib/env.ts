@@ -27,6 +27,37 @@ const envSchema = z.object({
       }
       return parsed;
     }),
+  // GCP service account used for Cloud Tasks (enqueue auth + OIDC token
+  // minting for the internal processor callback). Base64-encoded JSON, same
+  // shape as the Firebase key. The embedded `project_id` is the single
+  // source of truth for the Cloud Tasks queue project — no separate
+  // GCP_PROJECT_ID env var required. Optional while the /sync endpoints are
+  // the only code path in use; required before async is re-enabled.
+  GOOGLE_APPLICATION_CREDENTIALS: z
+    .string()
+    .min(1)
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      let parsed: Record<string, unknown>;
+      try {
+        const decoded = Buffer.from(val, "base64").toString("utf-8");
+        parsed = JSON.parse(decoded) as Record<string, unknown>;
+      } catch {
+        throw new Error(
+          "GOOGLE_APPLICATION_CREDENTIALS must be a valid base64-encoded JSON string",
+        );
+      }
+      const required = ["project_id", "private_key", "client_email"] as const;
+      for (const field of required) {
+        if (typeof parsed[field] !== "string" || parsed[field] === "") {
+          throw new Error(
+            `GOOGLE_APPLICATION_CREDENTIALS is missing required field: ${field}`,
+          );
+        }
+      }
+      return parsed;
+    }),
   AWS_S3_BUCKET: z.string().min(1),
   AWS_S3_REGION: z.string().min(1),
   AWS_CLOUDFRONT_HOST: z.string().min(1).optional(),
@@ -53,10 +84,13 @@ const envSchema = z.object({
     .optional()
     .default("strict"),
   // ─── Async generation pipeline (Cloud Tasks + FCM) ───────────────────────
-  // TEMPORARY: These four variables are optional while the /sync tool
-  // endpoints are used for manual testing. The async Cloud Tasks path will
-  // throw at runtime if invoked without them set — see `enqueueGenerationTask`
-  // and `verifyCloudTask`. Make them required again before re-enabling async.
+  // TEMPORARY: These variables are optional while the /sync tool endpoints
+  // are used for manual testing. The async Cloud Tasks path throws at
+  // runtime if invoked without them — see `enqueueGenerationTask` and
+  // `verifyCloudTask`. Make them required again before re-enabling async.
+  // GCP_PROJECT_ID must match GOOGLE_APPLICATION_CREDENTIALS.project_id —
+  // enforced at the entry of requireAsyncEnv so a mismatch fails fast
+  // instead of producing opaque Cloud Tasks auth errors.
   GCP_PROJECT_ID: z.string().min(1).optional(),
   GCP_LOCATION: z.string().min(1).optional().default("us-central1"),
   GCP_QUEUE_NAME: z.string().min(1).optional().default("design-generation"),

@@ -18,7 +18,7 @@ import { logger } from "./logger.js";
 
 // Keyed by projectId so a changed environment (hot reload, credentials
 // rotation, test harness) cannot serve a stale client to the wrong project.
-// In production GCP_PROJECT_ID is static and the map stays at size 1.
+// In production the credentials are static and the map stays at size 1.
 const clientCache = new Map<string, CloudTasksClient>();
 
 /**
@@ -26,6 +26,12 @@ const clientCache = new Map<string, CloudTasksClient>();
  * of `enqueueGenerationTask`. While the temporary /sync endpoints are in use
  * these env vars are optional — invoking the async path without them is a
  * configuration error surfaced here rather than hiding as a null reference.
+ *
+ * Also fails fast when `GCP_PROJECT_ID` disagrees with the `project_id`
+ * embedded in `GOOGLE_APPLICATION_CREDENTIALS`. Without this check the
+ * Cloud Tasks client authenticates against the credentials' project while
+ * `queuePath()` builds a resource name for `GCP_PROJECT_ID` — the resulting
+ * PERMISSION_DENIED is opaque and hard to attribute to the env mismatch.
  */
 function requireAsyncEnv(): {
   projectId: string;
@@ -38,12 +44,26 @@ function requireAsyncEnv(): {
   if (!env.GCP_SERVICE_ACCOUNT_EMAIL) missing.push("GCP_SERVICE_ACCOUNT_EMAIL");
   if (!env.BACKEND_PUBLIC_URL) missing.push("BACKEND_PUBLIC_URL");
   if (!env.INTERNAL_TASK_AUDIENCE) missing.push("INTERNAL_TASK_AUDIENCE");
+  if (!env.GOOGLE_APPLICATION_CREDENTIALS)
+    missing.push("GOOGLE_APPLICATION_CREDENTIALS");
   if (missing.length > 0) {
     throw new Error(
       `Async Cloud Tasks pipeline is not configured. Missing env: ${missing.join(", ")}. ` +
         `Use the /sync endpoints for testing, or set these to enable async.`,
     );
   }
+
+  const credsProjectId = env.GOOGLE_APPLICATION_CREDENTIALS![
+    "project_id"
+  ] as string;
+  if (credsProjectId !== env.GCP_PROJECT_ID) {
+    throw new Error(
+      `GCP_PROJECT_ID ("${env.GCP_PROJECT_ID}") does not match ` +
+        `GOOGLE_APPLICATION_CREDENTIALS.project_id ("${credsProjectId}"). ` +
+        `Align the two env vars and restart — queue writes will PERMISSION_DENIED otherwise.`,
+    );
+  }
+
   return {
     projectId: env.GCP_PROJECT_ID!,
     serviceAccountEmail: env.GCP_SERVICE_ACCOUNT_EMAIL!,
@@ -56,14 +76,14 @@ function getClient(projectId: string): CloudTasksClient {
   const cached = clientCache.get(projectId);
   if (cached) return cached;
 
-  // Authenticate with the same Firebase service account credentials so that
-  // staging/prod deployments don't need a separate credential file — the
-  // service account just needs the cloudtasks.enqueuer + iam.serviceAccountUser
-  // roles in addition to its existing Firebase roles.
+  // Use the GCP service account from GOOGLE_APPLICATION_CREDENTIALS. The
+  // credential JSON is decoded + validated at process boot in env.ts, so we
+  // can read the parsed fields directly here.
+  const creds = env.GOOGLE_APPLICATION_CREDENTIALS!;
   const client = new CloudTasksClient({
     credentials: {
-      client_email: env.FIREBASE_SERVICE_ACCOUNT_KEY["client_email"] as string,
-      private_key: env.FIREBASE_SERVICE_ACCOUNT_KEY["private_key"] as string,
+      client_email: creds["client_email"] as string,
+      private_key: creds["private_key"] as string,
     },
     projectId,
   });
