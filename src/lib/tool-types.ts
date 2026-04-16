@@ -30,8 +30,13 @@ import {
   buildVirtualStagingPrompt,
   type VirtualStagingParams,
 } from "./prompts/tools/virtual-staging.js";
+import {
+  buildCleanOrganizePrompt,
+  type CleanOrganizeParams,
+} from "./prompts/tools/clean-organize.js";
 import type { PromptResult } from "./prompts/types.js";
 import {
+  CreateCleanOrganizeBody,
   CreateExteriorDesignBody,
   CreateFloorRestyleBody,
   CreateGardenDesignBody,
@@ -49,6 +54,7 @@ export type {
   PaintWallsParams,
   FloorRestyleParams,
   VirtualStagingParams,
+  CleanOrganizeParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -548,6 +554,33 @@ const STAGING_PALETTES = [
   "desertSand",
 ] as const;
 
+const DECLUTTER_LEVELS = ["full", "light"] as const;
+
+const cleanOrganizeBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "declutterLevel"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo to declutter (must use http or https scheme)",
+    },
+    declutterLevel: {
+      type: "string" as const,
+      enum: DECLUTTER_LEVELS,
+      description:
+        "`full` performs a complete tidy-up; `light` leaves some lived-in character intact.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 const virtualStagingBodyJsonSchema = {
   type: "object" as const,
   required: [
@@ -763,6 +796,31 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateVirtualStagingBody>,
+    PromptResult
+  >,
+
+  cleanOrganize: {
+    toolKey: "cleanOrganize",
+    routePath: "/clean-organize",
+    rateLimitKey: "cleanOrganize",
+    models: {
+      // Subtractive, surface-level edit: same stack as paint-walls and
+      // floor-restyle. Pruna's faithful-band I2I preserves geometry well,
+      // Klein 9B is a proven fallback.
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateCleanOrganizeBody,
+    bodyJsonSchema: cleanOrganizeBodyJsonSchema,
+    summary: "Enqueue a clean & organize transformation",
+    description:
+      "Declutters and tidies a room while preserving every other aspect (geometry, furniture, materials, colors, style). Two levels: `full` performs a complete tidy-up with every surface cleared and items neatly organized; `light` reduces clutter moderately while keeping a lived-in feel. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildCleanOrganizePrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateCleanOrganizeBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateCleanOrganizeBody>,
     PromptResult
   >,
 } as const;

@@ -456,6 +456,26 @@ export const CreateVirtualStagingBody = zod.object({
   language: zod.enum(["tr", "en"]).optional(),
 });
 
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a room photo URL + declutter level. Mirrors the iOS Clean &
+ * Organize wizard (CleanOrganizeWizardView, DeclutterLevel). No style,
+ * palette, or room type — the tool removes clutter and organizes existing
+ * items while preserving every other aspect of the room (geometry,
+ * furniture, style, materials, colors).
+ *
+ * @summary Generate a clean & organize transformation
+ */
+export const CreateCleanOrganizeBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the room photo to declutter"),
+  declutterLevel: zod.enum(["full", "light"]),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod
