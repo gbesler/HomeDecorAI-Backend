@@ -526,6 +526,7 @@ export function makeSyncGenerationHandler<TParams>(
       generationId,
       status: "completed" as const,
       outputImageUrl: finalDoc.outputImageUrl,
+      outputImageCDNUrl: finalDoc.outputImageCDNUrl,
       provider: finalDoc.provider,
       durationMs: finalDoc.durationMs,
       toolType: finalDoc.toolType,

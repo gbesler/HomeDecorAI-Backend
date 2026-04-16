@@ -18,6 +18,12 @@ export interface HistoryItem {
   toolParams: Record<string, unknown> | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
+  /**
+   * CloudFront-fronted URL for the same S3 object as `outputImageUrl`.
+   * Null on legacy records and on deploys without `AWS_CLOUDFRONT_HOST`.
+   * Clients should prefer this when non-null for CDN-cached delivery.
+   */
+  outputImageCDNUrl: string | null;
   status: GenerationStatus;
   provider: string;
   durationMs: number | null;
@@ -38,6 +44,7 @@ export async function getDesignHistory(
     toolParams: doc.toolParams,
     inputImageUrl: doc.inputImageUrl,
     outputImageUrl: doc.outputImageUrl,
+    outputImageCDNUrl: doc.outputImageCDNUrl,
     status: doc.status,
     provider: doc.provider,
     durationMs: doc.durationMs,

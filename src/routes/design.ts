@@ -85,6 +85,12 @@ const syncResponseSchemas = {
         enum: ["completed"] as const,
       },
       outputImageUrl: { type: "string" as const, nullable: true },
+      outputImageCDNUrl: {
+        type: "string" as const,
+        nullable: true,
+        description:
+          "CloudFront-fronted URL for the same object as outputImageUrl. Null when CloudFront is not configured.",
+      },
       provider: { type: "string" as const, nullable: true },
       durationMs: { type: "number" as const, nullable: true },
       toolType: { type: "string" as const },
@@ -166,7 +172,13 @@ const historyResponseSchemas = {
             outputImageUrl: {
               type: "string" as const,
               nullable: true,
-              description: "Generated image URL",
+              description: "Generated image URL (native S3)",
+            },
+            outputImageCDNUrl: {
+              type: "string" as const,
+              nullable: true,
+              description:
+                "CloudFront-fronted URL for the same object as outputImageUrl. Null on legacy records or deploys without CloudFront.",
             },
             status: {
               type: "string" as const,

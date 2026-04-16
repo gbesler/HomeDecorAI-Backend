@@ -174,6 +174,54 @@ export const CreateGardenDesignBody = zod.object({
 /**
  * Hand-edited — NOT produced by orval.
  *
+ * Accepts a patio photo URL + a patio style. Mirrors the iOS patio design
+ * wizard (PatioDesignWizardViewModel, PatioStyle). Single-style-step flow:
+ * upload photo -> choose style.
+ *
+ * @summary Generate a patio design transformation
+ */
+export const CreatePatioDesignBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the patio photo to redesign"),
+  patioStyle: zod.enum([
+    "outdoorDining",
+    "lounge",
+    "bistro",
+    "sundeck",
+    "firePit",
+    "pergola",
+    "zenDeck",
+    "coastal",
+  ]),
+});
+
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a pool photo URL + a pool style. Mirrors the iOS pool design
+ * wizard (PoolDesignWizardViewModel, PoolStyle). Single-style-step flow:
+ * upload photo -> choose style.
+ *
+ * @summary Generate a pool design transformation
+ */
+export const CreatePoolDesignBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the pool photo to redesign"),
+  poolStyle: zod.enum([
+    "poolSpa",
+    "resort",
+    "waterfall",
+    "infinity",
+  ]),
+});
+
+/**
+ * Hand-edited — NOT produced by orval.
+ *
  * Accepts a user room photo URL + reference style photo URL + spaceType.
  * Mirrors the iOS reference-style wizard (ReferenceStyleWizardViewModel,
  * SpaceType). No style/palette dictionaries — the style is conveyed entirely

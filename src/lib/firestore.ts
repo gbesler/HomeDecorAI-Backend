@@ -105,6 +105,7 @@ export async function createQueuedGeneration(
     toolParams: input.toolParams,
     inputImageUrl: input.inputImageUrl,
     outputImageUrl: null,
+    outputImageCDNUrl: null,
     prompt: "", // processor fills this when it builds the prompt
     actionMode: null,
     guidanceBand: null,
@@ -215,16 +216,20 @@ export async function recordAiResult(input: RecordAiResultInput): Promise<void> 
 }
 
 /**
- * Checkpoint: S3 upload succeeded. Writes the canonical `outputImageUrl`,
- * marks the record `completed`, and stamps `completedAt`.
+ * Checkpoint: S3 upload succeeded. Writes the canonical `outputImageUrl`
+ * (native S3) and `outputImageCDNUrl` (CloudFront-fronted; null when
+ * CloudFront is not configured), marks the record `completed`, and stamps
+ * `completedAt`.
  */
 export async function recordStorageResult(input: {
   generationId: string;
   outputImageUrl: string;
+  outputImageCDNUrl: string | null;
 }): Promise<void> {
   const db = getFirestore();
   await db.collection(GENERATIONS_COLLECTION).doc(input.generationId).update({
     outputImageUrl: input.outputImageUrl,
+    outputImageCDNUrl: input.outputImageCDNUrl,
     status: "completed",
     storageCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
     completedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -289,6 +294,7 @@ function mapDocToGeneration(
     toolParams: (data["toolParams"] as Record<string, unknown> | undefined) ?? null,
     inputImageUrl: data["inputImageUrl"],
     outputImageUrl: data["outputImageUrl"] ?? null,
+    outputImageCDNUrl: data["outputImageCDNUrl"] ?? null,
     prompt: data["prompt"],
     actionMode: data["actionMode"] ?? null,
     guidanceBand: data["guidanceBand"] ?? null,
