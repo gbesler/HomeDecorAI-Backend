@@ -118,8 +118,11 @@ function compose(
     : style.guidanceBand;
 
   const actionDirective = preservationMode
-    ? `Refresh the planting and surface treatments of this garden in a ${style.coreAesthetic} direction, keeping the existing layout, paths, and plot shape intact.`
-    : `Reimagine this garden as a ${style.coreAesthetic} landscape, restyling planting, hardscape finishes, and signature features to match the aesthetic.`;
+    ? `Refresh the planting and surface treatments of this garden in a ${style.coreAesthetic} direction ` +
+      `while keeping the existing layout, paths, and plot shape exactly as they are.`
+    : `Restyle this garden to a ${style.coreAesthetic} landscape aesthetic ` +
+      `while keeping the existing plot boundaries and camera angle. ` +
+      `Change the planting, hardscape finishes, and signature features.`;
 
   const itemsLayer = composeItemsLayer(items);
 
@@ -159,8 +162,10 @@ function buildGardenGenericFallback(
   const preservationMode = colorMode === "landscapePreservation";
 
   const actionDirective = preservationMode
-    ? `Refresh the planting and surface treatments of this garden with tasteful natural planting, keeping the existing layout intact.`
-    : `Reimagine this garden as a tasteful, timeless landscape with natural materials and a balanced planting scheme.`;
+    ? `Refresh the planting and surface treatments of this garden with tasteful natural planting ` +
+      `while keeping the existing layout exactly as it is.`
+    : `Restyle this garden to a tasteful, timeless landscape with natural materials and a balanced planting scheme ` +
+      `while keeping the existing plot boundaries and camera angle.`;
 
   const styleCore = `Color palette: deep green, warm stone, soft cream, natural timber. Mood: calm, natural, balanced.`;
 

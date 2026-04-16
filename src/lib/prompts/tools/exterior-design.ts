@@ -122,8 +122,12 @@ function compose(
 
   // Action directive differs by colorMode.
   const actionDirective = preservationMode
-    ? `Repaint and refinish the exterior of this ${building.label} in a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} palette. Do not change the building geometry, openings, or massing — only restyle surface treatments, paint colors, cladding finishes, and trim details.`
-    : `Restyle the exterior of this ${building.label} as a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} building, replacing cladding, finishes, paint, and surface treatments to match the ${style.coreAesthetic} aesthetic.`;
+    ? `Change the paint and surface finishes of this ${building.label} to a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} palette ` +
+      `while keeping the exact same building shape, roof line, window positions, door placements, and camera angle. ` +
+      `Only restyle the surface treatments, paint colors, cladding finishes, and trim details.`
+    : `Restyle the exterior finishes of this ${building.label} to a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} aesthetic ` +
+      `while keeping the exact same building shape and camera angle. ` +
+      `Change the cladding, paint colors, and surface treatments.`;
 
   const buildingFocus =
     `Characterize it as a ${building.massingDescriptor}. ` +
@@ -167,8 +171,10 @@ function buildExteriorGenericFallback(
   const preservationMode = colorMode === "structuralPreservation";
 
   const actionDirective = preservationMode
-    ? `Repaint and refresh the exterior of this ${label} with a tasteful, timeless palette and natural materials. Do not change the building geometry or massing — only restyle surface treatments.`
-    : `Restyle the exterior of this ${label} with a tasteful, timeless look using natural materials and a warm neutral palette.`;
+    ? `Change the paint and surface finishes of this ${label} to a tasteful, timeless palette with natural materials ` +
+      `while keeping the exact same building shape and camera angle. Only restyle surface treatments.`
+    : `Restyle the exterior finishes of this ${label} to a tasteful, timeless look with natural materials and a warm neutral palette ` +
+      `while keeping the exact same building shape and camera angle.`;
 
   const buildingFocus = `Keep the building's characteristic features, entrance, and window rhythm intact.`;
 
