@@ -223,6 +223,10 @@ const PATIO_STYLES = [
   "pergola",
   "zenDeck",
   "coastal",
+  "mediterranean",
+  "tropical",
+  "rustic",
+  "modern",
 ] as const;
 
 const POOL_STYLES = [
@@ -230,6 +234,12 @@ const POOL_STYLES = [
   "resort",
   "waterfall",
   "infinity",
+  "lagoon",
+  "lapPool",
+  "mediterranean",
+  "grotto",
+  "beachEntry",
+  "mosaicTile",
 ] as const;
 
 const GARDEN_ITEMS_LIST = [

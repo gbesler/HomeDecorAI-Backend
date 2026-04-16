@@ -1,5 +1,5 @@
 /**
- * Pool styles dictionary — 4 entries covering the iOS `PoolStyle` enum.
+ * Pool styles dictionary — 10 entries covering the iOS `PoolStyle` enum.
  * Reuses the `StyleEntry` shape so the existing `checkStyleEntry` validator
  * works unchanged. The `signatureItems` slot holds signature pool features
  * for each style, and `materials` holds pool coping, decking, and surround finishes.
@@ -130,5 +130,173 @@ export const poolStyles: PoolStylesDict = {
     actionMode: "transform",
     guidanceBand: "faithful",
     references: placeholderRefs("infinity-pool"),
+  },
+
+  [PoolStyle.lagoon]: {
+    coreAesthetic:
+      "free-form lagoon pool with organic curves, pebble interior, and lush tropical planting",
+    colorPalette: [
+      "lagoon aqua",
+      "warm sand",
+      "lush palm green",
+      "soft stone gray",
+    ],
+    materials: [
+      "pebble-finish pool interior",
+      "organic boulder edging",
+      "flagstone or pebble decking",
+      "dense tropical planting",
+    ],
+    signatureItems: [
+      "a free-form curved pool edge softened by natural boulders",
+      "sandy beach-style entry blending into pebble decking",
+      "overhanging palms and tropical foliage around the pool",
+    ],
+    lightingCharacter:
+      "dappled tropical daylight on turquoise water with warm amber late-day glow",
+    moodKeywords: ["natural", "tropical", "serene"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("lagoon-pool"),
+  },
+
+  [PoolStyle.lapPool]: {
+    coreAesthetic:
+      "long narrow lap pool designed for swimming, with a clean rectangular footprint and minimal surround",
+    colorPalette: [
+      "clear swimming-pool blue",
+      "pale stone gray",
+      "sun-bleached timber",
+      "crisp white",
+    ],
+    materials: [
+      "large-format stone or porcelain decking",
+      "tile or plaster pool interior",
+      "minimal coping in a single material",
+      "architectural linear planting",
+    ],
+    signatureItems: [
+      "a long rectangular lap pool with lane-clean proportions",
+      "a minimal stone or timber deck running the length of the pool",
+      "architectural linear planting along one edge",
+    ],
+    lightingCharacter:
+      "crisp directional midday light with clean linear shadows on still water",
+    moodKeywords: ["athletic", "minimal", "linear"],
+    actionMode: "transform",
+    guidanceBand: "faithful",
+    references: placeholderRefs("lap-pool"),
+  },
+
+  [PoolStyle.mediterranean]: {
+    coreAesthetic:
+      "Mediterranean-style pool with terracotta tile, stucco surrounds, and aromatic planting",
+    colorPalette: [
+      "Mediterranean aqua",
+      "terracotta",
+      "whitewashed stucco",
+      "olive green",
+    ],
+    materials: [
+      "terracotta or limestone decking",
+      "mosaic-tile pool interior in Mediterranean blue",
+      "whitewashed stucco surround walls",
+      "glazed ceramic planters",
+    ],
+    signatureItems: [
+      "a mosaic-tile pool in Mediterranean blue with terracotta coping",
+      "whitewashed stucco walls with climbing bougainvillea",
+      "potted olive trees and lavender framing the pool",
+    ],
+    lightingCharacter:
+      "warm Mediterranean sunlight with crisp shadows and a soft dusk amber over still water",
+    moodKeywords: ["sun-drenched", "timeless", "aromatic"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("mediterranean-pool"),
+  },
+
+  [PoolStyle.grotto]: {
+    coreAesthetic:
+      "dramatic grotto pool with a stone cave feature, hidden seating nook, and waterfall concealment",
+    colorPalette: [
+      "deep cave blue",
+      "dark stone gray",
+      "moss green",
+      "warm sandstone",
+    ],
+    materials: [
+      "stacked natural stone and boulder formation",
+      "dark pebble or plaster pool interior",
+      "flagstone decking",
+      "shaded fern and moss planting",
+    ],
+    signatureItems: [
+      "a stone grotto cave with a waterfall concealing a hidden nook",
+      "natural boulder edging wrapping one side of the pool",
+      "shaded underwater seating within the grotto",
+    ],
+    lightingCharacter:
+      "dramatic shaded grotto interior with bright water reflections and dappled filtered daylight",
+    moodKeywords: ["dramatic", "hidden", "naturalistic"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("grotto-pool"),
+  },
+
+  [PoolStyle.beachEntry]: {
+    coreAesthetic:
+      "zero-edge beach-entry pool with a gradual sandy slope into the water and resort-style surround",
+    colorPalette: [
+      "resort turquoise",
+      "warm sand",
+      "sun-bleached white",
+      "soft teak",
+    ],
+    materials: [
+      "textured sand-finish entry slope",
+      "pebble or plaster pool interior",
+      "large-format travertine decking",
+      "teak or woven loungers",
+    ],
+    signatureItems: [
+      "a gradual zero-edge beach entry sloping into the water",
+      "a pair of loungers resting partially in the shallow entry",
+      "travertine decking transitioning smoothly into the pool",
+    ],
+    lightingCharacter:
+      "bright resort daylight with crisp highlights on the shallow entry and warm late-day reflection",
+    moodKeywords: ["resort", "relaxed", "wade-in"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("beach-entry-pool"),
+  },
+
+  [PoolStyle.mosaicTile]: {
+    coreAesthetic:
+      "ornate mosaic-tile pool with intricate patterned interior and classical surround",
+    colorPalette: [
+      "deep mosaic blue",
+      "gilded gold",
+      "pale stone ivory",
+      "warm terracotta",
+    ],
+    materials: [
+      "hand-set mosaic-tile pool interior",
+      "polished stone coping",
+      "classical stone decking",
+      "ornamental planters",
+    ],
+    signatureItems: [
+      "an intricate mosaic-tile pattern covering the pool interior",
+      "a classical stone fountain or spout feeding the pool",
+      "ornamental urns and clipped topiary framing the surround",
+    ],
+    lightingCharacter:
+      "warm classical daylight catching mosaic color beneath the water, with soft dusk gold on stone",
+    moodKeywords: ["ornate", "classical", "crafted"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("mosaic-tile-pool"),
   },
 };

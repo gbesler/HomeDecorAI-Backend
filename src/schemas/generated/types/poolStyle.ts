@@ -14,4 +14,10 @@ export const PoolStyle = {
   resort: "resort",
   waterfall: "waterfall",
   infinity: "infinity",
+  lagoon: "lagoon",
+  lapPool: "lapPool",
+  mediterranean: "mediterranean",
+  grotto: "grotto",
+  beachEntry: "beachEntry",
+  mosaicTile: "mosaicTile",
 } as const;

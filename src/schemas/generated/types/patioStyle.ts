@@ -18,4 +18,8 @@ export const PatioStyle = {
   pergola: "pergola",
   zenDeck: "zenDeck",
   coastal: "coastal",
+  mediterranean: "mediterranean",
+  tropical: "tropical",
+  rustic: "rustic",
+  modern: "modern",
 } as const;
