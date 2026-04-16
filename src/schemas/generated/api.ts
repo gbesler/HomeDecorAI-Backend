@@ -194,6 +194,10 @@ export const CreatePatioDesignBody = zod.object({
     "pergola",
     "zenDeck",
     "coastal",
+    "mediterranean",
+    "tropical",
+    "rustic",
+    "modern",
   ]),
 });
 
@@ -216,6 +220,12 @@ export const CreatePoolDesignBody = zod.object({
     "resort",
     "waterfall",
     "infinity",
+    "lagoon",
+    "lapPool",
+    "mediterranean",
+    "grotto",
+    "beachEntry",
+    "mosaicTile",
   ]),
 });
 

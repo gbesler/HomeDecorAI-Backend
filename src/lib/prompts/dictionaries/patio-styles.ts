@@ -1,5 +1,5 @@
 /**
- * Patio styles dictionary — 8 entries covering the iOS `PatioStyle` enum.
+ * Patio styles dictionary — 12 entries covering the iOS `PatioStyle` enum.
  * Reuses the `StyleEntry` shape so the existing `checkStyleEntry` validator
  * works unchanged. The `signatureItems` slot holds signature outdoor furniture
  * and features for each style, and `materials` holds hardscape + surface finishes.
@@ -239,5 +239,117 @@ export const patioStyles: PatioStylesDict = {
     actionMode: "transform",
     guidanceBand: "balanced",
     references: placeholderRefs("coastal-patio"),
+  },
+
+  [PatioStyle.mediterranean]: {
+    coreAesthetic:
+      "sun-drenched Mediterranean patio with terracotta tile, stucco walls, and aromatic potted herbs",
+    colorPalette: [
+      "terracotta",
+      "whitewashed stucco",
+      "olive green",
+      "warm ochre",
+    ],
+    materials: [
+      "terracotta tile flooring",
+      "whitewashed stucco walls",
+      "wrought iron furniture",
+      "glazed ceramic planters",
+    ],
+    signatureItems: [
+      "a wrought iron table set on terracotta tile",
+      "clusters of potted olive trees, lavender, and rosemary",
+      "a whitewashed stucco wall with climbing bougainvillea",
+    ],
+    lightingCharacter:
+      "warm golden Mediterranean sunlight with crisp shadows and soft dusk amber",
+    moodKeywords: ["sun-drenched", "aromatic", "timeless"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("mediterranean-patio"),
+  },
+
+  [PatioStyle.tropical]: {
+    coreAesthetic:
+      "lush tropical patio wrapped in palms and broadleaf foliage with rattan seating",
+    colorPalette: [
+      "lush palm green",
+      "warm rattan tan",
+      "soft ivory",
+      "sunset coral",
+    ],
+    materials: [
+      "rattan and woven seating",
+      "teak or bamboo accents",
+      "stone or timber decking",
+      "broadleaf tropical planting",
+    ],
+    signatureItems: [
+      "rattan lounge chairs with ivory cushions",
+      "oversized monstera and palm foliage framing the patio",
+      "a carved timber coffee table with tropical accents",
+    ],
+    lightingCharacter:
+      "bright tropical daylight filtered through palm fronds with warm late-day glow",
+    moodKeywords: ["lush", "tropical", "indulgent"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("tropical-patio"),
+  },
+
+  [PatioStyle.rustic]: {
+    coreAesthetic:
+      "rustic countryside patio with reclaimed timber, stone, and handcrafted details",
+    colorPalette: [
+      "weathered timber brown",
+      "warm stone gray",
+      "forest moss",
+      "rust iron",
+    ],
+    materials: [
+      "reclaimed timber furniture",
+      "rough flagstone flooring",
+      "wrought iron fixtures",
+      "woven hemp textiles",
+    ],
+    signatureItems: [
+      "a heavy reclaimed-timber dining table with bench seating",
+      "a weathered stone wall bordering the patio",
+      "iron lanterns hung from timber beams",
+    ],
+    lightingCharacter:
+      "warm countryside afternoon light with soft shadows and lantern glow at dusk",
+    moodKeywords: ["rustic", "handcrafted", "grounded"],
+    actionMode: "transform",
+    guidanceBand: "balanced",
+    references: placeholderRefs("rustic-patio"),
+  },
+
+  [PatioStyle.modern]: {
+    coreAesthetic:
+      "sleek modern patio with clean lines, architectural furniture, and a restrained palette",
+    colorPalette: [
+      "charcoal gray",
+      "warm concrete",
+      "crisp white",
+      "matte black accents",
+    ],
+    materials: [
+      "large-format concrete or porcelain pavers",
+      "low-profile modular outdoor sofa",
+      "powder-coated steel frames",
+      "architectural planters",
+    ],
+    signatureItems: [
+      "a low-profile modular sofa with clean geometric lines",
+      "a sculptural architectural planter with a specimen tree",
+      "a minimal steel-and-stone coffee table anchoring the seating",
+    ],
+    lightingCharacter:
+      "crisp directional daylight with architectural shadows and subtle recessed evening lighting",
+    moodKeywords: ["modern", "architectural", "refined"],
+    actionMode: "transform",
+    guidanceBand: "faithful",
+    references: placeholderRefs("modern-patio"),
   },
 };
