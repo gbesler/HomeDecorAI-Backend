@@ -116,7 +116,6 @@ export async function createQueuedGeneration(
     durationMs: null,
     language: input.language,
     tempOutputUrl: null,
-    cognitoIdentityId: null,
     queuedAt: admin.firestore.FieldValue.serverTimestamp() as unknown as admin.firestore.Timestamp,
     processingStartedAt: null,
     aiCompletedAt: null,
@@ -217,18 +216,15 @@ export async function recordAiResult(input: RecordAiResultInput): Promise<void> 
 
 /**
  * Checkpoint: S3 upload succeeded. Writes the canonical `outputImageUrl`,
- * records the Cognito identity that performed the write (for CloudTrail
- * cross-referencing), marks the record `completed`, and stamps `completedAt`.
+ * marks the record `completed`, and stamps `completedAt`.
  */
 export async function recordStorageResult(input: {
   generationId: string;
   outputImageUrl: string;
-  cognitoIdentityId: string;
 }): Promise<void> {
   const db = getFirestore();
   await db.collection(GENERATIONS_COLLECTION).doc(input.generationId).update({
     outputImageUrl: input.outputImageUrl,
-    cognitoIdentityId: input.cognitoIdentityId,
     status: "completed",
     storageCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
     completedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -305,7 +301,6 @@ function mapDocToGeneration(
     createdAt: data["createdAt"],
     language: (data["language"] as SupportedLanguage | undefined) ?? null,
     tempOutputUrl: data["tempOutputUrl"] ?? null,
-    cognitoIdentityId: data["cognitoIdentityId"] ?? null,
     queuedAt: data["queuedAt"] ?? null,
     processingStartedAt: data["processingStartedAt"] ?? null,
     aiCompletedAt: data["aiCompletedAt"] ?? null,

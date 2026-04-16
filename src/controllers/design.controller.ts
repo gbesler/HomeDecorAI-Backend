@@ -87,7 +87,7 @@ function validateImageUrlScheme(
  * registers itself.
  *
  * Flow:
- *  1. Auth check (userId + firebaseIdToken on the request)
+ *  1. Auth check (userId on the request)
  *  2. Parse + validate body via `tool.bodySchema.extend({ language })`
  *  3. Validate imageUrl scheme (http/https only)
  *  4. Resolve language (body → Accept-Language → "en")
@@ -110,8 +110,7 @@ export function makeCreateGenerationHandler<TParams>(
     reply: FastifyReply,
   ) {
     const userId = request.userId;
-    const firebaseIdToken = request.firebaseIdToken;
-    if (!userId || !firebaseIdToken) {
+    if (!userId) {
       reply.code(401);
       return { error: "Unauthorized", message: "Authentication required" };
     }
@@ -226,7 +225,7 @@ export function makeCreateGenerationHandler<TParams>(
     }
 
     try {
-      await enqueueGenerationTask({ generationId, firebaseIdToken });
+      await enqueueGenerationTask({ generationId });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       request.log.error(
@@ -308,8 +307,7 @@ export function makeSyncGenerationHandler<TParams>(
     reply: FastifyReply,
   ) {
     const userId = request.userId;
-    const firebaseIdToken = request.firebaseIdToken;
-    if (!userId || !firebaseIdToken) {
+    if (!userId) {
       reply.code(401);
       return { error: "Unauthorized", message: "Authentication required" };
     }
@@ -416,7 +414,6 @@ export function makeSyncGenerationHandler<TParams>(
     try {
       const result = await processGeneration({
         generationId,
-        firebaseIdToken,
         retryCount: 0,
         skipLoadingPad: true,
       });

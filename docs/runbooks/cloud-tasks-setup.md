@@ -167,136 +167,77 @@ gcloud tasks queues purge "$QUEUE_NAME" \
 Pairs well with flipping `FCM_ENABLED=false` on Render to silence push while
 the queue is paused.
 
-## 9. AWS S3 via Cognito (Firebase OIDC federation)
+## 9. AWS S3 via shared unauthenticated Cognito identity
 
 The backend S3 upload path (`src/lib/storage/s3-upload.ts`) holds **zero
-static AWS credentials**. For every generation it mints per-user temporary
-AWS credentials through the **same** Cognito Identity Pool iOS uses, with
-the **same** Firebase OIDC federation scheme, and writes to S3 under
-`generations/{cognitoIdentityId}/{generationId}.{ext}` using those temp
-creds.
+static AWS credentials**. It mints temporary AWS credentials through a single
+**unauthenticated** Cognito identity (no Firebase federation, no Logins map)
+and writes to S3 under `generations/{firebaseUid}/{generationId}.{ext}`.
 
-Because both clients federate the same Firebase ID token against the same
-pool, a given Firebase user resolves to the *same* Cognito Identity ID from
-iOS and from the backend. iOS uploads land under
-`uploads/{sub}/…`; backend writes land under `generations/{sub}/…`; both
-use the same `sub`.
+The Firebase ID token is verified at the HTTP edge
+(`src/middlewares/firebase-auth.ts` → `request.userId`) and never travels
+further — not into the Cloud Tasks payload, not to Cognito.
 
 ### Why this design
 
 1. **Zero static AWS credentials.** The only bootstrap secret the backend
    holds is `FIREBASE_SERVICE_ACCOUNT_KEY`, already required for Firestore
    and Firebase Auth. No IAM user, no access key rotation.
-2. **Path consistency with iOS.** Same Firebase user → same Cognito Identity
-   ID on both clients. GDPR export, account deletion, and audit trails join
-   cleanly on a single identifier; no `MergeDeveloperIdentities` debt.
-3. **Blast radius per request.** Each set of temp credentials is scoped by
-   the IAM policy variable `${cognito-identity.amazonaws.com:sub}` — so even
-   if the processor is compromised mid-call, the credential it holds can
-   only write to one user's prefix, never the whole bucket.
-4. **Auto-rotation.** Temp creds live 1 hour, refreshed automatically by the
-   in-process cache in `cognito-credentials.ts`.
+2. **Backend is already trusted.** Per-user federation only adds value when
+   the credential consumer is the user's device. The backend already
+   verifies the Firebase token at the edge — pushing it through Cognito
+   again was duplicate work.
+3. **Token never leaves the HTTP edge.** Removing the token from Cloud Tasks
+   payloads removes it from the queue's at-rest storage and from the
+   per-task retry budget (no more `TOKEN_EXPIRED` failures).
+4. **Cache is process-local and shared.** A single in-memory credential
+   serves every concurrent request. Cold starts pay ~200ms once.
 
-### How the backend obtains a Firebase ID token
+### Trade-off accepted
 
-The backend does **not** mint its own Firebase ID token. Instead the token
-travels through the async pipeline as part of the Cloud Tasks payload:
-
-1. iOS calls `Auth.auth().currentUser?.getIDToken(forcingRefresh: true)`
-   before every enqueue. Force-refresh guarantees the token has the full
-   ~60-minute lifetime ahead of it.
-2. iOS sends the token in `Authorization: Bearer` on the enqueue request.
-3. The enqueue endpoint's `authenticate` middleware verifies the token
-   (`admin.auth().verifyIdToken`) and decorates `request.firebaseIdToken`
-   with the raw string.
-4. The controller packs `{ generationId, firebaseIdToken }` into the Cloud
-   Tasks HTTP body. Cloud Tasks stores task bodies encrypted at rest and
-   they never touch Firestore.
-5. The internal processor receives the task, pre-flights the token's
-   remaining lifetime (minimum 60 seconds), and feeds the token directly
-   into the Cognito federation flow (`GetId` + `GetCredentialsForIdentity`
-   with `Logins: { "securetoken.google.com/<projectId>": <token> }`).
-
-**Token lifetime budget:**
-
-| Stage | Elapsed | Remaining (worst case) |
-| --- | --- | --- |
-| iOS force-refresh | 0s | ~60 min |
-| Enqueue → Cloud Tasks dispatch (incl. cold start) | ~30s | ~59 min |
-| Processor first attempt (normal) | ~1 min | ~59 min |
-| Processor after retry storm (3 retries, max backoff) | ~15 min | ~45 min |
-
-The 60-second pre-flight threshold leaves a huge margin. If the token is
-somehow closer to expiry (clock skew, catastrophic retry), the processor
-fails fast with error code `TOKEN_EXPIRED` — Cloud Tasks is acked (no
-retry), Firestore is marked failed, and the iOS listener recovers by
-re-enqueueing with a fresh token.
-
-**Never log the token.** Backend code must keep `firebaseIdToken` out of
-structured log fields and error messages. Task payloads stay inside Cloud
-Tasks and never surface in logs.
+Per-user IAM scoping (`generations/${cognito-identity.amazonaws.com:sub}/*`)
+is gone. A compromised backend process can now write anywhere under
+`generations/*`. Compensating control: per-user isolation lives in the S3
+key path string (`generations/{firebaseUid}/...`) which is enforced by
+application code, not IAM.
 
 ### Prerequisites
 
-- An existing Cognito Identity Pool with Firebase token federation already
-  configured (iOS is using it today — check the Firestore `settings/aws`
-  document for `CognitoPoolId`).
-- An existing CloudFront distribution fronting the same S3 bucket.
+- A Cognito Identity Pool with **`AllowUnauthenticatedIdentities=true`**.
+- A CloudFront distribution fronting the same S3 bucket.
 
-### One-time setup (per environment — staging and prod)
+### One-time setup (per environment)
 
-**Step 1 — Extend the existing Cognito authenticated role's IAM policy**
+**Step 1 — Configure the Cognito pool's UNAUTHENTICATED role**
 
-The role iOS already assumes via Firebase federation grants writes to
-`uploads/${cognito-identity.amazonaws.com:sub}/*`. Add a second statement so
-the same role also covers backend generation writes:
+Attach this IAM policy to the unauthenticated role linked to your identity
+pool. The wildcard scope is intentional — the per-user prefix is enforced
+by the backend, not IAM:
 
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "IosUploadsPerUser",
+      "Sid": "BackendGenerationsWrite",
       "Effect": "Allow",
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::<bucket>/uploads/${cognito-identity.amazonaws.com:sub}/*"
-    },
-    {
-      "Sid": "BackendGenerationsPerUser",
-      "Effect": "Allow",
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::<bucket>/generations/${cognito-identity.amazonaws.com:sub}/*"
+      "Resource": "arn:aws:s3:::<bucket>/generations/*"
     }
   ]
 }
 ```
 
-No new role, no new provider, no role mappings to reshuffle. Backend and iOS
-assume the same role, differentiated only by S3 key prefix.
+> ⚠️ Attach this to the **unauthenticated** role, not the authenticated one.
+> Cognito returns the unauthenticated role's credentials when GetId is
+> called with no Logins map (the new flow). The authenticated role is still
+> used by iOS via Firebase federation for `uploads/*`.
 
-**Step 2 — Confirm the trust policy already allows Firebase federation**
+**Step 2 — Enable unauthenticated identities on the pool**
 
-The iOS path already works, so this should be a no-op. For reference, the
-trust policy looks like this and must not be narrowed further:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": { "Federated": "cognito-identity.amazonaws.com" },
-      "Action": "sts:AssumeRoleWithWebIdentity",
-      "Condition": {
-        "StringEquals": {
-          "cognito-identity.amazonaws.com:aud": "<IDENTITY_POOL_ID>",
-          "cognito-identity.amazonaws.com:amr": "authenticated"
-        }
-      }
-    }
-  ]
-}
-```
+In the Cognito console: Identity Pool → Edit → check
+"Enable access to unauthenticated identities". Without this, GetId throws
+`NotAuthorizedException` and every backend S3 write fails.
 
 **Step 3 — Set Render environment variables**
 
@@ -307,14 +248,11 @@ In addition to the Cloud Tasks vars documented above:
 | `AWS_S3_BUCKET` | Bucket name (same bucket iOS uploads to) |
 | `AWS_S3_REGION` | Bucket region |
 | `AWS_CLOUDFRONT_HOST` | CloudFront host (same one iOS uses) |
-| `COGNITO_IDENTITY_POOL_ID` | Format `<region>:<uuid>`, e.g. `us-east-1:abc-123-...` |
+| `AWS_COGNITO_IDENTITY_POOL_ID` | Format `<region>:<uuid>`, e.g. `us-east-1:abc-123-...` |
 
 > No `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`. No
-> `COGNITO_DEVELOPER_PROVIDER_NAME`. No `FIREBASE_WEB_API_KEY`. If you see
-> any of these in env, you're on a previous iteration of this design —
-> delete them. The backend does not mint its own Firebase tokens; iOS
-> force-refreshes on every enqueue and the token travels through the Cloud
-> Tasks payload.
+> `COGNITO_DEVELOPER_PROVIDER_NAME`. No `FIREBASE_WEB_API_KEY`. The backend
+> verifies Firebase tokens at the HTTP edge and uses Cognito unauthenticated.
 
 ### SSRF allowlist — why iOS-uploaded URLs are NOT there
 
@@ -328,36 +266,34 @@ storage.googleapis.com).
 
 ### Path structure note (iOS integration)
 
-iOS-uploaded inputs go to `uploads/{iOS-cognito-id}/…`.
-Backend-written generations go to `generations/{backend-cognito-id}/…`.
+- iOS-uploaded inputs go to `uploads/{iOS-cognito-id}/…` (unchanged).
+- Backend-written generations go to `generations/{firebaseUid}/…` (new).
 
-These **may be different Cognito Identity IDs** for the same Firebase user,
-because iOS federates via Firebase OIDC while the backend uses the developer
-provider. This is fine: iOS never constructs generation paths — it reads
-`outputImageUrl` (a CloudFront URL) directly from the Firestore listener.
-CloudFront is path-agnostic so the same distribution serves both prefixes.
+iOS never reconstructs S3 keys — it reads `outputImageUrl` (a CloudFront URL)
+directly from the Firestore listener. CloudFront is path-agnostic so the
+same distribution serves both prefixes.
 
-If a future requirement forces both to resolve to the **same** Cognito Identity
-ID, use `cognito-identity:MergeDeveloperIdentities` to link the two. Not
-required today.
+> Historical generations created before this refactor still live under
+> `generations/{cognitoIdentityId}/…` keys. Their `outputImageUrl` fields
+> point to the original CloudFront URLs and continue to resolve correctly.
+> No migration required.
 
 ### Operational notes
 
-- **Credential cache** lives in process memory (`src/lib/storage/cognito-credentials.ts`).
-  One entry per Firebase UID, refreshed when less than 5 minutes remain on the
-  temp creds. Process restart forfeits the cache — first request per user
-  after restart pays an extra ~200 ms Cognito round trip.
+- **Credential cache** lives in process memory
+  (`src/lib/storage/cognito-credentials.ts`). A single shared credential
+  refreshes when less than 5 minutes remain. Process restart forfeits the
+  cache — first request after restart pays an extra ~200ms Cognito round
+  trip. Concurrent cache misses are coalesced onto a single Cognito call.
 - **Metric to watch:** count of `cognito.credentials_minted` log events.
-  A healthy steady state has this count roughly equal to the number of unique
-  active users per hour. Unexpectedly high counts suggest the cache is being
-  evicted (process crashes, container restarts, cold scale events).
-- **Failure mode:** if Cognito rejects the dev token (rare — usually due to
-  pool misconfiguration), the processor records `STORAGE_FAILED` on the
-  generation and surfaces it to iOS via the Firestore listener. Rollback
-  option: downgrade to direct static-IAM writes by temporarily reverting
-  `src/lib/storage/s3-upload.ts` to use a plain `S3Client` with the bootstrap
-  user's creds — but for that to work, the bootstrap user needs broader S3
-  permissions, which defeats the point. Prefer fixing the pool.
+  Steady state should be roughly one per hour per process. Higher counts
+  suggest cold start churn or pool reconfiguration.
+- **Failure mode:** if Cognito rejects the GetId call (pool misconfigured,
+  unauthenticated identities disabled, IAM policy on wrong role), the
+  processor logs `CognitoCredentialMintError` and Cloud Tasks retries up to
+  the budget. Async generations end up `RETRY_EXHAUSTED`; sync generations
+  fail immediately with `STORAGE_FAILED`. Check the operator steps above
+  before debugging code.
 
 ## 10. Monitoring
 

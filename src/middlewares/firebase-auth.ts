@@ -6,15 +6,6 @@ import { env } from "../lib/env.js";
 declare module "fastify" {
   interface FastifyRequest {
     userId?: string;
-    /**
-     * Raw Firebase ID token string extracted from the Authorization header,
-     * *after* successful verification. Exposed so the async generation
-     * pipeline can pass the token through to Cloud Tasks → processor →
-     * Cognito federation without re-minting it.
-     *
-     * Never log this field. It's a short-lived credential.
-     */
-    firebaseIdToken?: string;
   }
   interface FastifyInstance {
     authenticate: (
@@ -42,7 +33,6 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
   initializeFirebase();
 
   fastify.decorateRequest("userId", undefined);
-  fastify.decorateRequest("firebaseIdToken", undefined);
 
   fastify.decorate(
     "authenticate",
@@ -81,13 +71,10 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
       }
 
       if (hasBearer) {
-        // Real Firebase token path — populates both userId and firebaseIdToken
-        // so downstream handlers can federate into Cognito.
         const token = authHeader!.slice(7);
         try {
           const decodedToken = await admin.auth().verifyIdToken(token);
           request.userId = decodedToken.uid;
-          request.firebaseIdToken = token;
         } catch (error) {
           request.log.error(
             {
@@ -102,9 +89,18 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
           return;
         }
       } else if (hasValidApiKey) {
-        // Swagger-only path (no Bearer): synthetic user for endpoints that do
-        // not need firebaseIdToken (e.g. GET /history). Endpoints requiring
-        // the token will still reject with 401 at the handler level.
+        // Swagger-only path (no Bearer): synthetic user for read-only endpoints
+        // (e.g. GET /history). Reject mutating methods so the synthetic user
+        // cannot reach create/sync handlers, burn AI provider credits, or
+        // write under a shared `generations/swagger-test-user/...` S3 prefix.
+        if (request.method !== "GET" && request.method !== "HEAD") {
+          reply.code(401).send({
+            error: "Unauthorized",
+            message:
+              "Swagger API key is read-only. Use a Bearer token for this endpoint.",
+          });
+          return;
+        }
         request.userId = "swagger-test-user";
       } else {
         reply.code(401).send({

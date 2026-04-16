@@ -3,63 +3,36 @@ import {
   GetCredentialsForIdentityCommand,
   GetIdCommand,
 } from "@aws-sdk/client-cognito-identity";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { env } from "../env.js";
 import { logger } from "../logger.js";
 
 /**
- * Per-user AWS credential provider backed by Cognito Identity Pool with
- * **Firebase OIDC federation**, using the exact same federation scheme iOS
- * uses. Backend and iOS share the same Cognito Identity ID for the same
- * Firebase user, so S3 paths stay consistent across both clients.
+ * Shared AWS credential provider backed by a single unauthenticated Cognito
+ * identity. The backend is already a trusted service (Firebase ID tokens are
+ * verified at the HTTP edge), so per-user federation adds cost without
+ * meaningful isolation. All S3 writes share one Cognito identity; per-user
+ * isolation lives in the S3 key path (`generations/{firebaseUid}/...`).
  *
- * Unlike a symmetric admin-side flow, this module does **not** mint its own
- * Firebase ID token. The token arrives with every async-pipeline job,
- * originally produced by the iOS client, verified on enqueue, and passed
- * through the Cloud Tasks payload. The processor runs an expiry pre-flight
- * before calling into this module, so by the time we federate we have at
- * least ~60s of remaining token lifetime.
+ * Flow (on cache miss, ~200ms):
+ *   1. cognito-identity:GetId        — no Logins map, unauthenticated
+ *   2. cognito-identity:GetCredentialsForIdentity — returns ~1h temp creds
  *
- * Flow per unique Firebase UID (on cache miss, ~200ms):
- *   1. cognito-identity:GetId
- *      - Logins: { "securetoken.google.com/<projectId>": firebaseIdToken }
- *      - deterministic: same Firebase UID always resolves to the same
- *        Cognito IdentityId
- *      - called with an *unsigned* Cognito client; GetId accepts unauth callers
- *   2. cognito-identity:GetCredentialsForIdentity
- *      - same Logins map
- *      - returns 1-hour AWS temp credentials scoped by the Cognito
- *        authenticated role, whose IAM policy uses
- *        `${cognito-identity.amazonaws.com:sub}` variables to restrict writes
- *        to this user's own S3 prefix.
- *
- * The resulting credentials are cached in memory per Firebase UID and
- * refreshed when their remaining lifetime falls below the refresh window.
- * On cache hit the incoming Firebase token is not touched — the STS creds
- * themselves are what matter once minted.
- *
- * Security posture:
- * - **Zero static AWS credentials** in the backend. The only bootstrap
- *   secret is `FIREBASE_SERVICE_ACCOUNT_KEY`, already required for
- *   Firestore and Firebase Auth.
- * - The Firebase ID token is a short-lived user credential — never log it,
- *   never persist it to Firestore, never include it in error messages.
- * - The credential cache lives in process memory only and auto-expires
- *   with the Cognito credential lifetime.
+ * The unauthenticated Cognito role's IAM policy must allow s3:PutObject on
+ * `generations/*` in the target bucket.
  */
 
-const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // refresh when < 5 min remains
-const DEFAULT_FALLBACK_LIFETIME_MS = 55 * 60 * 1000; // used only if Expiration is missing
+const REFRESH_THRESHOLD_MS = 5 * 60 * 1000;
+const DEFAULT_FALLBACK_LIFETIME_MS = 55 * 60 * 1000;
 
 interface CachedCredentials {
-  identityId: string;
   accessKeyId: string;
   secretAccessKey: string;
   sessionToken: string;
-  expiresAt: number; // epoch ms
+  expiresAt: number;
 }
 
-export interface UserAwsCredentials {
-  identityId: string;
+export interface AwsCredentials {
   accessKeyId: string;
   secretAccessKey: string;
   sessionToken: string;
@@ -72,16 +45,11 @@ export class CognitoCredentialMintError extends Error {
   }
 }
 
-const cache = new Map<string, CachedCredentials>();
+let cached: CachedCredentials | null = null;
+let inflight: Promise<AwsCredentials> | null = null;
 
 let cachedClient: CognitoIdentityClient | null = null;
 
-/**
- * Unsigned Cognito client. `GetId` and `GetCredentialsForIdentity` are both
- * public-accessible APIs when called with a valid Logins map — they do not
- * need AWS SigV4 credentials. Passing anonymous credentials keeps the SDK
- * from attempting to locate keys in the environment.
- */
 function getClient(): CognitoIdentityClient {
   if (!cachedClient) {
     cachedClient = new CognitoIdentityClient({
@@ -90,51 +58,45 @@ function getClient(): CognitoIdentityClient {
         accessKeyId: "",
         secretAccessKey: "",
       }),
+      // Bound mint() so a hung Cognito endpoint cannot pin the inflight
+      // promise indefinitely and stall every concurrent uploader.
+      requestHandler: new NodeHttpHandler({
+        connectionTimeout: 3_000,
+        socketTimeout: 5_000,
+      }),
     });
   }
   return cachedClient;
 }
 
 /**
- * Mint (or return cached) AWS temporary credentials for a specific Firebase
- * user, federating via a Firebase ID token produced on the iOS client.
- *
- * The returned credentials carry a Cognito Identity ID that's safe to use in
- * S3 key paths — IAM policy variables restrict writes to the matching prefix
- * at the AWS level.
- *
- * The caller is expected to have already pre-flighted the token's remaining
- * lifetime. If the token is expired, Cognito will reject it and this
- * function throws `CognitoCredentialMintError`; the processor turns that
- * into a `TOKEN_EXPIRED` failure so the client can retry.
+ * Mint (or return cached) shared unauthenticated AWS temporary credentials.
+ * Coalesces concurrent cache misses onto a single Cognito round trip.
  */
-export async function getUserAwsCredentials(
-  firebaseUid: string,
-  firebaseIdToken: string,
-): Promise<UserAwsCredentials> {
-  const cached = cache.get(firebaseUid);
+export async function getAwsCredentials(): Promise<AwsCredentials> {
   if (cached && cached.expiresAt - Date.now() > REFRESH_THRESHOLD_MS) {
     return {
-      identityId: cached.identityId,
       accessKeyId: cached.accessKeyId,
       secretAccessKey: cached.secretAccessKey,
       sessionToken: cached.sessionToken,
     };
   }
 
-  const projectId = (
-    env.FIREBASE_SERVICE_ACCOUNT_KEY as { project_id: string }
-  ).project_id;
-  const providerKey = `securetoken.google.com/${projectId}`;
+  if (inflight) return inflight;
 
+  inflight = mint().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+async function mint(): Promise<AwsCredentials> {
   const client = getClient();
 
-  // Step 1: resolve the Cognito Identity ID for this federated token.
   const getIdResp = await client
     .send(
       new GetIdCommand({
         IdentityPoolId: env.AWS_COGNITO_IDENTITY_POOL_ID,
-        Logins: { [providerKey]: firebaseIdToken },
       }),
     )
     .catch((err: unknown) => {
@@ -147,14 +109,10 @@ export async function getUserAwsCredentials(
     throw new CognitoCredentialMintError("Cognito GetId returned no IdentityId");
   }
 
-  // Step 2: exchange the federated token for AWS temp credentials scoped by
-  // the Cognito authenticated role. Policy variables in that role's IAM
-  // policy restrict writes to `generations/<identityId>/*`.
   const credsResp = await client
     .send(
       new GetCredentialsForIdentityCommand({
         IdentityId: getIdResp.IdentityId,
-        Logins: { [providerKey]: firebaseIdToken },
       }),
     )
     .catch((err: unknown) => {
@@ -175,38 +133,24 @@ export async function getUserAwsCredentials(
       ? creds.Expiration.getTime()
       : Date.now() + DEFAULT_FALLBACK_LIFETIME_MS;
 
-  const entry: CachedCredentials = {
-    identityId: getIdResp.IdentityId,
+  cached = {
     accessKeyId: creds.AccessKeyId,
     secretAccessKey: creds.SecretKey,
     sessionToken: creds.SessionToken,
     expiresAt,
   };
-  cache.set(firebaseUid, entry);
 
   logger.info(
     {
       event: "cognito.credentials_minted",
-      firebaseUid,
-      identityId: getIdResp.IdentityId,
       expiresInMinutes: Math.round((expiresAt - Date.now()) / 60_000),
     },
-    "Minted per-user AWS credentials via Cognito Firebase federation",
+    "Minted shared AWS credentials via unauthenticated Cognito identity",
   );
 
   return {
-    identityId: entry.identityId,
-    accessKeyId: entry.accessKeyId,
-    secretAccessKey: entry.secretAccessKey,
-    sessionToken: entry.sessionToken,
+    accessKeyId: cached.accessKeyId,
+    secretAccessKey: cached.secretAccessKey,
+    sessionToken: cached.sessionToken,
   };
-}
-
-/**
- * Clear a user's cached credentials. Call on forced invalidation (e.g. when
- * a PutObject returns 403, signalling that the policy has changed or the
- * identity has been deleted).
- */
-export function invalidateUserAwsCredentials(firebaseUid: string): void {
-  cache.delete(firebaseUid);
 }

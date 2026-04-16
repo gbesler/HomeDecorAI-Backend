@@ -1,24 +1,21 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { env } from "../env.js";
 import { logger } from "../logger.js";
-import { getUserAwsCredentials } from "./cognito-credentials.js";
+import { getAwsCredentials } from "./cognito-credentials.js";
 
 /**
  * S3 upload helper for AI-generated interior design images.
  *
  * AI provider output URLs (Replicate/fal.ai) expire within hours — if we
  * persist them directly to Firestore, historical generations turn into broken
- * images. This module downloads the temp URL and writes it to S3 under a
- * Cognito-scoped key so the URL we expose to clients is permanent.
+ * images. This module downloads the temp URL and writes it to S3 under
+ * `generations/{firebaseUid}/...` so the URL we expose to clients is permanent.
  *
- * Auth model: per-user temporary credentials minted via Cognito Identity
- * Pool with Firebase OIDC federation (see `./cognito-credentials.ts`). The
- * backend holds **zero static AWS credentials** — the only bootstrap secret
- * is the Firebase service account key, already required for Firestore.
- * IAM policy on the Cognito auth role restricts writes to
- * `generations/${cognito-identity.amazonaws.com:sub}/*`, so even if this
- * process were compromised mid-call the blast radius is a single user's
- * prefix — not the whole bucket.
+ * Auth model: shared unauthenticated Cognito credentials (see
+ * `./cognito-credentials.ts`). The backend holds zero static AWS credentials.
+ * The unauthenticated Cognito role's IAM policy allows writes to
+ * `generations/*` in the target bucket.
  *
  * Defences:
  * - SSRF: only hosts in ALLOWED_AI_DOWNLOAD_HOSTS may be fetched.
@@ -62,36 +59,36 @@ function extensionForContentType(contentType: string | null): {
 }
 
 export interface PersistGenerationImageInput {
-  /** Firebase UID. Used as the per-user cache key for minted credentials. */
+  /** Firebase UID — written into the S3 key path. */
   userId: string;
   generationId: string;
   sourceUrl: string;
-  /**
-   * Raw Firebase ID token from the user's original request, passed through
-   * the Cloud Tasks payload. Used directly with Cognito federation — iOS
-   * and backend end up on the same Cognito Identity ID. Never logged.
-   */
-  firebaseIdToken: string;
 }
 
 export interface PersistGenerationImageResult {
   outputImageUrl: string;
-  /** Cognito Identity ID that performed the upload — persisted in Firestore. */
-  cognitoIdentityId: string;
   bytes: number;
   mime: string;
 }
 
 /**
  * Download a temporary AI output URL and upload it to S3 under
- * `generations/{cognitoIdentityId}/{generationId}.{ext}` using per-user Cognito
+ * `generations/{userId}/{generationId}.{ext}` using the shared Cognito
  * credentials. Returns the canonical public URL (CloudFront-fronted when
  * configured, native S3 URL otherwise).
  */
 export async function persistGenerationImage(
   input: PersistGenerationImageInput,
 ): Promise<PersistGenerationImageResult> {
-  const { userId, generationId, sourceUrl, firebaseIdToken } = input;
+  const { userId, generationId, sourceUrl } = input;
+
+  // Guard against an empty or whitespace userId — without per-user IAM
+  // scoping, a blank value would silently produce orphan keys at
+  // `generations//{generationId}.ext` shared across every caller hitting
+  // the same path.
+  if (!userId || !userId.trim()) {
+    throw new StorageUploadError("userId is required to compute the S3 key");
+  }
 
   let parsed: URL;
   try {
@@ -147,15 +144,9 @@ export async function persistGenerationImage(
     );
   }
 
-  // Mint per-user Cognito credentials. Cached if still fresh, otherwise a
-  // ~200ms round trip to Cognito using the provided Firebase ID token. The
-  // returned identityId goes into the S3 key so the IAM policy variable
-  // `${cognito-identity.amazonaws.com:sub}` resolves correctly and
-  // authorizes the write.
-  const creds = await getUserAwsCredentials(userId, firebaseIdToken);
-  const cognitoIdentityId = creds.identityId;
+  const creds = await getAwsCredentials();
 
-  const key = `generations/${cognitoIdentityId}/${generationId}.${ext}`;
+  const key = `generations/${userId}/${generationId}.${ext}`;
 
   // Build a fresh S3 client for this request. The client is cheap to
   // construct and lives only for the duration of the PutObject, keeping the
@@ -167,6 +158,13 @@ export async function persistGenerationImage(
       secretAccessKey: creds.secretAccessKey,
       sessionToken: creds.sessionToken,
     },
+    // Bound PutObject so a slow S3 endpoint cannot stall the worker until
+    // the Cloud Tasks dispatch deadline (600s). Same posture as the download
+    // phase, which uses a 60s AbortSignal.
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: 5_000,
+      socketTimeout: 60_000,
+    }),
   });
 
   await s3.send(
@@ -187,13 +185,13 @@ export async function persistGenerationImage(
     {
       event: "storage.upload.ok",
       generationId,
-      cognitoIdentityId,
+      userId,
       bytes,
       mime,
       key,
     },
-    "AI output persisted to S3 via Cognito-scoped credentials",
+    "AI output persisted to S3",
   );
 
-  return { outputImageUrl, cognitoIdentityId, bytes, mime };
+  return { outputImageUrl, bytes, mime };
 }

@@ -16,6 +16,7 @@ import type {
   SupportedLanguage,
 } from "../lib/generation/types.js";
 import { persistGenerationImage, StorageUploadError } from "../lib/storage/s3-upload.js";
+import { CognitoCredentialMintError } from "../lib/storage/cognito-credentials.js";
 import { sendGenerationNotification } from "../lib/notifications/fcm.js";
 import { logger } from "../lib/logger.js";
 import type { NotificationKind } from "../lib/notifications/i18n.js";
@@ -58,45 +59,10 @@ const MAX_RETRY_COUNT = 3;
 const MIN_LOADING_WINDOW_MS = 30_000;
 const MAX_LOADING_WINDOW_MS = 60_000;
 
-/**
- * Minimum remaining lifetime, in seconds, the Firebase ID token must have
- * before the processor calls Cognito. If the token has less than this amount
- * left, we fail fast with TOKEN_EXPIRED rather than letting the Cognito call
- * almost-certainly fail mid-flight.
- *
- * 60 seconds is generous: the Cognito GetId + GetCredentialsForIdentity round
- * trip completes in well under a second, and one iOS retry loop costs no more
- * than a few seconds. Fail fast, let the client refresh, avoid wasted work.
- */
-const TOKEN_MIN_REMAINING_SECONDS = 60;
-
-/**
- * Decode the `exp` claim of a Firebase ID token without verifying it. We
- * trust the token at this point because the enqueue path already verified it
- * via `admin.auth().verifyIdToken` before the task was created. This helper
- * only reads the expiry to avoid round-tripping to Cognito when it's clearly
- * going to fail.
- *
- * Returns the remaining lifetime in seconds, or `null` if the token cannot
- * be decoded (malformed / unexpected shape).
- */
-function getFirebaseTokenRemainingSeconds(token: string): number | null {
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const payloadJson = Buffer.from(parts[1]!, "base64url").toString("utf-8");
-    const payload = JSON.parse(payloadJson) as { exp?: unknown };
-    if (typeof payload.exp !== "number") return null;
-    return payload.exp - Math.floor(Date.now() / 1000);
-  } catch {
-    return null;
-  }
-}
-
 export async function processGeneration(
   input: ProcessGenerationInput,
 ): Promise<ProcessGenerationResult> {
-  const { generationId, firebaseIdToken, retryCount, skipLoadingPad } = input;
+  const { generationId, retryCount, skipLoadingPad } = input;
 
   // Local fallback anchor for the loading-window pad. `claimProcessing`
   // writes a server timestamp to `processingStartedAt`, but on a fresh claim
@@ -179,35 +145,11 @@ export async function processGeneration(
 
   // Step 3 — S3 upload (skipped if already checkpointed).
   if (!doc.storageCompletedAt) {
-    // Pre-flight: make sure the Firebase ID token still has enough lifetime
-    // for the Cognito federation round trip. If it's too close to expiry
-    // (or undecodable), fail fast with TOKEN_EXPIRED so the client re-enqueues
-    // with a fresh token — cheaper and cleaner than letting Cognito 401.
-    const remaining = getFirebaseTokenRemainingSeconds(firebaseIdToken);
-    if (remaining === null || remaining < TOKEN_MIN_REMAINING_SECONDS) {
-      logger.warn(
-        {
-          event: "processor.token_expired",
-          generationId,
-          remainingSeconds: remaining,
-        },
-        "Firebase token near or past expiry — marking failed for client retry",
-      );
-      await markFailed(
-        generationId,
-        "TOKEN_EXPIRED",
-        "Firebase ID token expired before processor could federate to Cognito; retry with a fresh token",
-      ).catch((err) => logFirestoreError("markFailed", generationId, err));
-      await bestEffortNotify(doc, "failed");
-      return { action: "ok", reason: "token_expired" };
-    }
-
     try {
       const persisted = await persistGenerationImage({
         userId: doc.userId,
         generationId,
         sourceUrl: aiOutputUrl,
-        firebaseIdToken,
       });
 
       // Hold the `completed` transition so the iOS spinner stays visible for
@@ -226,7 +168,6 @@ export async function processGeneration(
       await recordStorageResult({
         generationId,
         outputImageUrl: persisted.outputImageUrl,
-        cognitoIdentityId: persisted.cognitoIdentityId,
       });
     } catch (err) {
       if (err instanceof StorageUploadError) {
@@ -244,6 +185,27 @@ export async function processGeneration(
         );
         await bestEffortNotify(doc, "failed");
         return { action: "ok", reason: "storage_refused" };
+      }
+
+      if (err instanceof CognitoCredentialMintError) {
+        // Credential mint failures are almost always config-shaped (pool
+        // missing unauth identities, IAM policy on the wrong role, wrong
+        // pool ID). Retrying won't fix them; surface fast as STORAGE_FAILED
+        // so operators see the issue on the first attempt instead of three
+        // retries later.
+        logger.error(
+          {
+            event: "processor.storage.cognito_mint_failure",
+            generationId,
+            error: err.message,
+          },
+          "Cognito credential mint failed — marking failed (config issue, retry won't help)",
+        );
+        await markFailed(generationId, "STORAGE_FAILED", err.message).catch(
+          (e) => logFirestoreError("markFailed", generationId, e),
+        );
+        await bestEffortNotify(doc, "failed");
+        return { action: "ok", reason: "cognito_mint_failed" };
       }
 
       // Transient error (network, S3 5xx) — throw to trigger Cloud Tasks retry.
