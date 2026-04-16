@@ -232,6 +232,34 @@ export const CreatePoolDesignBody = zod.object({
 /**
  * Hand-edited — NOT produced by orval.
  *
+ * Accepts an outdoor photo URL + a lighting style. Mirrors the iOS outdoor
+ * lighting wizard (OutdoorLightingDesignWizardViewModel, OutdoorLightingStyle).
+ * Single-style-step flow: upload photo -> choose lighting style.
+ *
+ * @summary Generate an outdoor lighting design transformation
+ */
+export const CreateOutdoorLightingDesignBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the outdoor photo to relight"),
+  lightingStyle: zod.enum([
+    "warmAmbient",
+    "stringLights",
+    "pathwayLighting",
+    "uplighting",
+    "lantern",
+    "modernArchitectural",
+    "moody",
+    "festiveHoliday",
+    "poolside",
+    "torchlight",
+  ]),
+});
+
+/**
+ * Hand-edited — NOT produced by orval.
+ *
  * Accepts a user room photo URL + reference style photo URL + spaceType.
  * Mirrors the iOS reference-style wizard (ReferenceStyleWizardViewModel,
  * SpaceType). No style/palette dictionaries — the style is conveyed entirely
