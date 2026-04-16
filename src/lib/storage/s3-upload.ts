@@ -66,7 +66,14 @@ export interface PersistGenerationImageInput {
 }
 
 export interface PersistGenerationImageResult {
+  /** Native S3 URL (`https://<bucket>.s3.<region>.amazonaws.com/<key>`). Always set. */
   outputImageUrl: string;
+  /**
+   * CloudFront-fronted URL for the same key. Populated only when
+   * `AWS_CLOUDFRONT_HOST` is configured; null otherwise. Clients that want
+   * CDN-cached delivery should prefer this when non-null.
+   */
+  outputImageCDNUrl: string | null;
   bytes: number;
   mime: string;
 }
@@ -74,8 +81,10 @@ export interface PersistGenerationImageResult {
 /**
  * Download a temporary AI output URL and upload it to S3 under
  * `generations/{userId}/{generationId}.{ext}` using the shared Cognito
- * credentials. Returns the canonical public URL (CloudFront-fronted when
- * configured, native S3 URL otherwise).
+ * credentials. Returns both the native S3 URL (`outputImageUrl`) and, when
+ * `AWS_CLOUDFRONT_HOST` is configured, the CloudFront-fronted URL
+ * (`outputImageCDNUrl`). Callers persist both so historical reads can choose
+ * between direct S3 and CDN delivery independently of runtime config.
  */
 export async function persistGenerationImage(
   input: PersistGenerationImageInput,
@@ -177,9 +186,10 @@ export async function persistGenerationImage(
     }),
   );
 
-  const outputImageUrl = env.AWS_CLOUDFRONT_HOST
+  const outputImageUrl = `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com/${key}`;
+  const outputImageCDNUrl = env.AWS_CLOUDFRONT_HOST
     ? `https://${env.AWS_CLOUDFRONT_HOST}/${key}`
-    : `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com/${key}`;
+    : null;
 
   logger.info(
     {
@@ -189,9 +199,10 @@ export async function persistGenerationImage(
       bytes,
       mime,
       key,
+      cdn: outputImageCDNUrl !== null,
     },
     "AI output persisted to S3",
   );
 
-  return { outputImageUrl, bytes, mime };
+  return { outputImageUrl, outputImageCDNUrl, bytes, mime };
 }

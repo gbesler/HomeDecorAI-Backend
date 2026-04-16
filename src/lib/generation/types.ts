@@ -78,6 +78,14 @@ export interface GenerationDoc {
   toolParams: Record<string, unknown> | null;
   inputImageUrl: string;
   outputImageUrl: string | null;
+  /**
+   * CloudFront-fronted URL for the same S3 key as `outputImageUrl`. Populated
+   * alongside `outputImageUrl` when `AWS_CLOUDFRONT_HOST` is configured at
+   * upload time, null otherwise (legacy records + any future deploy without
+   * CloudFront). Clients that want CDN-cached delivery prefer this when
+   * non-null and fall back to `outputImageUrl`.
+   */
+  outputImageCDNUrl: string | null;
   prompt: string;
   /** Builder actionMode that produced this prompt (R27). Nullable for records that predate the rewrite. */
   actionMode: string | null;

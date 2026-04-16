@@ -168,6 +168,7 @@ export async function processGeneration(
       await recordStorageResult({
         generationId,
         outputImageUrl: persisted.outputImageUrl,
+        outputImageCDNUrl: persisted.outputImageCDNUrl,
       });
     } catch (err) {
       if (err instanceof StorageUploadError) {

@@ -27,6 +27,20 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Patio design is a single-style transform on top of a single input image;
+  // same cost profile as garden. Same envelope pending usage telemetry.
+  patioDesign: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
+  // Pool design mirrors patio: single-style transform on top of a single
+  // input image. Same envelope pending usage telemetry.
+  poolDesign: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
   // Reference-style consumes two uploaded images and routes through more
   // expensive multi-reference models (fal-ai/flux-2/edit at ~$0.036/run vs
   // Klein at ~$0.012). Start with the same envelope as the other tools, but

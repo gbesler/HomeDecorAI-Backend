@@ -21,6 +21,8 @@ import { FloorTexture } from "../../schemas/generated/types/floorTexture.js";
 import { GardenColorPalette } from "../../schemas/generated/types/gardenColorPalette.js";
 import { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
+import { PatioStyle } from "../../schemas/generated/types/patioStyle.js";
+import { PoolStyle } from "../../schemas/generated/types/poolStyle.js";
 import { RoomType } from "../../schemas/generated/types/roomType.js";
 import { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 import { buildingTypes } from "./dictionaries/building-types.js";
@@ -29,6 +31,8 @@ import { designStyles } from "./dictionaries/design-styles.js";
 import { floorTextures } from "./dictionaries/floor-textures.js";
 import { gardenItems } from "./dictionaries/garden-items.js";
 import { gardenStyles } from "./dictionaries/garden-styles.js";
+import { patioStyles } from "./dictionaries/patio-styles.js";
+import { poolStyles } from "./dictionaries/pool-styles.js";
 import { rooms } from "./dictionaries/rooms.js";
 import { wallTextures } from "./dictionaries/wall-textures.js";
 import { logger } from "../logger.js";
@@ -76,6 +80,22 @@ export function validateDictionaries(options: ValidationOptions): void {
       "gardenStyles",
       Object.values(GardenStyle),
       gardenStyles,
+      checkStyleEntry,
+    ),
+  );
+  failures.push(
+    ...runValidator(
+      "patioStyles",
+      Object.values(PatioStyle),
+      patioStyles,
+      checkStyleEntry,
+    ),
+  );
+  failures.push(
+    ...runValidator(
+      "poolStyles",
+      Object.values(PoolStyle),
+      poolStyles,
       checkStyleEntry,
     ),
   );

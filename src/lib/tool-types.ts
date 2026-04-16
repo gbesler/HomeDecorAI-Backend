@@ -11,6 +11,14 @@ import {
   type GardenParams,
 } from "./prompts/tools/garden-design.js";
 import {
+  buildPatioPrompt,
+  type PatioParams,
+} from "./prompts/tools/patio-design.js";
+import {
+  buildPoolPrompt,
+  type PoolParams,
+} from "./prompts/tools/pool-design.js";
+import {
   buildInteriorPrompt,
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
@@ -37,6 +45,8 @@ import {
   CreateGardenDesignBody,
   CreateInteriorDesignBody,
   CreatePaintWallsBody,
+  CreatePatioDesignBody,
+  CreatePoolDesignBody,
   CreateReferenceStyleBody,
   CreateVirtualStagingBody,
 } from "../schemas/generated/api.js";
@@ -45,6 +55,8 @@ export type {
   InteriorParams,
   ExteriorParams,
   GardenParams,
+  PatioParams,
+  PoolParams,
   ReferenceStyleParams,
   PaintWallsParams,
   FloorRestyleParams,
@@ -200,6 +212,24 @@ const GARDEN_STYLES = [
   "modern",
   "rustic",
   "wildflower",
+] as const;
+
+const PATIO_STYLES = [
+  "outdoorDining",
+  "lounge",
+  "bistro",
+  "sundeck",
+  "firePit",
+  "pergola",
+  "zenDeck",
+  "coastal",
+] as const;
+
+const POOL_STYLES = [
+  "poolSpa",
+  "resort",
+  "waterfall",
+  "infinity",
 ] as const;
 
 const GARDEN_ITEMS_LIST = [
@@ -405,6 +435,54 @@ const gardenBodyJsonSchema = {
       },
       description:
         "Multi-select garden features. `surpriseMe` short-circuits the items layer.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
+const patioBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "patioStyle"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the patio photo to redesign (must use http or https scheme)",
+    },
+    patioStyle: {
+      type: "string" as const,
+      enum: PATIO_STYLES,
+      description: "Target patio style for the transformation",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
+const poolBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "poolStyle"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the pool photo to redesign (must use http or https scheme)",
+    },
+    poolStyle: {
+      type: "string" as const,
+      enum: POOL_STYLES,
+      description: "Target pool style for the transformation",
     },
     language: {
       type: "string" as const,
@@ -661,6 +739,50 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateGardenDesignBody>,
+    PromptResult
+  >,
+
+  patioDesign: {
+    toolKey: "patioDesign",
+    routePath: "/patio",
+    rateLimitKey: "patioDesign",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreatePatioDesignBody,
+    bodyJsonSchema: patioBodyJsonSchema,
+    summary: "Enqueue a patio design transformation",
+    description:
+      "Accepts a patio photo URL and a patio style. Creates a generation record and enqueues an async Cloud Tasks job with the same async pipeline and FCM notification as interior. Returns 202 with a generationId.",
+    buildPrompt: buildPatioPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreatePatioDesignBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreatePatioDesignBody>,
+    PromptResult
+  >,
+
+  poolDesign: {
+    toolKey: "poolDesign",
+    routePath: "/pool",
+    rateLimitKey: "poolDesign",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreatePoolDesignBody,
+    bodyJsonSchema: poolBodyJsonSchema,
+    summary: "Enqueue a pool design transformation",
+    description:
+      "Accepts a pool photo URL and a pool style. Creates a generation record and enqueues an async Cloud Tasks job with the same async pipeline and FCM notification as interior. Returns 202 with a generationId.",
+    buildPrompt: buildPoolPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreatePoolDesignBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreatePoolDesignBody>,
     PromptResult
   >,
 

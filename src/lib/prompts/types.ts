@@ -11,6 +11,8 @@ import type { ExteriorColorPalette } from "../../schemas/generated/types/exterio
 import type { GardenColorPalette } from "../../schemas/generated/types/gardenColorPalette.js";
 import type { GardenItem } from "../../schemas/generated/types/gardenItem.js";
 import type { GardenStyle } from "../../schemas/generated/types/gardenStyle.js";
+import type { PatioStyle } from "../../schemas/generated/types/patioStyle.js";
+import type { PoolStyle } from "../../schemas/generated/types/poolStyle.js";
 import type { RoomType } from "../../schemas/generated/types/roomType.js";
 import type { FloorTexture } from "../../schemas/generated/types/floorTexture.js";
 import type { WallTexture } from "../../schemas/generated/types/wallTexture.js";
@@ -181,6 +183,22 @@ export type BuildingTypesDict = Partial<Record<BuildingType, BuildingEntry>>;
 export type GardenStyleEntry = StyleEntry;
 
 export type GardenStylesDict = Partial<Record<GardenStyle, GardenStyleEntry>>;
+
+/**
+ * Per-patio-style dictionary entry. Same shape reuse as garden so
+ * `checkStyleEntry` validates both without duplication.
+ */
+export type PatioStyleEntry = StyleEntry;
+
+export type PatioStylesDict = Partial<Record<PatioStyle, PatioStyleEntry>>;
+
+/**
+ * Per-pool-style dictionary entry. Same shape reuse as garden/patio so
+ * `checkStyleEntry` validates all three without duplication.
+ */
+export type PoolStyleEntry = StyleEntry;
+
+export type PoolStylesDict = Partial<Record<PoolStyle, PoolStyleEntry>>;
 
 /**
  * Per-garden-item dictionary entry. Provides the human-readable phrase used
