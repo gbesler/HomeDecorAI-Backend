@@ -9,10 +9,8 @@ import { logger } from "./logger.js";
  * - Task name equals the generationId so Cloud Tasks performs submission-side
  *   dedup. If the enqueue endpoint is retried by the client, the second submit
  *   hits ALREADY_EXISTS and we treat it as success.
- * - Task payload carries the generationId plus the user's Firebase ID token.
- *   The processor uses the token to federate into Cognito with the exact same
- *   identity iOS uses, so backend writes and iOS uploads share the same
- *   Cognito Identity ID. The token must never be logged or persisted.
+ * - Task payload carries only the generationId. The processor reads everything
+ *   else from the Firestore record and uses shared Cognito credentials for S3.
  * - OIDC token audience must match what the receiver validates.
  * - dispatchDeadline is explicit (600s) to give the processor enough headroom
  *   for Render cold start + AI generation + S3 upload.
@@ -86,12 +84,6 @@ const DISPATCH_DEADLINE_SECONDS = 600;
 
 export interface EnqueueGenerationTaskInput {
   generationId: string;
-  /**
-   * Raw Firebase ID token from the user's request. Travels through the task
-   * payload to the processor, which feeds it into Cognito federation. Never
-   * logged.
-   */
-  firebaseIdToken: string;
 }
 
 /**
@@ -112,7 +104,6 @@ export async function enqueueGenerationTask(
 
   const payload = JSON.stringify({
     generationId: input.generationId,
-    firebaseIdToken: input.firebaseIdToken,
   });
 
   const task: protos.google.cloud.tasks.v2.ITask = {

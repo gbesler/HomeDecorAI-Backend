@@ -20,12 +20,16 @@
  * rejections, silent drops, quality regressions), re-verify the source docs
  * and update this file.
  *
- * Token budgets are defensive:
- * - Pruna: base model unverified; defensively assume Schnell-class T5=256
- *   limit with 200 target to front-load critical layers.
- * - fal Klein: Flux 2 token limit not published; 250 target keeps us inside
- *   the fal Klein guide's "<100 words creates confusion" sweet spot while
- *   allowing enough headroom for rich style descriptors.
+ * Token budgets:
+ * - Pruna: base model unverified; Flux Schnell-class models typically
+ *   tolerate 256+ tokens comfortably. Target 280 so the full 7-layer
+ *   composition (including photography-quality + lighting tails) survives
+ *   without routine truncation. Still well under any reasonable T5 ceiling.
+ * - fal Klein: Flux 2 token limit not formally published, but BFL's own
+ *   Kontext I2I guide routinely ships 300-400 token prompts. Target 350
+ *   so rich style descriptors + preservation clauses fit even for
+ *   complex interior scenes. Well above the "<100 words creates confusion"
+ *   floor flagged in the Klein guide.
  */
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -61,7 +65,7 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // Native reference-style support via images[] + reference_image index.
     // Docs: https://docs.pruna.ai/en/stable/docs_pruna_endpoints/performance_models/p-image-edit.html
     supportsReferenceImage: true,
-    maxPromptTokens: 200, // Defensive Schnell-class assumption
+    maxPromptTokens: 280, // Schnell-class comfortably handles this; leaves headroom for tail layers
     defaultAspectRatio: "16:9",
   },
   "fal-ai/flux-2/klein/9b/edit": {
@@ -73,7 +77,7 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // not formally documented as multi-reference editing — A/B against the
     // primary (Pruna) before relying on the fallback for production traffic.
     supportsReferenceImage: true,
-    maxPromptTokens: 250, // fal Klein guide sweet spot
+    maxPromptTokens: 350, // BFL Kontext I2I examples routinely exceed 300 tokens
     defaultImageSize: "landscape_4_3",
   },
 };

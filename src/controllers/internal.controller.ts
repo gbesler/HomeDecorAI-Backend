@@ -4,7 +4,6 @@ import { processGeneration } from "../services/generation-processor.js";
 
 const BodySchema = z.object({
   generationId: z.string().min(1),
-  firebaseIdToken: z.string().min(1),
 });
 
 /**
@@ -28,8 +27,6 @@ export async function processGenerationHandler(
 
   const parsed = BodySchema.safeParse(request.body);
   if (!parsed.success) {
-    // Log only the paths of invalid fields — never the values, since one of
-    // them is the Firebase ID token.
     request.log.warn(
       {
         event: "processor.bad_payload",
@@ -41,13 +38,12 @@ export async function processGenerationHandler(
     return { error: "Bad Request", message: "Invalid task payload" };
   }
 
-  const { generationId, firebaseIdToken } = parsed.data;
+  const { generationId } = parsed.data;
   const retryCount = request.cloudTask?.retryCount ?? 0;
 
   try {
     const result = await processGeneration({
       generationId,
-      firebaseIdToken,
       retryCount,
     });
 

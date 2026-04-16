@@ -30,12 +30,10 @@ const envSchema = z.object({
   AWS_S3_BUCKET: z.string().min(1),
   AWS_S3_REGION: z.string().min(1),
   AWS_CLOUDFRONT_HOST: z.string().min(1).optional(),
-  // Cognito Identity Pool shared with iOS. Backend federates the same
-  // Firebase ID token (`securetoken.google.com/<projectId>`) that iOS uses,
-  // so backend writes land on the same Cognito Identity ID as iOS uploads.
-  // No developer provider, no per-backend role mapping. The token itself is
-  // not minted on the backend — it arrives through the async-pipeline task
-  // payload, produced by the iOS client at enqueue time.
+  // Cognito Identity Pool used unauthenticated to mint shared temp AWS
+  // credentials for backend S3 writes. The pool must allow unauthenticated
+  // identities; the unauth role's IAM policy must allow s3:PutObject on
+  // `generations/*` in AWS_S3_BUCKET.
   AWS_COGNITO_IDENTITY_POOL_ID: z.string().regex(/^[a-z0-9-]+:[0-9a-f-]+$/),
   SWAGGER_API_KEY: z.string().min(1).optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),

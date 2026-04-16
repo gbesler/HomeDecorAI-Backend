@@ -32,7 +32,12 @@ export type GenerationStatus =
 /** Supported UI languages for push notification localization (R10). */
 export type SupportedLanguage = "tr" | "en";
 
-/** Typed error codes surfaced to iOS so the client can render differentiated failure UI. */
+/**
+ * Typed error codes surfaced to iOS so the client can render differentiated
+ * failure UI. `TOKEN_EXPIRED` is preserved only so legacy Firestore records
+ * produced by the previous per-user Cognito federation flow still deserialize
+ * cleanly; the current processor never emits it.
+ */
 export type GenerationErrorCode =
   | "ENQUEUE_FAILED"
   | "VALIDATION_FAILED"
@@ -98,13 +103,6 @@ export interface GenerationDoc {
    * the AI call. Once storageCompletedAt is set, outputImageUrl is canonical.
    */
   tempOutputUrl: string | null;
-  /**
-   * Cognito Identity ID that wrote the S3 object. Populated by the storage
-   * stage. Lets CloudTrail events (which identify the writer by Cognito
-   * identity) be cross-referenced back to a Firebase user in one query.
-   * Null until the storage checkpoint is recorded.
-   */
-  cognitoIdentityId: string | null;
   // ─── Async pipeline checkpoints (idempotency markers) ────────────────────
   /** Set when the enqueue endpoint writes the record. */
   queuedAt: admin.firestore.Timestamp | null;
@@ -180,15 +178,6 @@ export type ProcessGenerationResult =
 
 export interface ProcessGenerationInput {
   generationId: string;
-  /**
-   * Firebase ID token belonging to the user that enqueued the job. Travels
-   * through the Cloud Tasks payload so the processor can federate into
-   * Cognito with the same Firebase identity iOS uses. The token is ephemeral
-   * (~1h) — the processor runs an expiry pre-flight before every Cognito
-   * call and fails with TOKEN_EXPIRED if the remaining lifetime is too short,
-   * so the client can re-enqueue with a fresh token.
-   */
-  firebaseIdToken: string;
   /** Cloud Tasks retry count header, 0 for the first execution. */
   retryCount: number;
   /**

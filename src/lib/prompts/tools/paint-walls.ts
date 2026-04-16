@@ -9,34 +9,28 @@
  *      image is provided, the request becomes a multi-image call and the
  *      prompt references "image 2" as the style source for the walls.
  *
- * Every prompt is wrapped with the shared `structural-preservation`,
- * `positive-avoidance`, and `photography-quality` primitives so the output
- * preserves room geometry regardless of mode.
+ * Layer assembly + token-budget enforcement is delegated to the shared
+ * `composeSurfaceRestyleLayers` helper. Per-subject strings (action
+ * directives, style cores, lighting copy, generic fallback, focus
+ * directive) stay local so the prompt content for paint-walls is readable
+ * in one place.
  *
  * Phrasing rule: Flux models do not honor negation. Every directive is
  * written as a positive description of the desired output.
  */
 
 import type { z } from "zod";
-import {
-  KLEIN_GUIDANCE_BANDS,
-  PROVIDER_CAPABILITIES,
-} from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { wallTextures } from "../dictionaries/wall-textures.js";
-import { buildPhotographyQuality } from "../primitives/photography-quality.js";
-import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
-import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
-import { trimLayersToBudget, type PromptLayer } from "../token-budget.js";
 import type { PromptResult, WallTextureEntry } from "../types.js";
 import type { CreatePaintWallsBody } from "../../../schemas/generated/api.js";
+import {
+  composeSurfaceRestyleLayers,
+  type SurfaceRestyleConfig,
+} from "./_surface-restyle-base.js";
 
 const PROMPT_VERSION_CURRENT = "paintWalls/v1.0";
 const PROMPT_VERSION_FALLBACK = "paintWalls/fallback-v1";
-
-const PRIMARY_MODEL = "prunaai/p-image-edit";
-const PRIMARY_MAX_TOKENS =
-  PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 200;
 
 /**
  * Character ceiling for the user-supplied custom prompt. The Zod schema
@@ -44,6 +38,15 @@ const PRIMARY_MAX_TOKENS =
  * schema and keeps the action directive from blowing past the token budget.
  */
 const CUSTOM_PROMPT_MAX_CHARS = 500;
+
+const SURFACE_CONFIG: SurfaceRestyleConfig = {
+  tool: "paintWalls",
+  humanLabel: "Paint-walls",
+  focusDirective:
+    "Keep every other element in image 1 identical — furniture, flooring, " +
+    "ceiling, fixtures, artwork, and decor stay exactly as they are; only the " +
+    "wall surfaces receive the new finish.",
+};
 
 export type PaintWallsParams = z.infer<typeof CreatePaintWallsBody>;
 
@@ -56,6 +59,7 @@ export function buildPaintWallsPrompt(params: PaintWallsParams): PromptResult {
       logger.warn(
         {
           event: "prompt.unknown_texture",
+          tool: "paintWalls",
           textureId: params.textureId,
           fallback: "generic",
         },
@@ -72,6 +76,7 @@ export function buildPaintWallsPrompt(params: PaintWallsParams): PromptResult {
     logger.warn(
       {
         event: "prompt.empty_custom_prompt",
+        tool: "paintWalls",
         fallback: "generic",
       },
       "Empty customPrompt on paint-walls request — using generic fallback",
@@ -95,11 +100,12 @@ function composeTextureMode(entry: WallTextureEntry): PromptResult {
 
   const lighting = entry.lightingCharacter;
 
-  return composeLayers(
+  return composeSurfaceRestyleLayers(
     actionDirective,
     styleCore,
     lighting,
     PROMPT_VERSION_CURRENT,
+    SURFACE_CONFIG,
   );
 }
 
@@ -123,11 +129,12 @@ function composeCustomMode(
   const lighting =
     "Maintain the original room's daylight direction and overall warmth.";
 
-  return composeLayers(
+  return composeSurfaceRestyleLayers(
     actionDirective,
     styleCore,
     lighting,
     PROMPT_VERSION_CURRENT,
+    SURFACE_CONFIG,
   );
 }
 
@@ -141,76 +148,11 @@ function buildGenericFallback(): PromptResult {
   const lighting =
     "Soft even daylight; the wall surface absorbs light without specular highlights.";
 
-  return composeLayers(
+  return composeSurfaceRestyleLayers(
     actionDirective,
     styleCore,
     lighting,
     PROMPT_VERSION_FALLBACK,
+    SURFACE_CONFIG,
   );
-}
-
-// ─── Shared composition ──────────────────────────────────────────────────
-
-function composeLayers(
-  actionDirective: string,
-  styleCore: string,
-  lighting: string,
-  promptVersion: string,
-): PromptResult {
-  const focusDirective =
-    "Keep every other element in image 1 identical — furniture, flooring, " +
-    "ceiling, fixtures, artwork, and decor stay exactly as they are; only the " +
-    "wall surfaces receive the new finish.";
-
-  const positiveAvoidance = buildPositiveAvoidance([
-    "faithful to original room geometry",
-    "faithful to original furniture and decor",
-  ]);
-
-  const layers: PromptLayer[] = [
-    {
-      name: "action+focus",
-      priority: 1,
-      text: `${actionDirective} ${focusDirective}`,
-    },
-    { name: "style-core", priority: 2, text: styleCore },
-    {
-      name: "structural-preservation",
-      priority: 3,
-      text: buildStructuralPreservation("interior"),
-    },
-    { name: "positive-avoidance", priority: 4, text: positiveAvoidance },
-    {
-      name: "photography-quality",
-      priority: 5,
-      text: buildPhotographyQuality("interior"),
-    },
-    { name: "lighting", priority: 6, text: lighting },
-  ];
-
-  const trimResult = trimLayersToBudget(layers, PRIMARY_MAX_TOKENS);
-
-  if (trimResult.droppedLayers.length > 0) {
-    logger.warn(
-      {
-        event: "prompt.token_truncation",
-        tool: "paintWalls",
-        droppedLayers: trimResult.droppedLayers,
-        finalTokens: trimResult.finalTokens,
-        budget: PRIMARY_MAX_TOKENS,
-        overBudget: trimResult.overBudget,
-      },
-      `Paint-walls prompt trimmed to fit token budget (${trimResult.droppedLayers.length} layer(s) dropped)`,
-    );
-  }
-
-  return {
-    prompt: trimResult.composed,
-    positiveAvoidance,
-    // Paint-walls is geometry-sensitive — only wall surfaces change.
-    guidanceScale: KLEIN_GUIDANCE_BANDS.faithful,
-    actionMode: "transform",
-    guidanceBand: "faithful",
-    promptVersion,
-  };
 }
