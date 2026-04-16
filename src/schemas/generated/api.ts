@@ -456,6 +456,74 @@ export const CreateVirtualStagingBody = zod.object({
   language: zod.enum(["tr", "en"]).optional(),
 });
 
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a building photo URL + color palette + exterior material. Mirrors
+ * the iOS Exterior Painting wizard (ExteriorPaintingWizardView, ColorPalette
+ * .exteriorPalettes, ExteriorMaterial). Narrower than CreateExteriorDesign
+ * — no buildingType, no designStyle, no colorMode. The 12 palettes are
+ * shared with exterior-design; the 10 materials include a `keepOriginal`
+ * sentinel that tells the builder to repaint without swapping cladding.
+ *
+ * @summary Generate an exterior painting transformation
+ */
+const EXTERIOR_MATERIAL_VALUES = [
+  "keepOriginal",
+  "texturedBrick",
+  "vinylSiding",
+  "smoothStucco",
+  "naturalStone",
+  "woodCladding",
+  "metalPanel",
+  "fiberCement",
+  "limestoneFacade",
+  "concreteFacade",
+] as const;
+
+export const CreateExteriorPaintingBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the building photo to repaint"),
+  colorPalette: zod.enum([
+    "surpriseMe",
+    "laidBackBlues",
+    "highContrast",
+    "warmTones",
+    "pastelBreeze",
+    "peachyMeadow",
+    "earthyNeutrals",
+    "forestGreens",
+    "sunsetGlow",
+    "oceanBreeze",
+    "monochromeElegance",
+    "desertSand",
+  ]),
+  material: zod.enum(EXTERIOR_MATERIAL_VALUES),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a room photo URL + declutter level. Mirrors the iOS Clean &
+ * Organize wizard (CleanOrganizeWizardView, DeclutterLevel). No style,
+ * palette, or room type — the tool removes clutter and organizes existing
+ * items while preserving every other aspect of the room (geometry,
+ * furniture, style, materials, colors).
+ *
+ * @summary Generate a clean & organize transformation
+ */
+export const CreateCleanOrganizeBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the room photo to declutter"),
+  declutterLevel: zod.enum(["full", "light"]),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod

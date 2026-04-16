@@ -24,3 +24,4 @@ export * from "./gardenColorPalette";
 export * from "./spaceType";
 export * from "./wallTexture";
 export * from "./stagingMode";
+export * from "./exteriorMaterial";
