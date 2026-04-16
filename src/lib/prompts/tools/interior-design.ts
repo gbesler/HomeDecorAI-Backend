@@ -105,8 +105,9 @@ function composeTransform(
   const humanRoom = humanizeRoomType(roomType);
 
   const actionDirective =
-    `Convert this ${humanRoom} to a ${style.coreAesthetic} ${styleLabelFromKey(roomType, style)} interior, ` +
-    `replacing the furniture, decor, and finishes with items that match the ${style.coreAesthetic} aesthetic.`;
+    `Restyle the furniture and decor in this ${humanRoom} to a ${style.coreAesthetic} ${styleLabelFromKey(roomType, style)} aesthetic ` +
+    `while keeping the exact same room layout, camera angle, and perspective. ` +
+    `Only change the furniture, decor, and finishes.`;
 
   const roomFocus = composeRoomFocus(room.focusSlots);
 
@@ -147,13 +148,12 @@ function composeOverlay(
     const recipe = christmasRecipes[roomType as keyof typeof christmasRecipes];
     const decor = recipe?.decor ?? CHRISTMAS_FALLBACK_ACCENTS;
     actionDirective =
-      `Preserve the existing style of this ${humanRoom} and add ${decor}.`;
+      `Add ${decor} to this ${humanRoom} while keeping the existing style, furniture, and layout exactly as they are.`;
   } else {
     // F4 verb-split: non-whitelist rooms use "Add subtle festive accents to"
-    // to avoid the "preserve existing style" category error for utilitarian
-    // rooms (bathroom, kitchen, gamingRoom, stairway, etc.).
+    // for utilitarian rooms (bathroom, kitchen, gamingRoom, stairway, etc.).
     actionDirective =
-      `Add subtle festive accents to this ${humanRoom} without changing the room's core layout. ` +
+      `Add subtle festive accents to this ${humanRoom} while keeping the room's core layout exactly as it is. ` +
       `Include ${CHRISTMAS_FALLBACK_ACCENTS}.`;
   }
 
@@ -189,8 +189,9 @@ function composeTarget(
   const humanRoom = humanizeRoomType(roomType);
 
   const actionDirective =
-    `Stage this ${humanRoom} as a ${style.coreAesthetic} space, ` +
-    `restyling finishes and staging for broad appeal rather than personal expression.`;
+    `Restyle this ${humanRoom} as a ${style.coreAesthetic} space for broad appeal ` +
+    `while keeping the exact same room layout, camera angle, and perspective. ` +
+    `Change the finishes and staging to be universally inviting.`;
 
   // Merge room slots with style slotOverrides (style values take precedence).
   const mergedSlots: RoomSlots = {
@@ -227,7 +228,8 @@ function buildGenericFallback(roomType: string): PromptResult {
   const humanRoom = humanizeRoomType(roomType || "room");
 
   const actionDirective =
-    `Convert this ${humanRoom} to a tasteful, timeless interior with natural materials and a warm neutral palette.`;
+    `Restyle this ${humanRoom} to a tasteful, timeless interior with natural materials and a warm neutral palette ` +
+    `while keeping the exact same room layout, camera angle, and perspective.`;
 
   const roomFocus = `Refresh the furniture, decor, and finishes in balanced proportions.`;
 

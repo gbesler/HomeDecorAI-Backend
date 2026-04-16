@@ -24,30 +24,29 @@ export function buildStructuralPreservation(subject: Subject): string {
   switch (subject) {
     case "interior":
       return (
-        "while preserving the exact wall positions, window count, window shapes, " +
+        "Maintain identical wall positions, window count, window shapes, " +
         "ceiling height, door placements, floor plan, camera angle, lens perspective, " +
-        "and vanishing points. Maintain identical room geometry. " +
-        "Do not add or remove walls, windows, or doors."
+        "and vanishing points. Keep the room geometry exactly as it is."
       );
 
     case "exterior":
       return (
-        "while preserving the exact building massing, roof line, window count, " +
+        "Maintain identical building massing, roof line, window count, " +
         "window placements, door placements, and camera angle. " +
-        "Maintain identical structural geometry."
+        "Keep the structural geometry exactly as it is."
       );
 
     case "garden":
       return (
-        "while preserving the exact hardscape layout, paths, boundaries, " +
-        "existing mature trees, and camera angle. Maintain the identical " +
-        "plot shape and proportions."
+        "Maintain identical hardscape layout, paths, boundaries, " +
+        "existing mature trees, and camera angle. Keep the " +
+        "plot shape and proportions exactly as they are."
       );
 
     case "facade":
       return (
-        "while preserving the exact facade geometry, window and door positions, " +
-        "architectural details, and camera angle. Maintain identical building proportions."
+        "Maintain identical facade geometry, window and door positions, " +
+        "architectural details, and camera angle. Keep the building proportions exactly as they are."
       );
   }
 }

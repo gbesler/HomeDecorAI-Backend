@@ -112,9 +112,12 @@ function compose(
   const guidanceBand: GuidanceBand = isKeepLayout ? "faithful" : "balanced";
 
   const actionDirective = isKeepLayout
-    ? `Preserve any existing furniture in this ${humanRoom} and add complementary ${style.coreAesthetic} pieces to complete the staging. ` +
-      `Do not remove or replace existing furniture — only add items that complement the current layout.`
-    : `Stage this empty ${humanRoom} with ${style.coreAesthetic} furniture and decor to create a fully furnished, inviting space.`;
+    ? `Add complementary ${style.coreAesthetic} furniture pieces to this ${humanRoom} ` +
+      `while keeping all existing furniture exactly as it is. ` +
+      `Only add items that harmonize with the current layout.`
+    : `Stage this empty ${humanRoom} with ${style.coreAesthetic} furniture and decor ` +
+      `while keeping the exact same room layout, camera angle, and perspective. ` +
+      `Create a fully furnished, inviting space.`;
 
   const roomFocus = composeRoomFocus(room, isKeepLayout);
 
@@ -164,8 +167,10 @@ function buildStagingGenericFallback(
   const isKeepLayout = stagingMode === "keepLayout";
 
   const actionDirective = isKeepLayout
-    ? `Preserve any existing furniture in this ${humanRoom} and add complementary tasteful furniture and decor to complete the staging.`
-    : `Stage this empty ${humanRoom} with tasteful, timeless furniture and decor using natural materials and a warm neutral palette.`;
+    ? `Add complementary tasteful furniture pieces to this ${humanRoom} ` +
+      `while keeping all existing furniture exactly as it is.`
+    : `Stage this empty ${humanRoom} with tasteful, timeless furniture and decor ` +
+      `while keeping the exact same room layout, camera angle, and perspective.`;
 
   const roomFocus = isKeepLayout
     ? `Add complementary pieces that harmonize with existing furniture, filling empty areas appropriately.`
