@@ -28,6 +28,7 @@ import { logger } from "../../logger.js";
 import { buildingTypes } from "../dictionaries/building-types.js";
 import { exteriorPalettes } from "../dictionaries/color-palettes.js";
 import { designStyles } from "../dictionaries/design-styles.js";
+import { exteriorStyleOverrides } from "../dictionaries/exterior-style-overrides.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -116,40 +117,63 @@ function compose(
   palette: ColorPaletteEntry | null,
 ): PromptResult {
   const preservationMode = colorMode === "structuralPreservation";
-  const guidanceBand: GuidanceBand = preservationMode
-    ? "faithful"
-    : style.guidanceBand;
+  // Exterior is geometry-sensitive — the structural-preservation primitive
+  // already locks massing/openings, so cap at `balanced` even in renovation
+  // mode to prevent style-native `creative` bands from drifting the facade.
+  const guidanceBand: GuidanceBand = preservationMode ? "faithful" : "balanced";
 
-  // Action directive differs by colorMode.
+  // `buildingType` is the iOS building id (e.g. "house") — kept in the
+  // signature for parity with the generic fallback and as a future hook for
+  // building-aware overrides.
+  void buildingType;
+
+  // Action directive differs by colorMode. Both modes use a single
+  // aesthetic descriptor (previously mixed `coreAesthetic + moodKeywords[0]`
+  // which produced clumsy "clean, intentional, architecturally honest
+  // sophisticated" concatenations).
   const actionDirective = preservationMode
-    ? `Change the paint and surface finishes of this ${building.label} to a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} palette ` +
-      `while keeping the exact same building shape, roof line, window positions, door placements, and camera angle. ` +
-      `Only restyle the surface treatments, paint colors, cladding finishes, and trim details.`
-    : `Restyle the exterior finishes of this ${building.label} to a ${style.coreAesthetic} ${style.moodKeywords[0] ?? "balanced"} aesthetic ` +
-      `while keeping the exact same building shape and camera angle. ` +
-      `Change the cladding, paint colors, and surface treatments.`;
+    ? `Repaint this ${building.label} in a ${style.coreAesthetic} palette ` +
+      `while keeping the existing cladding material, surface texture, roof line, ` +
+      `window and door placements, and camera angle identical. Only the paint colors and trim finishes change.`
+    : `Reclad and restyle the exterior of this ${building.label} to a ${style.coreAesthetic} aesthetic ` +
+      `while keeping the building massing, roof line, window and door placements, and camera angle intact. ` +
+      `Update the cladding material, paint colors, trim, and surface treatments.`;
 
-  const buildingFocus =
-    `Characterize it as a ${building.massingDescriptor}. ` +
-    `Keep ${building.signatureFeatures.join(", ")}.`;
+  // In preservation mode the primitive + action directive fully lock geometry,
+  // so mentioning signatureFeatures here is redundant and over-constrains the
+  // renovation scope. In renovation mode we want the model to emphasize the
+  // building's massing, not re-list features that might otherwise be restyled.
+  const buildingFocus = preservationMode
+    ? `The building reads as a ${building.massingDescriptor}.`
+    : `Emphasize the ${building.massingDescriptor}.`;
 
-  // Color palette: override the style's native palette when the user
-  // picked a concrete palette (non-empty swatch).
+  // Color palette: concrete palette wins; else fall back to the style's
+  // exterior-appropriate palette when present; else interior palette as a
+  // last resort.
+  const fallbackPalette = resolveStylePalette(
+    style,
+    styleKeyFromEntry(style),
+  );
   const effectivePalette =
-    palette && palette.swatch.length > 0 ? palette.swatch : style.colorPalette;
+    palette && palette.swatch.length > 0 ? palette.swatch : fallbackPalette;
   const effectiveMood =
     palette && palette.mood ? palette.mood : style.moodKeywords.join(", ");
   const styleCore = `Color palette: ${effectivePalette.join(", ")}. Mood: ${effectiveMood}.`;
 
-  // Exterior skips the interior-specific `signatureItems` slot (those describe
-  // furniture like "low-profile sectional sofa"). Only materials go into
-  // styleDetail for exterior.
-  const styleDetail = `Materials and surface treatments: ${style.materials.join(", ")}.`;
+  // Materials come from the exterior override where available; fall back to
+  // the interior list only when no override is registered.
+  const exteriorMaterials = resolveStyleMaterials(
+    style,
+    styleKeyFromEntry(style),
+  );
+  const styleDetail = `Materials and surface treatments: ${exteriorMaterials.join(", ")}.`;
 
-  // Lighting — use the style's lighting character but anchor it as an
-  // exterior natural light cue.
+  // Lighting — anchor to the input photograph's existing natural light.
+  // Previously appended `style.lightingCharacter` which is interior-biased
+  // ("warm pendant glow", "bright overcast morning") and contradicted the
+  // input-consistent framing.
   const lighting =
-    `Natural exterior daylight consistent with the input photograph, with ${style.lightingCharacter}.`;
+    "Natural exterior daylight consistent with the input photograph.";
 
   return composeLayers(
     actionDirective,
@@ -161,6 +185,46 @@ function compose(
     guidanceBand,
     PROMPT_VERSION_CURRENT,
   );
+}
+
+// ─── Style-keyed lookup helpers ─────────────────────────────────────────────
+//
+// The builder receives a `StyleEntry` (the dictionary value) but the exterior
+// override table is keyed by the design-style *id*. We resolve the id by
+// reverse lookup on the shared `designStyles` dictionary — O(n) on 18
+// entries per call, acceptable at prompt-build frequency.
+
+function styleKeyFromEntry(style: StyleEntry): string | null {
+  for (const [key, entry] of Object.entries(designStyles)) {
+    if (entry === style) return key;
+  }
+  return null;
+}
+
+function resolveStyleMaterials(
+  style: StyleEntry,
+  styleKey: string | null,
+): string[] {
+  if (styleKey) {
+    const override =
+      exteriorStyleOverrides[styleKey as keyof typeof exteriorStyleOverrides];
+    if (override && override.materials.length > 0) return override.materials;
+  }
+  return style.materials;
+}
+
+function resolveStylePalette(
+  style: StyleEntry,
+  styleKey: string | null,
+): string[] {
+  if (styleKey) {
+    const override =
+      exteriorStyleOverrides[styleKey as keyof typeof exteriorStyleOverrides];
+    if (override && override.colorPalette && override.colorPalette.length > 0) {
+      return override.colorPalette;
+    }
+  }
+  return style.colorPalette;
 }
 
 function buildExteriorGenericFallback(

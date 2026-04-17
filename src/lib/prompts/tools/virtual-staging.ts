@@ -11,7 +11,8 @@
  * - `buildPhotographyQuality("interior")`, `buildStructuralPreservation("interior")`,
  *   `buildPositiveAvoidance()` primitives.
  * - `designStyles` dictionary for style attributes.
- * - `exteriorPalettes` dictionary for color palette overrides (same 12 IDs).
+ * - `stagingPalettes` dictionary (interior-tuned twin of `exteriorPalettes`,
+ *   shares the 12 iOS palette IDs) for color palette overrides.
  *
  * @see docs/plans/2026-04-15-001-feat-virtual-staging-tool-plan.md
  */
@@ -21,7 +22,7 @@ import {
   PROVIDER_CAPABILITIES,
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
-import { exteriorPalettes } from "../dictionaries/color-palettes.js";
+import { stagingPalettes } from "../dictionaries/color-palettes.js";
 import { designStyles } from "../dictionaries/design-styles.js";
 import { rooms } from "../dictionaries/rooms.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
@@ -62,7 +63,7 @@ export function buildVirtualStagingPrompt(
   const styleEntry = designStyles[designStyle as keyof typeof designStyles];
   const roomEntry = rooms[roomType as keyof typeof rooms];
   const paletteEntry =
-    exteriorPalettes[colorPalette as keyof typeof exteriorPalettes];
+    stagingPalettes[colorPalette as keyof typeof stagingPalettes];
 
   if (!styleEntry || !roomEntry) {
     if (!styleEntry) {
