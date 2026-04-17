@@ -7,6 +7,10 @@ import {
   type ExteriorParams,
 } from "./prompts/tools/exterior-design.js";
 import {
+  buildExteriorPaintingPrompt,
+  type ExteriorPaintingParams,
+} from "./prompts/tools/exterior-painting.js";
+import {
   buildGardenPrompt,
   type GardenParams,
 } from "./prompts/tools/garden-design.js";
@@ -45,6 +49,7 @@ import {
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateExteriorDesignBody,
+  CreateExteriorPaintingBody,
   CreateFloorRestyleBody,
   CreateGardenDesignBody,
   CreateInteriorDesignBody,
@@ -59,6 +64,7 @@ import {
 export type {
   InteriorParams,
   ExteriorParams,
+  ExteriorPaintingParams,
   GardenParams,
   PatioParams,
   PoolParams,
@@ -289,6 +295,19 @@ const EXTERIOR_PALETTES = [
   "desertSand",
 ] as const;
 
+const EXTERIOR_MATERIALS = [
+  "keepOriginal",
+  "texturedBrick",
+  "vinylSiding",
+  "smoothStucco",
+  "naturalStone",
+  "woodCladding",
+  "metalPanel",
+  "fiberCement",
+  "limestoneFacade",
+  "concreteFacade",
+] as const;
+
 const FLOOR_TEXTURES = [
   "oakWood",
   "walnut",
@@ -412,6 +431,37 @@ const exteriorBodyJsonSchema = {
       enum: EXTERIOR_PALETTES,
       description:
         "Color palette id. `surpriseMe` lets the style drive the palette.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
+const exteriorPaintingBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "colorPalette", "material"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the building photo to repaint (must use http or https scheme)",
+    },
+    colorPalette: {
+      type: "string" as const,
+      enum: EXTERIOR_PALETTES,
+      description:
+        "Color palette id. `surpriseMe` lets the builder pick a tasteful default.",
+    },
+    material: {
+      type: "string" as const,
+      enum: EXTERIOR_MATERIALS,
+      description:
+        "Cladding/material id. `keepOriginal` preserves the existing cladding and only changes paint color; any other value swaps the cladding.",
     },
     language: {
       type: "string" as const,
@@ -770,6 +820,28 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateExteriorDesignBody>,
+    PromptResult
+  >,
+
+  exteriorPainting: {
+    toolKey: "exteriorPainting",
+    routePath: "/exterior-painting",
+    rateLimitKey: "exteriorPainting",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateExteriorPaintingBody,
+    bodyJsonSchema: exteriorPaintingBodyJsonSchema,
+    summary: "Enqueue an exterior painting transformation",
+    description:
+      "Accepts a building photo URL, a color palette, and a cladding material id. Unlike exterior design this tool does not restyle the aesthetic — it only repaints the facade and optionally swaps the cladding material (or keeps the original when `material` is `keepOriginal`). Creates a generation record and enqueues an async Cloud Tasks job with the same async pipeline and FCM notification as the other tools. Returns 202 with a generationId.",
+    buildPrompt: buildExteriorPaintingPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateExteriorPaintingBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateExteriorPaintingBody>,
     PromptResult
   >,
 

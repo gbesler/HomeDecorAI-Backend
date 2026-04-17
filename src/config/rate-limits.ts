@@ -22,6 +22,13 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Exterior painting is a single-image repaint/cladding-swap on the same
+  // cost profile as exterior design. Same envelope pending usage telemetry.
+  exteriorPainting: {
+    minuteLimit: 5,
+    hourlyLimit: 30,
+    dailyLimit: 100,
+  },
   gardenDesign: {
     minuteLimit: 5,
     hourlyLimit: 30,

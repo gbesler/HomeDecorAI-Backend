@@ -542,6 +542,56 @@ export const CreateVirtualStagingBody = zod.object({
   language: zod.enum(["tr", "en"]).optional(),
 });
 
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a building photo URL + exterior color palette + cladding material.
+ * Mirrors the iOS exterior painting wizard (ExteriorPaintingWizardViewModel,
+ * ColorPalette.exteriorPalettes, ExteriorMaterial). Unlike exterior design,
+ * this tool only repaints / swaps cladding + applies a palette — no building
+ * type or design style inputs.
+ *
+ * `material === "keepOriginal"` is a sentinel meaning "repaint but keep the
+ * existing cladding/material intact".
+ *
+ * @summary Generate an exterior painting transformation
+ */
+const EXTERIOR_MATERIAL_VALUES = [
+  "keepOriginal",
+  "texturedBrick",
+  "vinylSiding",
+  "smoothStucco",
+  "naturalStone",
+  "woodCladding",
+  "metalPanel",
+  "fiberCement",
+  "limestoneFacade",
+  "concreteFacade",
+] as const;
+
+export const CreateExteriorPaintingBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the building photo to repaint"),
+  colorPalette: zod.enum([
+    "surpriseMe",
+    "laidBackBlues",
+    "highContrast",
+    "warmTones",
+    "pastelBreeze",
+    "peachyMeadow",
+    "earthyNeutrals",
+    "forestGreens",
+    "sunsetGlow",
+    "oceanBreeze",
+    "monochromeElegance",
+    "desertSand",
+  ]),
+  material: zod.enum(EXTERIOR_MATERIAL_VALUES),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod
