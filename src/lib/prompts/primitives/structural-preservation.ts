@@ -10,7 +10,7 @@
  * @see https://docs.bfl.ml/guides/prompting_guide_kontext_i2i
  */
 
-type Subject = "interior" | "exterior" | "garden" | "facade";
+type Subject = "interior" | "exterior" | "garden" | "facade" | "pool";
 
 /**
  * Produce the structural preservation clause for a given subject.
@@ -47,6 +47,13 @@ export function buildStructuralPreservation(subject: Subject): string {
       return (
         "Maintain identical facade geometry, window and door positions, " +
         "architectural details, and camera angle. Keep the building proportions exactly as they are."
+      );
+
+    case "pool":
+      return (
+        "Maintain identical pool shape, pool edges, coping line, waterline level, " +
+        "pool depth proportions, surround footprint, and camera angle. " +
+        "Keep the pool geometry and its position in the frame exactly as they are."
       );
   }
 }
