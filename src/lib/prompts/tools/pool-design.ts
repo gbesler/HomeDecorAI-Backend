@@ -70,13 +70,21 @@ export function buildPoolPrompt(params: PoolParams): PromptResult {
 function compose(style: StyleEntry): PromptResult {
   const guidanceBand: GuidanceBand = style.guidanceBand;
 
-  const actionDirective = `Restyle this pool as a ${style.coreAesthetic}, keeping the existing pool footprint and surrounding structural elements intact.`;
+  // Reinforce change over preservation. Structural-preservation primitive
+  // already locks the pool footprint and camera angle; the directive here
+  // drives the restyle so the model doesn't underpower it.
+  const actionDirective =
+    `Restyle this pool into a ${style.coreAesthetic} swimming pool scene. ` +
+    `Update the coping, interior finish, decking, and surround planting while ` +
+    `keeping the pool footprint and camera angle.`;
 
   const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
 
   const styleDetail = `Materials and surround: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph, with ${style.lightingCharacter}.`;
+  // Anchor lighting to the input photograph. `style.lightingCharacter`
+  // omitted to prevent contradiction with the original frame's time of day.
+  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
 
   return composeLayers(
     actionDirective,

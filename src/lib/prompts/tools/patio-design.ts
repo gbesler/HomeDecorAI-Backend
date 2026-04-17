@@ -71,13 +71,24 @@ export function buildPatioPrompt(params: PatioParams): PromptResult {
 function compose(style: StyleEntry): PromptResult {
   const guidanceBand: GuidanceBand = style.guidanceBand;
 
-  const actionDirective = `Restyle this patio as a ${style.coreAesthetic}, keeping the existing layout and structural elements intact.`;
+  // Action directive: reinforce change over preservation. The
+  // structural-preservation primitive already locks the plot boundary,
+  // paths, and camera angle — the directive here focuses on transformation
+  // so the model doesn't underpower the restyle.
+  const actionDirective =
+    `Restyle this patio into a ${style.coreAesthetic} outdoor living space. ` +
+    `Update the furnishings, surface finishes, and decor while keeping the ` +
+    `plot footprint and camera angle.`;
 
   const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
 
   const styleDetail = `Materials and furnishings: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph, with ${style.lightingCharacter}.`;
+  // Anchor lighting to the input photograph. `style.lightingCharacter` is a
+  // per-style dictionary value (e.g. "warm filtered afternoon light") that
+  // can contradict the input photo's time-of-day; omitted so the primitive
+  // lighting stays coherent with the original frame.
+  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
 
   return composeLayers(
     actionDirective,
