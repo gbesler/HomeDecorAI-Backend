@@ -31,8 +31,8 @@ import type {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const PROMPT_VERSION_CURRENT = "poolDesign/v1.0";
-const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1";
+const PROMPT_VERSION_CURRENT = "poolDesign/v1.1";
+const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1.1";
 
 const PRIMARY_MODEL = "prunaai/p-image-edit";
 const PRIMARY_MAX_TOKENS =
@@ -70,13 +70,13 @@ export function buildPoolPrompt(params: PoolParams): PromptResult {
 function compose(style: StyleEntry): PromptResult {
   const guidanceBand: GuidanceBand = style.guidanceBand;
 
-  // Reinforce change over preservation. Structural-preservation primitive
-  // already locks the pool footprint and camera angle; the directive here
-  // drives the restyle so the model doesn't underpower it.
+  // Apply the aesthetic to finishes and surround only. Structural-preservation
+  // primitive locks the pool shape, edges, and camera angle; this directive
+  // scopes the restyle so the model does not alter geometry or composition.
   const actionDirective =
-    `Restyle this pool into a ${style.coreAesthetic} swimming pool scene. ` +
-    `Update the coping, interior finish, decking, and surround planting while ` +
-    `keeping the pool footprint and camera angle.`;
+    `Apply a ${style.coreAesthetic} aesthetic to this swimming pool scene. ` +
+    `Update only the coping finish, interior tile/plaster finish, decking material, ` +
+    `and surround planting. Do not change the pool shape, edges, or camera angle.`;
 
   const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
 
@@ -98,7 +98,7 @@ function compose(style: StyleEntry): PromptResult {
 }
 
 function buildPoolGenericFallback(): PromptResult {
-  const actionDirective = `Restyle this pool as a tasteful, balanced residential pool with natural materials and clean surround, keeping the existing footprint intact.`;
+  const actionDirective = `Apply a tasteful, balanced residential pool aesthetic with natural materials and a clean surround. Update only finishes and planting; keep the pool shape, edges, and camera angle exactly as they are.`;
 
   const styleCore = `Color palette: clear aqua, warm travertine, soft cream, sun-bleached timber. Mood: balanced, inviting, calm.`;
 
@@ -112,7 +112,7 @@ function buildPoolGenericFallback(): PromptResult {
     styleDetail,
     lighting,
     "transform",
-    "balanced",
+    "faithful",
     PROMPT_VERSION_FALLBACK,
   );
 }
@@ -139,7 +139,7 @@ function composeLayers(
     {
       name: "structural-preservation",
       priority: 3,
-      text: buildStructuralPreservation("garden"),
+      text: buildStructuralPreservation("pool"),
     },
     { name: "positive-avoidance", priority: 4, text: positiveAvoidance },
     { name: "style-detail", priority: 5, text: styleDetail },

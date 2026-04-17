@@ -44,7 +44,7 @@ export const poolStyles: PoolStylesDict = {
       "warm late-afternoon sunlight on water with subtle underwater pool lighting for evening",
     moodKeywords: ["elegant", "resort-like", "integrated"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("pool-spa-combo"),
   },
 
@@ -72,7 +72,7 @@ export const poolStyles: PoolStylesDict = {
       "bright open tropical daylight with crisp directional shadows and soft late-day warmth",
     moodKeywords: ["resort", "lush", "indulgent"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("resort-pool"),
   },
 
@@ -100,7 +100,7 @@ export const poolStyles: PoolStylesDict = {
       "dappled afternoon light filtering through planting with crisp highlights on falling water",
     moodKeywords: ["naturalistic", "lush", "dramatic"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("waterfall-pool"),
   },
 
@@ -156,7 +156,7 @@ export const poolStyles: PoolStylesDict = {
       "dappled tropical daylight on turquoise water with warm amber late-day glow",
     moodKeywords: ["natural", "tropical", "serene"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("lagoon-pool"),
   },
 
@@ -212,7 +212,7 @@ export const poolStyles: PoolStylesDict = {
       "warm Mediterranean sunlight with crisp shadows and a soft dusk amber over still water",
     moodKeywords: ["sun-drenched", "timeless", "aromatic"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("mediterranean-pool"),
   },
 
@@ -240,7 +240,7 @@ export const poolStyles: PoolStylesDict = {
       "dramatic shaded grotto interior with bright water reflections and dappled filtered daylight",
     moodKeywords: ["dramatic", "hidden", "naturalistic"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("grotto-pool"),
   },
 
@@ -268,7 +268,7 @@ export const poolStyles: PoolStylesDict = {
       "bright resort daylight with crisp highlights on the shallow entry and warm late-day reflection",
     moodKeywords: ["resort", "relaxed", "wade-in"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("beach-entry-pool"),
   },
 
@@ -296,7 +296,7 @@ export const poolStyles: PoolStylesDict = {
       "warm classical daylight catching mosaic color beneath the water, with soft dusk gold on stone",
     moodKeywords: ["ornate", "classical", "crafted"],
     actionMode: "transform",
-    guidanceBand: "balanced",
+    guidanceBand: "faithful",
     references: placeholderRefs("mosaic-tile-pool"),
   },
 };
