@@ -9,7 +9,8 @@
  *   3. Adopt only image 2's palette, materials, lighting, and mood
  *
  * Producers: Pruna `p-image-edit` (images[0]=target, images[1]=reference,
- * `reference_image: "2"`) and fal `flux-2/klein/9b/edit` (image_urls=[target,
+ * `reference_image: "1"` — 1-based index of the PRIMARY image being edited,
+ * not the style reference) and fal `flux-2/klein/9b/edit` (image_urls=[target,
  * ref] when capabilities.supportsReferenceImage=true). Both accept explicit
  * "image 1 / image 2" references in the prompt text.
  *

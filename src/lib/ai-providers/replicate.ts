@@ -26,10 +26,14 @@ export async function callReplicate(
   const capabilities = PROVIDER_CAPABILITIES[model];
 
   // Reference-style tool passes a second image as the aesthetic reference.
-  // Pruna p-image-edit exposes this via:
-  //   - `images[]` accepts 1-5 items (index 1 = target)
-  //   - `reference_image`: string index ("1","2",...) marking which array
-  //     element is the style reference
+  // Pruna p-image-edit exposes multi-image editing via:
+  //   - `images[]` accepts 1-5 items
+  //   - `reference_image`: 1-based string index ("1","2",...) that marks
+  //     which array element is the PRIMARY image being edited — NOT the
+  //     style reference. The other array elements are referenced from the
+  //     prompt ("image 2", "image 3", ...) as auxiliary inputs (style refs,
+  //     backgrounds, subjects to combine).
+  //     Docs: https://docs.pruna.ai/en/stable/docs_pruna_endpoints/performance_models/p-image-edit.html
   // Models that don't advertise multi-image support silently ignore the
   // second URL (capabilities.supportsReferenceImage=false).
   const hasReference =
@@ -37,6 +41,9 @@ export async function callReplicate(
     typeof input.referenceImageUrl === "string" &&
     input.referenceImageUrl.length > 0;
 
+  // Order matters: images[0] is the target being edited, images[1] is the
+  // style reference. `reference_image="1"` tells Pruna to treat images[0]
+  // as the primary; the prompt then invokes images[1] as "image 2".
   const images = hasReference
     ? [input.imageUrl, input.referenceImageUrl as string]
     : [input.imageUrl];
@@ -53,19 +60,21 @@ export async function callReplicate(
   };
 
   if (hasReference) {
-    // Pruna uses 1-based string index pointing into `images[]`. With
-    // images = [target, reference], the reference is element 2 in 1-based
-    // notation. If Pruna ever changes to 0-based or rejects out-of-range,
-    // the structured log below makes the regression visible in production
-    // before a user reports a quality issue.
-    replicateInput.reference_image = "2";
+    // Pruna's `reference_image` is the 1-based index of the PRIMARY image
+    // being edited, not the style reference. With images = [target, styleRef],
+    // the target (room) lives at 1-based index "1". The prompt then invokes
+    // images[1] as "image 2" to convey the style reference.
+    // Regression canary: if Pruna ever flips the semantics (e.g. "2" becomes
+    // required to point at the style ref), the structured log below surfaces
+    // it in production before it manifests as a quality complaint.
+    replicateInput.reference_image = "1";
     logger.info(
       {
         event: "provider.reference_image",
         provider: "replicate",
         model,
         imagesCount: images.length,
-        refIndex: "2",
+        primaryIndex: "1",
       },
       "Replicate call carries a reference image",
     );
