@@ -25,6 +25,16 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
+
+      // ─── Albums: read-your-own; writes go through /api/albums ───────────
+      // V1 keeps client writes disabled — iOS calls the REST endpoints,
+      // which use the admin SDK. Reads are open so a future client-side
+      // listener can subscribe directly to the user's album list without
+      // another rule change.
+      match /albums/{albumId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if false;
+      }
     }
 
     // ─── Public config (revcat, mixpanel, aws) ────────────────────────────
