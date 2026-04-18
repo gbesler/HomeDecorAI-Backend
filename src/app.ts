@@ -50,6 +50,11 @@ export function buildApp() {
           name: "Users",
           description: "Authenticated user settings (FCM token registration)",
         },
+        {
+          name: "Albums",
+          description:
+            "User-scoped albums grouping generations many-to-many via a generationIds array",
+        },
       ],
       components: {
         securitySchemes: {

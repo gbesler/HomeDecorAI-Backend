@@ -93,4 +93,20 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
+  // Album writes — cheap Firestore ops, but the add-generation endpoint
+  // performs an extra `assertGenerationOwnedBy` read that an attacker could
+  // abuse to enumerate other users' generationIds. Cap aggressively but
+  // still leave headroom for legitimate batch usage from the AddToAlbumSheet.
+  albumWrite: {
+    minuteLimit: 30,
+    hourlyLimit: 200,
+    dailyLimit: 1000,
+  },
+  // Album reads — pure list/get. Loose envelope; pull-to-refresh from iOS
+  // can fire several times per minute under normal use.
+  albumRead: {
+    minuteLimit: 60,
+    hourlyLimit: 500,
+    dailyLimit: 2000,
+  },
 };

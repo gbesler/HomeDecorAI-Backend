@@ -41,7 +41,10 @@ export async function getDesignHistory(
     toolType: doc.toolType,
     roomType: doc.roomType,
     designStyle: doc.designStyle,
-    toolParams: doc.toolParams,
+    // Normalize undefined → null at the data boundary so the wire format
+    // is consistent regardless of whether the Firestore doc has the field
+    // (newer generations) or omits it entirely (legacy pre-toolParams docs).
+    toolParams: doc.toolParams ?? null,
     inputImageUrl: doc.inputImageUrl,
     outputImageUrl: doc.outputImageUrl,
     outputImageCDNUrl: doc.outputImageCDNUrl,
