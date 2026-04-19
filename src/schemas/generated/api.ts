@@ -646,6 +646,55 @@ export const CreateRemoveObjectsBody = zod.object({
   language: zod.enum(["tr", "en"]).optional(),
 });
 
+/**
+ * Replace & Add Object — prompt-driven inpainting of a user-painted region.
+ *
+ * Distinct from Remove Objects (which uses LaMa to extend surroundings): this
+ * tool generates NEW content inside the masked region guided by an inspiration
+ * prompt curated from a 40×20 item library on the client.
+ *
+ * Mask encoding: white pixels = replace, black pixels = preserve. Both
+ * `imageUrl` and `maskUrl` must be hosted on an allowlisted host (CloudFront
+ * or S3) — SSRF guard, same as Remove Objects.
+ *
+ * `categoryId` + `inspirationId` ride along for analytics (never reach the
+ * AI provider); they live inside `toolParams` on the `GenerationDoc`.
+ *
+ * @summary Enqueue a replace/add object inpainting
+ */
+export const CreateReplaceAddObjectBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the room photo"),
+  maskUrl: zod
+    .string()
+    .url()
+    .describe(
+      "Public URL of the binary mask PNG (white = replace, black = preserve)",
+    ),
+  prompt: zod
+    .string()
+    .min(1)
+    .max(500)
+    .describe(
+      "Inspiration prompt describing what to place in the masked region",
+    ),
+  categoryId: zod
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_-]+$/, "must be alphanumeric/underscore/dash")
+    .describe("Inspiration category id (analytics key)"),
+  inspirationId: zod
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-zA-Z0-9_-]+$/, "must be alphanumeric/underscore/dash")
+    .describe("Inspiration item id (analytics key)"),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod

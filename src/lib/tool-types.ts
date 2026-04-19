@@ -51,6 +51,10 @@ import {
   type RemoveObjectsParams,
 } from "./prompts/tools/remove-objects.js";
 import {
+  buildReplaceAddObjectPrompt,
+  type ReplaceAddObjectParams,
+} from "./prompts/tools/replace-add-object.js";
+import {
   buildExteriorPaintingPrompt,
   type ExteriorPaintingParams,
 } from "./prompts/tools/exterior-painting.js";
@@ -58,6 +62,7 @@ import type { PromptResult } from "./prompts/types.js";
 import {
   CreateCleanOrganizeBody,
   CreateRemoveObjectsBody,
+  CreateReplaceAddObjectBody,
   CreateExteriorDesignBody,
   CreateExteriorPaintingBody,
   CreateFloorRestyleBody,
@@ -85,6 +90,7 @@ export type {
   CleanOrganizeParams,
   ExteriorPaintingParams,
   RemoveObjectsParams,
+  ReplaceAddObjectParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -127,12 +133,17 @@ export interface ToolTypeConfig<
    * - `"remove-only"`:         LaMa with a caller-supplied mask URL.
    *                            Expects `maskUrl` in toolParams; no SAM call.
    *                            `prompt` is ignored (LaMa takes no prompt).
+   * - `"inpaint-with-prompt"`: Flux Fill with a caller-supplied mask URL
+   *                            and a prompt. Generates NEW content inside
+   *                            the masked region (Replace & Add Object).
+   *                            Distinct from `remove-only`: LaMa extends
+   *                            surroundings, Flux Fill synthesizes.
    *
-   * Segment and removal model slugs are sourced from env
-   * (`REPLICATE_SEGMENTATION_MODEL`, `REPLICATE_REMOVAL_MODEL`) so new
-   * pipeline tools do not duplicate them in every registry entry.
+   * Model slugs are sourced from env (`REPLICATE_SEGMENTATION_MODEL`,
+   * `REPLICATE_REMOVAL_MODEL`, `REPLICATE_INPAINT_MODEL`) so new pipeline
+   * tools do not duplicate them in every registry entry.
    */
-  mode?: "edit" | "segment-remove" | "remove-only";
+  mode?: "edit" | "segment-remove" | "remove-only" | "inpaint-with-prompt";
   /** AI provider model IDs for the router. Consumed only when mode is "edit". */
   models: {
     replicate: `${string}/${string}`;
@@ -826,6 +837,53 @@ const removeObjectsBodyJsonSchema = {
   },
 };
 
+const replaceAddObjectBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "maskUrl", "prompt", "categoryId", "inspirationId"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo (must use http or https scheme).",
+    },
+    maskUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the binary mask PNG (white = replace, black = preserve). Must be hosted on an allowlisted host.",
+    },
+    prompt: {
+      type: "string" as const,
+      minLength: 1,
+      maxLength: 500,
+      description:
+        "Inspiration prompt describing what to place inside the masked region.",
+    },
+    categoryId: {
+      type: "string" as const,
+      minLength: 1,
+      maxLength: 64,
+      pattern: "^[a-zA-Z0-9_-]+$",
+      description:
+        "Inspiration category id (analytics key — never reaches the AI provider).",
+    },
+    inspirationId: {
+      type: "string" as const,
+      minLength: 1,
+      maxLength: 64,
+      pattern: "^[a-zA-Z0-9_-]+$",
+      description: "Inspiration item id (analytics key).",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 const virtualStagingBodyJsonSchema = {
   type: "object" as const,
   required: [
@@ -1200,6 +1258,43 @@ export const TOOL_TYPES = {
     clientUploadFields: ["imageUrl", "maskUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateRemoveObjectsBody>,
+    PromptResult
+  >,
+
+  replaceAddObject: {
+    toolKey: "replaceAddObject",
+    routePath: "/replace-add-object",
+    rateLimitKey: "replaceAddObject",
+    // Inpaint-with-prompt pipeline: client supplies the brush mask + a
+    // prompt from the curated inspiration library, Flux Fill synthesizes
+    // new content inside the masked region. No SAM call. No fal.ai fallback.
+    // `models` fields are dead weight in this mode (Flux Fill slug comes from
+    // REPLICATE_INPAINT_MODEL) but kept so the registry shape stays uniform.
+    mode: "inpaint-with-prompt",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateReplaceAddObjectBody,
+    bodyJsonSchema: replaceAddObjectBodyJsonSchema,
+    summary: "Enqueue a replace-&-add-object inpainting",
+    description:
+      "Inpaints the region indicated by a client-drawn mask with new content described by the prompt. Distinct from Remove Objects (LaMa, no prompt, surface extension): this tool uses Flux Fill to synthesize fresh content inside the mask — Replace an existing object with something else, or Add an object into empty space. The mask PNG must already be uploaded (white = replace, black = preserve) and match the image dimensions. `categoryId` + `inspirationId` are analytics keys from the 40×20 inspiration library. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildReplaceAddObjectPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateReplaceAddObjectBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+    // `maskUrl` is a client-uploaded artifact — same SSRF shape as
+    // removeObjects. Declared as optional here because the processor reads
+    // it out of `toolParams` itself rather than forwarding it as the
+    // provider's second image slot.
+    optionalImageUrlFields: ["maskUrl"] as const,
+    // Both URLs must have been produced by the iOS direct-upload flow so a
+    // rogue client cannot hand Flux Fill an arbitrary URL (SSRF beacon +
+    // retry-storm amplification).
+    clientUploadFields: ["imageUrl", "maskUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateReplaceAddObjectBody>,
     PromptResult
   >,
 } as const;

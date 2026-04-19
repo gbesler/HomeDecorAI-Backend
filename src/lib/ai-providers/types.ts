@@ -73,3 +73,33 @@ export interface RemovalOutput {
   provider: ProviderId;
   durationMs: number;
 }
+
+// ─── Inpainting with prompt (Flux Fill family) ─────────────────────────────
+//
+// Flux Fill (and peers like SDXL Inpainting) accept image + mask + prompt,
+// generating NEW content inside the masked region guided by the prompt. This
+// is the "replace the thing with a different thing" pipeline — distinct from
+// LaMa's "remove the thing and extend surroundings" (no prompt).
+//
+// Mask convention: white pixels = region to replace, black = preserve. Matches
+// the convention used across the codebase for Remove Objects and SAM outputs.
+
+export interface InpaintInput {
+  imageUrl: string;
+  /** Binary mask PNG URL — white = replace, black = preserve. */
+  maskUrl: string;
+  /** Natural-language description of what to place in the masked region. */
+  prompt: string;
+  /**
+   * Optional guidance scale forwarded only to models that expose it
+   * (`capabilities.supportsGuidanceScale`). Flux Fill's "guidance" parameter
+   * is on a different scale than classic CFG — see model card for ranges.
+   */
+  guidanceScale?: number;
+}
+
+export interface InpaintOutput {
+  imageUrl: string;
+  provider: ProviderId;
+  durationMs: number;
+}
