@@ -1,4 +1,4 @@
-import { callDesignGeneration } from "../lib/ai-providers";
+import { callDesignGeneration, NoMaskDetectedError } from "../lib/ai-providers";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 import {
   claimProcessing,
@@ -6,8 +6,13 @@ import {
   markFailed,
   recordAiResult,
   recordNotification,
+  recordSegmentationCheckpoint,
   recordStorageResult,
 } from "../lib/firestore.js";
+import {
+  runRemoval,
+  runSegmentationAndPersistMask,
+} from "../lib/generation/segment-remove.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -324,56 +329,173 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
     "Starting AI generation",
   );
 
-  // Forward a secondary image URL to the provider only when the tool's
-  // contract declares one — as a mandatory second field in `imageUrlFields`
-  // (reference-style) OR as an optional `referenceImageUrl` in
-  // `optionalImageUrlFields` (paint-walls customStyle). Reading from the
-  // registry (rather than a hardcoded key) means:
-  //   - single-image tools (interior/exterior/garden) skip extraction
-  //     entirely, so a stray `referenceImageUrl` field accidentally written
-  //     to a non-multi-image doc cannot corrupt that tool's generation.
-  //   - any future multi-image tool with a different field name works
-  //     without touching this file — declaration-driven, not name-driven.
-  // The value is read from the already-typed `params` (post-Zod parse) so
-  // it inherits the body schema's URL validation.
-  const secondaryField =
-    tool.imageUrlFields[1] ?? tool.optionalImageUrlFields?.[0];
-  const referenceImageUrl =
-    secondaryField !== undefined
-      ? (params[secondaryField] as string | undefined)
-      : undefined;
+  const mode = tool.mode ?? "edit";
 
   try {
-    const result = await callDesignGeneration(tool.models, {
-      prompt: promptResult.prompt,
-      imageUrl: inputImageUrl,
-      referenceImageUrl,
-      guidanceScale: promptResult.guidanceScale,
-    });
+    let tempOutputUrl: string;
+    let provider: string;
+    let durationMs: number;
+
+    if (mode === "segment-remove") {
+      // SAM 3 → persist mask → CHECKPOINT → LaMa. The builder must have
+      // produced a `segmentTextPrompt` (concept noun phrase); guard at
+      // runtime so a misconfigured tool surfaces as VALIDATION_FAILED.
+      if (!promptResult.segmentTextPrompt) {
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=segment-remove but buildPrompt returned no segmentTextPrompt`,
+        };
+      }
+
+      // Idempotency invariant: SAM 3 runs at most once per generationId.
+      // We either reuse the checkpointed mask URL or we run SAM now and
+      // write the checkpoint BEFORE calling LaMa. If LaMa then fails, the
+      // retry reuses the persisted mask rather than re-billing SAM.
+      let maskUrl = doc.segmentationMaskUrl;
+      if (!maskUrl) {
+        const seg = await runSegmentationAndPersistMask({
+          userId,
+          generationId,
+          imageUrl: inputImageUrl,
+          textPrompt: promptResult.segmentTextPrompt,
+        });
+        maskUrl = seg.maskUrl;
+        await recordSegmentationCheckpoint(generationId, maskUrl);
+      } else {
+        logger.info(
+          { event: "segment_remove.mask_reused", generationId },
+          "Reusing persisted segmentation mask from prior attempt",
+        );
+      }
+
+      const result = await runRemoval({
+        imageUrl: inputImageUrl,
+        maskUrl,
+      });
+      tempOutputUrl = result.outputImageUrl;
+      provider = result.provider;
+      durationMs = result.durationMs;
+    } else if (mode === "remove-only") {
+      // Client-supplied mask URL lives in toolParams under `maskUrl`. The
+      // controller already host-allowlisted it against the project's upload
+      // origins (see design.controller.ts:validateClientUploadHost), so by
+      // the time we reach here the URL is known-trusted.
+      const maskUrl = params["maskUrl"];
+      if (typeof maskUrl !== "string" || maskUrl.length === 0) {
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=remove-only but toolParams.maskUrl is missing`,
+        };
+      }
+      const result = await runRemoval({
+        imageUrl: inputImageUrl,
+        maskUrl,
+      });
+      tempOutputUrl = result.outputImageUrl;
+      provider = result.provider;
+      durationMs = result.durationMs;
+    } else {
+      // Forward a secondary image URL to the provider only when the tool's
+      // contract declares one — as a mandatory second field in `imageUrlFields`
+      // (reference-style) OR as an optional `referenceImageUrl` in
+      // `optionalImageUrlFields` (paint-walls customStyle). Reading from the
+      // registry (rather than a hardcoded key) means:
+      //   - single-image tools (interior/exterior/garden) skip extraction
+      //     entirely, so a stray `referenceImageUrl` field accidentally written
+      //     to a non-multi-image doc cannot corrupt that tool's generation.
+      //   - any future multi-image tool with a different field name works
+      //     without touching this file — declaration-driven, not name-driven.
+      // The value is read from the already-typed `params` (post-Zod parse) so
+      // it inherits the body schema's URL validation.
+      const secondaryField =
+        tool.imageUrlFields[1] ?? tool.optionalImageUrlFields?.[0];
+      const referenceImageUrl =
+        secondaryField !== undefined
+          ? (params[secondaryField] as string | undefined)
+          : undefined;
+
+      const result = await callDesignGeneration(tool.models, {
+        prompt: promptResult.prompt,
+        imageUrl: inputImageUrl,
+        referenceImageUrl,
+        guidanceScale: promptResult.guidanceScale,
+      });
+      tempOutputUrl = result.imageUrl;
+      provider = result.provider;
+      durationMs = result.durationMs;
+    }
 
     await recordAiResult({
       generationId,
-      tempOutputUrl: result.imageUrl,
-      provider: result.provider,
+      tempOutputUrl,
+      provider,
       prompt: promptResult.prompt,
       actionMode: promptResult.actionMode,
       guidanceBand: promptResult.guidanceBand,
       promptVersion: promptResult.promptVersion,
-      durationMs: result.durationMs,
+      durationMs,
     });
 
     logger.info(
       {
         event: "processor.ai.ok",
         generationId,
-        provider: result.provider,
-        durationMs: result.durationMs,
+        provider,
+        mode,
+        durationMs,
       },
       "AI generation completed",
     );
 
-    return { kind: "ok", tempOutputUrl: result.imageUrl };
+    return { kind: "ok", tempOutputUrl };
   } catch (err) {
+    // Grounded-SAM matched zero regions — treat as terminal validation
+    // failure with a domain-specific error code rather than a provider
+    // outage. Surfaces to the user as "your room already looks clean".
+    if (err instanceof NoMaskDetectedError) {
+      logger.info(
+        { event: "processor.ai.no_mask_detected", generationId, mode },
+        "Segmentation returned no mask — marking failed as validation",
+      );
+      return {
+        kind: "failed",
+        code: "VALIDATION_FAILED",
+        message: "Segmentation returned no clutter matches for this image",
+      };
+    }
+
+    // Mask-persist errors happen INSIDE runSegmentationAndPersistMask (S3
+    // PutObject / Cognito mint). They are storage-shaped, not AI-shaped —
+    // classify them as STORAGE_FAILED so operator dashboards and runbooks
+    // point at the right system. Terminal (no retry) because both failure
+    // modes are config-shaped and retry won't help.
+    if (err instanceof StorageUploadError) {
+      logger.error(
+        {
+          event: "processor.ai.mask_storage_failure",
+          generationId,
+          mode,
+          error: err.message,
+        },
+        "Mask persist failed — marking failed as storage",
+      );
+      return { kind: "failed", code: "STORAGE_FAILED", message: err.message };
+    }
+    if (err instanceof CognitoCredentialMintError) {
+      logger.error(
+        {
+          event: "processor.ai.cognito_mint_failure_during_mask",
+          generationId,
+          mode,
+          error: err.message,
+        },
+        "Cognito credential mint failed during mask persist — marking failed as storage",
+      );
+      return { kind: "failed", code: "STORAGE_FAILED", message: err.message };
+    }
+
     const message = err instanceof Error ? err.message : String(err);
     const code: GenerationErrorCode = /timeout/i.test(message)
       ? "AI_TIMEOUT"
@@ -384,6 +506,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
         event: "processor.ai.failed",
         generationId,
         code,
+        mode,
         error: message,
       },
       "AI generation failed",

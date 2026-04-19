@@ -120,6 +120,7 @@ export async function createQueuedGeneration(
     queuedAt: admin.firestore.FieldValue.serverTimestamp() as unknown as admin.firestore.Timestamp,
     processingStartedAt: null,
     aiCompletedAt: null,
+    segmentationMaskUrl: null,
     storageCompletedAt: null,
     completedAt: null,
     notifiedAt: null,
@@ -194,6 +195,22 @@ export async function claimProcessing(
         status: "processing",
       },
     } satisfies ClaimProcessingResult;
+  });
+}
+
+/**
+ * Sub-checkpoint inside the AI stage for the segment-remove pipeline.
+ * Written after SAM succeeds and the mask has been persisted to S3, BEFORE
+ * the LaMa call. If the removal step fails and Cloud Tasks retries, the
+ * processor sees this field and skips SAM on the next attempt.
+ */
+export async function recordSegmentationCheckpoint(
+  generationId: string,
+  segmentationMaskUrl: string,
+): Promise<void> {
+  const db = getFirestore();
+  await db.collection(GENERATIONS_COLLECTION).doc(generationId).update({
+    segmentationMaskUrl,
   });
 }
 
@@ -310,6 +327,7 @@ function mapDocToGeneration(
     queuedAt: data["queuedAt"] ?? null,
     processingStartedAt: data["processingStartedAt"] ?? null,
     aiCompletedAt: data["aiCompletedAt"] ?? null,
+    segmentationMaskUrl: data["segmentationMaskUrl"] ?? null,
     storageCompletedAt: data["storageCompletedAt"] ?? null,
     completedAt: data["completedAt"] ?? null,
     notifiedAt: data["notifiedAt"] ?? null,

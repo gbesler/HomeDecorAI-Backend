@@ -110,6 +110,27 @@ const envSchema = z.object({
   // Comma-separated host allowlist for AI provider output URLs that the
   // backend will fetch and upload to S3. SSRF guard — any host outside
   // this list is rejected before any network call is made.
+  // ─── Segmentation + removal pipeline models ─────────────────────────────
+  // Overridable at runtime so ops can swap community forks without a deploy.
+  // Defaults are authoritative for this codebase; changes require re-verifying
+  // that the slug's input/output schema matches our replicate.ts adapter.
+  //
+  // Segmentation: SAM 3 (Meta, Nov 2025) — concept-prompt segmentation.
+  // Removal: LaMa (WACV 2022) — industry-standard object-removal inpainter.
+  // Pipeline: Clean & Organize runs SAM 3 -> LaMa; Remove Objects runs
+  // client-brush mask -> LaMa.
+  REPLICATE_SEGMENTATION_MODEL: z
+    .string()
+    .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
+    .optional()
+    .default("mattsays/sam3-image")
+    .transform((v) => v as `${string}/${string}`),
+  REPLICATE_REMOVAL_MODEL: z
+    .string()
+    .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
+    .optional()
+    .default("allenhooo/lama")
+    .transform((v) => v as `${string}/${string}`),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)
@@ -134,3 +155,48 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+// ─── Cross-field invariants ────────────────────────────────────────────────
+// Fail fast at boot if the operator pointed a role-specific model env at a
+// slug registered with the wrong role in PROVIDER_CAPABILITIES. Without this
+// guard, a removal slug in REPLICATE_SEGMENTATION_MODEL would be called
+// with segment-shaped input, return an image URL, and extractMaskUrl would
+// happily feed that RGB frame into LaMa as if it were a binary mask.
+//
+// Unknown slugs (not in the capability matrix) are warned-only and allowed
+// to boot; capability entries can lag behind community forks and blocking
+// boot on a slug swap would be too strict.
+//
+// Dynamic import to avoid a load-order cycle (capabilities.ts imports from
+// types.ts, which does not import env.ts — keep it that way).
+void (async () => {
+  const { PROVIDER_CAPABILITIES } = await import(
+    "./ai-providers/capabilities.js"
+  );
+  const checks: Array<[string, string, "segment" | "remove"]> = [
+    [
+      "REPLICATE_SEGMENTATION_MODEL",
+      env.REPLICATE_SEGMENTATION_MODEL,
+      "segment",
+    ],
+    ["REPLICATE_REMOVAL_MODEL", env.REPLICATE_REMOVAL_MODEL, "remove"],
+  ];
+  for (const [name, slug, expectedRole] of checks) {
+    const capability = PROVIDER_CAPABILITIES[slug];
+    if (!capability) {
+      console.warn(
+        `[env] ${name}=${slug} is not registered in PROVIDER_CAPABILITIES; running without role verification. Add a capability entry before relying on this slug in production.`,
+      );
+      continue;
+    }
+    if (capability.role !== expectedRole) {
+      console.error(
+        `[env] ${name}=${slug} is registered with role="${capability.role}" but must be role="${expectedRole}". Segmentation and inpainting slugs are not interchangeable; pointing one at the other produces silent garbage output.`,
+      );
+      process.exit(1);
+    }
+  }
+})().catch((err) => {
+  console.error("[env] Capability role verification crashed:", err);
+  process.exit(1);
+});

@@ -140,6 +140,13 @@ export interface PromptResult {
    * `"interiorDesign/fallback-v1"`.
    */
   promptVersion: string;
+  /**
+   * Optional comma-separated taxonomy fed to the text-grounding segmentation
+   * head. Populated only by tools whose `ToolTypeConfig.mode` is
+   * `"segment-remove"` (Clean & Organize). `prompt` is ignored on the
+   * removal side (LaMa takes no prompt).
+   */
+  segmentTextPrompt?: string;
 }
 
 // ─── Dictionary container types ────────────────────────────────────────────

@@ -17,6 +17,7 @@ import { processGeneration } from "../services/generation-processor.js";
 import { resolveLanguage } from "../lib/notifications/i18n.js";
 import type { SupportedLanguage } from "../lib/generation/types.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
+import { env } from "../lib/env.js";
 
 // ─── Language resolution ────────────────────────────────────────────────────
 
@@ -73,6 +74,52 @@ function validateImageUrlScheme(
     return {
       ok: false,
       message: `${fieldName} resolves to a disallowed host range`,
+    };
+  }
+  return { ok: true };
+}
+
+// Hosts our iOS clients upload to directly via Cognito-minted credentials.
+// Computed once at module load — env is frozen by the zod parse in env.ts.
+// Kept broad enough to cover the two S3 URL styles (virtual-hosted and
+// path-style) plus CloudFront, so a signed-URL rewrite on the iOS side
+// doesn't break the check.
+const CLIENT_UPLOAD_HOSTS: readonly string[] = (() => {
+  const hosts = new Set<string>();
+  hosts.add(
+    `${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`.toLowerCase(),
+  );
+  hosts.add(`${env.AWS_S3_BUCKET}.s3.amazonaws.com`.toLowerCase());
+  hosts.add(`s3.${env.AWS_S3_REGION}.amazonaws.com`.toLowerCase());
+  if (env.AWS_CLOUDFRONT_HOST) {
+    hosts.add(env.AWS_CLOUDFRONT_HOST.toLowerCase());
+  }
+  return Array.from(hosts);
+})();
+
+// Stricter check layered ON TOP of `validateImageUrlScheme` for tools whose
+// input URLs must have been produced by the iOS direct-upload flow. Blocks
+// the "attacker POSTs an arbitrary URL to Remove Objects and has Replicate
+// fetch it" class of abuse. Only applied to tools that declare
+// `clientUploadFields` in their registry entry.
+function validateClientUploadHost(
+  imageUrl: unknown,
+  fieldName: string,
+): { ok: true } | { ok: false; message: string } {
+  if (typeof imageUrl !== "string") {
+    return { ok: false, message: `${fieldName} must be a string` };
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(imageUrl);
+  } catch {
+    return { ok: false, message: `${fieldName} is not a valid URL` };
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (!CLIENT_UPLOAD_HOSTS.includes(host)) {
+    return {
+      ok: false,
+      message: `${fieldName} host is not an allowed client-upload origin`,
     };
   }
   return { ok: true };
@@ -156,6 +203,21 @@ export function makeCreateGenerationHandler<TParams>(
     for (const field of tool.optionalImageUrlFields ?? []) {
       if (bodyRecord[field] === undefined) continue;
       const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return {
+          error: "Validation Error",
+          message: check.message,
+        };
+      }
+    }
+    // Client-upload host enforcement. Only runs for tools that opt in via
+    // `clientUploadFields`; the fields are validated even when listed as
+    // optional elsewhere, because presence alone (not scheme alone) was
+    // already the gap reviewers flagged.
+    for (const field of tool.clientUploadFields ?? []) {
+      if (bodyRecord[field] === undefined) continue;
+      const check = validateClientUploadHost(bodyRecord[field], field);
       if (!check.ok) {
         reply.code(400);
         return {
@@ -340,6 +402,14 @@ export function makeSyncGenerationHandler<TParams>(
     for (const field of tool.optionalImageUrlFields ?? []) {
       if (bodyRecord[field] === undefined) continue;
       const check = validateImageUrlScheme(bodyRecord[field], field);
+      if (!check.ok) {
+        reply.code(400);
+        return { error: "Validation Error", message: check.message };
+      }
+    }
+    for (const field of tool.clientUploadFields ?? []) {
+      if (bodyRecord[field] === undefined) continue;
+      const check = validateClientUploadHost(bodyRecord[field], field);
       if (!check.ok) {
         reply.code(400);
         return { error: "Validation Error", message: check.message };

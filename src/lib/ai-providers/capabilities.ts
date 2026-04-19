@@ -38,8 +38,20 @@ import type { ProviderId } from "./types.js";
 
 export type { ProviderId };
 
+/**
+ * Role of a model in the generation pipeline.
+ * - `edit`:    single-step image-to-image (Pruna, Klein) — prompt + image → image.
+ * - `segment`: concept-prompted mask generation (SAM 3) — image + concept → mask.
+ * - `remove`:  mask-guided object removal (LaMa) — image + mask → image.
+ *              No prompt; LaMa extends the surrounding surface using Fourier
+ *              convolutions. This is the industry-standard pattern behind
+ *              Cleanup.pictures, IOPaint, Magic Eraser, and Apple Clean Up.
+ */
+export type ModelRole = "edit" | "segment" | "remove";
+
 export interface ProviderCapabilities {
   provider: ProviderId;
+  role: ModelRole;
   supportsNegativePrompt: boolean;
   supportsGuidanceScale: boolean;
   /**
@@ -60,6 +72,7 @@ export interface ProviderCapabilities {
 export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
   "prunaai/p-image-edit": {
     provider: "replicate",
+    role: "edit",
     supportsNegativePrompt: false, // Flux family + Pruna schema does not expose it
     supportsGuidanceScale: false, // Distilled sub-second model, no CFG knob
     // Native reference-style support via images[] + reference_image index.
@@ -70,6 +83,7 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
   },
   "fal-ai/flux-2/klein/9b/edit": {
     provider: "falai",
+    role: "edit",
     supportsNegativePrompt: false, // BFL: Flux 2 does not support negative prompts
     supportsGuidanceScale: true, // Documented: default 2.5, range 0-20
     // Klein 9B Edit schema accepts `image_urls` as an array; the
@@ -79,6 +93,50 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: true,
     maxPromptTokens: 350, // BFL Kontext I2I examples routinely exceed 300 tokens
     defaultImageSize: "landscape_4_3",
+  },
+  // ─── Segmentation: SAM 3 ─────────────────────────────────────────────────
+  // Meta Segment Anything 3 (November 2025). Unified foundation model with
+  // native concept prompts: short noun phrases like "clutter", "yellow school
+  // bus", or image exemplars. GroundingDINO sandwich is no longer required —
+  // SAM 3 understands concepts directly. Community Replicate wrapper exposes
+  // image + concept inputs and returns a binary mask URL.
+  //
+  // Paper: https://arxiv.org/abs/2511.16719
+  // Replicate: https://replicate.com/mattsays/sam3-image (~$0.001/run)
+  "mattsays/sam3-image": {
+    provider: "replicate",
+    role: "segment",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    // SAM 3 natively supports image exemplars as a second prompt modality.
+    // We don't use this today (v1 sticks to concept prompts) but the
+    // capability is true at the model level.
+    supportsReferenceImage: true,
+    // Concept prompts are short noun phrases, typically 1-5 words separated
+    // by ".". 128 tokens is generous headroom.
+    maxPromptTokens: 128,
+  },
+  // ─── Removal: LaMa ───────────────────────────────────────────────────────
+  // Resolution-robust Large Mask Inpainting with Fourier Convolutions (WACV
+  // 2022). Industry standard for "extend the surface that was behind this
+  // object" — behind Cleanup.pictures, Sanster/IOPaint, Apple Clean Up.
+  //
+  // LaMa takes image + mask ONLY. It does NOT accept a prompt; attempting to
+  // pass one is ignored at best and schema-rejected at worst. The model
+  // reliably extends periodic textures and structured backgrounds without
+  // hallucinating new objects — the exact failure mode FLUX Fill has in
+  // remove-style use cases.
+  //
+  // Paper: https://github.com/advimman/lama
+  // Replicate: https://replicate.com/allenhooo/lama (~$0.001-0.003/run, ~2s GPU)
+  "allenhooo/lama": {
+    provider: "replicate",
+    role: "remove",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    // LaMa accepts no prompt at all.
+    maxPromptTokens: 0,
   },
 };
 
