@@ -63,6 +63,13 @@ export interface PersistGenerationImageInput {
   userId: string;
   generationId: string;
   sourceUrl: string;
+  /**
+   * S3 key prefix. Defaults to "generations" — the canonical AI output path.
+   * Callers persisting intermediate artifacts (e.g. segmentation masks) pass
+   * "masks" so the lifecycle rules can expire them on a shorter cadence
+   * without touching the main outputs.
+   */
+  keyPrefix?: string;
 }
 
 export interface PersistGenerationImageResult {
@@ -89,7 +96,7 @@ export interface PersistGenerationImageResult {
 export async function persistGenerationImage(
   input: PersistGenerationImageInput,
 ): Promise<PersistGenerationImageResult> {
-  const { userId, generationId, sourceUrl } = input;
+  const { userId, generationId, sourceUrl, keyPrefix = "generations" } = input;
 
   // Guard against an empty or whitespace userId — without per-user IAM
   // scoping, a blank value would silently produce orphan keys at
@@ -155,7 +162,7 @@ export async function persistGenerationImage(
 
   const creds = await getAwsCredentials();
 
-  const key = `generations/${userId}/${generationId}.${ext}`;
+  const key = `${keyPrefix}/${userId}/${generationId}.${ext}`;
 
   // Build a fresh S3 client for this request. The client is cheap to
   // construct and lives only for the duration of the PutObject, keeping the

@@ -1,9 +1,21 @@
 import { designCircuitBreaker } from "../circuit-breaker.js";
+import { env } from "../env.js";
 import { withRetry } from "../retry.js";
 import { logger } from "../logger.js";
-import { callReplicate } from "./replicate.js";
+import {
+  callRemovalReplicate,
+  callReplicate,
+  callSegmentationReplicate,
+} from "./replicate.js";
 import { callFalAI } from "./falai.js";
-import type { GenerationInput, GenerationOutput } from "./types.js";
+import type {
+  GenerationInput,
+  GenerationOutput,
+  RemovalInput,
+  RemovalOutput,
+  SegmentationInput,
+  SegmentationOutput,
+} from "./types.js";
 
 interface ToolModelConfig {
   replicate: `${string}/${string}`;
@@ -83,5 +95,78 @@ export async function callDesignGeneration(
 
     // Immediate fallback for this request
     return callFalAI(models.falai, input);
+  }
+}
+
+/**
+ * Run text-grounded segmentation. Replicate-only: no fal.ai equivalent is
+ * wired today. Records circuit-breaker state so repeated segmentation
+ * failures contribute to the same "Replicate degraded" signal as edit calls.
+ *
+ * Throws `NoMaskDetectedError` when the model succeeds but matches zero
+ * regions — that is NOT a breaker-worthy failure and is re-thrown unchanged.
+ */
+export async function callSegmentation(
+  input: SegmentationInput,
+): Promise<SegmentationOutput> {
+  const model = env.REPLICATE_SEGMENTATION_MODEL;
+  try {
+    const result = await withRetry(
+      () => callSegmentationReplicate(model, input),
+      {
+        maxRetries: 1,
+        delayMs: 1000,
+        // A "no mask detected" result is a deterministic terminal outcome;
+        // retrying would bill SAM a second time for the same answer.
+        isRetryable: (error) => error.name !== "NoMaskDetectedError",
+        onRetry: (error, attempt) => {
+          logger.warn(
+            { event: "provider.retry", provider: "replicate", role: "segment", error: error.message, attempt },
+            "Segmentation call failed, retrying",
+          );
+        },
+      },
+    );
+    designCircuitBreaker.record(true);
+    return result;
+  } catch (error) {
+    // NoMaskDetectedError is a domain signal, not a provider health issue.
+    // Do not pollute the breaker with it.
+    if (error instanceof Error && error.name === "NoMaskDetectedError") {
+      throw error;
+    }
+    designCircuitBreaker.record(false);
+    throw error;
+  }
+}
+
+/**
+ * Run mask-guided object removal via LaMa. Replicate-only. Same breaker
+ * semantics as `callDesignGeneration` but no fal.ai fallback — LaMa has
+ * no equivalent wired on the fallback side.
+ */
+export async function callRemoval(
+  input: RemovalInput,
+): Promise<RemovalOutput> {
+  const model = env.REPLICATE_REMOVAL_MODEL;
+  try {
+    const result = await withRetry(
+      () => callRemovalReplicate(model, input),
+      {
+        maxRetries: 1,
+        delayMs: 1000,
+        onRetry: (error, attempt) => {
+          logger.warn(
+            { event: "provider.retry", provider: "replicate", role: "remove", error: error.message, attempt },
+            "Removal call failed, retrying",
+          );
+        },
+      },
+    );
+    designCircuitBreaker.record(true);
+    return result;
+  } catch (error) {
+    designCircuitBreaker.record(false);
+    throw error;
   }
 }

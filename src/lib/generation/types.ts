@@ -118,6 +118,14 @@ export interface GenerationDoc {
   processingStartedAt: admin.firestore.Timestamp | null;
   /** Set after the AI call completes. */
   aiCompletedAt: admin.firestore.Timestamp | null;
+  /**
+   * Persisted segmentation mask URL (segment-remove pipeline only). Written
+   * as a sub-checkpoint inside the AI stage so a retry that fails between
+   * SAM 3 and LaMa skips SAM 3 on the next attempt. Null for every other
+   * pipeline mode and for segment-remove docs that have not yet reached
+   * the mask-persist step.
+   */
+  segmentationMaskUrl: string | null;
   /** Set after the S3 upload completes. */
   storageCompletedAt: admin.firestore.Timestamp | null;
   /** Set when the terminal state is reached (completed or failed). */

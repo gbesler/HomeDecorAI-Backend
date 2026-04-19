@@ -610,6 +610,42 @@ export const CreateCleanOrganizeBody = zod.object({
   language: zod.enum(["tr", "en"]).optional(),
 });
 
+/**
+ * Hand-edited — NOT produced by orval.
+ *
+ * Accepts a room photo URL + a client-drawn binary mask URL. Mirrors the
+ * iOS Remove Objects wizard: the user brushes over the region to erase,
+ * the mask PNG is uploaded to S3 from the device, and the resulting URL
+ * is submitted here. Optional `prompt` lets the user describe what
+ * should fill the erased area (defaults to a clean surface completion).
+ *
+ * Mask encoding: white pixels = fill, black pixels = preserve. Mask must
+ * match the image dimensions and be hosted on an allowlisted host
+ * (CloudFront or S3) so the backend can fetch + validate it.
+ *
+ * @summary Remove selected objects from a room photo
+ */
+export const CreateRemoveObjectsBody = zod.object({
+  imageUrl: zod
+    .string()
+    .url()
+    .describe("Public URL of the room photo"),
+  maskUrl: zod
+    .string()
+    .url()
+    .describe(
+      "Public URL of the binary mask PNG (white = remove, black = preserve)",
+    ),
+  prompt: zod
+    .string()
+    .max(200)
+    .optional()
+    .describe(
+      "Optional caption describing what should replace the removed area. Defaults to a surface-completion prompt.",
+    ),
+  language: zod.enum(["tr", "en"]).optional(),
+});
+
 export const CreateInteriorDesignResponse = zod.object({
   id: zod.string().describe("Generation record ID"),
   outputImageUrl: zod

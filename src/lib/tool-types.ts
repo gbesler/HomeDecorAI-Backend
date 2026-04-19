@@ -47,12 +47,17 @@ import {
   type CleanOrganizeParams,
 } from "./prompts/tools/clean-organize.js";
 import {
+  buildRemoveObjectsPrompt,
+  type RemoveObjectsParams,
+} from "./prompts/tools/remove-objects.js";
+import {
   buildExteriorPaintingPrompt,
   type ExteriorPaintingParams,
 } from "./prompts/tools/exterior-painting.js";
 import type { PromptResult } from "./prompts/types.js";
 import {
   CreateCleanOrganizeBody,
+  CreateRemoveObjectsBody,
   CreateExteriorDesignBody,
   CreateExteriorPaintingBody,
   CreateFloorRestyleBody,
@@ -79,6 +84,7 @@ export type {
   VirtualStagingParams,
   CleanOrganizeParams,
   ExteriorPaintingParams,
+  RemoveObjectsParams,
 };
 
 // ─── ToolTypeConfig ─────────────────────────────────────────────────────────
@@ -110,7 +116,24 @@ export interface ToolTypeConfig<
   routePath: string;
   /** Rate limiter key — must also exist in `config/rate-limits.ts`. */
   rateLimitKey: string;
-  /** AI provider model IDs for the router. */
+  /**
+   * Pipeline mode. Controls which router function the processor dispatches to.
+   *
+   * - `"edit"` (default):      single-step i2i via `callDesignGeneration`.
+   *                            Model slugs come from `models.replicate`/`falai`.
+   * - `"segment-remove"`:      SAM 3 → persist mask → LaMa. Builder must
+   *                            return `segmentTextPrompt` (concept noun
+   *                            phrase). `prompt` is ignored.
+   * - `"remove-only"`:         LaMa with a caller-supplied mask URL.
+   *                            Expects `maskUrl` in toolParams; no SAM call.
+   *                            `prompt` is ignored (LaMa takes no prompt).
+   *
+   * Segment and removal model slugs are sourced from env
+   * (`REPLICATE_SEGMENTATION_MODEL`, `REPLICATE_REMOVAL_MODEL`) so new
+   * pipeline tools do not duplicate them in every registry entry.
+   */
+  mode?: "edit" | "segment-remove" | "remove-only";
+  /** AI provider model IDs for the router. Consumed only when mode is "edit". */
   models: {
     replicate: `${string}/${string}`;
     falai: string;
@@ -155,6 +178,16 @@ export interface ToolTypeConfig<
    * include one.
    */
   optionalImageUrlFields?: readonly (keyof TParams & string)[];
+  /**
+   * Fields whose URL MUST be a client-uploaded artifact hosted on one of the
+   * project's own origins (S3 bucket or CloudFront). Enforced IN ADDITION to
+   * `validateImageUrlScheme` by the controller. Use for tool inputs that
+   * would otherwise let an attacker hand the provider an arbitrary URL —
+   * most notably Remove Objects' `maskUrl`. Leave unset for tools whose
+   * image URLs may legitimately come from any HTTPS origin the user
+   * controls (none today, but the opt-in shape keeps it that way).
+   */
+  clientUploadFields?: readonly (keyof TParams & string)[];
 }
 
 // ─── Interior prompt dispatch (legacy safety valve) ─────────────────────────
@@ -762,6 +795,37 @@ const cleanOrganizeBodyJsonSchema = {
   },
 };
 
+const removeObjectsBodyJsonSchema = {
+  type: "object" as const,
+  required: ["imageUrl", "maskUrl"] as const,
+  properties: {
+    imageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the room photo (must use http or https scheme).",
+    },
+    maskUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Public URL of the binary mask PNG (white pixels = remove, black = preserve). Must match the image dimensions and be hosted on an allowlisted host.",
+    },
+    prompt: {
+      type: "string" as const,
+      maxLength: 200,
+      description:
+        "Optional caption describing what should replace the removed area. Defaults to a surface-completion fill.",
+    },
+    language: {
+      type: "string" as const,
+      enum: ["tr", "en"] as const,
+      description:
+        "Optional UI language snapshot for FCM push notifications.",
+    },
+  },
+};
+
 const virtualStagingBodyJsonSchema = {
   type: "object" as const,
   required: [
@@ -1076,10 +1140,13 @@ export const TOOL_TYPES = {
     toolKey: "cleanOrganize",
     routePath: "/clean-organize",
     rateLimitKey: "cleanOrganize",
+    // SAM 3 + LaMa pipeline: SAM 3 identifies clutter via concept prompt,
+    // LaMa extends the surrounding surface. Model slugs come from env
+    // (REPLICATE_SEGMENTATION_MODEL / REPLICATE_REMOVAL_MODEL). The `models`
+    // fields below are dead weight in this mode; left in place so a rollback
+    // to mode="edit" stays a one-line config change.
+    mode: "segment-remove",
     models: {
-      // Subtractive, surface-level edit: same stack as paint-walls and
-      // floor-restyle. Pruna's faithful-band I2I preserves geometry well,
-      // Klein 9B is a proven fallback.
       replicate: "prunaai/p-image-edit" as const,
       falai: "fal-ai/flux-2/klein/9b/edit",
     },
@@ -1094,6 +1161,45 @@ export const TOOL_TYPES = {
     imageUrlFields: ["imageUrl"] as const,
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateCleanOrganizeBody>,
+    PromptResult
+  >,
+
+  removeObjects: {
+    toolKey: "removeObjects",
+    routePath: "/remove-objects",
+    rateLimitKey: "removeObjects",
+    // Remove-only pipeline: the client supplies the brush mask directly, so
+    // there is no segmentation call. LaMa removes + extends. `models` fields
+    // are dead weight in this mode (slug comes from REPLICATE_REMOVAL_MODEL)
+    // but kept so a rollback to mode="edit" stays trivial.
+    mode: "remove-only",
+    models: {
+      replicate: "prunaai/p-image-edit" as const,
+      falai: "fal-ai/flux-2/klein/9b/edit",
+    },
+    bodySchema: CreateRemoveObjectsBody,
+    bodyJsonSchema: removeObjectsBodyJsonSchema,
+    summary: "Enqueue an object removal",
+    description:
+      "Removes the region indicated by a client-drawn mask from a room photo and fills it with a surface-continuing completion. The mask PNG must already be uploaded (white = remove, black = preserve) and match the image dimensions. Optional `prompt` describes what should replace the removed area. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+    buildPrompt: buildRemoveObjectsPrompt,
+    toToolParams: (params) => ({ ...params }),
+    fromToolParams: (raw) => CreateRemoveObjectsBody.parse(raw),
+    imageUrlFields: ["imageUrl"] as const,
+    // `maskUrl` is an image URL from the client's perspective, so the
+    // controller factory validates it against the http/https allowlist the
+    // same way it does `imageUrl`. Declared as optional here because the
+    // processor reads it out of `toolParams` itself rather than forwarding
+    // it as the provider's second image slot.
+    optionalImageUrlFields: ["maskUrl"] as const,
+    // Both URLs must have been produced by the iOS direct-upload flow —
+    // see controllers/design.controller.ts:validateClientUploadHost. This
+    // stops an attacker from submitting an arbitrary public URL that
+    // Replicate's LaMa worker would then fetch on our behalf (SSRF
+    // beacon + retry-storm amplification, surfaced in code review).
+    clientUploadFields: ["imageUrl", "maskUrl"] as const,
+  } satisfies ToolTypeConfig<
+    z.infer<typeof CreateRemoveObjectsBody>,
     PromptResult
   >,
 } as const;
