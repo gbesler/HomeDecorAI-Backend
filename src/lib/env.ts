@@ -125,11 +125,17 @@ const envSchema = z.object({
     .optional()
     .default("mattsays/sam3-image")
     .transform((v) => v as `${string}/${string}`),
+  // `allenhooo/lama` started 404-ing in prod on 2026-04-20 — the upstream
+  // model was pulled from Replicate. `cjwbw/lama` is the longest-running
+  // public community mirror with the same input schema (image + mask,
+  // no prompt). Flip via env without a deploy if this slug also gets
+  // pulled; startup role-verification in this file will log a warning
+  // if the slug lacks a capability entry.
   REPLICATE_REMOVAL_MODEL: z
     .string()
     .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
     .optional()
-    .default("allenhooo/lama")
+    .default("cjwbw/lama")
     .transform((v) => v as `${string}/${string}`),
   // Prompt-driven inpainting: Flux Fill (BFL). Image + mask + prompt → image.
   // Used by Replace & Add Object. Flip between `flux-fill-dev` (cheap) and
