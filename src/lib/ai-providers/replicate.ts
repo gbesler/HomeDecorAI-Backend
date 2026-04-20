@@ -6,6 +6,8 @@ import {
   NoMaskDetectedError,
   type GenerationInput,
   type GenerationOutput,
+  type InpaintInput,
+  type InpaintOutput,
   type RemovalInput,
   type RemovalOutput,
   type SegmentationInput,
@@ -276,6 +278,78 @@ export async function callRemovalReplicate(
       "LaMa returned no image — empty response",
     );
     throw new Error("Replicate removal returned no image");
+  }
+
+  return { imageUrl, provider: "replicate", durationMs };
+}
+
+// ─── Inpaint with prompt (Flux Fill) ───────────────────────────────────────
+
+/**
+ * Run prompt-driven inpainting on Replicate using Flux Fill.
+ *
+ * Flux Fill input schema (black-forest-labs/flux-fill-{dev,pro}):
+ *   image:                URL of the source photo (required)
+ *   mask:                 URL of the binary mask PNG (required; white = fill,
+ *                         black = preserve)
+ *   prompt:               text describing what to place in the masked region
+ *   guidance:             optional; different scale than classic CFG
+ *                         (model card defaults: Dev ~60, Pro ~30)
+ *   num_inference_steps:  optional; 28 is the common sweet spot (lower = faster,
+ *                         higher = more detail). We omit to let Replicate use
+ *                         the model-card default.
+ * Output: single URI string pointing to the inpainted image.
+ *
+ * Mask convention (white = replace) matches Remove Objects + SAM outputs, so
+ * the iOS client's `MaskRenderer` output flows through unchanged.
+ */
+export async function callInpaintReplicate(
+  model: `${string}/${string}`,
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const start = Date.now();
+
+  const capabilities = PROVIDER_CAPABILITIES[model];
+  if (capabilities?.role !== "inpaint") {
+    logger.warn(
+      { event: "provider.replicate.role_mismatch", model, expectedRole: "inpaint", actualRole: capabilities?.role },
+      "Inpaint model slug is not registered as role=inpaint",
+    );
+  }
+
+  const replicateInput: Record<string, unknown> = {
+    image: input.imageUrl,
+    mask: input.maskUrl,
+    prompt: input.prompt,
+  };
+
+  if (
+    input.guidanceScale !== undefined &&
+    capabilities?.supportsGuidanceScale
+  ) {
+    replicateInput.guidance = input.guidanceScale;
+  }
+
+  const output = (await replicate.run(model, {
+    input: replicateInput,
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  })) as unknown;
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = extractImageUrl(output);
+  if (imageUrl === null) {
+    logger.warn(
+      {
+        event: "provider.replicate.empty_response",
+        model,
+        outputShape: describeShape(output),
+        outputSnapshot: safeSnapshot(output),
+        durationMs,
+      },
+      "Flux Fill returned no image — empty response",
+    );
+    throw new Error("Replicate inpaint returned no image");
   }
 
   return { imageUrl, provider: "replicate", durationMs };

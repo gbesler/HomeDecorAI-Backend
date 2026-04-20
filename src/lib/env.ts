@@ -131,6 +131,15 @@ const envSchema = z.object({
     .optional()
     .default("allenhooo/lama")
     .transform((v) => v as `${string}/${string}`),
+  // Prompt-driven inpainting: Flux Fill (BFL). Image + mask + prompt → image.
+  // Used by Replace & Add Object. Flip between `flux-fill-dev` (cheap) and
+  // `flux-fill-pro` (higher quality, ~5× cost) without a deploy.
+  REPLICATE_INPAINT_MODEL: z
+    .string()
+    .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
+    .optional()
+    .default("black-forest-labs/flux-fill-dev")
+    .transform((v) => v as `${string}/${string}`),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)
@@ -173,13 +182,14 @@ void (async () => {
   const { PROVIDER_CAPABILITIES } = await import(
     "./ai-providers/capabilities.js"
   );
-  const checks: Array<[string, string, "segment" | "remove"]> = [
+  const checks: Array<[string, string, "segment" | "remove" | "inpaint"]> = [
     [
       "REPLICATE_SEGMENTATION_MODEL",
       env.REPLICATE_SEGMENTATION_MODEL,
       "segment",
     ],
     ["REPLICATE_REMOVAL_MODEL", env.REPLICATE_REMOVAL_MODEL, "remove"],
+    ["REPLICATE_INPAINT_MODEL", env.REPLICATE_INPAINT_MODEL, "inpaint"],
   ];
   for (const [name, slug, expectedRole] of checks) {
     const capability = PROVIDER_CAPABILITIES[slug];

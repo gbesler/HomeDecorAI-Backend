@@ -3,6 +3,7 @@ import { env } from "../env.js";
 import { withRetry } from "../retry.js";
 import { logger } from "../logger.js";
 import {
+  callInpaintReplicate,
   callRemovalReplicate,
   callReplicate,
   callSegmentationReplicate,
@@ -11,6 +12,8 @@ import { callFalAI } from "./falai.js";
 import type {
   GenerationInput,
   GenerationOutput,
+  InpaintInput,
+  InpaintOutput,
   RemovalInput,
   RemovalOutput,
   SegmentationInput,
@@ -159,6 +162,38 @@ export async function callRemoval(
           logger.warn(
             { event: "provider.retry", provider: "replicate", role: "remove", error: error.message, attempt },
             "Removal call failed, retrying",
+          );
+        },
+      },
+    );
+    designCircuitBreaker.record(true);
+    return result;
+  } catch (error) {
+    designCircuitBreaker.record(false);
+    throw error;
+  }
+}
+
+/**
+ * Run prompt-driven inpainting via Flux Fill. Replicate-only; mirrors the
+ * breaker + single-retry envelope of `callRemoval`. No fal.ai fallback — the
+ * fallback provider has no inpaint-with-prompt model wired up, and silently
+ * substituting a non-inpainting path would degrade quality without signal.
+ */
+export async function callInpaint(
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const model = env.REPLICATE_INPAINT_MODEL;
+  try {
+    const result = await withRetry(
+      () => callInpaintReplicate(model, input),
+      {
+        maxRetries: 1,
+        delayMs: 1000,
+        onRetry: (error, attempt) => {
+          logger.warn(
+            { event: "provider.retry", provider: "replicate", role: "inpaint", error: error.message, attempt },
+            "Inpaint call failed, retrying",
           );
         },
       },

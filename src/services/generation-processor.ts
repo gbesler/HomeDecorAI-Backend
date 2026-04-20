@@ -13,6 +13,7 @@ import {
   runRemoval,
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
+import { runPromptInpaint } from "../lib/generation/prompt-inpaint.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -392,6 +393,37 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       const result = await runRemoval({
         imageUrl: inputImageUrl,
         maskUrl,
+      });
+      tempOutputUrl = result.outputImageUrl;
+      provider = result.provider;
+      durationMs = result.durationMs;
+    } else if (mode === "inpaint-with-prompt") {
+      // Replace & Add Object: client mask + inspiration prompt → Flux Fill.
+      // `maskUrl` is a client-uploaded artifact (host-allowlisted by the
+      // controller, same SSRF guard as remove-only). The prompt comes from
+      // `promptResult.prompt` — builder is pass-through over the iOS
+      // inspiration library's authored per-item string, so an empty prompt
+      // means a misconfigured builder, not a user input gap.
+      const maskUrl = params["maskUrl"];
+      if (typeof maskUrl !== "string" || maskUrl.length === 0) {
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.maskUrl is missing`,
+        };
+      }
+      if (!promptResult.prompt) {
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=inpaint-with-prompt but buildPrompt returned empty prompt`,
+        };
+      }
+      const result = await runPromptInpaint({
+        imageUrl: inputImageUrl,
+        maskUrl,
+        prompt: promptResult.prompt,
+        guidanceScale: promptResult.guidanceScale,
       });
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;

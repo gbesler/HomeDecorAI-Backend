@@ -47,7 +47,7 @@ export type { ProviderId };
  *              convolutions. This is the industry-standard pattern behind
  *              Cleanup.pictures, IOPaint, Magic Eraser, and Apple Clean Up.
  */
-export type ModelRole = "edit" | "segment" | "remove";
+export type ModelRole = "edit" | "segment" | "remove" | "inpaint";
 
 export interface ProviderCapabilities {
   provider: ProviderId;
@@ -137,6 +137,34 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: false,
     // LaMa accepts no prompt at all.
     maxPromptTokens: 0,
+  },
+  // ─── Inpainting with prompt: Flux Fill ────────────────────────────────────
+  // Black Forest Labs Flux Fill (Dec 2024). Image + mask + prompt →
+  // inpainted image. Used by the Replace & Add Object tool: user paints the
+  // region, selects an inspiration item, the item's prompt drives what Flux
+  // Fill synthesizes inside the mask. Distinct from LaMa (no prompt) — Flux
+  // Fill generates NEW content rather than extending surrounding surface.
+  //
+  // Mask convention on the model: white = region to fill, matches ours.
+  // Replicate: https://replicate.com/black-forest-labs/flux-fill-dev (~$0.04/run)
+  //            https://replicate.com/black-forest-labs/flux-fill-pro  (~$0.20/run)
+  // Guidance scale on Flux Fill is on a different scale than classic CFG —
+  // model card defaults: Dev ~60, Pro ~30. Tune via staging A/B.
+  "black-forest-labs/flux-fill-dev": {
+    provider: "replicate",
+    role: "inpaint",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: true,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
+  },
+  "black-forest-labs/flux-fill-pro": {
+    provider: "replicate",
+    role: "inpaint",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: true,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
   },
 };
 
