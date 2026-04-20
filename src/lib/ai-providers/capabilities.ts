@@ -69,6 +69,20 @@ export interface ProviderCapabilities {
 
 // ─── Capability matrix ─────────────────────────────────────────────────────
 
+/**
+ * Strip a trailing `:<version-hash>` from a model slug before looking it up
+ * in PROVIDER_CAPABILITIES. Community models on Replicate require the
+ * pinned `owner/name:version` form on the `/v1/predictions` endpoint, but
+ * the capability matrix keys off the logical slug so `allenhooo/lama` and
+ * `allenhooo/lama:abc...` resolve to the same entry.
+ */
+export function getCapabilities(
+  modelSlug: string,
+): ProviderCapabilities | undefined {
+  const baseSlug = modelSlug.split(":")[0];
+  return PROVIDER_CAPABILITIES[baseSlug];
+}
+
 export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
   "prunaai/p-image-edit": {
     provider: "replicate",
@@ -128,29 +142,22 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
   // remove-style use cases.
   //
   // Paper: https://github.com/advimman/lama
-  // Primary: https://replicate.com/cjwbw/lama  — active community mirror
-  // Fallback (pulled 2026-04-20): https://replicate.com/allenhooo/lama
+  // Replicate: https://replicate.com/allenhooo/lama (~$0.001-0.003/run, ~2s GPU)
   //
-  // Both slugs stay registered so an env flip back to `allenhooo/lama`
-  // (if the upstream returns) or over to any other pinned version hash
-  // (`cjwbw/lama:<sha>`) doesn't trip the role-mismatch warning in the
-  // router. The input schema (image + mask) is identical across the
-  // LaMa forks — `callRemovalReplicate` sends `{ image, mask }` and
-  // expects a single output image URL.
-  "cjwbw/lama": {
-    provider: "replicate",
-    role: "remove",
-    supportsNegativePrompt: false,
-    supportsGuidanceScale: false,
-    supportsReferenceImage: false,
-    maxPromptTokens: 0,
-  },
+  // Replicate's Aug 2025 endpoint split restricted the legacy
+  // `/v1/models/{owner}/{name}/predictions` path to official models
+  // only — community models like this one now require the pinned
+  // `owner/name:version` form on the unified `/v1/predictions` path.
+  // We key by the bare slug here and use `getCapabilities()` to strip
+  // any trailing `:version` suffix at lookup time, so env flips to
+  // specific version hashes don't trip the role-mismatch warning.
   "allenhooo/lama": {
     provider: "replicate",
     role: "remove",
     supportsNegativePrompt: false,
     supportsGuidanceScale: false,
     supportsReferenceImage: false,
+    // LaMa accepts no prompt at all.
     maxPromptTokens: 0,
   },
   // ─── Inpainting with prompt: Flux Fill ────────────────────────────────────

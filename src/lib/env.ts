@@ -125,17 +125,28 @@ const envSchema = z.object({
     .optional()
     .default("mattsays/sam3-image")
     .transform((v) => v as `${string}/${string}`),
-  // `allenhooo/lama` started 404-ing in prod on 2026-04-20 — the upstream
-  // model was pulled from Replicate. `cjwbw/lama` is the longest-running
-  // public community mirror with the same input schema (image + mask,
-  // no prompt). Flip via env without a deploy if this slug also gets
-  // pulled; startup role-verification in this file will log a warning
-  // if the slug lacks a capability entry.
+  // `allenhooo/lama` is alive on Replicate; we were hitting the wrong
+  // endpoint. Replicate's Aug 2025 changelog restricted the legacy
+  // `POST /v1/models/{owner}/{name}/predictions` path to **official**
+  // models only — community models (including allenhooo/lama) now
+  // require the `{owner}/{name}:{version}` pinned form, which the
+  // npm client routes to `POST /v1/predictions` instead. Without a
+  // version suffix we were 404-ing on a live model. Pinning also
+  // freezes output behaviour against silent upstream updates — a
+  // helpful property for a generator we call on every Remove Objects
+  // + Clean & Organize submission.
+  //
+  // Latest version hash as of 2026-04-20, verified via
+  // https://replicate.com/allenhooo/lama/versions.
+  //
+  // Regex widened to accept the pinned `owner/name:version_hash`
+  // form in addition to the bare `owner/name` (still legal for
+  // Replicate's official models if we ever swap to one).
   REPLICATE_REMOVAL_MODEL: z
     .string()
-    .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
+    .regex(/^[^/]+\/[^/]+(?::[a-f0-9]{40,64})?$/, "must be in 'owner/name' or 'owner/name:version' form")
     .optional()
-    .default("cjwbw/lama")
+    .default("allenhooo/lama:cdac78a1bec5b23c07fd29692fb70baa513ea403a39e643c48ec5edadb15fe72")
     .transform((v) => v as `${string}/${string}`),
   // Prompt-driven inpainting: Flux Fill (BFL). Image + mask + prompt → image.
   // Used by Replace & Add Object. Flip between `flux-fill-dev` (cheap) and
@@ -185,7 +196,7 @@ export const env = parsed.data;
 // Dynamic import to avoid a load-order cycle (capabilities.ts imports from
 // types.ts, which does not import env.ts — keep it that way).
 void (async () => {
-  const { PROVIDER_CAPABILITIES } = await import(
+  const { getCapabilities } = await import(
     "./ai-providers/capabilities.js"
   );
   const checks: Array<[string, string, "segment" | "remove" | "inpaint"]> = [
@@ -198,7 +209,7 @@ void (async () => {
     ["REPLICATE_INPAINT_MODEL", env.REPLICATE_INPAINT_MODEL, "inpaint"],
   ];
   for (const [name, slug, expectedRole] of checks) {
-    const capability = PROVIDER_CAPABILITIES[slug];
+    const capability = getCapabilities(slug);
     if (!capability) {
       console.warn(
         `[env] ${name}=${slug} is not registered in PROVIDER_CAPABILITIES; running without role verification. Add a capability entry before relying on this slug in production.`,

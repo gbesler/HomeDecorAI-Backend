@@ -1,7 +1,7 @@
 import Replicate from "replicate";
 import { env } from "../env.js";
 import { logger } from "../logger.js";
-import { PROVIDER_CAPABILITIES } from "./capabilities.js";
+import { getCapabilities } from "./capabilities.js";
 import {
   NoMaskDetectedError,
   type GenerationInput,
@@ -33,7 +33,7 @@ export async function callReplicate(
 ): Promise<GenerationOutput> {
   const start = Date.now();
 
-  const capabilities = PROVIDER_CAPABILITIES[model];
+  const capabilities = getCapabilities(model);
 
   // Reference-style tool passes a second image as the aesthetic reference.
   // Pruna p-image-edit exposes multi-image editing via:
@@ -166,7 +166,7 @@ export async function callSegmentationReplicate(
 ): Promise<SegmentationOutput> {
   const start = Date.now();
 
-  const capabilities = PROVIDER_CAPABILITIES[model];
+  const capabilities = getCapabilities(model);
   if (capabilities?.role !== "segment") {
     logger.warn(
       { event: "provider.replicate.role_mismatch", model, expectedRole: "segment", actualRole: capabilities?.role },
@@ -240,7 +240,7 @@ export async function callRemovalReplicate(
 ): Promise<RemovalOutput> {
   const start = Date.now();
 
-  const capabilities = PROVIDER_CAPABILITIES[model];
+  const capabilities = getCapabilities(model);
   if (capabilities?.role !== "remove") {
     logger.warn(
       { event: "provider.replicate.role_mismatch", model, expectedRole: "remove", actualRole: capabilities?.role },
@@ -309,7 +309,7 @@ export async function callInpaintReplicate(
 ): Promise<InpaintOutput> {
   const start = Date.now();
 
-  const capabilities = PROVIDER_CAPABILITIES[model];
+  const capabilities = getCapabilities(model);
   if (capabilities?.role !== "inpaint") {
     logger.warn(
       { event: "provider.replicate.role_mismatch", model, expectedRole: "inpaint", actualRole: capabilities?.role },
