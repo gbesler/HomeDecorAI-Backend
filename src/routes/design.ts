@@ -4,6 +4,7 @@ import {
   getHistory,
   makeCreateGenerationHandler,
   makeSyncGenerationHandler,
+  retryGeneration,
 } from "../controllers/design.controller.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 
@@ -285,6 +286,56 @@ const designRoutes: FastifyPluginAsync = async (app) => {
       makeSyncGenerationHandler(tool),
     );
   }
+
+  app.post(
+    "/generations/:id/retry",
+    {
+      schema: {
+        tags: ["Design"],
+        summary: "Retry a failed generation in place",
+        description:
+          "Resets a terminally-failed generation to `queued` on the same " +
+          "document and re-enqueues the Cloud Tasks job. Preserves " +
+          "`generationId` so the iOS detail listener updates the open doc. " +
+          "Does not consume freemium — a failed generation never debited " +
+          "the meter. Returns 404 for missing or foreign-owned docs and 409 " +
+          "when the doc is already in progress or completed.",
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
+        params: {
+          type: "object" as const,
+          properties: {
+            id: {
+              type: "string" as const,
+              description: "Generation document id",
+            },
+          },
+          required: ["id"] as const,
+        },
+        response: {
+          202: enqueueResponseSchemas[202],
+          400: enqueueResponseSchemas[400],
+          401: enqueueResponseSchemas[401],
+          404: { ...errorResponse, description: "Generation not found" },
+          409: {
+            ...errorResponse,
+            description:
+              "Conflict: generation is not in a retryable state (already " +
+              "completed or already in flight)",
+          },
+          429: enqueueResponseSchemas[429],
+          503: enqueueResponseSchemas[503],
+        },
+      },
+      // Retry shares the per-tool rate-limit pattern but with its own key.
+      // Retry bypasses freemium, so the gate against provider-cost abuse
+      // is this limiter alone. See `rateLimits.retry` for cap rationale.
+      preHandler: [
+        app.authenticate,
+        createRateLimitPreHandler("retry"),
+      ],
+    },
+    retryGeneration,
+  );
 
   app.get(
     "/history",
