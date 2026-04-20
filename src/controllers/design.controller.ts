@@ -11,6 +11,7 @@ import {
   getGenerationById,
   markEnqueueFailed,
   markFailed,
+  retryFailedGeneration,
 } from "../lib/firestore.js";
 import { enqueueGenerationTask } from "../lib/cloud-tasks.js";
 import { processGeneration } from "../services/generation-processor.js";
@@ -601,6 +602,128 @@ export function makeSyncGenerationHandler<TParams>(
       durationMs: finalDoc.durationMs,
       toolType: finalDoc.toolType,
     };
+  };
+}
+
+// ─── POST /generations/:id/retry ────────────────────────────────────────────
+
+/**
+ * Retry a terminally-failed generation in place. Preserves `generationId`
+ * so the iOS detail screen's Firestore listener updates the open document
+ * (failed → queued → processing → completed) instead of having to navigate
+ * to a brand-new record. Does NOT consume freemium — a failed generation
+ * never debited the user's meter in the first place, and the UI explicitly
+ * advertises the retry as free.
+ *
+ * Distinct from the regular enqueue handler: no body, no prompt builder,
+ * no rate-limit on the tool key. The only caller is the Failed detail
+ * surface, which already gates behind auth. Rate-limiting retries would
+ * give a frustrating "try again" → "rate limited" loop — the gate is
+ * already "must own a failed doc to retry".
+ */
+export async function retryGeneration(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const userId = request.userId;
+  if (!userId) {
+    reply.code(401);
+    return { error: "Unauthorized", message: "Authentication required" };
+  }
+
+  const params = request.params as Record<string, unknown>;
+  const generationId =
+    typeof params["id"] === "string" ? params["id"] : undefined;
+  if (!generationId || generationId.length === 0) {
+    reply.code(400);
+    return {
+      error: "Validation Error",
+      message: "generationId path parameter is required",
+    };
+  }
+
+  const result = await retryFailedGeneration(generationId, userId);
+  if (result.kind === "not_found") {
+    reply.code(404);
+    return {
+      error: "Not Found",
+      message: "Generation record not found",
+    };
+  }
+  if (result.kind === "forbidden") {
+    // Deliberately mirrors "not found" externally so owner-probing a
+    // sibling's id returns the same shape as a missing record. Internally
+    // the log captures the userId mismatch for audit.
+    request.log.warn(
+      { event: "generation.retry.forbidden", generationId, userId },
+      "Retry attempted on a generation owned by a different user",
+    );
+    reply.code(404);
+    return {
+      error: "Not Found",
+      message: "Generation record not found",
+    };
+  }
+  if (result.kind === "already_done") {
+    reply.code(409);
+    return {
+      error: "Conflict",
+      message: "Generation already completed — nothing to retry",
+    };
+  }
+  if (result.kind === "already_live") {
+    reply.code(409);
+    return {
+      error: "Conflict",
+      message: `Generation is ${result.status} — wait for it to finish`,
+    };
+  }
+
+  // result.kind === "reset"
+  try {
+    await enqueueGenerationTask({ generationId });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    request.log.error(
+      {
+        event: "generation.retry.enqueue_failed",
+        generationId,
+        userId,
+        error: errorMessage,
+      },
+      "Cloud Tasks enqueue failed after retry reset — marking failed again",
+    );
+    // Best-effort: roll the doc back to failed so the user can try again.
+    // A stuck-in-queued retry would be invisible to the user (no loading
+    // timeout on the iOS listener for retried jobs).
+    await markEnqueueFailed(generationId, errorMessage).catch((firestoreErr) => {
+      request.log.error(
+        {
+          generationId,
+          error:
+            firestoreErr instanceof Error
+              ? firestoreErr.message
+              : String(firestoreErr),
+        },
+        "Failed to roll retry back to failed state",
+      );
+    });
+    reply.code(503);
+    return {
+      error: "Service Unavailable",
+      message: "Failed to enqueue retry. Please try again.",
+    };
+  }
+
+  request.log.info(
+    { event: "generation.retry.enqueued", generationId, userId },
+    "Generation retry enqueued",
+  );
+
+  reply.code(202);
+  return {
+    generationId,
+    status: "queued" as const,
   };
 }
 

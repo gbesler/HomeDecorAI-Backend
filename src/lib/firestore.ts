@@ -281,6 +281,92 @@ export async function markFailed(
 }
 
 /**
+ * Retry a terminally-failed generation. Transactionally flips `failed →
+ * queued` on the SAME document (preserves `generationId` so the iOS
+ * Firestore listener updates the open detail surface in-place) and clears
+ * every checkpoint field written by prior attempts (error + stage
+ * timestamps + provider id + temp + segmentation mask) so the processor
+ * starts fresh. Preserves `toolType`, `toolParams`, `inputImageUrl`, and
+ * `language` — same job, new run.
+ *
+ * Result kinds:
+ *  - `reset`:          doc was `failed`, fields cleared, status is now `queued`.
+ *  - `already_live`:   doc is `queued` or `processing` — do not re-enqueue
+ *                      (Cloud Tasks is already in flight).
+ *  - `already_done`:   doc is `completed` — nothing to retry.
+ *  - `not_found`:      doc does not exist (or was deleted).
+ *  - `forbidden`:      doc belongs to a different userId.
+ */
+export type RetryGenerationResult =
+  | { kind: "reset" }
+  | { kind: "already_live"; status: "queued" | "processing" }
+  | { kind: "already_done" }
+  | { kind: "not_found" }
+  | { kind: "forbidden" };
+
+export async function retryFailedGeneration(
+  generationId: string,
+  userId: string,
+): Promise<RetryGenerationResult> {
+  const db = getFirestore();
+  const ref = db.collection(GENERATIONS_COLLECTION).doc(generationId);
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) {
+      return { kind: "not_found" } satisfies RetryGenerationResult;
+    }
+    const doc = mapDocToGeneration(snap);
+    if (doc.userId !== userId) {
+      return { kind: "forbidden" } satisfies RetryGenerationResult;
+    }
+    if (doc.status === "completed") {
+      return { kind: "already_done" } satisfies RetryGenerationResult;
+    }
+    if (doc.status === "queued" || doc.status === "processing") {
+      return {
+        kind: "already_live",
+        status: doc.status,
+      } satisfies RetryGenerationResult;
+    }
+
+    // status === "failed" (or legacy "pending") — reset to queued. Clear
+    // every downstream checkpoint so the processor can't accidentally
+    // short-circuit on a stale value from the prior attempt. AI-stage
+    // fields (prompt, actionMode, etc.) are reset too so a retry that
+    // flips env-configured models picks up the fresh promptVersion /
+    // provider metadata instead of keeping the failed run's slug. Output
+    // URL fields are nulled defensively even though `markFailed` doesn't
+    // set them — a partial write from a past schema can leave them
+    // populated, and rendering a half-retried doc as "completed" via a
+    // stale URL would be worse than a loading state.
+    tx.update(ref, {
+      status: "queued",
+      errorCode: null,
+      errorMessage: null,
+      completedAt: null,
+      processingStartedAt: null,
+      aiCompletedAt: null,
+      storageCompletedAt: null,
+      notifiedAt: null,
+      tempOutputUrl: null,
+      outputImageUrl: null,
+      outputImageCDNUrl: null,
+      segmentationMaskUrl: null,
+      durationMs: null,
+      provider: "pending",
+      prompt: "",
+      actionMode: null,
+      guidanceBand: null,
+      promptVersion: null,
+      queuedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { kind: "reset" } satisfies RetryGenerationResult;
+  });
+}
+
+/**
  * Raw getter used by the processor after claimProcessing. Returns null for
  * missing documents. Callers should use {@link claimProcessing} as the primary
  * entry point; this helper is for the processor's re-entry paths.

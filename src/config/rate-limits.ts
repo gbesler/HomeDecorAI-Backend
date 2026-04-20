@@ -125,4 +125,14 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 500,
     dailyLimit: 2000,
   },
+  // Failed-generation retry. Skips the per-tool freemium meter, so a
+  // tight cap on abuse: a user who really wants more retries is going to
+  // generate new jobs instead. A legitimate "oh no try again" pattern
+  // is <3 retries per minute in practice; 10/min leaves headroom for
+  // frustrated mashing without opening a provider-cost DoS vector.
+  retry: {
+    minuteLimit: 10,
+    hourlyLimit: 50,
+    dailyLimit: 200,
+  },
 };
