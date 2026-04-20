@@ -128,14 +128,29 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
   // remove-style use cases.
   //
   // Paper: https://github.com/advimman/lama
-  // Replicate: https://replicate.com/allenhooo/lama (~$0.001-0.003/run, ~2s GPU)
+  // Primary: https://replicate.com/cjwbw/lama  — active community mirror
+  // Fallback (pulled 2026-04-20): https://replicate.com/allenhooo/lama
+  //
+  // Both slugs stay registered so an env flip back to `allenhooo/lama`
+  // (if the upstream returns) or over to any other pinned version hash
+  // (`cjwbw/lama:<sha>`) doesn't trip the role-mismatch warning in the
+  // router. The input schema (image + mask) is identical across the
+  // LaMa forks — `callRemovalReplicate` sends `{ image, mask }` and
+  // expects a single output image URL.
+  "cjwbw/lama": {
+    provider: "replicate",
+    role: "remove",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 0,
+  },
   "allenhooo/lama": {
     provider: "replicate",
     role: "remove",
     supportsNegativePrompt: false,
     supportsGuidanceScale: false,
     supportsReferenceImage: false,
-    // LaMa accepts no prompt at all.
     maxPromptTokens: 0,
   },
   // ─── Inpainting with prompt: Flux Fill ────────────────────────────────────
