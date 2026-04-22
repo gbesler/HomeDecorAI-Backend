@@ -52,7 +52,22 @@ export class StorageUploadError extends Error {
 
 function isHostAllowed(host: string): boolean {
   const normalized = host.toLowerCase();
-  return env.ALLOWED_AI_DOWNLOAD_HOSTS.includes(normalized);
+  if (env.ALLOWED_AI_DOWNLOAD_HOSTS.includes(normalized)) return true;
+  // Our own CloudFront + S3 bucket are implicitly trusted: they are the
+  // destination of client uploads and the source of generation outputs,
+  // and the Remove Objects normalizer (Phase B, 2026-04-22) reads them
+  // back through `downloadSafe` before re-uploading normalized bytes.
+  // Without these entries the normalizer rejects every in-house URL with
+  // `StorageUploadError("Host not in AI download allowlist: …")`, which
+  // the processor surfaces as `mask_storage_failure`. Deriving from env
+  // rather than the allowlist list keeps a single source of truth for
+  // our own infrastructure hostnames.
+  if (env.AWS_CLOUDFRONT_HOST && env.AWS_CLOUDFRONT_HOST.toLowerCase() === normalized) {
+    return true;
+  }
+  const ownS3Host = `${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`.toLowerCase();
+  if (ownS3Host === normalized) return true;
+  return false;
 }
 
 function extensionForContentType(contentType: string | null): {
