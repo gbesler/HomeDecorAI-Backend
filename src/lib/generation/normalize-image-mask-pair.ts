@@ -83,6 +83,18 @@ export async function normalizeImageMaskPair(
     downloadSafe(input.maskUrl),
   ]);
 
+  logger.info(
+    {
+      event: "remove.normalize.fetched",
+      generationId: input.generationId,
+      imageUrl: input.imageUrl,
+      maskUrl: input.maskUrl,
+      imageBytes: imageDl.buffer.length,
+      maskBytes: maskDl.buffer.length,
+    },
+    "normalize: downloaded image + mask",
+  );
+
   // Sharp's `.metadata()` reports raw stored dims and a separate
   // `orientation` field for EXIF. The previous implementation used those
   // raw dims for passthrough comparison, but then the normalize branch
@@ -99,6 +111,63 @@ export async function normalizeImageMaskPair(
 
   const originalImage = readDimensions(imageMeta, "image");
   const originalMask = readDimensions(maskMeta, "mask");
+
+  logger.info(
+    {
+      event: "remove.normalize.metadata",
+      generationId: input.generationId,
+      image: {
+        ...originalImage,
+        format: imageMeta.format,
+        orientation: imageMeta.orientation ?? null,
+        hasProfile: imageMeta.hasProfile ?? false,
+      },
+      mask: {
+        ...originalMask,
+        format: maskMeta.format,
+        orientation: maskMeta.orientation ?? null,
+        channels: maskMeta.channels,
+      },
+      shapesMatch:
+        originalImage.width === originalMask.width
+        && originalImage.height === originalMask.height,
+    },
+    "normalize: decoded metadata",
+  );
+
+  // Mask content stats — mean channel value approximates the
+  // white-pixel ratio. If mean ≈ 0 the mask is effectively empty
+  // and LaMa will return null with no diagnostic of its own. ~50-
+  // 200ms overhead on a multi-MP mask; cheap relative to the
+  // Replicate round-trip we'd otherwise waste on an empty payload.
+  try {
+    const stats = await sharp(maskDl.buffer).stats();
+    const ch0 = stats.channels[0];
+    logger.info(
+      {
+        event: "remove.normalize.mask_stats",
+        generationId: input.generationId,
+        channelMean: ch0?.mean ?? null,
+        channelMin: ch0?.min ?? null,
+        channelMax: ch0?.max ?? null,
+        // Approximate white-pixel fraction assuming a clean
+        // 0/255 binary mask. Soft edges bias this downward.
+        whitePixelFraction: ch0 ? ch0.mean / 255 : null,
+        isBlack: ch0 ? ch0.max === 0 : null,
+        isWhite: ch0 ? ch0.min === 255 : null,
+      },
+      "normalize: mask content stats",
+    );
+  } catch (err) {
+    logger.warn(
+      {
+        event: "remove.normalize.mask_stats_failed",
+        generationId: input.generationId,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "normalize: mask stats probe failed (non-fatal)",
+    );
+  }
 
   // Pixel-count guard. Protects the Render instance from an OOM when a
   // pathological upload would decode to a 200+ MB RGBA raster. Runs

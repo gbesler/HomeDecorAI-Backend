@@ -258,6 +258,18 @@ export async function callRemovalReplicate(
     mask: input.maskUrl,
   };
 
+  logger.info(
+    {
+      event: "provider.replicate.remove.start",
+      model,
+      imageUrl: input.imageUrl,
+      maskUrl: input.maskUrl,
+      normalizedDims: input.normalizedDims ?? null,
+      timeoutMs: TIMEOUT_MS,
+    },
+    "LaMa: calling Replicate",
+  );
+
   const output = (await replicate.run(model, {
     input: replicateInput,
     signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -279,6 +291,11 @@ export async function callRemovalReplicate(
         // response is already self-diagnostic — we know whether the input
         // was within LaMa's envelope without needing to re-download.
         normalizedDims: input.normalizedDims ?? null,
+        // Full inputs for operator triage: if LaMa returns null we
+        // want to be able to re-run the exact same payload against
+        // the web UI without reconstructing URLs from the trace.
+        imageUrl: input.imageUrl,
+        maskUrl: input.maskUrl,
       },
       "LaMa returned no image — empty response",
     );
