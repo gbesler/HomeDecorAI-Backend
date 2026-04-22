@@ -41,8 +41,8 @@ import {
 import {
   logNormalizeResult,
   NormalizeInputError,
-  normalizeRemovalInputs,
-} from "./normalize-removal-inputs.js";
+  normalizeImageMaskPair,
+} from "./normalize-image-mask-pair.js";
 
 // ─── Stage 1: segment + persist ─────────────────────────────────────────────
 
@@ -149,7 +149,7 @@ export async function runRemoval(
   // variants that are config-shaped (allowlist / size cap violations).
   const normalized = await withRetry(
     () =>
-      normalizeRemovalInputs({
+      normalizeImageMaskPair({
         imageUrl: input.imageUrl,
         maskUrl: input.maskUrl,
         userId: input.userId,
@@ -190,7 +190,7 @@ export async function runRemoval(
       },
     },
   );
-  logNormalizeResult(input.generationId, normalized);
+  logNormalizeResult(input.generationId, normalized, "remove");
 
   const result = await callRemoval({
     imageUrl: normalized.imageUrl,

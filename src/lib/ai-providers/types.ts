@@ -104,6 +104,14 @@ export interface InpaintInput {
    * is on a different scale than classic CFG — see model card for ranges.
    */
   guidanceScale?: number;
+  /**
+   * Pixel dimensions image + mask were normalized to upstream (when
+   * known). Purely a diagnostic passthrough — logged on an
+   * `empty_response` so a future regression is diagnosable from logs
+   * alone without re-downloading the S3 artifacts. Mirrors
+   * `RemovalInput.normalizedDims`.
+   */
+  normalizedDims?: { width: number; height: number };
 }
 
 export interface InpaintOutput {

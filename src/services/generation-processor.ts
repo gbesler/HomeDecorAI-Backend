@@ -23,7 +23,7 @@ import type {
 } from "../lib/generation/types.js";
 import { persistGenerationImage, StorageUploadError } from "../lib/storage/s3-upload.js";
 import { CognitoCredentialMintError } from "../lib/storage/cognito-credentials.js";
-import { NormalizeInputError } from "../lib/generation/normalize-removal-inputs.js";
+import { NormalizeInputError } from "../lib/generation/normalize-image-mask-pair.js";
 import { sendGenerationNotification } from "../lib/notifications/fcm.js";
 import { logger } from "../lib/logger.js";
 import type { NotificationKind } from "../lib/notifications/i18n.js";
@@ -429,6 +429,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
         maskUrl,
         prompt: promptResult.prompt,
         guidanceScale: promptResult.guidanceScale,
+        userId,
+        generationId,
       });
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;

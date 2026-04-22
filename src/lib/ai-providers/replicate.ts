@@ -351,6 +351,10 @@ export async function callInpaintReplicate(
         outputShape: describeShape(output),
         outputSnapshot: safeSnapshot(output),
         durationMs,
+        // Upstream normalization pins image + mask to these dims before
+        // Flux Fill sees them. Surfacing them on the failure log makes
+        // a null response self-diagnostic — mirrors the LaMa path.
+        normalizedDims: input.normalizedDims ?? null,
       },
       "Flux Fill returned no image — empty response",
     );
