@@ -26,32 +26,36 @@ export class NormalizeInputError extends Error {
 const MAX_INPUT_PIXELS = 50_000_000;
 
 /**
- * Guarantee that the `image` and `mask` URLs handed to LaMa have identical
- * pixel dimensions and that the image long-side stays within the model's
- * practical envelope. See
- * `docs/plans/2026-04-22-001-fix-remove-objects-vertical-normalization-plan.md`
- * for the full rationale.
+ * Guarantee that a paired `image` + `mask` handed to an inpainting /
+ * removal model have identical pixel dimensions and that the image
+ * long-side stays within the model's practical envelope.
  *
- * Short version: LaMa (`allenhooo/lama` on Replicate) silently returns
- * `null` when image and mask pixel shapes disagree. Pre-iOS-Phase-A clients
- * ship an image at native camera resolution and a mask rendered against
- * the UIImage's display-scaled copy, which desyncs shapes on portrait
- * photos. This helper is that defense-in-depth step.
+ * Motivating bug: both LaMa (Remove Objects) and Flux Fill (Replace &
+ * Add Object) silently return `null` when image and mask pixel shapes
+ * disagree. Pre-iOS-PR-#13 clients ship an image at native camera
+ * resolution with a mask rendered against the UIImage's display-scaled
+ * copy, which desyncs shapes on portrait photos. This helper is the
+ * backend-side defense-in-depth for both paths.
+ *
+ * See `docs/plans/2026-04-22-001-fix-remove-objects-vertical-normalization-plan.md`
+ * for the full rationale (originally scoped to the removal path;
+ * broadened to inpaint in a follow-up).
  */
 
-/** Image long-side cap. Values above this put LaMa inside OOM territory on
- *  Replicate's consumer GPU tier. Matches the iOS Phase A client cap so
- *  post-Phase-A uploads take the passthrough path. */
+/** Image long-side cap. Values above this put Replicate's consumer
+ *  GPU tier (the deployment target for both LaMa and Flux Fill) into
+ *  OOM territory. Matches the iOS PR #13 client cap so post-PR-#13
+ *  uploads take the passthrough path. */
 const MAX_LONG_SIDE = 2048;
 
-export interface NormalizeRemovalInputsInput {
+export interface NormalizeImageMaskPairInput {
   imageUrl: string;
   maskUrl: string;
   userId: string;
   generationId: string;
 }
 
-export interface NormalizeRemovalInputsResult {
+export interface NormalizeImageMaskPairResult {
   imageUrl: string;
   maskUrl: string;
   action: "passthrough" | "normalized";
@@ -65,9 +69,9 @@ export interface Dimensions {
   height: number;
 }
 
-export async function normalizeRemovalInputs(
-  input: NormalizeRemovalInputsInput,
-): Promise<NormalizeRemovalInputsResult> {
+export async function normalizeImageMaskPair(
+  input: NormalizeImageMaskPairInput,
+): Promise<NormalizeImageMaskPairResult> {
   const start = Date.now();
 
   // Parallel fetch — both URLs are on the same CDN so network latency
@@ -278,25 +282,30 @@ function clampLongSide(size: Dimensions, cap: number): Dimensions {
 }
 
 /**
- * Convenience logger for the normalize stage. Separate from
- * `normalizeRemovalInputs` so callers in the generation pipeline keep
- * their own log-event taxonomy (`remove.normalize.*`) rather than the
- * helper dictating it.
+ * Convenience logger for the normalize stage. The `eventPrefix` keeps
+ * the per-pipeline log taxonomy stable so operator dashboards keyed off
+ * `remove.normalize.*` stay intact while the inpaint path emits its own
+ * parallel `inpaint.normalize.*` events. Valid values today are
+ * `"remove"` (LaMa / Remove Objects) and `"inpaint"` (Flux Fill /
+ * Replace & Add Object). Typed as a union so adding a third pipeline
+ * requires widening the type — prevents silent drift into arbitrary
+ * strings.
  */
 export function logNormalizeResult(
   generationId: string,
-  result: NormalizeRemovalInputsResult,
+  result: NormalizeImageMaskPairResult,
+  eventPrefix: "remove" | "inpaint",
 ): void {
   logger.info(
     {
-      event: "remove.normalize.done",
+      event: `${eventPrefix}.normalize.done`,
       generationId,
       action: result.action,
       before: result.before,
       after: result.after,
       durationMs: result.durationMs,
     },
-    `Remove normalize: ${result.action}`,
+    `${eventPrefix} normalize: ${result.action}`,
   );
   const shapeChanged =
     result.before.image.width !== result.before.mask.width ||
@@ -304,12 +313,12 @@ export function logNormalizeResult(
   if (shapeChanged) {
     logger.warn(
       {
-        event: "remove.normalize.mismatch",
+        event: `${eventPrefix}.normalize.mismatch`,
         generationId,
         before: result.before,
         after: result.after,
       },
-      "Remove normalize: image/mask shapes differed pre-normalization",
+      `${eventPrefix} normalize: image/mask shapes differed pre-normalization`,
     );
   }
 }
