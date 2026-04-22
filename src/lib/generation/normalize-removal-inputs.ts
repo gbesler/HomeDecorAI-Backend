@@ -3,6 +3,29 @@ import { logger } from "../logger.js";
 import { downloadSafe, persistGenerationBuffer } from "../storage/s3-upload.js";
 
 /**
+ * Raised when the image or mask cannot be normalized because of a
+ * client-payload-shape issue (sharp failed to decode, metadata missing
+ * width/height, pixel count exceeds our per-image ceiling). Distinct from
+ * `StorageUploadError` (fetch/S3 transport problems) and generic errors
+ * (upstream provider outage) — the processor maps this to
+ * `VALIDATION_FAILED` so operator dashboards and the iOS retry UX don't
+ * mistake a malformed upload for an AI provider outage.
+ */
+export class NormalizeInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NormalizeInputError";
+  }
+}
+
+/** Hard ceiling on decoded pixel count. Above this sharp's RGBA raster
+ *  (~4 bytes/pixel × 2 buffers for resize) risks OOM on a 512 MB Render
+ *  instance under concurrent load. 50 MP covers every iPhone capture
+ *  format we ship today (48 MP Pro + generous headroom) while keeping
+ *  the worst-case sharp raster under ~200 MB. */
+const MAX_INPUT_PIXELS = 50_000_000;
+
+/**
  * Guarantee that the `image` and `mask` URLs handed to LaMa have identical
  * pixel dimensions and that the image long-side stays within the model's
  * practical envelope. See
@@ -20,11 +43,6 @@ import { downloadSafe, persistGenerationBuffer } from "../storage/s3-upload.js";
  *  Replicate's consumer GPU tier. Matches the iOS Phase A client cap so
  *  post-Phase-A uploads take the passthrough path. */
 const MAX_LONG_SIDE = 2048;
-
-/** Disambiguates the two artifacts when they land in S3 under the same
- *  `normalized/{userId}/{generationId}-…` prefix. */
-const IMAGE_SUFFIX = "image";
-const MASK_SUFFIX = "mask";
 
 export interface NormalizeRemovalInputsInput {
   imageUrl: string;
@@ -53,19 +71,37 @@ export async function normalizeRemovalInputs(
   const start = Date.now();
 
   // Parallel fetch — both URLs are on the same CDN so network latency
-  // dominates over any per-request fixed cost. No point serializing.
+  // dominates over any per-request fixed cost. Downloads stay parallel;
+  // only the sharp CPU+memory pipelines below get serialized to halve
+  // peak RSS under concurrent load.
   const [imageDl, maskDl] = await Promise.all([
     downloadSafe(input.imageUrl),
     downloadSafe(input.maskUrl),
   ]);
 
+  // Sharp's `.metadata()` reports raw stored dims and a separate
+  // `orientation` field for EXIF. The previous implementation used those
+  // raw dims for passthrough comparison, but then the normalize branch
+  // preserved EXIF via `.withMetadata()` — which meant LaMa's decoder
+  // could re-apply orientation and produce a payload whose pixel shape
+  // doesn't match the mask. We normalize *post-rotation* dims here
+  // (i.e. `.rotate()` baked into a fresh pipeline before metadata) so
+  // the shape comparison and the eventual resize operate on the same
+  // coordinate system the mask was authored against.
   const [imageMeta, maskMeta] = await Promise.all([
-    sharp(imageDl.buffer).metadata(),
-    sharp(maskDl.buffer).metadata(),
+    readMetadata(imageDl.buffer, "image"),
+    readMetadata(maskDl.buffer, "mask"),
   ]);
 
   const originalImage = readDimensions(imageMeta, "image");
   const originalMask = readDimensions(maskMeta, "mask");
+
+  // Pixel-count guard. Protects the Render instance from an OOM when a
+  // pathological upload would decode to a 200+ MB RGBA raster. Runs
+  // after metadata (which is O(header bytes)) but before any decode, so
+  // the defensive cost is ~nothing.
+  assertPixelCount(originalImage, "image");
+  assertPixelCount(originalMask, "mask");
 
   const targetImage = clampLongSide(originalImage, MAX_LONG_SIDE);
 
@@ -77,9 +113,16 @@ export async function normalizeRemovalInputs(
     originalMask.width !== targetImage.width ||
     originalMask.height !== targetImage.height;
 
-  if (!imageNeedsResize && !maskNeedsResize) {
-    // Passthrough short-circuit — no S3 writes, no sharp re-encode.
-    // Expected to be the common case once iOS Phase A lands.
+  // Passthrough is narrow on purpose: dims already match AND the image
+  // has no non-identity EXIF orientation. If it did, forwarding the raw
+  // JPEG bytes to LaMa would let the decoder apply orientation and
+  // desync from the unrotated mask. Anything outside these invariants
+  // goes through the re-encode branch where we bake rotation and strip
+  // orientation metadata.
+  const imageNeedsReencode =
+    imageNeedsResize || !isIdentityOrientation(imageMeta.orientation);
+
+  if (!imageNeedsReencode && !maskNeedsResize) {
     return {
       imageUrl: input.imageUrl,
       maskUrl: input.maskUrl,
@@ -90,36 +133,51 @@ export async function normalizeRemovalInputs(
     };
   }
 
-  // Image: resize with a high-quality kernel (sharp default is lanczos3).
-  // Preserve ICC profile so P3 captures don't silently flatten to sRGB.
-  // JPEG out at quality 90 — high enough to be visually indistinguishable
-  // from the source at this scale, low enough to keep file sizes inside
-  // the 10 MB download cap for the next leg of the pipeline.
-  const imageBuffer = imageNeedsResize
-    ? await sharp(imageDl.buffer)
+  // Sharp pipelines run sequentially (not Promise.all) — CPU is
+  // single-threaded anyway at this buffer size, and keeping at most one
+  // RGBA raster resident halves peak heap vs. running both pipelines in
+  // parallel. Network I/O remains parallel above.
+  //
+  // Image: `.rotate()` with no arg auto-orients from EXIF and strips
+  // the tag. `.resize(..., { fit: "fill" })` preserves the proportional
+  // target computed in `clampLongSide`. JPEG q=90 at 2048-long-side
+  // typically lands under 2 MB; far below `MAX_DOWNLOAD_BYTES` (10 MB).
+  // No `.withMetadata()` — that's what created the EXIF re-application
+  // bug in the previous implementation.
+  const imageBuffer = await sharpRun(
+    () =>
+      sharp(imageDl.buffer)
+        .rotate()
         .resize(targetImage.width, targetImage.height, { fit: "fill" })
         .jpeg({ quality: 90 })
-        .withMetadata()
-        .toBuffer()
-    : imageDl.buffer;
+        .toBuffer(),
+    "image",
+  );
 
-  // Mask: nearest-neighbor is the only correct kernel for a binary mask.
-  // Bilinear / bicubic produce intermediate grays at edges that LaMa
-  // interprets as "neither remove nor preserve", softening object
-  // boundaries and leaving halos in the output.
-  const maskBuffer = maskNeedsResize
-    ? await sharp(maskDl.buffer)
+  // Mask: nearest-neighbor is the only correct kernel for a binary
+  // mask. Bilinear / bicubic produce intermediate grays at edges that
+  // LaMa interprets as "neither remove nor preserve", softening object
+  // boundaries. Always re-encode as PNG even if dims already match —
+  // guarantees the uploaded `-mask.png` body is actually PNG regardless
+  // of what Content-Type the client originally sent.
+  const maskBuffer = await sharpRun(
+    () =>
+      sharp(maskDl.buffer)
         .resize(targetImage.width, targetImage.height, {
           fit: "fill",
           kernel: "nearest",
         })
         .png()
-        .toBuffer()
-    : maskDl.buffer;
+        .toBuffer(),
+    "mask",
+  );
 
-  // Upload both under a dedicated `normalized/` prefix so infra can
-  // expire them on a short lifecycle rule independent of user uploads or
-  // generation outputs.
+  // Uploads stay parallel — two small PUTs, no CPU or memory cost on
+  // our side, and the deterministic key scheme (`-image` / `-mask`
+  // suffixes) makes retries idempotent. If one leg fails, the other
+  // leaves an orphan artifact that the `normalized/` lifecycle rule
+  // reaps — acceptable since the lifecycle is the whole point of the
+  // separate prefix.
   const [uploadedImage, uploadedMask] = await Promise.all([
     persistGenerationBuffer({
       userId: input.userId,
@@ -127,7 +185,7 @@ export async function normalizeRemovalInputs(
       buffer: imageBuffer,
       mime: "image/jpeg",
       keyPrefix: "normalized",
-      suffix: IMAGE_SUFFIX,
+      suffix: "image",
     }),
     persistGenerationBuffer({
       userId: input.userId,
@@ -135,7 +193,7 @@ export async function normalizeRemovalInputs(
       buffer: maskBuffer,
       mime: "image/png",
       keyPrefix: "normalized",
-      suffix: MASK_SUFFIX,
+      suffix: "mask",
     }),
   ]);
 
@@ -149,16 +207,62 @@ export async function normalizeRemovalInputs(
   };
 }
 
+async function readMetadata(
+  buffer: Buffer,
+  role: "image" | "mask",
+): Promise<sharp.Metadata> {
+  try {
+    return await sharp(buffer).metadata();
+  } catch (err) {
+    throw new NormalizeInputError(
+      `normalize: ${role} could not be decoded: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+async function sharpRun(
+  fn: () => Promise<Buffer>,
+  role: "image" | "mask",
+): Promise<Buffer> {
+  try {
+    return await fn();
+  } catch (err) {
+    // Sharp throws plain Errors; map them to our typed class so the
+    // processor's catch block routes a corrupt upload to
+    // VALIDATION_FAILED instead of AI_PROVIDER_FAILED.
+    throw new NormalizeInputError(
+      `normalize: sharp failed on ${role}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
 function readDimensions(
   meta: sharp.Metadata,
   role: "image" | "mask",
 ): Dimensions {
-  if (!meta.width || !meta.height) {
-    throw new Error(
-      `normalize: ${role} has no width/height in sharp metadata`,
+  if (meta.width == null || meta.height == null) {
+    throw new NormalizeInputError(
+      `normalize: ${role} has no width/height (format=${meta.format ?? "unknown"})`,
     );
   }
   return { width: meta.width, height: meta.height };
+}
+
+function assertPixelCount(size: Dimensions, role: "image" | "mask"): void {
+  const pixels = size.width * size.height;
+  if (pixels > MAX_INPUT_PIXELS) {
+    throw new NormalizeInputError(
+      `normalize: ${role} has ${pixels} pixels, exceeds limit ${MAX_INPUT_PIXELS} (${size.width}x${size.height})`,
+    );
+  }
+}
+
+/** Sharp reports EXIF `orientation` as 1-8 (or undefined when absent).
+ *  Values 1 and undefined mean "no rotation" — safe to passthrough.
+ *  Anything 2-8 means the raw pixel buffer is rotated/mirrored relative
+ *  to the display orientation the mask was authored against. */
+function isIdentityOrientation(orientation: number | undefined): boolean {
+  return orientation === undefined || orientation === 1;
 }
 
 function clampLongSide(size: Dimensions, cap: number): Dimensions {

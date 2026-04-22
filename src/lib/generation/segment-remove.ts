@@ -33,9 +33,14 @@ import {
   callSegmentation,
 } from "../ai-providers/index.js";
 import { logger } from "../logger.js";
-import { persistGenerationImage } from "../storage/s3-upload.js";
+import { withRetry } from "../retry.js";
+import {
+  persistGenerationImage,
+  StorageUploadError,
+} from "../storage/s3-upload.js";
 import {
   logNormalizeResult,
+  NormalizeInputError,
   normalizeRemovalInputs,
 } from "./normalize-removal-inputs.js";
 
@@ -133,12 +138,58 @@ export async function runRemoval(
   // Passthrough short-circuit means this is effectively free when inputs
   // already satisfy the invariants (notably once iOS Phase A ships — see
   // HomeDecorAI/docs/plans/2026-04-22-001-fix-remove-objects-image-mask-unify-plan.md).
-  const normalized = await normalizeRemovalInputs({
-    imageUrl: input.imageUrl,
-    maskUrl: input.maskUrl,
-    userId: input.userId,
-    generationId: input.generationId,
-  });
+  //
+  // The normalize surface is bigger than the raw LaMa call (two fetches
+  // + sharp + two S3 PUTs), so a transient blip on any of those legs
+  // would otherwise fail the whole generation with zero retries — we
+  // lost the single-retry envelope that used to cover the Replicate
+  // call for free. Re-wrap normalize in its own retry to restore that
+  // safety net, deliberately not retrying on deterministic
+  // client-payload errors (NormalizeInputError) or on StorageUploadError
+  // variants that are config-shaped (allowlist / size cap violations).
+  const normalized = await withRetry(
+    () =>
+      normalizeRemovalInputs({
+        imageUrl: input.imageUrl,
+        maskUrl: input.maskUrl,
+        userId: input.userId,
+        generationId: input.generationId,
+      }),
+    {
+      maxRetries: 1,
+      delayMs: 1000,
+      isRetryable: (error) => {
+        if (error instanceof NormalizeInputError) return false;
+        if (error instanceof StorageUploadError) {
+          // Allowlist / size-cap / invalid-URL violations are
+          // deterministic; anything else (e.g. Cognito mint transient)
+          // gets one retry.
+          const msg = error.message;
+          if (
+            msg.includes("Host not in AI download allowlist") ||
+            msg.includes("exceeds limit") ||
+            msg.includes("Invalid source URL") ||
+            msg.includes("refusing to persist an empty buffer") ||
+            msg.includes("Refused to download non-HTTP(S)")
+          ) {
+            return false;
+          }
+        }
+        return true;
+      },
+      onRetry: (error, attempt) => {
+        logger.warn(
+          {
+            event: "remove.normalize.retry",
+            generationId: input.generationId,
+            error: error.message,
+            attempt,
+          },
+          "Normalize pre-step failed, retrying",
+        );
+      },
+    },
+  );
   logNormalizeResult(input.generationId, normalized);
 
   const result = await callRemoval({

@@ -27,6 +27,22 @@ import { getAwsCredentials } from "./cognito-credentials.js";
 const MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
 const DOWNLOAD_TIMEOUT_MS = 60_000;
 
+/**
+ * The mime types we write to S3. Narrow on purpose — the typed buffer
+ * upload path ought to fail at compile time if a caller tries to persist
+ * `application/octet-stream` or similar, not silently write `.bin`.
+ */
+export type SupportedMime = "image/jpeg" | "image/png" | "image/webp";
+
+/** Canonical mime → extension mapping. Single source of truth so the
+ *  download-path (`extensionForContentType`) and the buffer-upload path
+ *  can't drift. */
+const MIME_EXT_MAP: Record<SupportedMime, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
 export class StorageUploadError extends Error {
   constructor(message: string) {
     super(message);
@@ -41,21 +57,21 @@ function isHostAllowed(host: string): boolean {
 
 function extensionForContentType(contentType: string | null): {
   ext: string;
-  mime: string;
+  mime: SupportedMime;
 } {
-  if (!contentType) return { ext: "jpg", mime: "image/jpeg" };
+  if (!contentType) return { ext: MIME_EXT_MAP["image/jpeg"], mime: "image/jpeg" };
   const lower = contentType.toLowerCase().split(";")[0]?.trim() ?? "";
-  if (lower === "image/png") return { ext: "png", mime: "image/png" };
-  if (lower === "image/webp") return { ext: "webp", mime: "image/webp" };
+  if (lower === "image/png") return { ext: MIME_EXT_MAP["image/png"], mime: "image/png" };
+  if (lower === "image/webp") return { ext: MIME_EXT_MAP["image/webp"], mime: "image/webp" };
   if (lower === "image/jpeg" || lower === "image/jpg") {
-    return { ext: "jpg", mime: "image/jpeg" };
+    return { ext: MIME_EXT_MAP["image/jpeg"], mime: "image/jpeg" };
   }
   // Unknown — default to jpg with a warning so the caller can see it in logs.
   logger.warn(
     { event: "storage.unknown_content_type", contentType },
     "Unknown AI download content-type, defaulting to image/jpeg",
   );
-  return { ext: "jpg", mime: "image/jpeg" };
+  return { ext: MIME_EXT_MAP["image/jpeg"], mime: "image/jpeg" };
 }
 
 export interface PersistGenerationImageInput {
@@ -74,7 +90,7 @@ export interface PersistGenerationImageInput {
 
 export interface DownloadSafeResult {
   buffer: Buffer;
-  mime: string;
+  mime: SupportedMime;
   bytes: number;
 }
 
@@ -142,7 +158,7 @@ export interface PersistGenerationBufferInput {
   userId: string;
   generationId: string;
   buffer: Buffer;
-  mime: string;
+  mime: SupportedMime;
   /** Same semantics as `PersistGenerationImageInput.keyPrefix`. */
   keyPrefix?: string;
   /**
@@ -151,9 +167,17 @@ export interface PersistGenerationBufferInput {
    * same prefix (e.g. normalized image + normalized mask) — otherwise the
    * two writes collide on the same key. Omit when there's only ever one
    * artifact per (generationId, prefix) pair.
+   *
+   * For `keyPrefix: "normalized"` this field is enforced at runtime —
+   * the normalize pipeline writes two artifacts per generation and a
+   * missing suffix would silently overwrite the sibling.
    */
   suffix?: string;
 }
+
+/** Prefixes that persist more than one artifact per generationId and
+ *  therefore require a `suffix` to disambiguate the keys. */
+const MULTI_ARTIFACT_PREFIXES = new Set(["normalized"]);
 
 /**
  * Write pre-fetched bytes (already in memory, no URL to download) to S3.
@@ -185,8 +209,13 @@ export async function persistGenerationBuffer(
       `Buffer ${buffer.byteLength} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
     );
   }
+  if (MULTI_ARTIFACT_PREFIXES.has(keyPrefix) && !suffix) {
+    throw new StorageUploadError(
+      `keyPrefix="${keyPrefix}" persists multiple artifacts per generationId — a suffix is required to avoid overwriting the sibling`,
+    );
+  }
 
-  const ext = mimeToExtension(mime);
+  const ext = MIME_EXT_MAP[mime];
   const base = suffix ? `${generationId}-${suffix}` : generationId;
   const key = `${keyPrefix}/${userId}/${base}.${ext}`;
 
@@ -241,19 +270,6 @@ export async function persistGenerationBuffer(
   };
 }
 
-function mimeToExtension(mime: string): string {
-  switch (mime.toLowerCase()) {
-    case "image/png":
-      return "png";
-    case "image/webp":
-      return "webp";
-    case "image/jpeg":
-    case "image/jpg":
-      return "jpg";
-    default:
-      return "bin";
-  }
-}
 
 export interface PersistGenerationImageResult {
   /** Native S3 URL (`https://<bucket>.s3.<region>.amazonaws.com/<key>`). Always set. */
@@ -280,16 +296,12 @@ export async function persistGenerationImage(
   input: PersistGenerationImageInput,
 ): Promise<PersistGenerationImageResult> {
   const { userId, generationId, sourceUrl, keyPrefix = "generations" } = input;
-  const { buffer, mime, bytes } = await downloadSafe(sourceUrl);
+  const { buffer, mime } = await downloadSafe(sourceUrl);
   return persistGenerationBuffer({
     userId,
     generationId,
     buffer,
     mime,
     keyPrefix,
-  }).then((result) => {
-    // Preserve the original caller's view of `bytes` (buffer byte length
-    // equals `downloadSafe`'s reported bytes, but make it explicit).
-    return { ...result, bytes };
   });
 }

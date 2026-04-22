@@ -34,8 +34,10 @@ Establishes that the normalizer actually fixes the production failure.
    aws s3 ls s3://<bucket>/normalized/<userId>/<generationId>-image.jpg
    aws s3 ls s3://<bucket>/normalized/<userId>/<generationId>-mask.png
    ```
-   Both should exist, both should have matching dims (verify via
-   `sips -g pixelWidth -g pixelHeight` after download).
+   Both should exist, both should have matching dims. Verify via any
+   image-metadata tool — `sips -g pixelWidth -g pixelHeight` (macOS),
+   `identify -format '%wx%h'` (ImageMagick, portable), or
+   `python -c 'from PIL import Image, sys; print(Image.open(sys.argv[1]).size)'`.
 
 ## Scenario 2 — Passthrough short-circuit
 

@@ -23,6 +23,7 @@ import type {
 } from "../lib/generation/types.js";
 import { persistGenerationImage, StorageUploadError } from "../lib/storage/s3-upload.js";
 import { CognitoCredentialMintError } from "../lib/storage/cognito-credentials.js";
+import { NormalizeInputError } from "../lib/generation/normalize-removal-inputs.js";
 import { sendGenerationNotification } from "../lib/notifications/fcm.js";
 import { logger } from "../lib/logger.js";
 import type { NotificationKind } from "../lib/notifications/i18n.js";
@@ -518,6 +519,27 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
         "Mask persist failed — marking failed as storage",
       );
       return { kind: "failed", code: "STORAGE_FAILED", message: err.message };
+    }
+    // Malformed / oversized client upload detected during the Remove
+    // Objects normalize pre-step (Phase B, 2026-04-22). Terminal
+    // validation failure — retry-with-same-bytes will deterministically
+    // re-hit the same decode/pixel-count/sharp error, and the iOS retry
+    // UX should surface "try a different photo", not "AI unavailable".
+    if (err instanceof NormalizeInputError) {
+      logger.error(
+        {
+          event: "processor.ai.normalize_input_invalid",
+          generationId,
+          mode,
+          error: err.message,
+        },
+        "Normalize rejected the client payload — marking failed as validation",
+      );
+      return {
+        kind: "failed",
+        code: "VALIDATION_FAILED",
+        message: err.message,
+      };
     }
     if (err instanceof CognitoCredentialMintError) {
       logger.error(
