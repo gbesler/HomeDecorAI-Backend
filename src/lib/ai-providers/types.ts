@@ -66,6 +66,14 @@ export interface RemovalInput {
   imageUrl: string;
   /** Binary mask PNG URL — white pixels are removed, black preserved. */
   maskUrl: string;
+  /**
+   * Pixel dimensions image + mask were normalized to upstream (when
+   * known). Purely a diagnostic passthrough — the provider does not
+   * feed this into the LaMa call. Logged on an `empty_response` so a
+   * future regression is diagnosable from logs alone without having to
+   * re-download the S3 artifacts.
+   */
+  normalizedDims?: { width: number; height: number };
 }
 
 export interface RemovalOutput {

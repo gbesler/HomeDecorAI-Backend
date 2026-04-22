@@ -373,6 +373,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       const result = await runRemoval({
         imageUrl: inputImageUrl,
         maskUrl,
+        userId,
+        generationId,
       });
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;
@@ -393,6 +395,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       const result = await runRemoval({
         imageUrl: inputImageUrl,
         maskUrl,
+        userId,
+        generationId,
       });
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;

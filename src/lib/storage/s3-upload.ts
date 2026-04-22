@@ -72,6 +72,189 @@ export interface PersistGenerationImageInput {
   keyPrefix?: string;
 }
 
+export interface DownloadSafeResult {
+  buffer: Buffer;
+  mime: string;
+  bytes: number;
+}
+
+/**
+ * Fetch a remote image into memory with the same SSRF / size / timeout
+ * defences `persistGenerationImage` uses. Extracted so callers that need
+ * the raw bytes (e.g. the Remove Objects normalizer, which resizes
+ * in-process before re-uploading) don't have to re-implement the guards.
+ */
+export async function downloadSafe(
+  sourceUrl: string,
+): Promise<DownloadSafeResult> {
+  let parsed: URL;
+  try {
+    parsed = new URL(sourceUrl);
+  } catch {
+    throw new StorageUploadError(`Invalid source URL: ${sourceUrl}`);
+  }
+
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new StorageUploadError(
+      `Refused to download non-HTTP(S) URL: ${parsed.protocol}`,
+    );
+  }
+
+  if (!isHostAllowed(parsed.hostname)) {
+    throw new StorageUploadError(
+      `Host not in AI download allowlist: ${parsed.hostname}`,
+    );
+  }
+
+  const controller = AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS);
+  const response = await fetch(sourceUrl, { signal: controller });
+
+  if (!response.ok) {
+    throw new StorageUploadError(
+      `Download failed with ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const contentLengthRaw = response.headers.get("content-length");
+  if (contentLengthRaw) {
+    const declared = Number.parseInt(contentLengthRaw, 10);
+    if (Number.isFinite(declared) && declared > MAX_DOWNLOAD_BYTES) {
+      throw new StorageUploadError(
+        `Declared content-length ${declared} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
+      );
+    }
+  }
+
+  const { mime } = extensionForContentType(response.headers.get("content-type"));
+
+  const arrayBuffer = await response.arrayBuffer();
+  const bytes = arrayBuffer.byteLength;
+  if (bytes > MAX_DOWNLOAD_BYTES) {
+    throw new StorageUploadError(
+      `Downloaded body ${bytes} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
+    );
+  }
+
+  return { buffer: Buffer.from(arrayBuffer), mime, bytes };
+}
+
+export interface PersistGenerationBufferInput {
+  userId: string;
+  generationId: string;
+  buffer: Buffer;
+  mime: string;
+  /** Same semantics as `PersistGenerationImageInput.keyPrefix`. */
+  keyPrefix?: string;
+  /**
+   * Disambiguation suffix appended to `generationId` in the key. Required
+   * when a single generation persists more than one artifact under the
+   * same prefix (e.g. normalized image + normalized mask) — otherwise the
+   * two writes collide on the same key. Omit when there's only ever one
+   * artifact per (generationId, prefix) pair.
+   */
+  suffix?: string;
+}
+
+/**
+ * Write pre-fetched bytes (already in memory, no URL to download) to S3.
+ * Complements `persistGenerationImage` for callers that have already
+ * resolved the buffer upstream — notably the normalization pipeline,
+ * which needs to resize before upload and shouldn't double-fetch the
+ * source URL just to reuse `persistGenerationImage`.
+ */
+export async function persistGenerationBuffer(
+  input: PersistGenerationBufferInput,
+): Promise<PersistGenerationImageResult> {
+  const {
+    userId,
+    generationId,
+    buffer,
+    mime,
+    keyPrefix = "generations",
+    suffix,
+  } = input;
+
+  if (!userId || !userId.trim()) {
+    throw new StorageUploadError("userId is required to compute the S3 key");
+  }
+  if (buffer.byteLength === 0) {
+    throw new StorageUploadError("refusing to persist an empty buffer");
+  }
+  if (buffer.byteLength > MAX_DOWNLOAD_BYTES) {
+    throw new StorageUploadError(
+      `Buffer ${buffer.byteLength} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
+    );
+  }
+
+  const ext = mimeToExtension(mime);
+  const base = suffix ? `${generationId}-${suffix}` : generationId;
+  const key = `${keyPrefix}/${userId}/${base}.${ext}`;
+
+  const creds = await getAwsCredentials();
+  const s3 = new S3Client({
+    region: env.AWS_S3_REGION,
+    credentials: {
+      accessKeyId: creds.accessKeyId,
+      secretAccessKey: creds.secretAccessKey,
+      sessionToken: creds.sessionToken,
+    },
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: 5_000,
+      socketTimeout: 60_000,
+    }),
+  });
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: env.AWS_S3_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: mime,
+      CacheControl: "public, max-age=31536000, immutable",
+    }),
+  );
+
+  const outputImageUrl = `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com/${key}`;
+  const outputImageCDNUrl = env.AWS_CLOUDFRONT_HOST
+    ? `https://${env.AWS_CLOUDFRONT_HOST}/${key}`
+    : null;
+
+  logger.info(
+    {
+      event: "storage.upload.ok",
+      generationId,
+      userId,
+      bytes: buffer.byteLength,
+      mime,
+      key,
+      cdn: outputImageCDNUrl !== null,
+      source: "buffer",
+    },
+    "Buffer persisted to S3",
+  );
+
+  return {
+    outputImageUrl,
+    outputImageCDNUrl,
+    bytes: buffer.byteLength,
+    mime,
+  };
+}
+
+function mimeToExtension(mime: string): string {
+  switch (mime.toLowerCase()) {
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "image/jpeg":
+    case "image/jpg":
+      return "jpg";
+    default:
+      return "bin";
+  }
+}
+
 export interface PersistGenerationImageResult {
   /** Native S3 URL (`https://<bucket>.s3.<region>.amazonaws.com/<key>`). Always set. */
   outputImageUrl: string;
@@ -97,119 +280,16 @@ export async function persistGenerationImage(
   input: PersistGenerationImageInput,
 ): Promise<PersistGenerationImageResult> {
   const { userId, generationId, sourceUrl, keyPrefix = "generations" } = input;
-
-  // Guard against an empty or whitespace userId — without per-user IAM
-  // scoping, a blank value would silently produce orphan keys at
-  // `generations//{generationId}.ext` shared across every caller hitting
-  // the same path.
-  if (!userId || !userId.trim()) {
-    throw new StorageUploadError("userId is required to compute the S3 key");
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(sourceUrl);
-  } catch {
-    throw new StorageUploadError(`Invalid source URL: ${sourceUrl}`);
-  }
-
-  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-    throw new StorageUploadError(
-      `Refused to download non-HTTP(S) URL: ${parsed.protocol}`,
-    );
-  }
-
-  if (!isHostAllowed(parsed.hostname)) {
-    throw new StorageUploadError(
-      `Host not in AI download allowlist: ${parsed.hostname}`,
-    );
-  }
-
-  // Download phase does not need AWS creds — this is a public URL fetch.
-  const controller = AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS);
-  const response = await fetch(sourceUrl, { signal: controller });
-
-  if (!response.ok) {
-    throw new StorageUploadError(
-      `Download failed with ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const contentLengthRaw = response.headers.get("content-length");
-  if (contentLengthRaw) {
-    const declared = Number.parseInt(contentLengthRaw, 10);
-    if (Number.isFinite(declared) && declared > MAX_DOWNLOAD_BYTES) {
-      throw new StorageUploadError(
-        `Declared content-length ${declared} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
-      );
-    }
-  }
-
-  const { ext, mime } = extensionForContentType(
-    response.headers.get("content-type"),
-  );
-
-  // Buffer the full body. 10 MB cap above keeps this bounded; for AI outputs
-  // (typically 1-3 MB) the memory footprint is negligible. Re-check the actual
-  // length after buffering in case Content-Length was absent.
-  const arrayBuffer = await response.arrayBuffer();
-  const bytes = arrayBuffer.byteLength;
-  if (bytes > MAX_DOWNLOAD_BYTES) {
-    throw new StorageUploadError(
-      `Downloaded body ${bytes} exceeds limit ${MAX_DOWNLOAD_BYTES}`,
-    );
-  }
-
-  const creds = await getAwsCredentials();
-
-  const key = `${keyPrefix}/${userId}/${generationId}.${ext}`;
-
-  // Build a fresh S3 client for this request. The client is cheap to
-  // construct and lives only for the duration of the PutObject, keeping the
-  // credential scope exactly as wide as this one write.
-  const s3 = new S3Client({
-    region: env.AWS_S3_REGION,
-    credentials: {
-      accessKeyId: creds.accessKeyId,
-      secretAccessKey: creds.secretAccessKey,
-      sessionToken: creds.sessionToken,
-    },
-    // Bound PutObject so a slow S3 endpoint cannot stall the worker until
-    // the Cloud Tasks dispatch deadline (600s). Same posture as the download
-    // phase, which uses a 60s AbortSignal.
-    requestHandler: new NodeHttpHandler({
-      connectionTimeout: 5_000,
-      socketTimeout: 60_000,
-    }),
+  const { buffer, mime, bytes } = await downloadSafe(sourceUrl);
+  return persistGenerationBuffer({
+    userId,
+    generationId,
+    buffer,
+    mime,
+    keyPrefix,
+  }).then((result) => {
+    // Preserve the original caller's view of `bytes` (buffer byte length
+    // equals `downloadSafe`'s reported bytes, but make it explicit).
+    return { ...result, bytes };
   });
-
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: env.AWS_S3_BUCKET,
-      Key: key,
-      Body: Buffer.from(arrayBuffer),
-      ContentType: mime,
-      CacheControl: "public, max-age=31536000, immutable",
-    }),
-  );
-
-  const outputImageUrl = `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com/${key}`;
-  const outputImageCDNUrl = env.AWS_CLOUDFRONT_HOST
-    ? `https://${env.AWS_CLOUDFRONT_HOST}/${key}`
-    : null;
-
-  logger.info(
-    {
-      event: "storage.upload.ok",
-      generationId,
-      userId,
-      bytes,
-      mime,
-      key,
-      cdn: outputImageCDNUrl !== null,
-    },
-    "AI output persisted to S3",
-  );
-
-  return { outputImageUrl, outputImageCDNUrl, bytes, mime };
 }

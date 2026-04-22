@@ -274,6 +274,11 @@ export async function callRemovalReplicate(
         outputShape: describeShape(output),
         outputSnapshot: safeSnapshot(output),
         durationMs,
+        // Upstream normalization pins image + mask to these dims before
+        // LaMa sees them. Surfacing them on the failure log means a null
+        // response is already self-diagnostic — we know whether the input
+        // was within LaMa's envelope without needing to re-download.
+        normalizedDims: input.normalizedDims ?? null,
       },
       "LaMa returned no image — empty response",
     );
