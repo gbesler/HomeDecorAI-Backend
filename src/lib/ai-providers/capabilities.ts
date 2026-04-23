@@ -15,10 +15,28 @@
  *     range 4-50), guidance_scale (default 2.5, range 0-20), image_size,
  *     sync_mode, enable_safety_checker, output_format, acceleration.
  *     NO negative_prompt. NO enable_prompt_expansion.
+ * - fal.ai flux-pro/kontext/max/multi model page: https://fal.ai/models/fal-ai/flux-pro/kontext/max/multi/api
+ *   → schema: prompt, image_urls (array of URL strings — same field name
+ *     and shape as Klein, just multi-reference native), seed, guidance_scale
+ *     (default 3.5), num_images, output_format ("jpeg"|"png"), aspect_ratio,
+ *     safety_tolerance, enhance_prompt, sync_mode. NO negative_prompt.
+ *     NO image_size. NO num_inference_steps.
+ * - Replicate google/nano-banana: https://replicate.com/google/nano-banana/api/api-reference
+ *   → Gemini 2.5 Flash Image via Replicate. Supports up to 14 reference
+ *     images per call, MIME allowlist: png/jpeg/webp/heic/heif. Public page
+ *     is SPA-rendered and blocks WebFetch; authoritative schema requires an
+ *     authenticated GET against /v1/models/google/nano-banana. Until the
+ *     deploy machine has REPLICATE_API_TOKEN available to this repo, the
+ *     field name for the multi-image array (expected `image_input` per
+ *     Replicate convention and community examples) is treated as unverified.
+ *     First live call from staging will confirm; adjust the replicate.ts
+ *     Nano Banana branch if the schema rejects.
  *
- * Verified: 2026-04-10. If provider updates surface in production (schema
- * rejections, silent drops, quality regressions), re-verify the source docs
- * and update this file.
+ * Verified: 2026-04-10 (Pruna, Klein). 2026-04-23 (Kontext Multi confirmed
+ * via fal docs; Nano Banana Replicate schema noted above as unverified).
+ * If provider updates surface in production (schema rejections, silent
+ * drops, quality regressions), re-verify the source docs and update this
+ * file.
  *
  * Token budgets:
  * - Pruna: base model unverified; Flux Schnell-class models typically
@@ -107,6 +125,47 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: true,
     maxPromptTokens: 350, // BFL Kontext I2I examples routinely exceed 300 tokens
     defaultImageSize: "landscape_4_3",
+  },
+  // ─── Reference-style primary: Kontext Max Multi ─────────────────────────
+  // BFL Flux Pro Kontext Max, multi-reference variant. Native multi-image
+  // editing is the model's explicit use case — unlike Klein which accepts
+  // `image_urls` as an array without documented multi-reference behavior,
+  // Kontext Multi is trained to extract style/character/palette from one
+  // image and apply it to another. Wired as primary for the reference-style
+  // tool (Pruna p-image-edit produces near-identity output on that path).
+  //
+  // Schema note: `image_urls` is the SAME field name Klein uses — just an
+  // array of URL strings, no per-image objects. The fal adapter's existing
+  // Klein branch can be reused with only the model slug differing.
+  "fal-ai/flux-pro/kontext/max/multi": {
+    provider: "falai",
+    role: "edit",
+    supportsNegativePrompt: false, // Flux family — no negative prompts
+    supportsGuidanceScale: true, // Default 3.5 per fal docs
+    supportsReferenceImage: true, // Native multi-reference editing
+    maxPromptTokens: 350, // Same Flux-family budget as Klein
+  },
+  // ─── Reference-style fallback: Nano Banana on Replicate ─────────────────
+  // Google Gemini 2.5 Flash Image via Replicate. Multimodal: genuinely
+  // understands "apply image 2's style to image 1" as a semantic directive
+  // rather than executing a distilled transform. Provider-diversity fallback
+  // for the reference-style tool — if fal primary is unavailable, Replicate
+  // side picks up. Pairs with `fal-ai/flux-pro/kontext/max/multi` above.
+  //
+  // Gemini does not expose a CFG knob; prompt adherence is governed by the
+  // model internals, not a scale parameter. Community examples and the
+  // Replicate search index suggest the multi-image field is `image_input`
+  // (array of URL strings), max 14 images per call per the api-reference
+  // page. Verify on first staging call — see file header note.
+  "google/nano-banana": {
+    provider: "replicate",
+    role: "edit",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false, // Gemini: no CFG
+    supportsReferenceImage: true, // Up to 14 reference images
+    // Gemini context is large; 512 is conservative and matches other
+    // non-token-constrained Replicate entries (Flux Fill).
+    maxPromptTokens: 512,
   },
   // ─── Segmentation: SAM 3 ─────────────────────────────────────────────────
   // Meta Segment Anything 3 (November 2025). Unified foundation model with

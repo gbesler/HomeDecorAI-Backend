@@ -1,7 +1,7 @@
 import { fal } from "@fal-ai/client";
 import { env } from "../env.js";
 import { logger } from "../logger.js";
-import { PROVIDER_CAPABILITIES } from "./capabilities.js";
+import { getCapabilities } from "./capabilities.js";
 import type { GenerationInput, GenerationOutput } from "./types.js";
 
 fal.config({ credentials: env.FAL_AI_API_KEY });
@@ -14,11 +14,15 @@ export async function callFalAI(
 ): Promise<GenerationOutput> {
   const start = Date.now();
 
-  const capabilities = PROVIDER_CAPABILITIES[model];
+  // Use the helper so version-pinned slugs (`owner/name:version`) resolve
+  // back to the base entry, matching replicate.ts behaviour.
+  const capabilities = getCapabilities(model);
 
   // Append the reference image as a second element of `image_urls` when the
-  // model advertises multi-reference support (e.g. fal-ai/flux-2/edit).
-  // Klein 9B edit is single-image; leave it untouched.
+  // model advertises multi-reference support. Both Klein 9B Edit and
+  // Kontext Max Multi use the same `image_urls: string[]` schema — Kontext
+  // is natively multi-reference (trained for it), Klein accepts the array
+  // but multi-reference behavior is not formally documented there.
   const hasReference =
     capabilities?.supportsReferenceImage === true &&
     typeof input.referenceImageUrl === "string" &&
@@ -29,10 +33,9 @@ export async function callFalAI(
     : [input.imageUrl];
 
   if (hasReference) {
-    // Klein 9B Edit's multi-reference behavior is not formally documented
-    // (capabilities.ts notes this). Log every multi-image call so a silent
-    // "model ignored image_urls[1]" failure mode shows up as a quality-vs-
-    // log discrepancy in production rather than as user reports only.
+    // Log every multi-image call so a silent "model ignored image_urls[1]"
+    // quality failure shows up as a log/quality discrepancy in production
+    // rather than only as user reports.
     logger.info(
       {
         event: "provider.reference_image",

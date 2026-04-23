@@ -6,6 +6,7 @@ import { logger } from "./lib/logger.js";
 import { validateDictionaries } from "./lib/prompts/validate.js";
 import {
   designCircuitBreaker,
+  designCircuitBreakerFalPrimary,
   CircuitState,
 } from "./lib/circuit-breaker.js";
 import {
@@ -18,15 +19,26 @@ import { rateLimiterCleanupInterval } from "./lib/rate-limiter.js";
 
 // ─── Circuit Breaker Notifications ──────────────────────────────────────────
 
-designCircuitBreaker.onTransition = (name, from, to, stats) => {
-  if (to === CircuitState.OPEN) {
-    notifyCircuitTripped(name, stats);
-  } else if (to === CircuitState.HALF_OPEN) {
-    notifyCircuitHalfOpen(name);
-  } else if (to === CircuitState.CLOSED && from !== CircuitState.CLOSED) {
-    notifyCircuitRecovered(name);
-  }
-};
+function wireBreakerNotifications(
+  breaker: typeof designCircuitBreaker,
+): void {
+  const providers = {
+    primary: breaker.primaryProvider,
+    fallback: breaker.fallbackProvider,
+  };
+  breaker.onTransition = (name, from, to, stats) => {
+    if (to === CircuitState.OPEN) {
+      notifyCircuitTripped(name, providers, stats);
+    } else if (to === CircuitState.HALF_OPEN) {
+      notifyCircuitHalfOpen(name, providers);
+    } else if (to === CircuitState.CLOSED && from !== CircuitState.CLOSED) {
+      notifyCircuitRecovered(name, providers);
+    }
+  };
+}
+
+wireBreakerNotifications(designCircuitBreaker);
+wireBreakerNotifications(designCircuitBreakerFalPrimary);
 
 // ─── Server ─────────────────────────────────────────────────────────────────
 
@@ -52,26 +64,39 @@ try {
 }
 
 // Start intervals only after validation passes
+const breakers = [designCircuitBreaker, designCircuitBreakerFalPrimary];
+
 const statusInterval = setInterval(() => {
-  const state = designCircuitBreaker.getState();
-  if (state !== CircuitState.CLOSED) {
-    const provider = designCircuitBreaker.shouldUseFallback()
-      ? "fal.ai"
-      : "replicate";
-    logger.info(
-      `Circuit breaker: ${provider} (${state})`,
-    );
+  for (const breaker of breakers) {
+    const state = breaker.getState();
+    if (state !== CircuitState.CLOSED) {
+      // OPEN: all traffic on fallback, no probing. HALF_OPEN: traffic still
+      // on fallback but probes testing primary recovery. Spell out both so
+      // an on-call reader doesn't conflate probe activity with user-facing
+      // serving.
+      const servingProvider = breaker.fallbackProvider;
+      const probing =
+        state === CircuitState.HALF_OPEN
+          ? ` (probing ${breaker.primaryProvider} for recovery)`
+          : "";
+      logger.info(
+        `Circuit breaker [${breaker.name}]: serving ${servingProvider} (${state})${probing}`,
+      );
+    }
   }
 }, 30_000);
 
 const slackStatusInterval = setInterval(() => {
-  const state = designCircuitBreaker.getState();
-  if (state !== CircuitState.CLOSED) {
-    notifyCircuitStatus(
-      designCircuitBreaker.name,
-      state,
-      designCircuitBreaker.getStats(),
-    );
+  for (const breaker of breakers) {
+    const state = breaker.getState();
+    if (state !== CircuitState.CLOSED) {
+      notifyCircuitStatus(
+        breaker.name,
+        { primary: breaker.primaryProvider, fallback: breaker.fallbackProvider },
+        state,
+        breaker.getStats(),
+      );
+    }
   }
 }, 30 * 60 * 1000);
 

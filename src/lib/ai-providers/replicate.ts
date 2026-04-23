@@ -52,52 +52,85 @@ export async function callReplicate(
     input.referenceImageUrl.length > 0;
 
   // Order matters: images[0] is the target being edited, images[1] is the
-  // style reference. `reference_image="1"` tells Pruna to treat images[0]
-  // as the primary; the prompt then invokes images[1] as "image 2".
+  // style reference. For Pruna, `reference_image="1"` tells the model to
+  // treat images[0] as the primary; the prompt then invokes images[1] as
+  // "image 2". Nano Banana reuses the same [target, ref] ordering without
+  // needing a primary-index flag.
   const images = hasReference
     ? [input.imageUrl, input.referenceImageUrl as string]
     : [input.imageUrl];
 
-  // Pruna p-image-edit schema (docs.pruna.ai) accepts only:
-  //   images, prompt, reference_image, aspect_ratio, width, height, seed,
-  //   disable_safety_checker.
-  // `output_format` and `go_fast` are not in the schema. They are silently
-  // dropped today but passing unrecognized params has been observed to
-  // contribute to empty responses. Keep the payload tight.
-  const replicateInput: Record<string, unknown> = {
-    prompt: input.prompt,
-    images,
-  };
+  const replicateInput: Record<string, unknown> = {};
+  const baseSlug = model.split(":")[0];
 
-  if (hasReference) {
-    // Pruna's `reference_image` is the 1-based index of the PRIMARY image
-    // being edited, not the style reference. With images = [target, styleRef],
-    // the target (room) lives at 1-based index "1". The prompt then invokes
-    // images[1] as "image 2" to convey the style reference.
-    // Regression canary: if Pruna ever flips the semantics (e.g. "2" becomes
-    // required to point at the style ref), the structured log below surfaces
-    // it in production before it manifests as a quality complaint.
-    replicateInput.reference_image = "1";
-    logger.info(
-      {
-        event: "provider.reference_image",
-        provider: "replicate",
-        model,
-        imagesCount: images.length,
-        primaryIndex: "1",
-      },
-      "Replicate call carries a reference image",
-    );
-  }
+  if (baseSlug === "google/nano-banana") {
+    // Nano Banana schema (google/nano-banana, Replicate):
+    //   prompt:       text instruction (required)
+    //   image_input:  array of image URLs (required for editing; up to 14)
+    //   num_images, aspect_ratio, output_format, safety_tolerance optional.
+    // No reference_image index — the model reasons about images semantically
+    // from the prompt ("image 1 ... image 2 ..."). No guidance_scale —
+    // Gemini does not expose a CFG knob.
+    //
+    // Schema is unverified against a live GET on /v1/models/google/nano-banana
+    // (no token available at build time). If the field name is actually
+    // `image_urls` / `images`, first live call will return a validation
+    // error and we adjust. Capability matrix header documents this risk.
+    replicateInput.prompt = input.prompt;
+    replicateInput.image_input = images;
+    if (hasReference) {
+      logger.info(
+        {
+          event: "provider.reference_image",
+          provider: "replicate",
+          model,
+          imagesCount: images.length,
+        },
+        "Replicate call carries a reference image (nano-banana)",
+      );
+    }
+  } else {
+    // Pruna p-image-edit schema (docs.pruna.ai) accepts only:
+    //   images, prompt, reference_image, aspect_ratio, width, height, seed,
+    //   disable_safety_checker.
+    // `output_format` and `go_fast` are not in the schema. They are silently
+    // dropped today but passing unrecognized params has been observed to
+    // contribute to empty responses. Keep the payload tight.
+    replicateInput.prompt = input.prompt;
+    replicateInput.images = images;
 
-  // Only forward guidance_scale to models that actually expose it. Pruna
-  // p-image-edit is a distilled sub-second model with no CFG knob; sending
-  // the field would be either silently dropped or schema-rejected.
-  if (
-    input.guidanceScale !== undefined &&
-    capabilities?.supportsGuidanceScale
-  ) {
-    replicateInput.guidance_scale = input.guidanceScale;
+    if (hasReference) {
+      // Pruna's `reference_image` is the 1-based index of the PRIMARY image
+      // being edited, not the style reference. With images = [target, styleRef],
+      // the target (room) lives at 1-based index "1". The prompt then invokes
+      // images[1] as "image 2" to convey the style reference.
+      // Regression canary: if Pruna ever flips the semantics (e.g. "2" becomes
+      // required to point at the style ref), the structured log below surfaces
+      // it in production before it manifests as a quality complaint.
+      replicateInput.reference_image = "1";
+      logger.info(
+        {
+          event: "provider.reference_image",
+          provider: "replicate",
+          model,
+          imagesCount: images.length,
+          primaryIndex: "1",
+        },
+        "Replicate call carries a reference image",
+      );
+    }
+
+    // Only forward guidance_scale to models that actually expose it. Pruna
+    // p-image-edit is a distilled sub-second model with no CFG knob; sending
+    // the field would be either silently dropped or schema-rejected. Nano
+    // Banana (Gemini) also lacks a CFG knob — the slug branch above sets its
+    // own payload without this field.
+    if (
+      input.guidanceScale !== undefined &&
+      capabilities?.supportsGuidanceScale
+    ) {
+      replicateInput.guidance_scale = input.guidanceScale;
+    }
   }
 
   const output = (await replicate.run(model, {
