@@ -73,3 +73,6 @@ pids/
 tmp/
 temp/
 .scratch/
+
+# Compound-engineering review run artifacts (transient, per-machine)
+.context/

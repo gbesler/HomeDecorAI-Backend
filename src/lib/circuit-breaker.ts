@@ -17,6 +17,16 @@ interface CircuitBreakerOptions {
   bufferSize?: number;
   errorThresholdPercent?: number;
   recoverySuccessPercent?: number;
+  /**
+   * Provider served when the breaker is CLOSED (primary path). Defaults to
+   * "replicate" for backward compatibility with the original design breaker.
+   */
+  primaryProvider?: ProviderId;
+  /**
+   * Provider served when the breaker is OPEN / HALF_OPEN (fallback path).
+   * Defaults to "falai".
+   */
+  fallbackProvider?: ProviderId;
 }
 
 export type TransitionCallback = (
@@ -47,6 +57,8 @@ export class CircuitBreaker {
   private readonly bufferSize: number;
   private readonly errorThresholdPercent: number;
   private readonly recoverySuccessPercent: number;
+  readonly primaryProvider: ProviderId;
+  readonly fallbackProvider: ProviderId;
 
   onTransition?: TransitionCallback;
 
@@ -57,6 +69,8 @@ export class CircuitBreaker {
       options.errorThresholdPercent ?? DEFAULT_ERROR_THRESHOLD_PERCENT;
     this.recoverySuccessPercent =
       options.recoverySuccessPercent ?? DEFAULT_RECOVERY_SUCCESS_PERCENT;
+    this.primaryProvider = options.primaryProvider ?? "replicate";
+    this.fallbackProvider = options.fallbackProvider ?? "falai";
   }
 
   getState(): CircuitState {
@@ -65,10 +79,12 @@ export class CircuitBreaker {
 
   /** Returns the provider to use based on current circuit state */
   getProvider(): ProviderId {
-    return this.state === CircuitState.CLOSED ? "replicate" : "falai";
+    return this.state === CircuitState.CLOSED
+      ? this.primaryProvider
+      : this.fallbackProvider;
   }
 
-  /** Whether the fallback provider (fal.ai) should be used */
+  /** Whether the fallback provider should be used (breaker open or half-open) */
   shouldUseFallback(): boolean {
     return (
       this.state === CircuitState.OPEN ||
@@ -181,4 +197,25 @@ export class CircuitBreaker {
   }
 }
 
-export const designCircuitBreaker = new CircuitBreaker({ name: "design" });
+/**
+ * Design generation breaker for Replicate-primary tools (interior, exterior,
+ * garden, patio, pool, virtual-staging, etc.). CLOSED → Replicate; OPEN →
+ * fal.ai fallback. This is the breaker for the bulk of design traffic.
+ */
+export const designCircuitBreaker = new CircuitBreaker({
+  name: "design",
+  primaryProvider: "replicate",
+  fallbackProvider: "falai",
+});
+
+/**
+ * Design generation breaker for fal-primary tools (reference-style → Kontext
+ * Max Multi, fallback to Replicate Nano Banana). Tracked independently from
+ * `designCircuitBreaker` so Replicate degradation does not spuriously open
+ * the breaker for traffic that starts on fal, and vice versa.
+ */
+export const designCircuitBreakerFalPrimary = new CircuitBreaker({
+  name: "design-fal",
+  primaryProvider: "falai",
+  fallbackProvider: "replicate",
+});

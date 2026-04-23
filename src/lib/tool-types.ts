@@ -1,5 +1,6 @@
 import type { FastifySchema } from "fastify";
 import { type z } from "zod";
+import type { ProviderId } from "./ai-providers/types.js";
 import { env } from "./env.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
@@ -148,6 +149,13 @@ export interface ToolTypeConfig<
   models: {
     replicate: `${string}/${string}`;
     falai: string;
+    /**
+     * Optional primary-provider override. Defaults to "replicate" when
+     * omitted, matching every existing tool's flow. Reference-style sets
+     * this to "falai" so the router tries Kontext Max Multi first and
+     * falls back to Nano Banana on Replicate.
+     */
+    primaryProvider?: ProviderId;
   };
   /** Zod body schema (without `language` — the controller factory adds it). */
   bodySchema: z.ZodType<TParams>;
@@ -1125,12 +1133,17 @@ export const TOOL_TYPES = {
     routePath: "/reference-style",
     rateLimitKey: "referenceStyle",
     models: {
-      // Pruna native multi-image support: images[]=[room, ref] + reference_image="2".
-      replicate: "prunaai/p-image-edit" as const,
-      // Klein 9B Edit accepts `image_urls` as an array; we send both target
-      // and reference here. Quality vs purpose-built multi-ref editors should
-      // be A/B tested in production.
-      falai: "fal-ai/flux-2/klein/9b/edit",
+      // Primary: Kontext Max Multi (fal). Native multi-reference editing —
+      // trained to extract palette/materials from image 2 and apply them to
+      // image 1. Pruna p-image-edit (previously primary) produces near-
+      // identity output on this path; swapped out after A/B failure.
+      falai: "fal-ai/flux-pro/kontext/max/multi",
+      // Fallback: Nano Banana on Replicate (Gemini 2.5 Flash Image). Runs
+      // only when fal hard-fails (timeout / 5xx / schema reject). Provider
+      // diversity: fal ↔ Replicate, so a single-cloud outage keeps the tool
+      // available.
+      replicate: "google/nano-banana" as const,
+      primaryProvider: "falai",
     },
     bodySchema: CreateReferenceStyleBody,
     bodyJsonSchema: referenceStyleBodyJsonSchema,
