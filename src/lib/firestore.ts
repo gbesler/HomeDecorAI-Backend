@@ -290,19 +290,47 @@ export async function markFailed(
  * `language` — same job, new run.
  *
  * Result kinds:
- *  - `reset`:          doc was `failed`, fields cleared, status is now `queued`.
- *  - `already_live`:   doc is `queued` or `processing` — do not re-enqueue
- *                      (Cloud Tasks is already in flight).
+ *  - `reset`:          doc was `failed` (or a stale `queued`/`processing`
+ *                      orphan — see `recoveredFrom`), fields cleared,
+ *                      status is now `queued`.
+ *  - `already_live`:   doc is FRESH `queued` or `processing` — a live
+ *                      Cloud Tasks run is plausibly in flight, do not
+ *                      disturb it.
  *  - `already_done`:   doc is `completed` — nothing to retry.
  *  - `not_found`:      doc does not exist (or was deleted).
  *  - `forbidden`:      doc belongs to a different userId.
+ *
+ * `recoveredFrom` on `reset` surfaces whether the reset was a normal
+ * failed-retry or an orphan/stuck recovery so the controller can log
+ * it and we can alert on a spike of recoveries (they indicate the
+ * `fix/retry-stale-task` cloud-tasks path regressed again).
  */
 export type RetryGenerationResult =
-  | { kind: "reset" }
+  | { kind: "reset"; recoveredFrom: "failed" | "orphaned_queued" | "stuck_processing" }
   | { kind: "already_live"; status: "queued" | "processing" }
   | { kind: "already_done" }
   | { kind: "not_found" }
   | { kind: "forbidden" };
+
+/**
+ * Staleness thresholds used to distinguish a legitimately in-flight job
+ * from an orphaned one. A just-enqueued task dispatches within seconds
+ * in the happy path (Render hibernate cold start tops out around ~10s);
+ * a `queued` doc older than `ORPHAN_QUEUED_THRESHOLD_MS` has almost
+ * certainly lost its Cloud Tasks backing. `dispatchDeadline` on the
+ * task itself is 600s, so a `processing` doc older than
+ * `STUCK_PROCESSING_THRESHOLD_MS` means the processor died mid-run
+ * without writing a terminal state.
+ */
+const ORPHAN_QUEUED_THRESHOLD_MS = 2 * 60 * 1000;
+const STUCK_PROCESSING_THRESHOLD_MS = 15 * 60 * 1000;
+
+function timestampAgeMs(
+  ts: admin.firestore.Timestamp | null | undefined,
+): number | null {
+  if (!ts) return null;
+  return Date.now() - ts.toMillis();
+}
 
 export async function retryFailedGeneration(
   generationId: string,
@@ -323,20 +351,44 @@ export async function retryFailedGeneration(
     if (doc.status === "completed") {
       return { kind: "already_done" } satisfies RetryGenerationResult;
     }
-    if (doc.status === "queued" || doc.status === "processing") {
-      return {
-        kind: "already_live",
-        status: doc.status,
-      } satisfies RetryGenerationResult;
+
+    // Decide whether a `queued`/`processing` doc is genuinely in flight
+    // or a silent orphan. A silent orphan is almost always a symptom of
+    // the Cloud Tasks ALREADY_EXISTS-swallowed-as-success bug (see
+    // fix/retry-stale-task). Treat a fresh doc as in-flight and a stale
+    // one as recoverable so the user isn't permanently locked out.
+    let recoveredFrom: "failed" | "orphaned_queued" | "stuck_processing" = "failed";
+    if (doc.status === "queued") {
+      const ageMs = timestampAgeMs(doc.queuedAt);
+      if (ageMs !== null && ageMs < ORPHAN_QUEUED_THRESHOLD_MS) {
+        return {
+          kind: "already_live",
+          status: doc.status,
+        } satisfies RetryGenerationResult;
+      }
+      // Null `queuedAt` shouldn't happen for a `queued` doc, but if it
+      // does the document is already abnormal — fall through to the
+      // reset path rather than locking the user out.
+      recoveredFrom = "orphaned_queued";
+    } else if (doc.status === "processing") {
+      const ageMs = timestampAgeMs(doc.processingStartedAt);
+      if (ageMs !== null && ageMs < STUCK_PROCESSING_THRESHOLD_MS) {
+        return {
+          kind: "already_live",
+          status: doc.status,
+        } satisfies RetryGenerationResult;
+      }
+      recoveredFrom = "stuck_processing";
     }
 
-    // status === "failed" (or legacy "pending") — reset to queued. Clear
-    // every downstream checkpoint so the processor can't accidentally
-    // short-circuit on a stale value from the prior attempt. AI-stage
-    // fields (prompt, actionMode, etc.) are reset too so a retry that
-    // flips env-configured models picks up the fresh promptVersion /
-    // provider metadata instead of keeping the failed run's slug. Output
-    // URL fields are nulled defensively even though `markFailed` doesn't
+    // status === "failed" (or legacy "pending"), OR an orphaned/stuck
+    // queued/processing doc — reset to queued. Clear every downstream
+    // checkpoint so the processor can't accidentally short-circuit on a
+    // stale value from the prior attempt. AI-stage fields (prompt,
+    // actionMode, etc.) are reset too so a retry that flips
+    // env-configured models picks up the fresh promptVersion / provider
+    // metadata instead of keeping the failed run's slug. Output URL
+    // fields are nulled defensively even though `markFailed` doesn't
     // set them — a partial write from a past schema can leave them
     // populated, and rendering a half-retried doc as "completed" via a
     // stale URL would be worse than a loading state.
@@ -362,7 +414,7 @@ export async function retryFailedGeneration(
       queuedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    return { kind: "reset" } satisfies RetryGenerationResult;
+    return { kind: "reset", recoveredFrom } satisfies RetryGenerationResult;
   });
 }
 
