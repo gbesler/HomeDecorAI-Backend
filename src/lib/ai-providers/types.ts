@@ -15,6 +15,19 @@ export interface GenerationInput {
   referenceImageUrl?: string;
   outputFormat?: string;
   guidanceScale?: number;
+  /**
+   * Aspect ratio snapped to one of the provider's supported enum values
+   * (e.g. "16:9", "4:3", "1:1", "3:4", "9:16"). When set, the adapter
+   * forwards it under the provider-specific field (`aspect_ratio` for
+   * Pruna/Kontext/Nano Banana, `image_size` label for Klein) so the
+   * output matches the input photo's orientation instead of the
+   * provider's undocumented default.
+   *
+   * When absent, the adapter sends nothing and the provider falls back
+   * to its own default — historically this has produced AR mismatches
+   * between before/after frames in the iOS detail view.
+   */
+  aspectRatio?: string;
 }
 
 export interface GenerationOutput {
