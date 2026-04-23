@@ -716,8 +716,15 @@ export async function retryGeneration(
   }
 
   request.log.info(
-    { event: "generation.retry.enqueued", generationId, userId },
-    "Generation retry enqueued",
+    {
+      event: "generation.retry.enqueued",
+      generationId,
+      userId,
+      recoveredFrom: result.recoveredFrom,
+    },
+    result.recoveredFrom === "failed"
+      ? "Generation retry enqueued"
+      : `Generation retry enqueued (recovered from ${result.recoveredFrom})`,
   );
 
   reply.code(202);
