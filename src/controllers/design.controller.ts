@@ -681,7 +681,7 @@ export async function retryGeneration(
 
   // result.kind === "reset"
   try {
-    await enqueueGenerationTask({ generationId });
+    await enqueueGenerationTask({ generationId, mode: "retry" });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     request.log.error(

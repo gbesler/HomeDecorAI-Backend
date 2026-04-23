@@ -14,6 +14,15 @@ import { logger } from "./logger.js";
  * - OIDC token audience must match what the receiver validates.
  * - dispatchDeadline is explicit (600s) to give the processor enough headroom
  *   for Render cold start + AI generation + S3 upload.
+ *
+ * Retry mode:
+ * - User-initiated retries must NOT rely on the ALREADY_EXISTS idempotent-
+ *   success path. That path handles client double-clicks where the first task
+ *   is still pending; on retry the original task has already executed (and
+ *   failed) so its tombstone is useless — Cloud Tasks will not re-dispatch a
+ *   terminal task. Before creating the new task we delete the stale one, and
+ *   in retry mode ALREADY_EXISTS is treated as a real error instead of being
+ *   swallowed.
  */
 
 // Keyed by projectId so a changed environment (hot reload, credentials
@@ -102,16 +111,34 @@ function taskPath(projectId: string, generationId: string): string {
 const PROCESS_GENERATION_PATH = "/internal/process-generation";
 const DISPATCH_DEADLINE_SECONDS = 600;
 
+export type EnqueueGenerationTaskMode = "create" | "retry";
+
 export interface EnqueueGenerationTaskInput {
   generationId: string;
+  /**
+   * `"create"` (default) — original enqueue from a wizard submit. Tolerates
+   *   ALREADY_EXISTS as an idempotent success for client double-clicks.
+   * `"retry"` — user-initiated retry from a failed doc. Deletes any stale
+   *   task with the same name first (Cloud Tasks keeps terminal tasks in a
+   *   tombstone state for up to an hour, which would otherwise block the new
+   *   createTask with ALREADY_EXISTS); in this mode ALREADY_EXISTS is a real
+   *   error.
+   */
+  mode?: EnqueueGenerationTaskMode;
 }
+
+// gRPC status codes returned by @google-cloud/tasks.
+// https://grpc.github.io/grpc/core/md_doc_statuscodes.html
+const GRPC_NOT_FOUND = 5;
+const GRPC_ALREADY_EXISTS = 6;
 
 /**
  * Enqueue a task that will POST to the internal processor endpoint.
  *
  * Returns normally on success. Throws if Cloud Tasks rejects the submission
- * for any reason other than ALREADY_EXISTS (which is treated as idempotent
- * success — the client retried an enqueue request that had already gone through).
+ * for any reason other than ALREADY_EXISTS in `"create"` mode (treated as
+ * idempotent success). In `"retry"` mode the stale task is deleted first
+ * and ALREADY_EXISTS becomes a hard error.
  */
 export async function enqueueGenerationTask(
   input: EnqueueGenerationTaskInput,
@@ -121,6 +148,7 @@ export async function enqueueGenerationTask(
   const parent = queuePath(asyncEnv.projectId);
   const name = taskPath(asyncEnv.projectId, input.generationId);
   const url = `${asyncEnv.backendUrl}${PROCESS_GENERATION_PATH}`;
+  const mode: EnqueueGenerationTaskMode = input.mode ?? "create";
 
   const payload = JSON.stringify({
     generationId: input.generationId,
@@ -145,23 +173,69 @@ export async function enqueueGenerationTask(
     },
   };
 
+  if (mode === "retry") {
+    // Delete the stale task from the prior attempt. The original run is in
+    // a terminal state (that is why we are retrying) but Cloud Tasks keeps
+    // the tombstone long enough to block a same-name createTask. NOT_FOUND
+    // is the common case on retries older than the tombstone window and is
+    // silently ignored; every other error bubbles up so the controller can
+    // roll the Firestore doc back to failed.
+    try {
+      await client.deleteTask({ name });
+      logger.info(
+        {
+          event: "cloudtasks.stale_task_deleted",
+          generationId: input.generationId,
+        },
+        "Cloud Tasks stale task deleted prior to retry",
+      );
+    } catch (err) {
+      const code = (err as { code?: number }).code;
+      if (code !== GRPC_NOT_FOUND) {
+        logger.error(
+          {
+            event: "cloudtasks.delete_failed",
+            generationId: input.generationId,
+            error: err instanceof Error ? err.message : String(err),
+          },
+          "Cloud Tasks deleteTask failed before retry createTask",
+        );
+        throw err;
+      }
+    }
+  }
+
   try {
     await client.createTask({ parent, task });
     logger.info(
       {
         event: "cloudtasks.enqueued",
         generationId: input.generationId,
+        mode,
         queue: env.GCP_QUEUE_NAME,
       },
       "Cloud Tasks enqueue succeeded",
     );
   } catch (err) {
-    // Cloud Tasks surfaces ALREADY_EXISTS (gRPC code 6) when a task with the
-    // same name is re-submitted within the 1-hour tombstone window. Treat as
-    // idempotent success — the generationId is already queued, and the
-    // processor will still handle it exactly once.
     const code = (err as { code?: number }).code;
-    if (code === 6) {
+    if (code === GRPC_ALREADY_EXISTS) {
+      if (mode === "retry") {
+        // The delete above must have succeeded (or NOT_FOUND'd), so a same-
+        // name task surviving the createTask means something else grabbed
+        // the slot (concurrent retry? orphaned tombstone?). Do NOT swallow
+        // — the processor would never fire and the user sees a silent
+        // "stuck in queued" doc.
+        logger.error(
+          {
+            event: "cloudtasks.retry_collision",
+            generationId: input.generationId,
+          },
+          "Cloud Tasks task still exists after deleteTask on retry — aborting",
+        );
+        throw err;
+      }
+      // `"create"` mode: client double-clicked the wizard submit. The first
+      // task is still pending and the processor will run it exactly once.
       logger.info(
         {
           event: "cloudtasks.already_exists",
@@ -176,6 +250,7 @@ export async function enqueueGenerationTask(
       {
         event: "cloudtasks.enqueue_failed",
         generationId: input.generationId,
+        mode,
         error: err instanceof Error ? err.message : String(err),
       },
       "Cloud Tasks enqueue failed",
