@@ -133,6 +133,17 @@ export async function callReplicate(
     }
   }
 
+  // Forward aspect ratio when the caller supplied one AND the model
+  // accepts it. Both Pruna and Nano Banana use the `aspect_ratio` field
+  // with ratio-string values ("4:3", "16:9", etc.). Models with
+  // `aspectRatioField: null` (LaMa, Flux Fill) derive their dimensions
+  // from the input image/mask and don't take an explicit ratio — we
+  // skip the field entirely for those paths even if `input.aspectRatio`
+  // is set.
+  if (input.aspectRatio && capabilities?.aspectRatioField === "aspect_ratio") {
+    replicateInput.aspect_ratio = input.aspectRatio;
+  }
+
   const output = (await replicate.run(model, {
     input: replicateInput,
     signal: AbortSignal.timeout(TIMEOUT_MS),

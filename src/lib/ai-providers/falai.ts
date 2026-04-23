@@ -1,5 +1,6 @@
 import { fal } from "@fal-ai/client";
 import { env } from "../env.js";
+import { aspectRatioToKleinImageSize } from "../generation/probe-aspect-ratio.js";
 import { logger } from "../logger.js";
 import { getCapabilities } from "./capabilities.js";
 import type { GenerationInput, GenerationOutput } from "./types.js";
@@ -47,6 +48,24 @@ export async function callFalAI(
     );
   }
 
+  // Map the canonical GenerationInput.aspectRatio onto whichever field
+  // this model's schema accepts. Kontext Multi uses `aspect_ratio` with
+  // a ratio-string enum; Klein uses `image_size` with named presets
+  // (square_hd / landscape_4_3 / portrait_16_9 / ...). `null` capability
+  // means the model has no AR knob and we skip the field entirely.
+  const aspectRatioPayload: Record<string, string> = {};
+  if (input.aspectRatio && capabilities?.aspectRatioField === "aspect_ratio") {
+    aspectRatioPayload.aspect_ratio = input.aspectRatio;
+  } else if (
+    input.aspectRatio &&
+    capabilities?.aspectRatioField === "image_size"
+  ) {
+    const imageSize = aspectRatioToKleinImageSize(input.aspectRatio);
+    if (imageSize) {
+      aspectRatioPayload.image_size = imageSize;
+    }
+  }
+
   const result = await fal.subscribe(model, {
     input: {
       prompt: input.prompt,
@@ -56,6 +75,7 @@ export async function callFalAI(
       ...(input.guidanceScale !== undefined && {
         guidance_scale: input.guidanceScale,
       }),
+      ...aspectRatioPayload,
     },
     logs: true,
     abortSignal: AbortSignal.timeout(TIMEOUT_MS),

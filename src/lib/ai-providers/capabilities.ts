@@ -83,6 +83,20 @@ export interface ProviderCapabilities {
   maxPromptTokens: number;
   defaultAspectRatio?: string;
   defaultImageSize?: string;
+  /**
+   * Provider-side field name that accepts an explicit output aspect ratio.
+   * - `"aspect_ratio"`: enum of ratio strings (Pruna, Kontext Multi, Nano Banana)
+   * - `"image_size"`: named size preset (Klein — "landscape_4_3" etc.)
+   * - `null`: model does not accept an AR parameter (LaMa, Flux Fill both
+   *   derive dimensions from the supplied image+mask, SAM returns a mask of
+   *   the input's shape). The adapter omits the field when this is null.
+   *
+   * The shape of the *value* we send differs per field: `aspect_ratio`
+   * takes a ratio string like "4:3", `image_size` takes a named preset
+   * like "landscape_4_3". The adapter maps a canonical ratio (from
+   * `GenerationInput.aspectRatio`) into the right format for the field.
+   */
+  aspectRatioField?: "aspect_ratio" | "image_size" | null;
 }
 
 // ─── Capability matrix ─────────────────────────────────────────────────────
@@ -112,6 +126,7 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: true,
     maxPromptTokens: 280, // Schnell-class comfortably handles this; leaves headroom for tail layers
     defaultAspectRatio: "16:9",
+    aspectRatioField: "aspect_ratio",
   },
   "fal-ai/flux-2/klein/9b/edit": {
     provider: "falai",
@@ -125,6 +140,7 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: true,
     maxPromptTokens: 350, // BFL Kontext I2I examples routinely exceed 300 tokens
     defaultImageSize: "landscape_4_3",
+    aspectRatioField: "image_size",
   },
   // ─── Reference-style primary: Kontext Max Multi ─────────────────────────
   // BFL Flux Pro Kontext Max, multi-reference variant. Native multi-image
@@ -144,6 +160,12 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsGuidanceScale: true, // Default 3.5 per fal docs
     supportsReferenceImage: true, // Native multi-reference editing
     maxPromptTokens: 350, // Same Flux-family budget as Klein
+    // Kontext Max Multi exposes `aspect_ratio` as an enum; WebFetched
+    // values: ["21:9","16:9","4:3","3:2","1:1","2:3","3:4","9:16","9:21"].
+    // Without a value the output AR is non-deterministic from the input —
+    // we explicitly forward an image-derived ratio so before/after frames
+    // line up.
+    aspectRatioField: "aspect_ratio",
   },
   // ─── Reference-style fallback: Nano Banana on Replicate ─────────────────
   // Google Gemini 2.5 Flash Image via Replicate. Multimodal: genuinely
@@ -166,6 +188,12 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // Gemini context is large; 512 is conservative and matches other
     // non-token-constrained Replicate entries (Flux Fill).
     maxPromptTokens: 512,
+    // Nano Banana accepts `aspect_ratio` with an "auto" default plus
+    // enum: ["21:9","16:9","4:3","3:2","1:1","2:3","3:4","9:16"] per
+    // the fal variant's public schema (shared model family). Forward
+    // explicitly so the fallback path produces output matching the
+    // input image's orientation.
+    aspectRatioField: "aspect_ratio",
   },
   // ─── Segmentation: SAM 3 ─────────────────────────────────────────────────
   // Meta Segment Anything 3 (November 2025). Unified foundation model with
@@ -188,6 +216,9 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // Concept prompts are short noun phrases, typically 1-5 words separated
     // by ".". 128 tokens is generous headroom.
     maxPromptTokens: 128,
+    // SAM returns a mask of the input's own shape; aspect ratio is
+    // defined by the input image itself, not a parameter.
+    aspectRatioField: null,
   },
   // ─── Removal: LaMa ───────────────────────────────────────────────────────
   // Resolution-robust Large Mask Inpainting with Fourier Convolutions (WACV
@@ -218,6 +249,8 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: false,
     // LaMa accepts no prompt at all.
     maxPromptTokens: 0,
+    // LaMa's output dimensions equal the input image+mask; no AR knob.
+    aspectRatioField: null,
   },
   // ─── Inpainting with prompt: Flux Fill ────────────────────────────────────
   // Black Forest Labs Flux Fill (Dec 2024). Image + mask + prompt →
@@ -238,6 +271,8 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsGuidanceScale: true,
     supportsReferenceImage: false,
     maxPromptTokens: 512,
+    // Flux Fill output matches the input image+mask shape; no AR knob.
+    aspectRatioField: null,
   },
   "black-forest-labs/flux-fill-pro": {
     provider: "replicate",
@@ -246,6 +281,8 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsGuidanceScale: true,
     supportsReferenceImage: false,
     maxPromptTokens: 512,
+    // Flux Fill output matches the input image+mask shape; no AR knob.
+    aspectRatioField: null,
   },
 };
 

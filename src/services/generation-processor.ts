@@ -24,6 +24,7 @@ import type {
 import { persistGenerationImage, StorageUploadError } from "../lib/storage/s3-upload.js";
 import { CognitoCredentialMintError } from "../lib/storage/cognito-credentials.js";
 import { NormalizeInputError } from "../lib/generation/normalize-image-mask-pair.js";
+import { probeImageAspectRatio } from "../lib/generation/probe-aspect-ratio.js";
 import { sendGenerationNotification } from "../lib/notifications/fcm.js";
 import { logger } from "../lib/logger.js";
 import type { NotificationKind } from "../lib/notifications/i18n.js";
@@ -455,11 +456,20 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
           ? (params[secondaryField] as string | undefined)
           : undefined;
 
+      // Probe the input image's aspect ratio so the adapter can forward
+      // it to the provider. Without this, providers fall back to their
+      // own default (e.g. Kontext Multi produces non-input-matching
+      // output), breaking the iOS before/after detail view. `null` on
+      // probe failure means "skip the field and accept provider default"
+      // — better than failing the generation.
+      const aspectRatio = await probeImageAspectRatio(inputImageUrl);
+
       const result = await callDesignGeneration(tool.models, {
         prompt: promptResult.prompt,
         imageUrl: inputImageUrl,
         referenceImageUrl,
         guidanceScale: promptResult.guidanceScale,
+        aspectRatio: aspectRatio ?? undefined,
       });
       tempOutputUrl = result.imageUrl;
       provider = result.provider;
