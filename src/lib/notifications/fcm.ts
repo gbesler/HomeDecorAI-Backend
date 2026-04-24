@@ -3,6 +3,10 @@ import { env } from "../env.js";
 import { logger } from "../logger.js";
 import type { SupportedLanguage } from "../generation/types.js";
 import { LOCALIZED_MESSAGES, type NotificationKind } from "./i18n.js";
+import {
+  getCampaignTemplate,
+  type CampaignDay,
+} from "./campaign-templates.js";
 import { getFcmTokens, removeFcmTokens } from "./token-store.js";
 
 /**
@@ -20,13 +24,14 @@ import { getFcmTokens, removeFcmTokens } from "./token-store.js";
 
 const DEEP_LINK_BASE = "homedecorai://generation";
 
-// FCM error codes that indicate the token should be pruned from the user doc.
-// Other errors (internal, throttled, invalid-argument) are transient and left
-// in place for the next push attempt.
+// FCM error codes that indicate the token is permanently defective and
+// should be pruned from the user doc. Transient or payload-related errors
+// (internal, throttled, invalid-argument) are NOT prunable — they indicate
+// a server-side problem (e.g., a malformed message) rather than a dead
+// device, so pruning would wipe every user's tokens on a template bug.
 const PRUNABLE_ERROR_CODES = new Set([
   "messaging/registration-token-not-registered",
   "messaging/invalid-registration-token",
-  "messaging/invalid-argument",
 ]);
 
 export interface SendGenerationNotificationInput {
@@ -156,6 +161,116 @@ export async function sendGenerationNotification(
         error: err instanceof Error ? err.message : String(err),
       },
       "FCM push dispatch failed",
+    );
+    return null;
+  }
+}
+
+export interface SendCampaignNotificationInput {
+  userId: string;
+  day: CampaignDay;
+  language: SupportedLanguage;
+  deepLink: string;
+  tokens: string[];
+}
+
+/**
+ * Dispatch a pre-launch campaign push to a user's registered tokens.
+ * Mirrors the generation-push error semantics: never throws, prunes
+ * invalid tokens, returns counts.
+ *
+ * The caller is expected to have already gated on premium status and
+ * loaded tokens. Passing tokens explicitly (rather than re-fetching)
+ * keeps this callable from a receiver that already read the user doc
+ * for other reasons.
+ */
+export async function sendCampaignNotification(
+  input: SendCampaignNotificationInput,
+): Promise<{ sent: number; failed: number } | null> {
+  if (!env.FCM_ENABLED) {
+    logger.debug(
+      { event: "fcm.disabled", userId: input.userId, day: input.day },
+      "FCM disabled, skipping campaign push",
+    );
+    return null;
+  }
+  if (input.tokens.length === 0) return null;
+
+  const content = getCampaignTemplate(input.day, input.language);
+
+  const message: admin.messaging.MulticastMessage = {
+    tokens: input.tokens,
+    notification: {
+      title: content.title,
+      body: content.body,
+    },
+    data: {
+      kind: "campaign",
+      campaignDay: String(input.day),
+      lang: input.language,
+      deepLink: input.deepLink,
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: "default",
+          "mutable-content": 1,
+        },
+      },
+    },
+  };
+
+  try {
+    const response = await admin.messaging().sendEachForMulticast(message);
+
+    if (response.failureCount > 0) {
+      const toPrune: string[] = [];
+      response.responses.forEach((result, index) => {
+        if (!result.success) {
+          const code = result.error?.code;
+          const token = input.tokens[index];
+          if (token && code && PRUNABLE_ERROR_CODES.has(code)) {
+            toPrune.push(token);
+          }
+          logger.warn(
+            {
+              event: "fcm.campaign.individual_failure",
+              userId: input.userId,
+              day: input.day,
+              tokenSuffix: token?.slice(-8),
+              code,
+            },
+            "FCM campaign individual send failed",
+          );
+        }
+      });
+      if (toPrune.length > 0) {
+        await removeFcmTokens(input.userId, toPrune);
+      }
+    }
+
+    logger.info(
+      {
+        event: "fcm.campaign.ok",
+        userId: input.userId,
+        day: input.day,
+        sent: response.successCount,
+        failed: response.failureCount,
+        language: input.language,
+      },
+      "FCM campaign push dispatched",
+    );
+
+    return { sent: response.successCount, failed: response.failureCount };
+  } catch (err) {
+    logger.error(
+      {
+        event: "fcm.campaign.failed",
+        userId: input.userId,
+        day: input.day,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "FCM campaign dispatch failed",
     );
     return null;
   }
