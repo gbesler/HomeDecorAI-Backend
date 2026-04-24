@@ -1,6 +1,5 @@
 import {
   designCircuitBreaker,
-  designCircuitBreakerFalPrimary,
   type CircuitBreaker,
 } from "../circuit-breaker.js";
 import { env } from "../env.js";
@@ -12,7 +11,12 @@ import {
   callReplicate,
   callSegmentationReplicate,
 } from "./replicate.js";
-import { callFalAI } from "./falai.js";
+import {
+  callFalAI,
+  callInpaintFalAI,
+  callRemovalFalAI,
+  callSegmentationFalAI,
+} from "./falai.js";
 import type {
   GenerationInput,
   GenerationOutput,
@@ -28,13 +32,6 @@ import type {
 interface ToolModelConfig {
   replicate: `${string}/${string}`;
   falai: string;
-  /**
-   * Which provider handles the primary path. Defaults to "replicate".
-   * When "falai", the router flips: fal.ai is tried first and Replicate
-   * is the hard-failure fallback. Used by reference-style (Kontext Max
-   * Multi primary, Nano Banana fallback).
-   */
-  primaryProvider?: ProviderId;
 }
 
 const PROBE_COOLDOWN_MS = 30_000;
@@ -54,16 +51,6 @@ function resolveProviders(
   models: ToolModelConfig,
   input: GenerationInput,
 ): Providers {
-  if (models.primaryProvider === "falai") {
-    return {
-      primary: "falai",
-      callPrimary: () => callFalAI(models.falai, input),
-      callFallback: () => callReplicate(models.replicate, input),
-      breaker: designCircuitBreakerFalPrimary,
-      primaryModel: models.falai,
-      fallbackModel: models.replicate,
-    };
-  }
   return {
     primary: "replicate",
     callPrimary: () => callReplicate(models.replicate, input),
@@ -77,10 +64,9 @@ function resolveProviders(
 /**
  * Route an AI generation request through the circuit breaker.
  *
- * Default flow: Replicate primary, fal.ai fallback (interior, exterior,
- * garden, etc.). When `models.primaryProvider === "falai"`, the flow flips:
- * fal.ai primary, Replicate fallback (reference-style). Each direction uses
- * its own circuit-breaker instance so health signals stay independent.
+ * Replicate primary, fal.ai fallback. Every tool in the registry shares this
+ * flow (interior, exterior, garden, reference-style, etc.), tracked by the
+ * single `designCircuitBreaker` instance.
  */
 export async function callDesignGeneration(
   models: ToolModelConfig,
@@ -226,106 +212,254 @@ export async function callDesignGeneration(
 }
 
 /**
- * Run text-grounded segmentation. Replicate-only: no fal.ai equivalent is
- * wired today. Records circuit-breaker state so repeated segmentation
- * failures contribute to the same "Replicate degraded" signal as edit calls.
+ * Run text-grounded segmentation. Replicate primary (SAM 3), fal.ai fallback
+ * (`fal-ai/sam-3/image`). Shares the `designCircuitBreaker` instance with
+ * edit calls so repeated segmentation failures contribute to the same
+ * "Replicate degraded" signal.
  *
- * Throws `NoMaskDetectedError` when the model succeeds but matches zero
- * regions — that is NOT a breaker-worthy failure and is re-thrown unchanged.
+ * Throws `NoMaskDetectedError` when either provider succeeds but matches
+ * zero regions — that is NOT a breaker-worthy failure and is re-thrown
+ * unchanged so the primary/fallback retry envelope doesn't bill a second
+ * model for the same deterministic answer.
  */
 export async function callSegmentation(
   input: SegmentationInput,
 ): Promise<SegmentationOutput> {
-  const model = env.REPLICATE_SEGMENTATION_MODEL;
-  try {
-    const result = await withRetry(
-      () => callSegmentationReplicate(model, input),
-      {
-        maxRetries: 1,
-        delayMs: 1000,
-        // A "no mask detected" result is a deterministic terminal outcome;
-        // retrying would bill SAM a second time for the same answer.
-        isRetryable: (error) => error.name !== "NoMaskDetectedError",
-        onRetry: (error, attempt) => {
-          logger.warn(
-            { event: "provider.retry", provider: "replicate", role: "segment", error: error.message, attempt },
-            "Segmentation call failed, retrying",
-          );
-        },
-      },
-    );
-    designCircuitBreaker.record(true);
-    return result;
-  } catch (error) {
-    // NoMaskDetectedError is a domain signal, not a provider health issue.
-    // Do not pollute the breaker with it.
-    if (error instanceof Error && error.name === "NoMaskDetectedError") {
-      throw error;
-    }
-    designCircuitBreaker.record(false);
-    throw error;
-  }
+  const primaryModel = env.REPLICATE_SEGMENTATION_MODEL;
+  const fallbackModel = env.FALAI_SEGMENTATION_MODEL;
+  return runWithFallback<SegmentationOutput>({
+    role: "segment",
+    callPrimary: () => callSegmentationReplicate(primaryModel, input),
+    callFallback: () => callSegmentationFalAI(fallbackModel, input),
+    primaryModel,
+    fallbackModel,
+    // Domain signal — never a provider health issue. Don't pollute the
+    // breaker and don't retry against the fallback for it.
+    isTerminalError: (error) => error.name === "NoMaskDetectedError",
+  });
 }
 
 /**
- * Run mask-guided object removal via LaMa. Replicate-only. Same breaker
- * semantics as `callDesignGeneration` but no fal.ai fallback — LaMa has
- * no equivalent wired on the fallback side.
+ * Run mask-guided object removal. Replicate LaMa primary, fal.ai
+ * object-removal fallback. Same breaker semantics as `callDesignGeneration`.
  */
 export async function callRemoval(
   input: RemovalInput,
 ): Promise<RemovalOutput> {
-  const model = env.REPLICATE_REMOVAL_MODEL;
-  try {
-    const result = await withRetry(
-      () => callRemovalReplicate(model, input),
-      {
-        maxRetries: 1,
-        delayMs: 1000,
-        onRetry: (error, attempt) => {
-          logger.warn(
-            { event: "provider.retry", provider: "replicate", role: "remove", error: error.message, attempt },
-            "Removal call failed, retrying",
-          );
-        },
-      },
-    );
-    designCircuitBreaker.record(true);
-    return result;
-  } catch (error) {
-    designCircuitBreaker.record(false);
-    throw error;
-  }
+  const primaryModel = env.REPLICATE_REMOVAL_MODEL;
+  const fallbackModel = env.FALAI_REMOVAL_MODEL;
+  return runWithFallback<RemovalOutput>({
+    role: "remove",
+    callPrimary: () => callRemovalReplicate(primaryModel, input),
+    callFallback: () => callRemovalFalAI(fallbackModel, input),
+    primaryModel,
+    fallbackModel,
+  });
 }
 
 /**
- * Run prompt-driven inpainting via Flux Fill. Replicate-only; mirrors the
- * breaker + single-retry envelope of `callRemoval`. No fal.ai fallback — the
- * fallback provider has no inpaint-with-prompt model wired up, and silently
- * substituting a non-inpainting path would degrade quality without signal.
+ * Run prompt-driven inpainting. Replicate Flux Fill primary, fal.ai
+ * `flux-pro/v1/fill` fallback.
  */
 export async function callInpaint(
   input: InpaintInput,
 ): Promise<InpaintOutput> {
-  const model = env.REPLICATE_INPAINT_MODEL;
-  try {
-    const result = await withRetry(
-      () => callInpaintReplicate(model, input),
-      {
+  const primaryModel = env.REPLICATE_INPAINT_MODEL;
+  const fallbackModel = env.FALAI_INPAINT_MODEL;
+  return runWithFallback<InpaintOutput>({
+    role: "inpaint",
+    callPrimary: () => callInpaintReplicate(primaryModel, input),
+    callFallback: () => callInpaintFalAI(fallbackModel, input),
+    primaryModel,
+    fallbackModel,
+  });
+}
+
+// ─── Shared primary/fallback envelope for pipeline roles ───────────────────
+//
+// Mirrors the retry + circuit-breaker + probe shape from
+// `callDesignGeneration` for the segment/remove/inpaint roles. Kept as a
+// separate function (not a merged abstraction) so the edit-path semantics —
+// which also forward the reference-image/aspect-ratio fields via
+// GenerationInput — stay decoupled from the three pipeline roles that share
+// a simpler input shape.
+
+interface FallbackConfig<T> {
+  role: "segment" | "remove" | "inpaint";
+  callPrimary: () => Promise<T>;
+  callFallback: () => Promise<T>;
+  primaryModel: string;
+  fallbackModel: string;
+  /**
+   * Predicate for errors that should short-circuit the envelope — skip
+   * retry, skip fallback, and skip breaker recording. Used for domain
+   * signals like `NoMaskDetectedError` that are not provider health issues.
+   */
+  isTerminalError?: (error: Error) => boolean;
+}
+
+async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
+  const {
+    role,
+    callPrimary,
+    callFallback,
+    primaryModel,
+    fallbackModel,
+    isTerminalError,
+  } = config;
+  const breaker = designCircuitBreaker;
+  const fallbackProvider = breaker.fallbackProvider;
+
+  async function callFallbackWithRetry(
+    reason: "circuit_open" | "primary_failed",
+  ): Promise<T> {
+    try {
+      const result = await withRetry(callFallback, {
         maxRetries: 1,
         delayMs: 1000,
+        isRetryable: isTerminalError
+          ? (error) => !isTerminalError(error)
+          : undefined,
         onRetry: (error, attempt) => {
           logger.warn(
-            { event: "provider.retry", provider: "replicate", role: "inpaint", error: error.message, attempt },
-            "Inpaint call failed, retrying",
+            {
+              event: "provider.retry",
+              provider: fallbackProvider,
+              role,
+              error: error.message,
+              attempt,
+            },
+            `${fallbackProvider} ${role} fallback call failed, retrying`,
           );
         },
+      });
+      breaker.record(true);
+      logger.info(
+        {
+          event: "provider.generation",
+          provider: fallbackProvider,
+          role,
+          model: fallbackModel,
+          fallbackFired: true,
+          fallbackReason: reason,
+        },
+        `${role} served from fallback provider`,
+      );
+      return result;
+    } catch (error) {
+      if (
+        isTerminalError &&
+        error instanceof Error &&
+        isTerminalError(error)
+      ) {
+        throw error;
+      }
+      breaker.record(false);
+      throw error;
+    }
+  }
+
+  if (breaker.shouldUseFallback()) {
+    logger.info(
+      {
+        event: "provider.circuit_open",
+        provider: fallbackProvider,
+        role,
+        breaker: breaker.name,
       },
+      `Circuit open — routing ${role} to ${fallbackProvider} fallback`,
     );
-    designCircuitBreaker.record(true);
+
+    // Fire-and-forget probe. Shares the single-breaker probe cadence via the
+    // `lastProbeTime` map, so multiple roles firing in parallel don't each
+    // issue their own probe.
+    const now = Date.now();
+    const lastProbe = lastProbeTime.get(breaker.name) ?? 0;
+    if (now - lastProbe >= PROBE_COOLDOWN_MS) {
+      lastProbeTime.set(breaker.name, now);
+      const probeTimeout = setTimeout(
+        () => breaker.recordProbe(false),
+        PROBE_TIMEOUT_MS,
+      );
+      probeTimeout.unref?.();
+      callPrimary()
+        .then(() => {
+          clearTimeout(probeTimeout);
+          breaker.recordProbe(true);
+        })
+        .catch((err: unknown) => {
+          clearTimeout(probeTimeout);
+          // Domain signals (e.g. NoMaskDetectedError from a SAM probe firing
+          // on a clean image) aren't provider failures — feeding them into
+          // recordProbe(false) would spuriously re-OPEN the breaker and
+          // block recovery even when Replicate is healthy. Mirrors the
+          // isTerminalError guard on the primary/fallback error paths.
+          if (
+            isTerminalError &&
+            err instanceof Error &&
+            isTerminalError(err)
+          ) {
+            return;
+          }
+          breaker.recordProbe(false);
+        });
+    }
+
+    return callFallbackWithRetry("circuit_open");
+  }
+
+  try {
+    const result = await withRetry(callPrimary, {
+      maxRetries: 1,
+      delayMs: 1000,
+      isRetryable: isTerminalError
+        ? (error) => !isTerminalError(error)
+        : undefined,
+      onRetry: (error, attempt) => {
+        logger.warn(
+          {
+            event: "provider.retry",
+            provider: "replicate",
+            role,
+            error: error.message,
+            attempt,
+          },
+          `replicate ${role} call failed, retrying`,
+        );
+      },
+    });
+    breaker.record(true);
+    logger.info(
+      {
+        event: "provider.generation",
+        provider: "replicate",
+        role,
+        model: primaryModel,
+        fallbackFired: false,
+      },
+      `${role} served from primary provider`,
+    );
     return result;
   } catch (error) {
-    designCircuitBreaker.record(false);
-    throw error;
+    if (
+      isTerminalError &&
+      error instanceof Error &&
+      isTerminalError(error)
+    ) {
+      throw error;
+    }
+    breaker.record(false);
+
+    logger.error(
+      {
+        event: "provider.fallback",
+        provider: fallbackProvider,
+        role,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      `replicate ${role} failed after retries, trying ${fallbackProvider} fallback`,
+    );
+
+    return callFallbackWithRetry("primary_failed");
   }
 }

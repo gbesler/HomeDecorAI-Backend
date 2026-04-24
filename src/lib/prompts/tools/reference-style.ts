@@ -8,16 +8,20 @@
  *   2. Preserve image 1's geometry (walls, windows, layout)
  *   3. Adopt image 2's palette, materials, lighting, and mood
  *
- * Producers: primary is fal `flux-pro/kontext/max/multi` (image_urls=[target,
- * ref]); fallback is Replicate `google/nano-banana` (image_input=[target,
- * ref]). Both understand "image 1 / image 2" references in the prompt text.
+ * Producers: primary is Replicate `google/nano-banana` (image_input=[target,
+ * ref]); fallback is fal `fal-ai/flux-2/edit` (image_urls=[target, ref], up
+ * to 4). Both understand "image 1 / image 2" references in the prompt text.
  *
  * History: this tool previously shipped on `prunaai/p-image-edit` primary +
  * `fal-ai/flux-2/klein/9b/edit` fallback. Pruna produced near-identity
  * output — a distilled sub-second edit model is not trained for cross-image
- * style transfer. The v2 build retires the "merely restyle materials"
- * hedging that was written to nudge Pruna; Kontext Multi and Nano Banana
- * both handle direct transfer directives.
+ * style transfer. An intermediate iteration moved primary to
+ * `fal-ai/flux-pro/kontext/max/multi`; Kontext Max Multi was then retired
+ * in favor of Nano Banana (cheaper, semantic cross-image reasoning), with
+ * Flux 2 Edit replacing it on the fallback side (~9× cost reduction vs
+ * Kontext Max Multi). The "merely restyle materials" hedging that was
+ * written to nudge Pruna is gone; Nano Banana and Flux 2 Edit both handle
+ * direct transfer directives.
  *
  * Phrasing rule: Flux-2 and Kontext models are not trained to interpret
  * negative instructions ("do not", "avoid", "without") — those bias the
@@ -42,9 +46,9 @@ import type { SpaceType } from "../../../schemas/generated/types/spaceType.js";
 
 const PROMPT_VERSION = "referenceStyle/v2.0";
 
-const PRIMARY_MODEL = "fal-ai/flux-pro/kontext/max/multi";
+const PRIMARY_MODEL = "google/nano-banana";
 const PRIMARY_MAX_TOKENS =
-  PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 350;
+  PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 512;
 
 /**
  * The full validated body shape — declared as the single source of truth for
@@ -61,11 +65,11 @@ export function buildReferenceStylePrompt(
 
   const scopeNoun = spaceType === "interior" ? "room" : "building";
 
-  // Transfer-first directive. Kontext Max Multi and Nano Banana both handle
-  // cross-image style transfer natively — there is no need to soften with
-  // "merely restyle". The preceding structural-preservation layer supplies
-  // the constraint that geometry stays fixed; this layer's job is to push
-  // hard on adopting image 2's visual language.
+  // Transfer-first directive. Nano Banana (Gemini 2.5 Flash Image) and
+  // Flux 2 Edit both handle cross-image style transfer natively — there is
+  // no need to soften with "merely restyle". The preceding structural-
+  // preservation layer supplies the constraint that geometry stays fixed;
+  // this layer's job is to push hard on adopting image 2's visual language.
   const actionDirective =
     `Apply the full visual language of image 2 (the reference) to image 1 (the ${scopeNoun}). ` +
     `Adopt image 2's color palette, materials, finishes, textures, and lighting mood as the dominant aesthetic of image 1.`;
@@ -124,12 +128,15 @@ export function buildReferenceStylePrompt(
   return {
     prompt: trimResult.composed,
     positiveAvoidance,
-    // Kontext Max Multi default guidance is 3.5. We ship `balanced` (3.0)
-    // because style transfer needs headroom for the model to diverge from
+    // `balanced` (3.0) gives style transfer enough headroom to diverge from
     // image 1's surface appearance while the structural-preservation layer
-    // in the prompt handles geometry. `faithful` (5.0) was the Pruna-era
-    // setting; with a transfer-capable model it over-preserves the input
-    // and reproduces the near-identity failure mode we migrated off of.
+    // handles geometry. `faithful` (5.0) was the Pruna-era setting; with a
+    // transfer-capable model it over-preserves the input and reproduces the
+    // near-identity failure mode we migrated off of. The primary (Nano
+    // Banana) advertises supportsGuidanceScale=false and the replicate
+    // adapter drops this field for Gemini; the value is still forwarded so
+    // the fal-ai/flux-2/edit fallback — which does expose guidance_scale —
+    // receives a calibrated setting.
     guidanceScale: KLEIN_GUIDANCE_BANDS.balanced,
     actionMode: "transform",
     guidanceBand: "balanced",

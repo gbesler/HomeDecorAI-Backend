@@ -165,6 +165,24 @@ const envSchema = z.object({
     .optional()
     .default("black-forest-labs/flux-fill-dev")
     .transform((v) => v as `${string}/${string}`),
+  // fal.ai fallback model slugs for the segment/remove/inpaint pipelines.
+  // Hot-swappable without a deploy for parity with the REPLICATE_* entries
+  // above. Defaults are the slugs documented in capabilities.ts.
+  FALAI_SEGMENTATION_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/sam-3/image"),
+  FALAI_REMOVAL_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/object-removal"),
+  FALAI_INPAINT_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/flux-pro/v1/fill"),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)
@@ -207,6 +225,11 @@ void (async () => {
   const { getCapabilities } = await import(
     "./ai-providers/capabilities.js"
   );
+  // Cover both REPLICATE_* and FALAI_* pipeline slugs. An operator who
+  // misconfigures FALAI_SEGMENTATION_MODEL to a removal slug would otherwise
+  // silently hand segmentation-shaped input to an inpainter during the rare
+  // fallback path — producing either a schema reject or, worse, a false
+  // "already clean" short-circuit that users interpret as a working feature.
   const checks: Array<[string, string, "segment" | "remove" | "inpaint"]> = [
     [
       "REPLICATE_SEGMENTATION_MODEL",
@@ -215,6 +238,9 @@ void (async () => {
     ],
     ["REPLICATE_REMOVAL_MODEL", env.REPLICATE_REMOVAL_MODEL, "remove"],
     ["REPLICATE_INPAINT_MODEL", env.REPLICATE_INPAINT_MODEL, "inpaint"],
+    ["FALAI_SEGMENTATION_MODEL", env.FALAI_SEGMENTATION_MODEL, "segment"],
+    ["FALAI_REMOVAL_MODEL", env.FALAI_REMOVAL_MODEL, "remove"],
+    ["FALAI_INPAINT_MODEL", env.FALAI_INPAINT_MODEL, "inpaint"],
   ];
   for (const [name, slug, expectedRole] of checks) {
     const capability = getCapabilities(slug);

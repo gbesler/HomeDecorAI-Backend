@@ -15,12 +15,16 @@
  *     range 4-50), guidance_scale (default 2.5, range 0-20), image_size,
  *     sync_mode, enable_safety_checker, output_format, acceleration.
  *     NO negative_prompt. NO enable_prompt_expansion.
- * - fal.ai flux-pro/kontext/max/multi model page: https://fal.ai/models/fal-ai/flux-pro/kontext/max/multi/api
- *   → schema: prompt, image_urls (array of URL strings — same field name
- *     and shape as Klein, just multi-reference native), seed, guidance_scale
- *     (default 3.5), num_images, output_format ("jpeg"|"png"), aspect_ratio,
- *     safety_tolerance, enhance_prompt, sync_mode. NO negative_prompt.
- *     NO image_size. NO num_inference_steps.
+ * - fal.ai flux-2/edit model: reference-style fallback (replaced the
+ *   retired fal-ai/flux-pro/kontext/max/multi, ~9× cheaper per MP).
+ *   Schema expected to share the Flux 2 family shape (`image_urls` array,
+ *   `guidance_scale`, `output_format`); aspect-ratio field not verified
+ *   against a live call — if schema rejects `image_size` presets, flip
+ *   `aspectRatioField` to `"aspect_ratio"`.
+ * - fal.ai sam-3/image / object-removal / flux-pro/v1/fill: pipeline
+ *   fallbacks (segment/remove/inpaint). Response shape defensively parsed
+ *   in the adapter (accepts both `data.image.url` singular and
+ *   `data.images[0].url` plural for SAM 3).
  * - Replicate google/nano-banana: https://replicate.com/google/nano-banana/api/api-reference
  *   → Gemini 2.5 Flash Image via Replicate. Supports up to 14 reference
  *     images per call, MIME allowlist: png/jpeg/webp/heic/heif. Public page
@@ -32,8 +36,10 @@
  *     First live call from staging will confirm; adjust the replicate.ts
  *     Nano Banana branch if the schema rejects.
  *
- * Verified: 2026-04-10 (Pruna, Klein). 2026-04-23 (Kontext Multi confirmed
- * via fal docs; Nano Banana Replicate schema noted above as unverified).
+ * Verified: 2026-04-10 (Pruna, Klein). 2026-04-24 (Flux 2 Edit added as
+ * reference-style fallback; fal-ai SAM 3 / object-removal / flux-pro v1
+ * fill added as pipeline fallbacks — response shapes unverified against a
+ * live call; Nano Banana Replicate schema also noted below as unverified).
  * If provider updates surface in production (schema rejections, silent
  * drops, quality regressions), re-verify the source docs and update this
  * file.
@@ -142,37 +148,28 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     defaultImageSize: "landscape_4_3",
     aspectRatioField: "image_size",
   },
-  // ─── Reference-style primary: Kontext Max Multi ─────────────────────────
-  // BFL Flux Pro Kontext Max, multi-reference variant. Native multi-image
-  // editing is the model's explicit use case — unlike Klein which accepts
-  // `image_urls` as an array without documented multi-reference behavior,
-  // Kontext Multi is trained to extract style/character/palette from one
-  // image and apply it to another. Wired as primary for the reference-style
-  // tool (Pruna p-image-edit produces near-identity output on that path).
-  //
-  // Schema note: `image_urls` is the SAME field name Klein uses — just an
-  // array of URL strings, no per-image objects. The fal adapter's existing
-  // Klein branch can be reused with only the model slug differing.
-  "fal-ai/flux-pro/kontext/max/multi": {
+  // ─── Reference-style fallback: Flux 2 Edit ─────────────────────────────
+  // BFL Flux 2 Edit on fal.ai. Cheaper (~$0.012/MP) than Kontext Max Multi
+  // (~$0.11/MP) — roughly 9× cost reduction on the fallback path. Flux 2
+  // accepts multiple `image_urls` (up to 4), so the reference-style pair
+  // (room + style reference) fits comfortably. Wired as the fal.ai
+  // fallback for reference-style after moving the primary to Replicate's
+  // Nano Banana.
+  "fal-ai/flux-2/edit": {
     provider: "falai",
     role: "edit",
-    supportsNegativePrompt: false, // Flux family — no negative prompts
-    supportsGuidanceScale: true, // Default 3.5 per fal docs
-    supportsReferenceImage: true, // Native multi-reference editing
-    maxPromptTokens: 350, // Same Flux-family budget as Klein
-    // Kontext Max Multi exposes `aspect_ratio` as an enum; WebFetched
-    // values: ["21:9","16:9","4:3","3:2","1:1","2:3","3:4","9:16","9:21"].
-    // Without a value the output AR is non-deterministic from the input —
-    // we explicitly forward an image-derived ratio so before/after frames
-    // line up.
-    aspectRatioField: "aspect_ratio",
+    supportsNegativePrompt: false, // Flux 2: no negative prompts
+    supportsGuidanceScale: true,
+    supportsReferenceImage: true,
+    maxPromptTokens: 512,
+    aspectRatioField: "image_size",
   },
-  // ─── Reference-style fallback: Nano Banana on Replicate ─────────────────
+  // ─── Reference-style primary: Nano Banana on Replicate ──────────────────
   // Google Gemini 2.5 Flash Image via Replicate. Multimodal: genuinely
   // understands "apply image 2's style to image 1" as a semantic directive
-  // rather than executing a distilled transform. Provider-diversity fallback
-  // for the reference-style tool — if fal primary is unavailable, Replicate
-  // side picks up. Pairs with `fal-ai/flux-pro/kontext/max/multi` above.
+  // rather than executing a distilled transform. Primary for the reference-
+  // style tool; pairs with `fal-ai/flux-2/edit` above as the fal.ai
+  // fallback.
   //
   // Gemini does not expose a CFG knob; prompt adherence is governed by the
   // model internals, not a scale parameter. Community examples and the
@@ -220,6 +217,18 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // defined by the input image itself, not a parameter.
     aspectRatioField: null,
   },
+  // fal.ai hosted SAM 3. Mirror role/shape of the Replicate entry above —
+  // the adapter flips apply_mask=false so the endpoint returns a mask PNG
+  // rather than a burned-in overlay.
+  "fal-ai/sam-3/image": {
+    provider: "falai",
+    role: "segment",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 256,
+    aspectRatioField: null,
+  },
   // ─── Removal: LaMa ───────────────────────────────────────────────────────
   // Resolution-robust Large Mask Inpainting with Fourier Convolutions (WACV
   // 2022). Industry standard for "extend the surface that was behind this
@@ -252,6 +261,19 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     // LaMa's output dimensions equal the input image+mask; no AR knob.
     aspectRatioField: null,
   },
+  // fal.ai object-removal fallback. Takes image + mask; no prompt. Output
+  // size derived from input. Adapter pins model="best_quality" — the
+  // fallback path is rare enough that cost savings aren't worth a quality
+  // step-down when it does fire.
+  "fal-ai/object-removal": {
+    provider: "falai",
+    role: "remove",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 0,
+    aspectRatioField: null,
+  },
   // ─── Inpainting with prompt: Flux Fill ────────────────────────────────────
   // Black Forest Labs Flux Fill (Dec 2024). Image + mask + prompt →
   // inpainted image. Used by the Replace & Add Object tool: user paints the
@@ -282,6 +304,18 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     supportsReferenceImage: false,
     maxPromptTokens: 512,
     // Flux Fill output matches the input image+mask shape; no AR knob.
+    aspectRatioField: null,
+  },
+  // fal.ai Flux Pro Fill fallback. Same image + mask + prompt shape as
+  // Replicate Flux Fill Dev, but no guidance_scale knob — the fal variant
+  // omits it. Accepts subtle-quality difference on the fallback path.
+  "fal-ai/flux-pro/v1/fill": {
+    provider: "falai",
+    role: "inpaint",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
     aspectRatioField: null,
   },
 };

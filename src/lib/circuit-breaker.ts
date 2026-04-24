@@ -198,24 +198,13 @@ export class CircuitBreaker {
 }
 
 /**
- * Design generation breaker for Replicate-primary tools (interior, exterior,
- * garden, patio, pool, virtual-staging, etc.). CLOSED → Replicate; OPEN →
- * fal.ai fallback. This is the breaker for the bulk of design traffic.
+ * Design generation breaker. CLOSED → Replicate (primary for every tool);
+ * OPEN → fal.ai fallback. Shared across edit (callDesignGeneration) and the
+ * three pipeline roles (segment / remove / inpaint) — every tool is Replicate
+ * primary, so a single breaker captures the "Replicate degraded" signal.
  */
 export const designCircuitBreaker = new CircuitBreaker({
   name: "design",
   primaryProvider: "replicate",
   fallbackProvider: "falai",
-});
-
-/**
- * Design generation breaker for fal-primary tools (reference-style → Kontext
- * Max Multi, fallback to Replicate Nano Banana). Tracked independently from
- * `designCircuitBreaker` so Replicate degradation does not spuriously open
- * the breaker for traffic that starts on fal, and vice versa.
- */
-export const designCircuitBreakerFalPrimary = new CircuitBreaker({
-  name: "design-fal",
-  primaryProvider: "falai",
-  fallbackProvider: "replicate",
 });
