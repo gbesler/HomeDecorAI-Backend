@@ -6,7 +6,6 @@ import { logger } from "./lib/logger.js";
 import { validateDictionaries } from "./lib/prompts/validate.js";
 import {
   designCircuitBreaker,
-  designCircuitBreakerFalPrimary,
   CircuitState,
 } from "./lib/circuit-breaker.js";
 import {
@@ -38,7 +37,6 @@ function wireBreakerNotifications(
 }
 
 wireBreakerNotifications(designCircuitBreaker);
-wireBreakerNotifications(designCircuitBreakerFalPrimary);
 
 // ─── Server ─────────────────────────────────────────────────────────────────
 
@@ -64,7 +62,7 @@ try {
 }
 
 // Start intervals only after validation passes
-const breakers = [designCircuitBreaker, designCircuitBreakerFalPrimary];
+const breakers = [designCircuitBreaker];
 
 const statusInterval = setInterval(() => {
   for (const breaker of breakers) {

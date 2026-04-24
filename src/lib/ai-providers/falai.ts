@@ -3,7 +3,17 @@ import { env } from "../env.js";
 import { aspectRatioToKleinImageSize } from "../generation/probe-aspect-ratio.js";
 import { logger } from "../logger.js";
 import { getCapabilities } from "./capabilities.js";
-import type { GenerationInput, GenerationOutput } from "./types.js";
+import {
+  NoMaskDetectedError,
+  type GenerationInput,
+  type GenerationOutput,
+  type InpaintInput,
+  type InpaintOutput,
+  type RemovalInput,
+  type RemovalOutput,
+  type SegmentationInput,
+  type SegmentationOutput,
+} from "./types.js";
 
 fal.config({ credentials: env.FAL_AI_API_KEY });
 
@@ -95,4 +105,164 @@ export async function callFalAI(
     durationMs,
     requestId: result.requestId,
   };
+}
+
+// ─── Segmentation (fal-ai/sam-3/image) ─────────────────────────────────────
+
+/**
+ * Text-grounded segmentation fallback using fal.ai SAM 3.
+ *
+ * fal-ai/sam-3/image schema:
+ *   image_url:              source photo URL (required)
+ *   prompt:                 concept noun phrase(s)
+ *   apply_mask:             false returns a standalone binary mask PNG (what
+ *                           we want); true returns the image with the mask
+ *                           burned in.
+ *   return_multiple_masks:  false collapses to a single combined mask URL.
+ *   output_format:          "png" for a lossless binary mask.
+ *
+ * Output: `result.data.image.url` is the mask PNG when `apply_mask=false`.
+ * Throws `NoMaskDetectedError` when the response contains no mask — mirrors
+ * the Replicate SAM 3 adapter so downstream callers handle the "already
+ * clean" case uniformly regardless of which provider served the mask.
+ */
+export async function callSegmentationFalAI(
+  model: string,
+  input: SegmentationInput,
+): Promise<SegmentationOutput> {
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      prompt: input.textPrompt,
+      apply_mask: false,
+      return_multiple_masks: false,
+      output_format: "png",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as { data?: { image?: { url?: string } }; requestId?: string };
+
+  const durationMs = Date.now() - start;
+
+  const maskUrl = result.data?.image?.url;
+  if (typeof maskUrl !== "string" || maskUrl.length === 0) {
+    logger.warn(
+      {
+        event: "provider.falai.empty_mask",
+        model,
+        textPrompt: input.textPrompt,
+        durationMs,
+      },
+      "fal.ai SAM 3 returned no mask — concept prompt matched zero regions",
+    );
+    throw new NoMaskDetectedError();
+  }
+
+  return { maskUrl, provider: "falai", durationMs };
+}
+
+// ─── Removal (fal-ai/object-removal) ───────────────────────────────────────
+
+/**
+ * Mask-guided object removal fallback using fal.ai's object-removal endpoint.
+ *
+ * fal-ai/object-removal schema:
+ *   image_url: source photo URL (required)
+ *   mask_url:  binary mask PNG URL (white = remove)
+ *   model:     "best_quality" (default) or "medium_quality". We pin to
+ *              best_quality because this path only fires when the Replicate
+ *              primary is already unhealthy; cost savings aren't worth
+ *              degrading the fallback UX when it's already the rarer path.
+ *
+ * Output: `result.data.images[0].url` — single inpainted image.
+ */
+export async function callRemovalFalAI(
+  model: string,
+  input: RemovalInput,
+): Promise<RemovalOutput> {
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      mask_url: input.maskUrl,
+      model: "best_quality",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as { data?: { images?: Array<{ url?: string }> }; requestId?: string };
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = result.data?.images?.[0]?.url;
+  if (typeof imageUrl !== "string" || imageUrl.length === 0) {
+    logger.warn(
+      {
+        event: "provider.falai.empty_response",
+        model,
+        durationMs,
+      },
+      "fal.ai object-removal returned no image",
+    );
+    throw new Error("fal.ai removal returned no image");
+  }
+
+  return { imageUrl, provider: "falai", durationMs };
+}
+
+// ─── Inpaint with prompt (fal-ai/flux-pro/v1/fill) ─────────────────────────
+
+/**
+ * Prompt-driven inpainting fallback using fal.ai Flux Pro Fill.
+ *
+ * fal-ai/flux-pro/v1/fill schema:
+ *   image_url:     source photo URL (required)
+ *   mask_url:      binary mask PNG URL (white = fill)
+ *   prompt:        text describing what to synthesize inside the mask
+ *   output_format: "png" for parity with the Replicate Flux Fill Dev output
+ *
+ * Output: `result.data.images[0].url`.
+ *
+ * Note: fal's Flux Pro Fill does not expose a guidance_scale knob — Replicate
+ * Flux Fill Dev does. Subtle quality differences between primary and fallback
+ * are acceptable since the fallback only fires on primary failure.
+ */
+export async function callInpaintFalAI(
+  model: string,
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      mask_url: input.maskUrl,
+      prompt: input.prompt,
+      output_format: "png",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as { data?: { images?: Array<{ url?: string }> }; requestId?: string };
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = result.data?.images?.[0]?.url;
+  if (typeof imageUrl !== "string" || imageUrl.length === 0) {
+    logger.warn(
+      {
+        event: "provider.falai.empty_response",
+        model,
+        durationMs,
+      },
+      "fal.ai flux-pro fill returned no image",
+    );
+    throw new Error("fal.ai inpaint returned no image");
+  }
+
+  return { imageUrl, provider: "falai", durationMs };
 }

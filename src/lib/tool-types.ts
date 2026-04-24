@@ -1,6 +1,5 @@
 import type { FastifySchema } from "fastify";
 import { type z } from "zod";
-import type { ProviderId } from "./ai-providers/types.js";
 import { env } from "./env.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
@@ -149,13 +148,6 @@ export interface ToolTypeConfig<
   models: {
     replicate: `${string}/${string}`;
     falai: string;
-    /**
-     * Optional primary-provider override. Defaults to "replicate" when
-     * omitted, matching every existing tool's flow. Reference-style sets
-     * this to "falai" so the router tries Kontext Max Multi first and
-     * falls back to Nano Banana on Replicate.
-     */
-    primaryProvider?: ProviderId;
   };
   /** Zod body schema (without `language` — the controller factory adds it). */
   bodySchema: z.ZodType<TParams>;
@@ -1133,17 +1125,18 @@ export const TOOL_TYPES = {
     routePath: "/reference-style",
     rateLimitKey: "referenceStyle",
     models: {
-      // Primary: Kontext Max Multi (fal). Native multi-reference editing —
-      // trained to extract palette/materials from image 2 and apply them to
-      // image 1. Pruna p-image-edit (previously primary) produces near-
-      // identity output on this path; swapped out after A/B failure.
-      falai: "fal-ai/flux-pro/kontext/max/multi",
-      // Fallback: Nano Banana on Replicate (Gemini 2.5 Flash Image). Runs
-      // only when fal hard-fails (timeout / 5xx / schema reject). Provider
-      // diversity: fal ↔ Replicate, so a single-cloud outage keeps the tool
-      // available.
+      // Primary: Nano Banana on Replicate (Gemini 2.5 Flash Image). Semantic
+      // multimodal reasoning genuinely handles "apply image 2's style to
+      // image 1" rather than executing a distilled transform. Previous
+      // primary (fal Kontext Max Multi, ~$0.11/MP) was dropped — Nano Banana
+      // is producing the output users actually see.
       replicate: "google/nano-banana" as const,
-      primaryProvider: "falai",
+      // Fallback: Flux 2 Edit on fal.ai (~$0.012/MP — roughly 9× cheaper
+      // than Kontext Max Multi). Accepts up to 4 `image_urls`, which is
+      // more than enough for the reference-style pair (room + style ref).
+      // Provider diversity: Replicate ↔ fal, so a single-cloud outage keeps
+      // the tool available.
+      falai: "fal-ai/flux-2/edit",
     },
     bodySchema: CreateReferenceStyleBody,
     bodyJsonSchema: referenceStyleBodyJsonSchema,
@@ -1213,13 +1206,16 @@ export const TOOL_TYPES = {
     rateLimitKey: "cleanOrganize",
     // SAM 3 + LaMa pipeline: SAM 3 identifies clutter via concept prompt,
     // LaMa extends the surrounding surface. Model slugs come from env
-    // (REPLICATE_SEGMENTATION_MODEL / REPLICATE_REMOVAL_MODEL). The `models`
-    // fields below are dead weight in this mode; left in place so a rollback
-    // to mode="edit" stays a one-line config change.
+    // (REPLICATE_SEGMENTATION_MODEL / REPLICATE_REMOVAL_MODEL and their
+    // FALAI_* fallbacks). The `models` fields below are decorative for
+    // this mode — the router reads env directly — but kept so the registry
+    // shape stays uniform and a rollback to mode="edit" stays trivial. We
+    // register the fal.ai segmentation slug here to make the fallback
+    // wiring visible alongside the primary.
     mode: "segment-remove",
     models: {
       replicate: "prunaai/p-image-edit" as const,
-      falai: "fal-ai/flux-2/klein/9b/edit",
+      falai: "fal-ai/sam-3/image",
     },
     bodySchema: CreateCleanOrganizeBody,
     bodyJsonSchema: cleanOrganizeBodyJsonSchema,
@@ -1240,13 +1236,14 @@ export const TOOL_TYPES = {
     routePath: "/remove-objects",
     rateLimitKey: "removeObjects",
     // Remove-only pipeline: the client supplies the brush mask directly, so
-    // there is no segmentation call. LaMa removes + extends. `models` fields
-    // are dead weight in this mode (slug comes from REPLICATE_REMOVAL_MODEL)
-    // but kept so a rollback to mode="edit" stays trivial.
+    // there is no segmentation call. LaMa removes + extends; fal.ai
+    // object-removal is the fallback. `models` fields are decorative here
+    // (router reads REPLICATE_REMOVAL_MODEL / FALAI_REMOVAL_MODEL from env)
+    // but kept for documentation + rollback-to-edit parity.
     mode: "remove-only",
     models: {
       replicate: "prunaai/p-image-edit" as const,
-      falai: "fal-ai/flux-2/klein/9b/edit",
+      falai: "fal-ai/object-removal",
     },
     bodySchema: CreateRemoveObjectsBody,
     bodyJsonSchema: removeObjectsBodyJsonSchema,
@@ -1280,13 +1277,14 @@ export const TOOL_TYPES = {
     rateLimitKey: "replaceAddObject",
     // Inpaint-with-prompt pipeline: client supplies the brush mask + a
     // prompt from the curated inspiration library, Flux Fill synthesizes
-    // new content inside the masked region. No SAM call. No fal.ai fallback.
-    // `models` fields are dead weight in this mode (Flux Fill slug comes from
-    // REPLICATE_INPAINT_MODEL) but kept so the registry shape stays uniform.
+    // new content inside the masked region. No SAM call. fal.ai
+    // `flux-pro/v1/fill` is the fallback. `models` fields are decorative
+    // (router reads REPLICATE_INPAINT_MODEL / FALAI_INPAINT_MODEL from env)
+    // but kept so the registry shape stays uniform.
     mode: "inpaint-with-prompt",
     models: {
       replicate: "prunaai/p-image-edit" as const,
-      falai: "fal-ai/flux-2/klein/9b/edit",
+      falai: "fal-ai/flux-pro/v1/fill",
     },
     bodySchema: CreateReplaceAddObjectBody,
     bodyJsonSchema: replaceAddObjectBodyJsonSchema,

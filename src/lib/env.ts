@@ -157,6 +157,24 @@ const envSchema = z.object({
     .optional()
     .default("black-forest-labs/flux-fill-dev")
     .transform((v) => v as `${string}/${string}`),
+  // fal.ai fallback model slugs for the segment/remove/inpaint pipelines.
+  // Hot-swappable without a deploy for parity with the REPLICATE_* entries
+  // above. Defaults are the slugs documented in capabilities.ts.
+  FALAI_SEGMENTATION_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/sam-3/image"),
+  FALAI_REMOVAL_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/object-removal"),
+  FALAI_INPAINT_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/flux-pro/v1/fill"),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)

@@ -8,16 +8,20 @@
  *   2. Preserve image 1's geometry (walls, windows, layout)
  *   3. Adopt image 2's palette, materials, lighting, and mood
  *
- * Producers: primary is fal `flux-pro/kontext/max/multi` (image_urls=[target,
- * ref]); fallback is Replicate `google/nano-banana` (image_input=[target,
- * ref]). Both understand "image 1 / image 2" references in the prompt text.
+ * Producers: primary is Replicate `google/nano-banana` (image_input=[target,
+ * ref]); fallback is fal `fal-ai/flux-2/edit` (image_urls=[target, ref], up
+ * to 4). Both understand "image 1 / image 2" references in the prompt text.
  *
  * History: this tool previously shipped on `prunaai/p-image-edit` primary +
  * `fal-ai/flux-2/klein/9b/edit` fallback. Pruna produced near-identity
  * output — a distilled sub-second edit model is not trained for cross-image
- * style transfer. The v2 build retires the "merely restyle materials"
- * hedging that was written to nudge Pruna; Kontext Multi and Nano Banana
- * both handle direct transfer directives.
+ * style transfer. An intermediate iteration moved primary to
+ * `fal-ai/flux-pro/kontext/max/multi`; Kontext Max Multi was then retired
+ * in favor of Nano Banana (cheaper, semantic cross-image reasoning), with
+ * Flux 2 Edit replacing it on the fallback side (~9× cost reduction vs
+ * Kontext Max Multi). The "merely restyle materials" hedging that was
+ * written to nudge Pruna is gone; Nano Banana and Flux 2 Edit both handle
+ * direct transfer directives.
  *
  * Phrasing rule: Flux-2 and Kontext models are not trained to interpret
  * negative instructions ("do not", "avoid", "without") — those bias the
@@ -42,9 +46,9 @@ import type { SpaceType } from "../../../schemas/generated/types/spaceType.js";
 
 const PROMPT_VERSION = "referenceStyle/v2.0";
 
-const PRIMARY_MODEL = "fal-ai/flux-pro/kontext/max/multi";
+const PRIMARY_MODEL = "google/nano-banana";
 const PRIMARY_MAX_TOKENS =
-  PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 350;
+  PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 512;
 
 /**
  * The full validated body shape — declared as the single source of truth for
