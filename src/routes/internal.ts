@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import { processGenerationHandler } from "../controllers/internal.controller.js";
+import { campaignFireHandler } from "../controllers/campaign.controller.js";
 
 /**
  * Internal routes invoked by Cloud Tasks (or other trusted backends).
@@ -30,6 +31,28 @@ const internalRoutes: FastifyPluginAsync = async (app) => {
       preHandler: [app.verifyCloudTask],
     },
     processGenerationHandler,
+  );
+
+  app.post(
+    "/notifications/campaign-fire",
+    {
+      schema: {
+        hide: true,
+        body: {
+          type: "object",
+          required: ["userId", "day"],
+          properties: {
+            userId: { type: "string" },
+            day: {
+              type: "integer",
+              enum: [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14],
+            },
+          },
+        },
+      },
+      preHandler: [app.verifyCloudTask],
+    },
+    campaignFireHandler,
   );
 };
 
