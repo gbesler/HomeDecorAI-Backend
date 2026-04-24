@@ -104,12 +104,11 @@ function queuePath(projectId: string): string {
   return `projects/${projectId}/locations/${env.GCP_LOCATION}/queues/${env.GCP_QUEUE_NAME}`;
 }
 
-function taskPath(projectId: string, taskName: string): string {
-  return `${queuePath(projectId)}/tasks/${taskName}`;
+function taskPath(projectId: string, generationId: string): string {
+  return `${queuePath(projectId)}/tasks/${generationId}`;
 }
 
 const PROCESS_GENERATION_PATH = "/internal/process-generation";
-const CAMPAIGN_FIRE_PATH = "/internal/notifications/campaign-fire";
 const DISPATCH_DEADLINE_SECONDS = 600;
 
 export type EnqueueGenerationTaskMode = "create" | "retry";
@@ -221,99 +220,6 @@ export async function enqueueGenerationTask(
         error: err instanceof Error ? err.message : String(err),
       },
       "Cloud Tasks enqueue failed",
-    );
-    throw err;
-  }
-}
-
-export interface EnqueueCampaignTaskInput {
-  userId: string;
-  day: number;
-  /** Epoch milliseconds when Cloud Tasks should dispatch the task. */
-  scheduleTimeMs: number;
-}
-
-/**
- * Enqueue a scheduled campaign-fire task. Task name is deterministic
- * (`precampaign-{uid}-day-{N}`) so concurrent schedule calls for the same
- * user collapse to a single task via ALREADY_EXISTS. Falls through to
- * logged success in that case — the first task is still pending and will
- * fire exactly once at the configured scheduleTime.
- *
- * The OIDC audience is reused from INTERNAL_TASK_AUDIENCE. The receiver
- * validates audience + service-account email identically to the
- * generation processor, so a leaked audience token does not widen the
- * attack surface — a caller would still need a token signed by our
- * service account to reach either endpoint.
- */
-export async function enqueueCampaignTask(
-  input: EnqueueCampaignTaskInput,
-): Promise<void> {
-  const asyncEnv = requireAsyncEnv();
-  const client = getClient(asyncEnv.projectId);
-  const parent = queuePath(asyncEnv.projectId);
-  const url = `${asyncEnv.backendUrl}${CAMPAIGN_FIRE_PATH}`;
-  const taskName = `precampaign-${input.userId}-day-${input.day}`;
-
-  const payload = JSON.stringify({
-    userId: input.userId,
-    day: input.day,
-  });
-
-  const task: protos.google.cloud.tasks.v2.ITask = {
-    name: taskPath(asyncEnv.projectId, taskName),
-    httpRequest: {
-      httpMethod: "POST",
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: Buffer.from(payload).toString("base64"),
-      oidcToken: {
-        serviceAccountEmail: asyncEnv.serviceAccountEmail,
-        audience: asyncEnv.internalAudience,
-      },
-    },
-    scheduleTime: {
-      seconds: Math.floor(input.scheduleTimeMs / 1000),
-      nanos: (input.scheduleTimeMs % 1000) * 1_000_000,
-    },
-    dispatchDeadline: { seconds: DISPATCH_DEADLINE_SECONDS },
-  };
-
-  try {
-    await client.createTask({ parent, task });
-    logger.info(
-      {
-        event: "cloudtasks.campaign.enqueued",
-        userId: input.userId,
-        day: input.day,
-        scheduleTimeMs: input.scheduleTimeMs,
-        queue: env.GCP_QUEUE_NAME,
-      },
-      "Campaign task enqueued",
-    );
-  } catch (err) {
-    const code = (err as { code?: number }).code;
-    if (code === GRPC_ALREADY_EXISTS) {
-      logger.info(
-        {
-          event: "cloudtasks.campaign.already_exists",
-          userId: input.userId,
-          day: input.day,
-        },
-        "Campaign task already exists — idempotent success",
-      );
-      return;
-    }
-    logger.error(
-      {
-        event: "cloudtasks.campaign.enqueue_failed",
-        userId: input.userId,
-        day: input.day,
-        error: err instanceof Error ? err.message : String(err),
-      },
-      "Campaign task enqueue failed",
     );
     throw err;
   }
