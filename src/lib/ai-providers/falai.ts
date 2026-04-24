@@ -143,11 +143,41 @@ export async function callSegmentationFalAI(
     logs: true,
     abortSignal: AbortSignal.timeout(TIMEOUT_MS),
     pollInterval: 1000,
-  })) as { data?: { image?: { url?: string } }; requestId?: string };
+  })) as {
+    data?: {
+      image?: { url?: string };
+      images?: Array<{ url?: string }>;
+    };
+    requestId?: string;
+  };
 
   const durationMs = Date.now() - start;
 
-  const maskUrl = result.data?.image?.url;
+  // Schema drift guard: if `result.data` is entirely missing the endpoint
+  // returned something unexpected (empty body, error envelope, schema
+  // change). That's a provider health issue, not a "no mask" signal —
+  // throw a generic Error so the fallback envelope records breaker
+  // failure + retries, instead of short-circuiting as NoMaskDetectedError.
+  if (result.data === undefined || result.data === null) {
+    logger.warn(
+      {
+        event: "provider.falai.malformed_response",
+        model,
+        textPrompt: input.textPrompt,
+        durationMs,
+      },
+      "fal.ai SAM 3 returned a response with no `data` field",
+    );
+    throw new Error("fal.ai SAM 3 returned a malformed response");
+  }
+
+  // Defensive parse: the fal.ai SAM 3 schema is not version-pinned and
+  // apply_mask=false is documented to return `image.url`, but sibling fal
+  // endpoints (object-removal, flux-pro/v1/fill) return `images[0].url`.
+  // Accept either shape so a minor schema change doesn't silently produce
+  // false "already clean" results to end users.
+  const maskUrl =
+    result.data.image?.url ?? result.data.images?.[0]?.url;
   if (typeof maskUrl !== "string" || maskUrl.length === 0) {
     logger.warn(
       {

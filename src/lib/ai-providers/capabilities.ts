@@ -15,12 +15,16 @@
  *     range 4-50), guidance_scale (default 2.5, range 0-20), image_size,
  *     sync_mode, enable_safety_checker, output_format, acceleration.
  *     NO negative_prompt. NO enable_prompt_expansion.
- * - fal.ai flux-pro/kontext/max/multi model page: https://fal.ai/models/fal-ai/flux-pro/kontext/max/multi/api
- *   → schema: prompt, image_urls (array of URL strings — same field name
- *     and shape as Klein, just multi-reference native), seed, guidance_scale
- *     (default 3.5), num_images, output_format ("jpeg"|"png"), aspect_ratio,
- *     safety_tolerance, enhance_prompt, sync_mode. NO negative_prompt.
- *     NO image_size. NO num_inference_steps.
+ * - fal.ai flux-2/edit model: reference-style fallback (replaced the
+ *   retired fal-ai/flux-pro/kontext/max/multi, ~9× cheaper per MP).
+ *   Schema expected to share the Flux 2 family shape (`image_urls` array,
+ *   `guidance_scale`, `output_format`); aspect-ratio field not verified
+ *   against a live call — if schema rejects `image_size` presets, flip
+ *   `aspectRatioField` to `"aspect_ratio"`.
+ * - fal.ai sam-3/image / object-removal / flux-pro/v1/fill: pipeline
+ *   fallbacks (segment/remove/inpaint). Response shape defensively parsed
+ *   in the adapter (accepts both `data.image.url` singular and
+ *   `data.images[0].url` plural for SAM 3).
  * - Replicate google/nano-banana: https://replicate.com/google/nano-banana/api/api-reference
  *   → Gemini 2.5 Flash Image via Replicate. Supports up to 14 reference
  *     images per call, MIME allowlist: png/jpeg/webp/heic/heif. Public page
@@ -32,8 +36,10 @@
  *     First live call from staging will confirm; adjust the replicate.ts
  *     Nano Banana branch if the schema rejects.
  *
- * Verified: 2026-04-10 (Pruna, Klein). 2026-04-23 (Kontext Multi confirmed
- * via fal docs; Nano Banana Replicate schema noted above as unverified).
+ * Verified: 2026-04-10 (Pruna, Klein). 2026-04-24 (Flux 2 Edit added as
+ * reference-style fallback; fal-ai SAM 3 / object-removal / flux-pro v1
+ * fill added as pipeline fallbacks — response shapes unverified against a
+ * live call; Nano Banana Replicate schema also noted below as unverified).
  * If provider updates surface in production (schema rejections, silent
  * drops, quality regressions), re-verify the source docs and update this
  * file.

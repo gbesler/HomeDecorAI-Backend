@@ -65,11 +65,11 @@ export function buildReferenceStylePrompt(
 
   const scopeNoun = spaceType === "interior" ? "room" : "building";
 
-  // Transfer-first directive. Kontext Max Multi and Nano Banana both handle
-  // cross-image style transfer natively — there is no need to soften with
-  // "merely restyle". The preceding structural-preservation layer supplies
-  // the constraint that geometry stays fixed; this layer's job is to push
-  // hard on adopting image 2's visual language.
+  // Transfer-first directive. Nano Banana (Gemini 2.5 Flash Image) and
+  // Flux 2 Edit both handle cross-image style transfer natively — there is
+  // no need to soften with "merely restyle". The preceding structural-
+  // preservation layer supplies the constraint that geometry stays fixed;
+  // this layer's job is to push hard on adopting image 2's visual language.
   const actionDirective =
     `Apply the full visual language of image 2 (the reference) to image 1 (the ${scopeNoun}). ` +
     `Adopt image 2's color palette, materials, finishes, textures, and lighting mood as the dominant aesthetic of image 1.`;
@@ -128,12 +128,15 @@ export function buildReferenceStylePrompt(
   return {
     prompt: trimResult.composed,
     positiveAvoidance,
-    // Kontext Max Multi default guidance is 3.5. We ship `balanced` (3.0)
-    // because style transfer needs headroom for the model to diverge from
+    // `balanced` (3.0) gives style transfer enough headroom to diverge from
     // image 1's surface appearance while the structural-preservation layer
-    // in the prompt handles geometry. `faithful` (5.0) was the Pruna-era
-    // setting; with a transfer-capable model it over-preserves the input
-    // and reproduces the near-identity failure mode we migrated off of.
+    // handles geometry. `faithful` (5.0) was the Pruna-era setting; with a
+    // transfer-capable model it over-preserves the input and reproduces the
+    // near-identity failure mode we migrated off of. The primary (Nano
+    // Banana) advertises supportsGuidanceScale=false and the replicate
+    // adapter drops this field for Gemini; the value is still forwarded so
+    // the fal-ai/flux-2/edit fallback — which does expose guidance_scale —
+    // receives a calibrated setting.
     guidanceScale: KLEIN_GUIDANCE_BANDS.balanced,
     actionMode: "transform",
     guidanceBand: "balanced",

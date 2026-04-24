@@ -387,8 +387,20 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
           clearTimeout(probeTimeout);
           breaker.recordProbe(true);
         })
-        .catch(() => {
+        .catch((err: unknown) => {
           clearTimeout(probeTimeout);
+          // Domain signals (e.g. NoMaskDetectedError from a SAM probe firing
+          // on a clean image) aren't provider failures — feeding them into
+          // recordProbe(false) would spuriously re-OPEN the breaker and
+          // block recovery even when Replicate is healthy. Mirrors the
+          // isTerminalError guard on the primary/fallback error paths.
+          if (
+            isTerminalError &&
+            err instanceof Error &&
+            isTerminalError(err)
+          ) {
+            return;
+          }
           breaker.recordProbe(false);
         });
     }
