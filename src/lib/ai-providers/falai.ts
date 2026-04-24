@@ -153,12 +153,19 @@ export async function callSegmentationFalAI(
 
   const durationMs = Date.now() - start;
 
-  // Schema drift guard: if `result.data` is entirely missing the endpoint
-  // returned something unexpected (empty body, error envelope, schema
-  // change). That's a provider health issue, not a "no mask" signal —
-  // throw a generic Error so the fallback envelope records breaker
-  // failure + retries, instead of short-circuiting as NoMaskDetectedError.
-  if (result.data === undefined || result.data === null) {
+  // Schema drift guard: if `result.data` is entirely missing, OR it is
+  // present but exposes neither an `image` nor `images` key (e.g. the
+  // endpoint returned an error envelope like `{ data: { error: {...} } }`),
+  // the endpoint did not actually run segmentation. That's a provider
+  // health issue, not a "no mask" signal — throw a generic Error so the
+  // fallback envelope records breaker failure + retries, instead of
+  // short-circuiting as NoMaskDetectedError and showing the user a false
+  // "already clean" result.
+  if (
+    result.data === undefined ||
+    result.data === null ||
+    (result.data.image === undefined && result.data.images === undefined)
+  ) {
     logger.warn(
       {
         event: "provider.falai.malformed_response",
@@ -166,7 +173,7 @@ export async function callSegmentationFalAI(
         textPrompt: input.textPrompt,
         durationMs,
       },
-      "fal.ai SAM 3 returned a response with no `data` field",
+      "fal.ai SAM 3 returned a response without an image/images field",
     );
     throw new Error("fal.ai SAM 3 returned a malformed response");
   }
@@ -174,10 +181,11 @@ export async function callSegmentationFalAI(
   // Defensive parse: the fal.ai SAM 3 schema is not version-pinned and
   // apply_mask=false is documented to return `image.url`, but sibling fal
   // endpoints (object-removal, flux-pro/v1/fill) return `images[0].url`.
-  // Accept either shape so a minor schema change doesn't silently produce
-  // false "already clean" results to end users.
+  // Accept either shape. `||` (not `??`) is deliberate so an empty-string
+  // `image.url` falls through to `images[0].url` rather than short-
+  // circuiting the dual-shape parse.
   const maskUrl =
-    result.data.image?.url ?? result.data.images?.[0]?.url;
+    result.data.image?.url || result.data.images?.[0]?.url;
   if (typeof maskUrl !== "string" || maskUrl.length === 0) {
     logger.warn(
       {
