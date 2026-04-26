@@ -55,6 +55,16 @@ export function buildApp() {
           description:
             "User-scoped albums grouping generations many-to-many via a generationIds array",
         },
+        {
+          name: "Explore",
+          description:
+            "Curated AI-generated room inspirations with cursor pagination and filters",
+        },
+        {
+          name: "Favorites",
+          description:
+            "User-scoped saved inspirations from the Explore tab",
+        },
       ],
       components: {
         securitySchemes: {
