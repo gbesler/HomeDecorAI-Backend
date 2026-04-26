@@ -70,9 +70,15 @@ export function buildReferenceStylePrompt(
   // no need to soften with "merely restyle". The preceding structural-
   // preservation layer supplies the constraint that geometry stays fixed;
   // this layer's job is to push hard on adopting image 2's visual language.
+  // Action and focus must agree on what transfers vs what is preserved.
+  // Earlier wording said "adopt textures" in the action but "preserve
+  // furniture shapes" in the focus — the model received contradictory
+  // instructions. We now scope the transfer to surface-level visual
+  // language (palette, materials, finishes, lighting mood) and let the
+  // focus directive elaborate on how furniture/openings carry it.
   const actionDirective =
     `Apply the full visual language of image 2 (the reference) to image 1 (the ${scopeNoun}). ` +
-    `Adopt image 2's color palette, materials, finishes, textures, and lighting mood as the dominant aesthetic of image 1.`;
+    `Adopt image 2's color palette, materials, finishes, and lighting mood as the dominant aesthetic of image 1.`;
 
   const focusDirective =
     spaceType === "interior"
@@ -87,7 +93,7 @@ export function buildReferenceStylePrompt(
   const styleCore =
     `The result's palette, materials, and lighting should read as image 2's aesthetic applied to image 1's scene.`;
 
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance(spaceType, [
     "faithful to image 2 style",
     "faithful to image 1 geometry",
   ]);

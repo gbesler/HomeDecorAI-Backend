@@ -272,7 +272,7 @@ function composeLayers(
   guidanceBand: GuidanceBand,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("exterior", [
     "clean architectural lines",
     "intact roof line",
   ]);

@@ -20,11 +20,9 @@ import {
   CHRISTMAS_FALLBACK_ACCENTS,
   christmasRecipes,
 } from "../dictionaries/christmas-recipes.js";
+import { humanizeRoomType } from "../primitives/humanize-room-type.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
-import {
-  POSITIVE_AVOIDANCE_BASE,
-  buildPositiveAvoidance,
-} from "../primitives/positive-avoidance.js";
+import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import {
   trimLayersToBudget,
@@ -104,8 +102,13 @@ function composeTransform(
 ): PromptResult {
   const humanRoom = humanizeRoomType(roomType);
 
+  // Single aesthetic descriptor — `coreAesthetic` already reads as a full
+  // adjective phrase (e.g. "clean, intentional, architecturally honest").
+  // Mixing in `moodKeywords[0]` produced clumsy zigzag concatenations
+  // like "...architecturally honest sophisticated aesthetic". Fixed in
+  // exterior earlier; interior had regressed.
   const actionDirective =
-    `Restyle the furniture and decor in this ${humanRoom} to a ${style.coreAesthetic} ${styleLabelFromKey(roomType, style)} aesthetic ` +
+    `Restyle the furniture and decor in this ${humanRoom} to a ${style.coreAesthetic} aesthetic ` +
     `while keeping the exact same room layout, camera angle, and perspective. ` +
     `Only change the furniture, decor, and finishes.`;
 
@@ -218,7 +221,10 @@ function composeTarget(
     style.actionMode,
     style.guidanceBand,
     PROMPT_VERSION_CURRENT,
-    ["neutralized", "universally inviting", "minimal personal expression"],
+    // Phrased as positive descriptions of the desired airbnb-style result.
+    // Earlier "neutralized" / "minimal personal expression" were semantic
+    // negations that risked biasing Flux back toward the negated content.
+    ["broadly approachable styling", "universally inviting", "balanced staging"],
   );
 }
 
@@ -279,7 +285,7 @@ function composeLayers(
   promptVersion: string,
   extraAvoidanceTokens: readonly string[] | undefined,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance(extraAvoidanceTokens);
+  const positiveAvoidance = buildPositiveAvoidance("interior", extraAvoidanceTokens);
 
   const layers: PromptLayer[] = [
     {
@@ -346,27 +352,4 @@ function describeAvoidAdditions(slots: RoomSlots): string {
   return "the existing furniture and fixtures";
 }
 
-function humanizeRoomType(camelCase: string): string {
-  const specialCases: Record<string, string> = {
-    livingRoom: "living room",
-    diningRoom: "dining room",
-    gamingRoom: "gaming room",
-    studyRoom: "study room",
-    homeOffice: "home office",
-    underStairSpace: "under-stair space",
-  };
-  if (specialCases[camelCase]) return specialCases[camelCase];
-  return camelCase
-    .replace(/([A-Z])/g, " $1")
-    .toLowerCase()
-    .trim();
-}
 
-/**
- * Short style label used inline in action directives. Currently delegates
- * to the style's core aesthetic — separate function so future tools can
- * swap in a different label strategy without touching the main composer.
- */
-function styleLabelFromKey(_roomType: string, style: StyleEntry): string {
-  return style.moodKeywords[0] ?? "balanced";
-}
