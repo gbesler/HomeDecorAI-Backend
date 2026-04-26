@@ -33,6 +33,27 @@ const PRIMARY_MODEL = "prunaai/p-image-edit";
 const PRIMARY_MAX_TOKENS =
   PROVIDER_CAPABILITIES[PRIMARY_MODEL]?.maxPromptTokens ?? 200;
 
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARS = /[\x00-\x1F\x7F]/g;
+const SMART_QUOTES = /[“”"]/g;
+const WHITESPACE = /\s+/g;
+
+/**
+ * Sanitize a user-supplied freeform prompt before inlining it into an
+ * action directive that wraps it in double quotes. Strips control
+ * characters, normalizes smart/double quotes to a single apostrophe so
+ * the surrounding `"${prompt}"` template stays well-formed, and collapses
+ * runs of whitespace. Length capping is the caller's job
+ * (CUSTOM_PROMPT_MAX_CHARS in each tool builder).
+ */
+export function sanitizeCustomPrompt(input: string): string {
+  return input
+    .replace(CONTROL_CHARS, " ")
+    .replace(SMART_QUOTES, "'")
+    .replace(WHITESPACE, " ")
+    .trim();
+}
+
 export interface SurfaceRestyleConfig {
   /**
    * Tool identifier used in log events (e.g., "paintWalls", "floorRestyle").
@@ -67,7 +88,7 @@ export function composeSurfaceRestyleLayers(
   promptVersion: string,
   config: SurfaceRestyleConfig,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("interior", [
     "faithful to original room geometry",
     "faithful to original furniture and decor",
   ]);

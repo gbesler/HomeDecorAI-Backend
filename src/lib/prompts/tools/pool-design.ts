@@ -128,7 +128,7 @@ function composeLayers(
   guidanceBand: GuidanceBand,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("pool", [
     "realistic water reflections",
     "natural outdoor materials",
   ]);

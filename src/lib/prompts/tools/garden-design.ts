@@ -134,14 +134,11 @@ function compose(
 
   const styleDetail = `Hardscape materials: ${style.materials.join(", ")}. Signature planting and features: ${style.signatureItems.join(", ")}.`;
 
-  // Lighting anchors to the input photograph. In `fullRedesign` mode we
-  // allow the style's lighting character to colour the scene since the
-  // user opted into a full restyle; in `landscapePreservation` mode we
-  // stay strictly consistent with the input frame to avoid contradictions
-  // between "keep the garden as-is" and a style-defined time-of-day cue.
-  const lighting = preservationMode
-    ? `Natural outdoor daylight consistent with the input photograph.`
-    : `Natural outdoor daylight consistent with the input photograph, with ${style.lightingCharacter}.`;
+  // Lighting anchors to the input photograph in both modes. Appending
+  // `style.lightingCharacter` (e.g. "warm golden hour glow") on
+  // fullRedesign contradicted the input photo's actual time of day —
+  // pool/patio dropped this for the same reason; garden now matches.
+  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
 
   return composeLayers(
     actionDirective,
@@ -204,7 +201,7 @@ function composeLayers(
   guidanceBand: GuidanceBand,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("garden", [
     "healthy mature plants",
     "natural texture variation",
   ]);

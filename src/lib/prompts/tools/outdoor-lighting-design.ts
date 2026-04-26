@@ -75,8 +75,14 @@ export function buildOutdoorLightingPrompt(
 function compose(style: StyleEntry): PromptResult {
   const guidanceBand: GuidanceBand = style.guidanceBand;
 
-  const actionVerb = style.actionMode === "overlay" ? "Relight" : "Restyle";
-  const actionDirective = `${actionVerb} this outdoor scene as a ${style.coreAesthetic}, keeping the existing layout, planting, and hardscape intact.`;
+  // Verb-bound suffix: in overlay mode the layout, planting, and hardscape
+  // must stay intact (we are only adding lights). In restyle mode we are
+  // permitted to update fixtures and finishes — saying "intact" there
+  // contradicts the verb.
+  const actionDirective =
+    style.actionMode === "overlay"
+      ? `Relight this outdoor scene as a ${style.coreAesthetic}, keeping the existing layout, planting, and hardscape intact.`
+      : `Restyle the lighting fixtures and finishes of this outdoor scene as a ${style.coreAesthetic}, keeping the existing layout and plot boundaries.`;
 
   const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
 
@@ -126,10 +132,9 @@ function composeLayers(
   guidanceBand: GuidanceBand,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("outdoor-lighting", [
     "realistic outdoor materials",
     "natural planting textures",
-    "physically plausible light falloff and shadows",
   ]);
 
   const layers: PromptLayer[] = [

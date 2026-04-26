@@ -140,7 +140,7 @@ function compose(
   styleCore: string,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("exterior", [
     "intact roof line",
     "clean architectural lines",
     "faithful to original building massing",

@@ -132,7 +132,7 @@ function composeLayers(
   guidanceBand: GuidanceBand,
   promptVersion: string,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance([
+  const positiveAvoidance = buildPositiveAvoidance("patio", [
     "realistic outdoor materials",
     "natural planting textures",
   ]);
@@ -143,7 +143,7 @@ function composeLayers(
     {
       name: "structural-preservation",
       priority: 3,
-      text: buildStructuralPreservation("garden"),
+      text: buildStructuralPreservation("patio"),
     },
     { name: "positive-avoidance", priority: 4, text: positiveAvoidance },
     { name: "style-detail", priority: 5, text: styleDetail },

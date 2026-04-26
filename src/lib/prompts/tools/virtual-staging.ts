@@ -25,6 +25,7 @@ import { logger } from "../../logger.js";
 import { stagingPalettes } from "../dictionaries/color-palettes.js";
 import { designStyles } from "../dictionaries/design-styles.js";
 import { rooms } from "../dictionaries/rooms.js";
+import { humanizeRoomType } from "../primitives/humanize-room-type.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -141,9 +142,11 @@ function compose(
     isKeepLayout ? "overlay" : "transform",
     guidanceBand,
     PROMPT_VERSION_CURRENT,
-    isKeepLayout
-      ? ["complement existing", "harmonize with current"]
-      : undefined,
+    // No extra avoidance tokens here — the action directive in keepLayout
+    // mode already states "complement existing furniture" and "harmonize
+    // with the current layout"; duplicating those into the avoidance tail
+    // wastes the token budget for no model uplift.
+    undefined,
   );
 }
 
@@ -192,9 +195,11 @@ function buildStagingGenericFallback(
     isKeepLayout ? "overlay" : "transform",
     isKeepLayout ? "faithful" : "balanced",
     PROMPT_VERSION_FALLBACK,
-    isKeepLayout
-      ? ["complement existing", "harmonize with current"]
-      : undefined,
+    // No extra avoidance tokens here — the action directive in keepLayout
+    // mode already states "complement existing furniture" and "harmonize
+    // with the current layout"; duplicating those into the avoidance tail
+    // wastes the token budget for no model uplift.
+    undefined,
   );
 }
 
@@ -211,7 +216,7 @@ function composeLayers(
   promptVersion: string,
   extraAvoidanceTokens: readonly string[] | undefined,
 ): PromptResult {
-  const positiveAvoidance = buildPositiveAvoidance(extraAvoidanceTokens);
+  const positiveAvoidance = buildPositiveAvoidance("interior", extraAvoidanceTokens);
 
   const layers: PromptLayer[] = [
     {
@@ -263,18 +268,3 @@ function composeLayers(
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function humanizeRoomType(camelCase: string): string {
-  const specialCases: Record<string, string> = {
-    livingRoom: "living room",
-    diningRoom: "dining room",
-    gamingRoom: "gaming room",
-    studyRoom: "study room",
-    homeOffice: "home office",
-    underStairSpace: "under-stair space",
-  };
-  if (specialCases[camelCase]) return specialCases[camelCase];
-  return camelCase
-    .replace(/([A-Z])/g, " $1")
-    .toLowerCase()
-    .trim();
-}

@@ -26,6 +26,7 @@ import type { PromptResult, FloorTextureEntry } from "../types.js";
 import type { CreateFloorRestyleBody } from "../../../schemas/generated/api.js";
 import {
   composeSurfaceRestyleLayers,
+  sanitizeCustomPrompt,
   type SurfaceRestyleConfig,
 } from "./_surface-restyle-base.js";
 
@@ -73,8 +74,8 @@ export function buildFloorRestylePrompt(
   }
 
   // customStyle mode — freeform prompt, optional reference image.
-  const raw = (params.customPrompt ?? "").trim();
-  if (raw.length === 0) {
+  const sanitized = sanitizeCustomPrompt(params.customPrompt ?? "");
+  if (sanitized.length === 0) {
     logger.warn(
       {
         event: "prompt.empty_custom_prompt",
@@ -85,7 +86,7 @@ export function buildFloorRestylePrompt(
     );
     return buildGenericFallback();
   }
-  const clipped = raw.slice(0, CUSTOM_PROMPT_MAX_CHARS);
+  const clipped = sanitized.slice(0, CUSTOM_PROMPT_MAX_CHARS);
   const hasReference =
     typeof params.referenceImageUrl === "string" &&
     params.referenceImageUrl.length > 0;
