@@ -35,6 +35,25 @@ service cloud.firestore {
         allow read: if request.auth != null && request.auth.uid == userId;
         allow write: if false;
       }
+
+      // ─── Favorite Inspirations: read-your-own; writes via REST ──────────
+      // iOS calls /api/favorite-inspirations/* which goes through the admin
+      // SDK. Open reads so a future client-side listener can subscribe to
+      // the favorites list directly without another rule change.
+      match /favoriteInspirations/{inspirationId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if false;
+      }
+    }
+
+    // ─── Inspirations: public-read curated content ────────────────────────
+    // Curated AI room images shown in the iOS Explore tab. Documents are
+    // written by admins (or a future admin pipeline) using the admin SDK.
+    // The collection starts empty for the MVP launch — iOS surfaces a
+    // dedicated empty state until content is added.
+    match /inspirations/{inspirationId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     // ─── Public config (revcat, mixpanel, aws) ────────────────────────────
