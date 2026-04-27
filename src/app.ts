@@ -60,11 +60,6 @@ export function buildApp() {
           description:
             "Curated AI-generated room inspirations with cursor pagination and filters",
         },
-        {
-          name: "Favorites",
-          description:
-            "User-scoped saved inspirations from the Explore tab",
-        },
       ],
       components: {
         securitySchemes: {

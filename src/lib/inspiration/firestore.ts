@@ -1,5 +1,4 @@
 import admin from "firebase-admin";
-import { logger } from "../logger.js";
 import { isTimestamp } from "../firestore-utils.js";
 import {
   InvalidCursorError,
@@ -138,38 +137,6 @@ export async function getInspiration(
   const snap = await ref.get();
   if (!snap.exists) throw new InspirationNotFoundError(inspirationId);
   return mapDocToInspiration(snap);
-}
-
-/** Batched existence check used by the favorite-inspirations join. Missing
- *  ids are silently skipped — we log a warning so an empty inspiration
- *  referenced by a stale favorite doc is observable. */
-export async function getInspirationsByIds(
-  ids: string[],
-): Promise<Map<string, Inspiration>> {
-  const result = new Map<string, Inspiration>();
-  if (ids.length === 0) return result;
-
-  // Firestore `in` queries cap at 30 ids; chunk defensively.
-  const CHUNK = 30;
-  for (let i = 0; i < ids.length; i += CHUNK) {
-    const chunk = ids.slice(i, i + CHUNK);
-    const snap = await getFirestore()
-      .collection(INSPIRATIONS_COLLECTION)
-      .where(admin.firestore.FieldPath.documentId(), "in", chunk)
-      .get();
-    for (const doc of snap.docs) {
-      result.set(doc.id, mapDocToInspiration(doc));
-    }
-  }
-
-  const missing = ids.filter((id) => !result.has(id));
-  if (missing.length > 0) {
-    logger.warn(
-      { event: "inspiration.missing_ids", count: missing.length, missing },
-      "Some favorite-referenced inspirations no longer exist",
-    );
-  }
-  return result;
 }
 
 // Re-export the typed cursor error so controllers can `instanceof`-check it

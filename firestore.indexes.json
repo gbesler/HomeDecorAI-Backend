@@ -162,15 +162,6 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" },
         { "fieldPath": "__name__", "order": "DESCENDING" }
       ]
-    },
-
-    {
-      "collectionGroup": "favoriteInspirations",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "savedAt", "order": "DESCENDING" },
-        { "fieldPath": "__name__", "order": "DESCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []
