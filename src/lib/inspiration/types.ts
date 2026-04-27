@@ -80,15 +80,24 @@ export const DESIGN_STYLE_VALUES = [
   "airbnb",
 ] as const;
 
-/** Allowed ToolType keys for inspirations. MVP: interior only. Other tools
- *  may produce inspirations later but the iOS detail-sheet hand-off currently
- *  seeds only the InteriorDesign wizard. */
+/** Allowed ToolType keys for inspirations. Mirrors the iOS
+ *  `InspirationToolType` enum — every tool surfaced on the Home grid is
+ *  filterable in Explore. */
 export const TOOL_TYPE_VALUES = [
   "interiorDesign",
   "exteriorDesign",
   "gardenDesign",
   "patioDesign",
   "poolDesign",
+  "referenceStyle",
+  "replaceAddObject",
+  "paintWalls",
+  "floorRestyle",
+  "virtualStaging",
+  "cleanOrganize",
+  "removeObjects",
+  "exteriorPainting",
+  "outdoorLightingDesign",
 ] as const;
 
 export type RoomTypeValue = (typeof ROOM_TYPE_VALUES)[number];
