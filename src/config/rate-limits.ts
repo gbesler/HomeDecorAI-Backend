@@ -133,20 +133,6 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 500,
     dailyLimit: 2000,
   },
-  // Favorite-inspiration writes — Firestore set/delete on a tiny doc, but a
-  // tight cap discourages enumeration of inspirationIds via 200/404 timing.
-  favoriteWrite: {
-    minuteLimit: 30,
-    hourlyLimit: 200,
-    dailyLimit: 1000,
-  },
-  // Favorite-inspiration reads — list a user's saved items. Pull-to-refresh
-  // friendly, similar profile to albumRead.
-  favoriteRead: {
-    minuteLimit: 60,
-    hourlyLimit: 500,
-    dailyLimit: 2000,
-  },
   // Failed-generation retry. Skips the per-tool freemium meter, so a
   // tight cap on abuse: a user who really wants more retries is going to
   // generate new jobs instead. A legitimate "oh no try again" pattern

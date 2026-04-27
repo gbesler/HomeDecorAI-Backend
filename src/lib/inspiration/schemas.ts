@@ -45,15 +45,11 @@ export const InspirationWriteSchema = z.object({
 
 export type InspirationWriteInput = z.infer<typeof InspirationWriteSchema>;
 
-// MARK: - Cursors
+// MARK: - Cursor
 //
-// The two paginated endpoints have semantically different sort keys:
-//   • Explore  → orderBy(createdAt DESC)   — `lastCreatedAtMs`
-//   • Favorites → orderBy(savedAt   DESC)   — `lastSavedAtMs`
-//
-// Each endpoint owns its own cursor schema + helpers so the field name can
-// describe what it actually carries, and so a cursor minted by one endpoint
-// is structurally rejected by the other.
+// Explore is the only paginated endpoint that survives the favorites
+// removal. The cursor encodes (createdAt DESC, __name__ DESC) for stable
+// keyset pagination.
 
 export const ExploreCursorPayloadSchema = z.object({
   lastId: z.string().regex(ID_PATTERN),
@@ -61,13 +57,6 @@ export const ExploreCursorPayloadSchema = z.object({
 });
 
 export type ExploreCursorPayload = z.infer<typeof ExploreCursorPayloadSchema>;
-
-export const FavoritesCursorPayloadSchema = z.object({
-  lastId: z.string().regex(ID_PATTERN),
-  lastSavedAtMs: z.number().int().nonnegative(),
-});
-
-export type FavoritesCursorPayload = z.infer<typeof FavoritesCursorPayloadSchema>;
 
 /** Shared `limit` query-param transform. Kept here (not duplicated in each
  *  controller) so a single edit changes the clamp behaviour everywhere. */
@@ -126,22 +115,6 @@ export function decodeExploreCursor(raw: string): ExploreCursorPayload {
     throw new InvalidCursorError();
   }
   const parsed = ExploreCursorPayloadSchema.safeParse(json);
-  if (!parsed.success) throw new InvalidCursorError();
-  return parsed.data;
-}
-
-export function encodeFavoritesCursor(payload: FavoritesCursorPayload): string {
-  return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
-}
-
-export function decodeFavoritesCursor(raw: string): FavoritesCursorPayload {
-  let json: unknown;
-  try {
-    json = JSON.parse(Buffer.from(raw, "base64url").toString("utf8"));
-  } catch {
-    throw new InvalidCursorError();
-  }
-  const parsed = FavoritesCursorPayloadSchema.safeParse(json);
   if (!parsed.success) throw new InvalidCursorError();
   return parsed.data;
 }
