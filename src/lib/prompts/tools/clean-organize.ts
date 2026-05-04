@@ -28,7 +28,7 @@ import { KLEIN_GUIDANCE_BANDS } from "../../ai-providers/capabilities.js";
 import type { PromptResult } from "../types.js";
 import type { CreateCleanOrganizeBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "cleanOrganize/v4.0-edit-instruction";
+const PROMPT_VERSION_CURRENT = "cleanOrganize/v4.1-edit-instruction-light-fix";
 
 const FULL_DECLUTTER_PROMPT =
   "Tidy and declutter this room. Remove all visible clutter: " +
@@ -40,13 +40,23 @@ const FULL_DECLUTTER_PROMPT =
   "composition completely unchanged. Photorealistic result. " +
   "Same camera angle. Same lighting and time of day.";
 
+// Mirrors FULL_DECLUTTER_PROMPT's structure (same verb, same preservation
+// clause, same trailing photographic anchors) so the model interprets the
+// two levels identically except for the target list. The earlier draft
+// used "Pick up" plus an explicit "Leave clothes, books, and personal
+// items in place" line — naming kept objects in a preservation clause
+// caused FLUX-family models to occasionally add or duplicate those
+// objects, making the room look more cluttered after Light declutter.
+// Use "Remove only" with a narrow target list and a generic preservation
+// clause that names categories instead of items.
 const LIGHT_DECLUTTER_PROMPT =
-  "Pick up the after-use trash from this room: empty bottles, cans, " +
-  "dirty dishes, crumpled papers, food wrappers. Leave clothes, " +
-  "books, and personal items in place. Keep all furniture, walls, " +
-  "flooring, lighting, decor, and the room's layout and composition " +
-  "completely unchanged. Photorealistic result. Same camera angle. " +
-  "Same lighting.";
+  "Remove only the after-use trash visible in this room: empty " +
+  "bottles, cans, dirty dishes, crumpled papers, food wrappers. " +
+  "Do not add, move, or duplicate anything. Keep all furniture, " +
+  "walls, flooring, ceiling, lighting, windows, decor, and the " +
+  "room's exact layout and composition completely unchanged. " +
+  "Photorealistic result. Same camera angle. Same lighting and " +
+  "time of day.";
 
 export type CleanOrganizeParams = z.infer<typeof CreateCleanOrganizeBody>;
 
