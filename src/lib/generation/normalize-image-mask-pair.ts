@@ -1,6 +1,17 @@
 import sharp from "sharp";
+import { NoMaskDetectedError } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
 import { downloadSafe, persistGenerationBuffer } from "../storage/s3-upload.js";
+
+/**
+ * Minimum fraction of white pixels for a mask to be considered non-empty.
+ * Below this LaMa receives effectively zero pixels to inpaint and returns
+ * the input image unchanged — a silent no-op that previously surfaced as a
+ * "successful" generation identical to the input. 0.001 = 0.1%; on a
+ * 1312x800 image (~1M pixels) the floor is ~1k white pixels, well below
+ * the smallest meaningful object selection but above PNG encoding noise.
+ */
+const MIN_MASK_WHITE_FRACTION = 0.001;
 
 /**
  * Raised when the image or mask cannot be normalized because of a
@@ -137,12 +148,21 @@ export async function normalizeImageMaskPair(
 
   // Mask content stats — mean channel value approximates the
   // white-pixel ratio. If mean ≈ 0 the mask is effectively empty
-  // and LaMa will return null with no diagnostic of its own. ~50-
+  // and LaMa would return the input unchanged (silent no-op). ~50-
   // 200ms overhead on a multi-MP mask; cheap relative to the
   // Replicate round-trip we'd otherwise waste on an empty payload.
+  //
+  // NoMaskDetectedError below is a *terminal* domain signal — the
+  // processor maps it to VALIDATION_FAILED ("already clean" UX),
+  // not to AI_PROVIDER_FAILED. SAM 3 can return a non-null mask URL
+  // whose pixels are all-zero when its concept prompt matches no
+  // regions; `callSegmentationReplicate` only guards URL=null, so
+  // this is the canonical empty-mask choke point.
+  let whitePixelFraction: number | null = null;
   try {
     const stats = await sharp(maskDl.buffer).stats();
     const ch0 = stats.channels[0];
+    whitePixelFraction = ch0 ? ch0.mean / 255 : null;
     logger.info(
       {
         event: "remove.normalize.mask_stats",
@@ -152,7 +172,7 @@ export async function normalizeImageMaskPair(
         channelMax: ch0?.max ?? null,
         // Approximate white-pixel fraction assuming a clean
         // 0/255 binary mask. Soft edges bias this downward.
-        whitePixelFraction: ch0 ? ch0.mean / 255 : null,
+        whitePixelFraction,
         isBlack: ch0 ? ch0.max === 0 : null,
         isWhite: ch0 ? ch0.min === 255 : null,
       },
@@ -166,6 +186,25 @@ export async function normalizeImageMaskPair(
         error: err instanceof Error ? err.message : String(err),
       },
       "normalize: mask stats probe failed (non-fatal)",
+    );
+  }
+
+  if (
+    whitePixelFraction !== null &&
+    whitePixelFraction < MIN_MASK_WHITE_FRACTION
+  ) {
+    logger.warn(
+      {
+        event: "remove.normalize.mask_empty",
+        generationId: input.generationId,
+        whitePixelFraction,
+        threshold: MIN_MASK_WHITE_FRACTION,
+        maskUrl: input.maskUrl,
+      },
+      "normalize: mask is effectively empty — refusing to call LaMa",
+    );
+    throw new NoMaskDetectedError(
+      "Mask contains no regions to remove (model returned an empty mask)",
     );
   }
 
