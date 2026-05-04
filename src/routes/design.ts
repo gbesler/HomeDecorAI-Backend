@@ -1,5 +1,8 @@
 import type { FastifyPluginAsync } from "fastify";
-import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
+import {
+  createConcurrencyPreHandler,
+  createRateLimitPreHandler,
+} from "../lib/rate-limiter.js";
 import {
   getHistory,
   makeCreateGenerationHandler,
@@ -54,9 +57,9 @@ const enqueueResponseSchemas = {
     properties: {
       error: { type: "string" as const },
       message: { type: "string" as const },
-      retryAfterMs: {
+      retryAfter: {
         type: "number" as const,
-        description: "Milliseconds until the rate limit resets",
+        description: "Seconds until the rate limit resets (mirrors the Retry-After header)",
       },
     },
     required: ["error", "message"] as const,
@@ -116,7 +119,7 @@ const syncResponseSchemas = {
     properties: {
       error: { type: "string" as const },
       message: { type: "string" as const },
-      retryAfterMs: { type: "number" as const },
+      retryAfter: { type: "number" as const },
     },
     required: ["error", "message"] as const,
   },
@@ -232,6 +235,12 @@ const historyResponseSchemas = {
 // ─── Routes ────────────────────────────────────────────────────────────────
 
 const designRoutes: FastifyPluginAsync = async (app) => {
+  // Per-user concurrency cap shared across every generation route (async
+  // tool POST, sync variant, and retry). Two slots leave room for a quick
+  // before/after compare without letting a single user hold the worker
+  // pool open across many /sync requests.
+  const concurrencyLimit = createConcurrencyPreHandler();
+
   // Registry-driven enqueue routes. Adding a new tool is a config-only change:
   // register it in `TOOL_TYPES` and this loop produces the route.
   //
@@ -256,6 +265,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         preHandler: [
           app.authenticate,
           createRateLimitPreHandler(tool.rateLimitKey),
+          concurrencyLimit,
         ],
       },
       makeCreateGenerationHandler(tool),
@@ -281,6 +291,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         preHandler: [
           app.authenticate,
           createRateLimitPreHandler(tool.rateLimitKey),
+          concurrencyLimit,
         ],
       },
       makeSyncGenerationHandler(tool),
@@ -329,9 +340,12 @@ const designRoutes: FastifyPluginAsync = async (app) => {
       // Retry shares the per-tool rate-limit pattern but with its own key.
       // Retry bypasses freemium, so the gate against provider-cost abuse
       // is this limiter alone. See `rateLimits.retry` for cap rationale.
+      // Concurrency cap also applies — a retry holds an in-flight slot
+      // identical to a fresh generation.
       preHandler: [
         app.authenticate,
         createRateLimitPreHandler("retry"),
+        concurrencyLimit,
       ],
     },
     retryGeneration,
@@ -360,7 +374,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         },
         response: historyResponseSchemas,
       },
-      preHandler: [app.authenticate],
+      preHandler: [app.authenticate, createRateLimitPreHandler("historyRead")],
     },
     getHistory,
   );
