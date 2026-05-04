@@ -5,6 +5,9 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
   app.get(
     "/healthz",
     {
+      // Render uptime probe — must remain unauthenticated and unmetered.
+      // Explicit opt-out from the boot-time rate-limit guard.
+      config: { noRateLimit: true },
       schema: {
         tags: ["Health"],
         summary: "Health check",
