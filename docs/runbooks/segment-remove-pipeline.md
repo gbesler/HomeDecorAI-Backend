@@ -1,6 +1,8 @@
 # Segmentation + Removal Pipeline (SAM 3 + LaMa)
 
-Operational guide for Clean & Organize and Remove Objects — both run on the SAM 3 + LaMa unified pipeline.
+> **As of cleanOrganize v4.0 (May 2026)**: Clean & Organize migrated off this pipeline to a single-step `mode: "edit"` path on `prunaai/p-image-edit` (Replicate) + `fal-ai/flux-2/klein/9b/edit` (fal.ai). SAM 3 returned all-zero masks for clutter-class concepts on real user rooms regardless of prompt taxonomy. This runbook now covers `removeObjects` only. Historical Clean & Organize segmentation context is preserved below for git-blame.
+
+Operational guide for Remove Objects — runs on the SAM 3 + LaMa unified pipeline. (Clean & Organize: see migration note above.)
 
 ## Topology
 
