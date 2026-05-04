@@ -24,6 +24,14 @@
  *   - "." separator is the SAM 3 convention for multi-concept prompts
  *   - "full" gets the broad mess taxonomy (laundry, scattered objects,
  *     packaging); "light" stays narrow (consumable trash only)
+ *
+ * HARD TOKEN CAP: `mattsays/sam3-image` ships with
+ * `max_position_embeddings: 32` — the Replicate fork rejects any prompt
+ * that tokenizes longer than that with `Sequence length must be less
+ * than max_position_embeddings`. Single-token nouns + ` . ` separators
+ * (each a token) keep us well under the cap. Do not add multi-word
+ * phrases like "piles of clothes" without re-counting; a 15-concept list
+ * blew past 32 in production (May 2026).
  */
 
 import type { z } from "zod";
@@ -31,33 +39,30 @@ import { KLEIN_GUIDANCE_BANDS } from "../../ai-providers/capabilities.js";
 import type { PromptResult } from "../types.js";
 import type { CreateCleanOrganizeBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "cleanOrganize/v3.1-sam3-lama-taxonomy";
+const PROMPT_VERSION_CURRENT = "cleanOrganize/v3.2-sam3-lama-taxonomy-short";
 
+// Single-token nouns only. Each ` . ` separator is itself a token, so the
+// effective budget is ~12-14 concepts at the 32-token cap. We stay
+// conservative at 9 to leave headroom for tokenizer drift across SAM 3
+// model forks.
 const FULL_DECLUTTER_PROMPT = [
   "clutter",
-  "scattered objects",
-  "piles of clothes",
   "laundry",
-  "dirty dishes",
-  "empty bottles",
+  "dishes",
+  "bottles",
   "cans",
   "cups",
-  "crumpled papers",
   "trash",
-  "plastic bags",
-  "cardboard boxes",
-  "cables",
   "wires",
-  "toys on the floor",
+  "toys",
 ].join(" . ");
 
 const LIGHT_DECLUTTER_PROMPT = [
   "trash",
-  "empty bottles",
+  "bottles",
   "cans",
-  "dirty dishes",
-  "crumpled papers",
-  "food wrappers",
+  "dishes",
+  "wrappers",
 ].join(" . ");
 
 export type CleanOrganizeParams = z.infer<typeof CreateCleanOrganizeBody>;
