@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import { registerFcmTokenHandler } from "../controllers/users.controller.js";
+import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
 
 const errorResponse = {
   type: "object" as const,
@@ -11,6 +12,8 @@ const errorResponse = {
 };
 
 const usersRoutes: FastifyPluginAsync = async (app) => {
+  const userWriteLimit = createRateLimitPreHandler("userWrite");
+
   app.post(
     "/me/fcm-token",
     {
@@ -41,7 +44,7 @@ const usersRoutes: FastifyPluginAsync = async (app) => {
           500: { ...errorResponse, description: "Failed to persist token" },
         },
       },
-      preHandler: [app.authenticate],
+      preHandler: [app.authenticate, userWriteLimit],
     },
     registerFcmTokenHandler,
   );
