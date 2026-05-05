@@ -93,11 +93,20 @@ export function composeSurfaceRestyleLayers(
     "faithful to original furniture and decor",
   ]);
 
+  // Redundantly anchor camera angle + lens perspective in the priority-1
+  // layer. The structural-preservation primitive (priority 3) covers this
+  // in detail, but at a 200-token budget an over-long custom prompt could
+  // push the trim into territory where the priority-3 layer is at risk;
+  // restating the most load-bearing constraint in the un-droppable head
+  // ensures geometry/framing survives any trim path.
+  const cameraAnchor =
+    "Keep the camera angle, framing, and lens perspective identical to image 1.";
+
   const layers: PromptLayer[] = [
     {
       name: "action+focus",
       priority: 1,
-      text: `${actionDirective} ${config.focusDirective}`,
+      text: `${actionDirective} ${config.focusDirective} ${cameraAnchor}`,
     },
     { name: "style-core", priority: 2, text: styleCore },
     {
