@@ -31,8 +31,8 @@ import type {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const PROMPT_VERSION_CURRENT = "poolDesign/v1.1";
-const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1.1";
+const PROMPT_VERSION_CURRENT = "poolDesign/v1.2";
+const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1.2";
 
 const PRIMARY_MODEL = "prunaai/p-image-edit";
 const PRIMARY_MAX_TOKENS =
@@ -72,11 +72,18 @@ function compose(style: StyleEntry): PromptResult {
 
   // Apply the aesthetic to finishes and surround only. Structural-preservation
   // primitive locks the pool shape, edges, and camera angle; this directive
-  // scopes the restyle so the model does not alter geometry or composition.
+  // scopes the restyle to surface-only changes.
+  //
+  // Phrasing rule: positive framing only — the prior wording included "Do not
+  // change the pool shape, edges, or camera angle", which is the negation
+  // anti-pattern Flux/Klein biases toward. Geometry/frame preservation lives
+  // in the structural-preservation primitive; the action directive now states
+  // the scope as a positive boundary.
   const actionDirective =
     `Apply a ${style.coreAesthetic} aesthetic to this swimming pool scene. ` +
-    `Update only the coping finish, interior tile/plaster finish, decking material, ` +
-    `and surround planting. Do not change the pool shape, edges, or camera angle.`;
+    `Restyle only the coping finish, interior tile/plaster finish, decking material, ` +
+    `and surround planting; the pool footprint, edges, waterline, and camera framing ` +
+    `remain identical to the input photograph.`;
 
   const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
 

@@ -30,8 +30,8 @@ import {
   type SurfaceRestyleConfig,
 } from "./_surface-restyle-base.js";
 
-const PROMPT_VERSION_CURRENT = "paintWalls/v1.0";
-const PROMPT_VERSION_FALLBACK = "paintWalls/fallback-v1";
+const PROMPT_VERSION_CURRENT = "paintWalls/v1.1";
+const PROMPT_VERSION_FALLBACK = "paintWalls/fallback-v1.1";
 
 /**
  * Character ceiling for the user-supplied custom prompt. The Zod schema
@@ -97,9 +97,18 @@ function composeTextureMode(entry: WallTextureEntry): PromptResult {
   const actionDirective =
     `Restyle the wall surfaces in this room to a ${entry.label} finish. ${entry.description}`;
 
-  const styleCore = `Finish character: ${entry.descriptors.join(", ")}.`;
+  // Fold the texture's lightingCharacter into the style-core layer so the
+  // model reads it as a property of the painted surface (how the finish
+  // responds to light) rather than a directive about the room's lighting.
+  // Anchoring the lighting layer to the input photo prevents drift in the
+  // room's overall illumination — same fix patio/pool/garden already apply.
+  const styleCore =
+    `Finish character: ${entry.descriptors.join(", ")}. ` +
+    `Surface response: ${entry.lightingCharacter}`;
 
-  const lighting = entry.lightingCharacter;
+  const lighting =
+    "Preserve the input photograph's existing lighting, daylight direction, " +
+    "and time of day; only the wall finish responds differently to that light.";
 
   return composeSurfaceRestyleLayers(
     actionDirective,
@@ -116,19 +125,31 @@ function composeCustomMode(
   customPrompt: string,
   hasReference: boolean,
 ): PromptResult {
+  // Defensive scope prefix: the user's freeform prompt is inlined verbatim
+  // into the priority-1 layer. An adversarial or careless prompt like
+  // "different angle, knock down the wall" would otherwise compete with
+  // the priority-3 structural-preservation primitive. Framing the
+  // freeform text as a description of the wall finish — rather than a
+  // free instruction to the model — keeps the request scoped even when
+  // the user fights it.
   const actionDirective = hasReference
     ? `Restyle the wall surfaces in this room (image 1) to match the aesthetic ` +
       `described as: "${customPrompt}". Use image 2 as the primary style reference ` +
-      `for the wall finish and palette.`
+      `for the wall finish and palette. Only the wall material, color, and pattern ` +
+      `are in scope; the room's geometry, camera angle, and every other surface stay ` +
+      `identical to image 1.`
     : `Restyle the wall surfaces in this room to match the aesthetic described ` +
-      `as: "${customPrompt}".`;
+      `as: "${customPrompt}". Only the wall material, color, and pattern are in ` +
+      `scope; the room's geometry, camera angle, and every other surface stay ` +
+      `identical to the input photograph.`;
 
   const styleCore = hasReference
     ? `Confine the wall material, color, and pattern to what is visible in image 2.`
     : `Apply the described finish consistently across every wall plane.`;
 
   const lighting =
-    "Maintain the original room's daylight direction and overall warmth.";
+    "Preserve the input photograph's existing daylight direction, warmth, and " +
+    "time of day; only the wall finish responds differently to that light.";
 
   return composeSurfaceRestyleLayers(
     actionDirective,
@@ -145,9 +166,11 @@ function buildGenericFallback(): PromptResult {
   const actionDirective =
     "Restyle the wall surfaces in this room with a tasteful, neutral, matte-finish paint.";
   const styleCore =
-    "Finish character: soft velvet-like, non-reflective, balanced warm neutral.";
+    "Finish character: soft velvet-like, non-reflective, balanced warm neutral. " +
+    "Surface response: absorbs light without specular highlights.";
   const lighting =
-    "Soft even daylight; the wall surface absorbs light without specular highlights.";
+    "Preserve the input photograph's existing lighting, daylight direction, " +
+    "and time of day.";
 
   return composeSurfaceRestyleLayers(
     actionDirective,

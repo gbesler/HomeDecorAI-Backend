@@ -28,7 +28,7 @@ import { KLEIN_GUIDANCE_BANDS } from "../../ai-providers/capabilities.js";
 import type { PromptResult } from "../types.js";
 import type { CreateCleanOrganizeBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "cleanOrganize/v4.1-edit-instruction-light-fix";
+const PROMPT_VERSION_CURRENT = "cleanOrganize/v4.2-positive-light";
 
 const FULL_DECLUTTER_PROMPT =
   "Tidy and declutter this room. Remove all visible clutter: " +
@@ -49,14 +49,21 @@ const FULL_DECLUTTER_PROMPT =
 // objects, making the room look more cluttered after Light declutter.
 // Use "Remove only" with a narrow target list and a generic preservation
 // clause that names categories instead of items.
+//
+// Positive-framing rule: the prior wording included "Do not add, move, or
+// duplicate anything" — this is the negation anti-pattern Flux/Klein bias
+// toward (the listed verbs prime the model to do exactly that). Replaced
+// with "Leave every other object exactly where and as it is" — a positive
+// description of the desired output that anchors preservation without
+// surfacing the failure-mode tokens.
 const LIGHT_DECLUTTER_PROMPT =
   "Remove only the after-use trash visible in this room: empty " +
   "bottles, cans, dirty dishes, crumpled papers, food wrappers. " +
-  "Do not add, move, or duplicate anything. Keep all furniture, " +
-  "walls, flooring, ceiling, lighting, windows, decor, and the " +
-  "room's exact layout and composition completely unchanged. " +
-  "Photorealistic result. Same camera angle. Same lighting and " +
-  "time of day.";
+  "Leave every other object, surface, and decor item exactly where " +
+  "and as it is in the input. Keep all furniture, walls, flooring, " +
+  "ceiling, lighting, windows, decor, and the room's exact layout and " +
+  "composition completely unchanged. Photorealistic result. " +
+  "Same camera angle. Same lighting and time of day.";
 
 export type CleanOrganizeParams = z.infer<typeof CreateCleanOrganizeBody>;
 
