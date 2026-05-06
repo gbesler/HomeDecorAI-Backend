@@ -1,7 +1,4 @@
-import {
-  designCircuitBreaker,
-  type CircuitBreaker,
-} from "../circuit-breaker.js";
+import { designCircuitBreaker } from "../circuit-breaker.js";
 import { env } from "../env.js";
 import { withRetry } from "../retry.js";
 import { logger } from "../logger.js";
@@ -22,7 +19,6 @@ import type {
   GenerationOutput,
   InpaintInput,
   InpaintOutput,
-  ProviderId,
   RemovalInput,
   RemovalOutput,
   SegmentationInput,
@@ -38,177 +34,34 @@ const PROBE_COOLDOWN_MS = 30_000;
 const PROBE_TIMEOUT_MS = 30_000;
 const lastProbeTime = new Map<string, number>();
 
-type Providers = {
-  primary: ProviderId;
-  callPrimary: () => Promise<GenerationOutput>;
-  callFallback: () => Promise<GenerationOutput>;
-  breaker: CircuitBreaker;
-  primaryModel: string;
-  fallbackModel: string;
-};
-
-function resolveProviders(
-  models: ToolModelConfig,
-  input: GenerationInput,
-): Providers {
-  return {
-    primary: "replicate",
-    callPrimary: () => callReplicate(models.replicate, input),
-    callFallback: () => callFalAI(models.falai, input),
-    breaker: designCircuitBreaker,
-    primaryModel: models.replicate,
-    fallbackModel: models.falai,
-  };
-}
-
 /**
  * Route an AI generation request through the circuit breaker.
  *
- * Replicate primary, fal.ai fallback. Every tool in the registry shares this
- * flow (interior, exterior, garden, reference-style, etc.), tracked by the
- * single `designCircuitBreaker` instance.
+ * Replicate primary, fal.ai fallback. Every tool in the registry shares
+ * this flow (interior, exterior, garden, reference-style, etc.), tracked
+ * by the single `designCircuitBreaker` instance — same instance the
+ * segment/remove/inpaint roles use, so a Replicate-wide outage trips
+ * the breaker for everyone.
+ *
+ * Thin wrapper over `runWithFallback<GenerationOutput>` (defined below)
+ * with `role: "edit"`. The shape of `GenerationInput` is fully
+ * encapsulated by the `callPrimary`/`callFallback` thunks the wrapper
+ * passes in, so there is no edit-path-specific behavior left to
+ * preserve in a separate copy of the envelope. Behavioural diff vs
+ * the previous standalone implementation: log payloads now include a
+ * `role: "edit"` field — strict telemetry improvement.
  */
 export async function callDesignGeneration(
   models: ToolModelConfig,
   input: GenerationInput,
 ): Promise<GenerationOutput> {
-  const providers = resolveProviders(models, input);
-  const {
-    primary,
-    callPrimary,
-    callFallback,
-    breaker,
-    primaryModel,
-    fallbackModel,
-  } = providers;
-  const fallbackProvider = breaker.fallbackProvider;
-
-  const useFallback = breaker.shouldUseFallback();
-
-  // Shared fallback invocation used by both the circuit-open path and the
-  // primary-failure catch path. Wraps in withRetry(maxRetries:1) so the two
-  // paths behave symmetrically (a transient fallback error gets one retry
-  // regardless of whether the breaker was already open). Records breaker
-  // outcome on the fallback side too — otherwise a persistently broken
-  // fallback would never contribute to any health signal.
-  async function callFallbackWithRetry(
-    reason: "circuit_open" | "primary_failed",
-  ): Promise<GenerationOutput> {
-    try {
-      const result = await withRetry(callFallback, {
-        maxRetries: 1,
-        delayMs: 1000,
-        onRetry: (error, attempt) => {
-          logger.warn(
-            {
-              event: "provider.retry",
-              provider: fallbackProvider,
-              error: error.message,
-              attempt,
-            },
-            `${fallbackProvider} fallback call failed, retrying`,
-          );
-        },
-      });
-      breaker.record(true);
-      logger.info(
-        {
-          event: "provider.generation",
-          provider: fallbackProvider,
-          model: fallbackModel,
-          fallbackFired: true,
-          fallbackReason: reason,
-        },
-        "Generation served from fallback provider",
-      );
-      return result;
-    } catch (error) {
-      breaker.record(false);
-      throw error;
-    }
-  }
-
-  if (useFallback) {
-    logger.info(
-      {
-        event: "provider.circuit_open",
-        provider: fallbackProvider,
-        breaker: breaker.name,
-      },
-      `Circuit open — routing to ${fallbackProvider} fallback`,
-    );
-
-    // Fire-and-forget probe to check if the primary has recovered. Probe
-    // gets its own AbortController so a hanging primary can't keep a
-    // zombie promise alive past graceful shutdown — the SIGTERM handler
-    // (not wired here; lives in app shutdown hooks) aborts pending probes.
-    const now = Date.now();
-    const lastProbe = lastProbeTime.get(breaker.name) ?? 0;
-    if (now - lastProbe >= PROBE_COOLDOWN_MS) {
-      lastProbeTime.set(breaker.name, now);
-      const probeTimeout = setTimeout(
-        () => breaker.recordProbe(false),
-        PROBE_TIMEOUT_MS,
-      );
-      probeTimeout.unref?.();
-      callPrimary()
-        .then(() => {
-          clearTimeout(probeTimeout);
-          breaker.recordProbe(true);
-        })
-        .catch(() => {
-          clearTimeout(probeTimeout);
-          breaker.recordProbe(false);
-        });
-    }
-
-    return callFallbackWithRetry("circuit_open");
-  }
-
-  // Primary path with retry. Record circuit breaker once per logical
-  // request, not per retry attempt.
-  try {
-    const result = await withRetry(callPrimary, {
-      maxRetries: 1,
-      delayMs: 1000,
-      onRetry: (error, attempt) => {
-        logger.warn(
-          {
-            event: "provider.retry",
-            provider: primary,
-            error: error.message,
-            attempt,
-          },
-          `${primary} call failed, retrying`,
-        );
-      },
-    });
-
-    breaker.record(true);
-    logger.info(
-      {
-        event: "provider.generation",
-        provider: primary,
-        model: primaryModel,
-        fallbackFired: false,
-      },
-      "Generation served from primary provider",
-    );
-    return result;
-  } catch (error) {
-    breaker.record(false);
-
-    logger.error(
-      {
-        event: "provider.fallback",
-        provider: fallbackProvider,
-        error: error instanceof Error ? error.message : String(error),
-      },
-      `${primary} failed after retries, trying ${fallbackProvider} fallback`,
-    );
-
-    return callFallbackWithRetry("primary_failed");
-  }
+  return runWithFallback<GenerationOutput>({
+    role: "edit",
+    callPrimary: () => callReplicate(models.replicate, input),
+    callFallback: () => callFalAI(models.falai, input),
+    primaryModel: models.replicate,
+    fallbackModel: models.falai,
+  });
 }
 
 /**
@@ -275,17 +128,16 @@ export async function callInpaint(
   });
 }
 
-// ─── Shared primary/fallback envelope for pipeline roles ───────────────────
+// ─── Shared primary/fallback envelope ──────────────────────────────────────
 //
-// Mirrors the retry + circuit-breaker + probe shape from
-// `callDesignGeneration` for the segment/remove/inpaint roles. Kept as a
-// separate function (not a merged abstraction) so the edit-path semantics —
-// which also forward the reference-image/aspect-ratio fields via
-// GenerationInput — stay decoupled from the three pipeline roles that share
-// a simpler input shape.
+// Single retry + circuit-breaker + probe envelope for every role:
+// `edit` (callDesignGeneration), `segment`, `remove`, `inpaint`. The
+// `GenerationInput` plumbing for edit calls is encapsulated by the
+// caller's `callPrimary`/`callFallback` thunks, so this envelope stays
+// agnostic to the per-role input shape.
 
 interface FallbackConfig<T> {
-  role: "segment" | "remove" | "inpaint";
+  role: "edit" | "segment" | "remove" | "inpaint";
   callPrimary: () => Promise<T>;
   callFallback: () => Promise<T>;
   primaryModel: string;

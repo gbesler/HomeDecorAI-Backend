@@ -20,6 +20,9 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { patioStyles } from "../dictionaries/patio-styles.js";
+import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { buildStyleCore } from "../primitives/style-core.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -51,15 +54,12 @@ export function buildPatioPrompt(params: PatioParams): PromptResult {
   const styleEntry = patioStyles[patioStyle as keyof typeof patioStyles];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "patioDesign",
-        patioStyle,
-        fallback: "generic",
-      },
-      "Unknown patioStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "patioDesign",
+      kind: "style",
+      fields: { patioStyle },
+      message: "Unknown patioStyle — using generic fallback",
+    });
     return buildPatioGenericFallback();
   }
 
@@ -80,7 +80,7 @@ function compose(style: StyleEntry): PromptResult {
     `Update the furnishings, surface finishes, and decor while keeping the ` +
     `plot footprint and camera angle.`;
 
-  const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail = `Materials and furnishings: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 
@@ -88,7 +88,7 @@ function compose(style: StyleEntry): PromptResult {
   // per-style dictionary value (e.g. "warm filtered afternoon light") that
   // can contradict the input photo's time-of-day; omitted so the primitive
   // lighting stays coherent with the original frame.
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
@@ -108,7 +108,7 @@ function buildPatioGenericFallback(): PromptResult {
 
   const styleDetail = `Materials and furnishings: timber or wicker outdoor seating, stone or timber decking, cushioned seating, potted greenery. Signature features: a comfortable seating group, layered outdoor textiles, planters framing the space.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,

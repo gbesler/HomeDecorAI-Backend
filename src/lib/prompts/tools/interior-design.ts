@@ -21,7 +21,9 @@ import {
   christmasRecipes,
 } from "../dictionaries/christmas-recipes.js";
 import { humanizeRoomType } from "../primitives/humanize-room-type.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import {
@@ -68,16 +70,18 @@ export function buildInteriorPrompt(params: InteriorParams): PromptResult {
   // ─── R24 graceful fallback for unknown enums ─────────────────────────
   if (!styleEntry || !roomEntry) {
     if (!styleEntry) {
-      logger.warn(
-        { event: "prompt.unknown_style", designStyle, roomType, fallback: "generic" },
-        "Unknown designStyle — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "interiorDesign",
+        kind: "style",
+        fields: { designStyle, roomType },
+      });
     }
     if (!roomEntry) {
-      logger.warn(
-        { event: "prompt.unknown_room", designStyle, roomType, fallback: "generic" },
-        "Unknown roomType — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "interiorDesign",
+        kind: "room",
+        fields: { designStyle, roomType },
+      });
     }
     return buildGenericFallback(roomType);
   }
@@ -114,8 +118,7 @@ function composeTransform(
 
   const roomFocus = composeRoomFocus(room.focusSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail =
     `Materials: ${style.materials.join(", ")}. Signature pieces: ${style.signatureItems.join(", ")}.`;
@@ -204,8 +207,7 @@ function composeTarget(
 
   const roomFocus = composeRoomFocus(mergedSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail =
     `Materials: ${style.materials.join(", ")}. Signature staging pieces: ${style.signatureItems.join(", ")}.`;

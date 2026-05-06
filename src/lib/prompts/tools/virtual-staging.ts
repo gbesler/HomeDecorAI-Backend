@@ -26,7 +26,9 @@ import { stagingPalettes } from "../dictionaries/color-palettes.js";
 import { designStyles } from "../dictionaries/design-styles.js";
 import { rooms } from "../dictionaries/rooms.js";
 import { humanizeRoomType } from "../primitives/humanize-room-type.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import { trimLayersToBudget, type PromptLayer } from "../token-budget.js";
@@ -68,28 +70,18 @@ export function buildVirtualStagingPrompt(
 
   if (!styleEntry || !roomEntry) {
     if (!styleEntry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_style",
-          tool: "virtualStaging",
-          designStyle,
-          roomType,
-          fallback: "generic",
-        },
-        "Unknown designStyle — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "virtualStaging",
+        kind: "style",
+        fields: { designStyle, roomType },
+      });
     }
     if (!roomEntry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_room",
-          tool: "virtualStaging",
-          designStyle,
-          roomType,
-          fallback: "generic",
-        },
-        "Unknown roomType — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "virtualStaging",
+        kind: "room",
+        fields: { designStyle, roomType },
+      });
     }
     return buildStagingGenericFallback(roomType, stagingMode);
   }
@@ -123,11 +115,7 @@ function compose(
 
   const roomFocus = composeRoomFocus(room, isKeepLayout);
 
-  const effectivePalette =
-    palette && palette.swatch.length > 0 ? palette.swatch : style.colorPalette;
-  const effectiveMood =
-    palette && palette.mood ? palette.mood : style.moodKeywords.join(", ");
-  const styleCore = `Color palette: ${effectivePalette.join(", ")}. Mood: ${effectiveMood}.`;
+  const styleCore = buildStyleCore(style, palette);
 
   const styleDetail = `Materials: ${style.materials.join(", ")}. Signature furniture: ${style.signatureItems.join(", ")}.`;
 

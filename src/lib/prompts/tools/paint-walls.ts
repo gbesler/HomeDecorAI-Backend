@@ -22,6 +22,8 @@
 import type { z } from "zod";
 import { logger } from "../../logger.js";
 import { wallTextures } from "../dictionaries/wall-textures.js";
+import { surfaceRestyleLightingAnchor } from "../primitives/lighting-anchors.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import type { PromptResult, WallTextureEntry } from "../types.js";
 import type { CreatePaintWallsBody } from "../../../schemas/generated/api.js";
 import {
@@ -57,15 +59,12 @@ export function buildPaintWallsPrompt(params: PaintWallsParams): PromptResult {
       ? wallTextures[params.textureId]
       : undefined;
     if (!entry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_texture",
-          tool: "paintWalls",
-          textureId: params.textureId,
-          fallback: "generic",
-        },
-        "Unknown textureId — using generic paint-walls fallback",
-      );
+      warnUnknownEntry({
+        tool: "paintWalls",
+        kind: "texture",
+        fields: { textureId: params.textureId },
+        message: "Unknown textureId — using generic paint-walls fallback",
+      });
       return buildGenericFallback();
     }
     return composeTextureMode(entry);
@@ -106,9 +105,7 @@ function composeTextureMode(entry: WallTextureEntry): PromptResult {
     `Finish character: ${entry.descriptors.join(", ")}. ` +
     `Surface response: ${entry.lightingCharacter}`;
 
-  const lighting =
-    "Preserve the input photograph's existing lighting, daylight direction, " +
-    "and time of day; only the wall finish responds differently to that light.";
+  const lighting = surfaceRestyleLightingAnchor("wall");
 
   return composeSurfaceRestyleLayers(
     actionDirective,
