@@ -103,6 +103,17 @@ export interface ProviderCapabilities {
    * `GenerationInput.aspectRatio`) into the right format for the field.
    */
   aspectRatioField?: "aspect_ratio" | "image_size" | null;
+  /**
+   * Per-model default for the provider's guidance/CFG knob, applied when the
+   * caller does not pass `guidanceScale` explicitly. Distinct from the
+   * shared `KLEIN_GUIDANCE_BANDS` map below: those are tool-author-facing
+   * bands (creative/balanced/faithful) that builders pick from. This field
+   * is the *provider's* model-card recommendation — used today for Flux
+   * Fill where Dev (~60) and Pro (~30) live on the same scale but want
+   * very different numbers. Omit when the model has no guidance knob
+   * (`supportsGuidanceScale: false`).
+   */
+  defaultGuidanceScale?: number;
 }
 
 // ─── Capability matrix ─────────────────────────────────────────────────────
@@ -295,6 +306,13 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     maxPromptTokens: 512,
     // Flux Fill output matches the input image+mask shape; no AR knob.
     aspectRatioField: null,
+    // BFL model card: Dev runs on a different guidance scale than Pro;
+    // 60 is the documented Dev default. Lower values (e.g. 30) bias
+    // toward preserving masked-region pixels and let the model interpret
+    // the prompt loosely — that maps to "modify the existing object"
+    // rather than "place a new one", which is the symptom users were
+    // hitting on the Replace & Add Object path.
+    defaultGuidanceScale: 60,
   },
   "black-forest-labs/flux-fill-pro": {
     provider: "replicate",
@@ -305,6 +323,9 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     maxPromptTokens: 512,
     // Flux Fill output matches the input image+mask shape; no AR knob.
     aspectRatioField: null,
+    // BFL model card: Pro is calibrated tighter than Dev; 30 is the
+    // documented Pro default.
+    defaultGuidanceScale: 30,
   },
   // fal.ai Flux Pro Fill fallback. Same image + mask + prompt shape as
   // Replicate Flux Fill Dev, but no guidance_scale knob — the fal variant

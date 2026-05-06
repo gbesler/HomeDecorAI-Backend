@@ -64,6 +64,27 @@ export interface NormalizeImageMaskPairInput {
   maskUrl: string;
   userId: string;
   generationId: string;
+  /**
+   * Optional pixel-radius dilation applied to the mask AFTER resize but
+   * before re-encode. Set by the inpaint path (Flux Fill) so the mask
+   * carries a small bleed of surrounding context — Flux Fill needs that
+   * envelope to integrate the synthesized object with the existing
+   * scene; tight-edge masks bias it toward modifying the masked region's
+   * existing pixels rather than placing a new object. Omit for the
+   * removal path (LaMa) — dilation there over-removes neighboring
+   * pixels and produces visible halos.
+   */
+  dilateMaskPx?: number;
+  /**
+   * Distinguishes inpaint-path callers (Flux Fill / Replace & Add) from
+   * removal-path callers (SAM 3 + LaMa). Used to phrase the empty-mask
+   * error: removal-path callers inherit the segmentation-model-returned-
+   * empty wording (model probed and matched no regions); inpaint-path
+   * callers get a user-actionable message because the mask is the
+   * client's brush stroke, not a model output. Defaults to "remove" so
+   * existing callsites keep their current messaging.
+   */
+  callerKind?: "remove" | "inpaint";
 }
 
 export interface NormalizeImageMaskPairResult {
@@ -193,18 +214,28 @@ export async function normalizeImageMaskPair(
     whitePixelFraction !== null &&
     whitePixelFraction < MIN_MASK_WHITE_FRACTION
   ) {
+    const isInpaint = input.callerKind === "inpaint";
     logger.warn(
       {
         event: "remove.normalize.mask_empty",
         generationId: input.generationId,
+        callerKind: input.callerKind ?? "remove",
         whitePixelFraction,
         threshold: MIN_MASK_WHITE_FRACTION,
         maskUrl: input.maskUrl,
       },
-      "normalize: mask is effectively empty — refusing to call LaMa",
+      isInpaint
+        ? "normalize: client-painted mask is effectively empty — refusing to call Flux Fill"
+        : "normalize: mask is effectively empty — refusing to call LaMa",
     );
+    // Different shapes of "empty mask" need different copy. The inpaint
+    // path's mask is the iOS brush stroke, so "model returned an empty
+    // mask" is nonsensical to the user — they painted it. The remove
+    // path's mask comes from a segmentation model probe.
     throw new NoMaskDetectedError(
-      "Mask contains no regions to remove (model returned an empty mask)",
+      isInpaint
+        ? "Painted area is too small to inpaint — paint a larger region and retry"
+        : "Mask contains no regions to remove (model returned an empty mask)",
     );
   }
 
@@ -225,16 +256,21 @@ export async function normalizeImageMaskPair(
     originalMask.width !== targetImage.width ||
     originalMask.height !== targetImage.height;
 
+  const dilatePx = Math.max(0, Math.round(input.dilateMaskPx ?? 0));
+  const maskNeedsDilation = dilatePx > 0;
+
   // Passthrough is narrow on purpose: dims already match AND the image
-  // has no non-identity EXIF orientation. If it did, forwarding the raw
-  // JPEG bytes to LaMa would let the decoder apply orientation and
-  // desync from the unrotated mask. Anything outside these invariants
-  // goes through the re-encode branch where we bake rotation and strip
-  // orientation metadata.
+  // has no non-identity EXIF orientation AND the caller did not request
+  // mask dilation. If any are violated, forwarding the raw JPEG bytes to
+  // the model would let the decoder apply orientation and desync from
+  // the unrotated mask, or skip dilation that the inpaint path needs.
+  // Anything outside these invariants goes through the re-encode branch
+  // where we bake rotation, strip orientation metadata, and apply mask
+  // dilation when requested.
   const imageNeedsReencode =
     imageNeedsResize || !isIdentityOrientation(imageMeta.orientation);
 
-  if (!imageNeedsReencode && !maskNeedsResize) {
+  if (!imageNeedsReencode && !maskNeedsResize && !maskNeedsDilation) {
     return {
       imageUrl: input.imageUrl,
       maskUrl: input.maskUrl,
@@ -272,15 +308,27 @@ export async function normalizeImageMaskPair(
   // boundaries. Always re-encode as PNG even if dims already match —
   // guarantees the uploaded `-mask.png` body is actually PNG regardless
   // of what Content-Type the client originally sent.
+  //
+  // Optional dilation: Gaussian blur with sigma ≈ dilatePx/2 spreads
+  // white pixels by roughly `dilatePx` pixels into the surround;
+  // threshold(50) snaps the result back to a clean binary mask. This
+  // approximates a true morphological dilation — sharp doesn't expose
+  // one natively, and pulling in opencv-node for ~5 lines of work is
+  // not worth the dependency. Only the inpaint path requests this; the
+  // remove path leaves dilateMaskPx undefined so its mask flows through
+  // unchanged.
   const maskBuffer = await sharpRun(
-    () =>
-      sharp(maskDl.buffer)
-        .resize(targetImage.width, targetImage.height, {
-          fit: "fill",
-          kernel: "nearest",
-        })
-        .png()
-        .toBuffer(),
+    () => {
+      let pipeline = sharp(maskDl.buffer).resize(
+        targetImage.width,
+        targetImage.height,
+        { fit: "fill", kernel: "nearest" },
+      );
+      if (maskNeedsDilation) {
+        pipeline = pipeline.blur(dilatePx / 2).threshold(50);
+      }
+      return pipeline.png().toBuffer();
+    },
     "mask",
   );
 
