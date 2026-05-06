@@ -170,4 +170,12 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 600,
     dailyLimit: 6000,
   },
+  // Bulk delete generations. Firestore batch writes, no AI cost. Loose
+  // envelope but still capped to prevent enumeration/abuse. Max 50 IDs
+  // per request is enforced at the controller level.
+  deleteGenerations: {
+    minuteLimit: 10,
+    hourlyLimit: 50,
+    dailyLimit: 200,
+  },
 };
