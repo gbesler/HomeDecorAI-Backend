@@ -26,6 +26,7 @@ import { gardenPalettes } from "../dictionaries/color-palettes.js";
 import { gardenItems } from "../dictionaries/garden-items.js";
 import { gardenStyles } from "../dictionaries/garden-styles.js";
 import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
@@ -125,11 +126,7 @@ function compose(
 
   const itemsLayer = composeItemsLayer(items);
 
-  const effectivePalette =
-    palette && palette.swatch.length > 0 ? palette.swatch : style.colorPalette;
-  const effectiveMood =
-    palette && palette.mood ? palette.mood : style.moodKeywords.join(", ");
-  const styleCore = `Color palette: ${effectivePalette.join(", ")}. Mood: ${effectiveMood}.`;
+  const styleCore = buildStyleCore(style, palette);
 
   const styleDetail = `Hardscape materials: ${style.materials.join(", ")}. Signature planting and features: ${style.signatureItems.join(", ")}.`;
 

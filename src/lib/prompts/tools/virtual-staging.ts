@@ -28,6 +28,7 @@ import { rooms } from "../dictionaries/rooms.js";
 import { humanizeRoomType } from "../primitives/humanize-room-type.js";
 import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import { trimLayersToBudget, type PromptLayer } from "../token-budget.js";
@@ -114,11 +115,7 @@ function compose(
 
   const roomFocus = composeRoomFocus(room, isKeepLayout);
 
-  const effectivePalette =
-    palette && palette.swatch.length > 0 ? palette.swatch : style.colorPalette;
-  const effectiveMood =
-    palette && palette.mood ? palette.mood : style.moodKeywords.join(", ");
-  const styleCore = `Color palette: ${effectivePalette.join(", ")}. Mood: ${effectiveMood}.`;
+  const styleCore = buildStyleCore(style, palette);
 
   const styleDetail = `Materials: ${style.materials.join(", ")}. Signature furniture: ${style.signatureItems.join(", ")}.`;
 

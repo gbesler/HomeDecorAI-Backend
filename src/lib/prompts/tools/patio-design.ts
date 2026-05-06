@@ -21,6 +21,7 @@ import {
 import { logger } from "../../logger.js";
 import { patioStyles } from "../dictionaries/patio-styles.js";
 import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
@@ -79,7 +80,7 @@ function compose(style: StyleEntry): PromptResult {
     `Update the furnishings, surface finishes, and decor while keeping the ` +
     `plot footprint and camera angle.`;
 
-  const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail = `Materials and furnishings: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 

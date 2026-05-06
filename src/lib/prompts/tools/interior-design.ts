@@ -23,6 +23,7 @@ import {
 import { humanizeRoomType } from "../primitives/humanize-room-type.js";
 import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import {
@@ -117,8 +118,7 @@ function composeTransform(
 
   const roomFocus = composeRoomFocus(room.focusSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail =
     `Materials: ${style.materials.join(", ")}. Signature pieces: ${style.signatureItems.join(", ")}.`;
@@ -207,8 +207,7 @@ function composeTarget(
 
   const roomFocus = composeRoomFocus(mergedSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail =
     `Materials: ${style.materials.join(", ")}. Signature staging pieces: ${style.signatureItems.join(", ")}.`;
