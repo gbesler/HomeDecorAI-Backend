@@ -389,11 +389,29 @@ export async function callInpaintReplicate(
     prompt: input.prompt,
   };
 
+  // Resolve guidance: caller value wins, then capabilities default, then
+  // omit the field. The capability default exists because Flux Fill Dev
+  // and Pro live on the same scale but want very different numbers
+  // (Dev ~60, Pro ~30 per BFL model cards). Hard-coding either in the
+  // prompt builder couples the builder to a model choice that is
+  // deploy-flippable via REPLICATE_INPAINT_MODEL.
+  //
+  // 0 is treated as "no caller override" — the Replace & Add Object
+  // builder (prompts/tools/replace-add-object.ts) sends 0 as a sentinel
+  // because PromptResult.guidanceScale is typed `number`, not
+  // `number | undefined`. Real Flux Fill guidance values live in the 1+
+  // range, so 0 has no legitimate meaning here.
+  const callerGuidance =
+    input.guidanceScale !== undefined && input.guidanceScale > 0
+      ? input.guidanceScale
+      : undefined;
+  const resolvedGuidance =
+    callerGuidance ?? capabilities?.defaultGuidanceScale;
   if (
-    input.guidanceScale !== undefined &&
+    resolvedGuidance !== undefined &&
     capabilities?.supportsGuidanceScale
   ) {
-    replicateInput.guidance = input.guidanceScale;
+    replicateInput.guidance = resolvedGuidance;
   }
 
   const output = (await replicate.run(model, {

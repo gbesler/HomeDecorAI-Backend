@@ -75,6 +75,15 @@ export async function runPromptInpaint(
         maskUrl: input.maskUrl,
         userId: input.userId,
         generationId: input.generationId,
+        // 5px dilation gives Flux Fill an envelope of surrounding
+        // context around the brush stroke. Without it, tight client
+        // masks bias the model toward modifying the masked region's
+        // existing pixels rather than placing a new object — see
+        // prompts/tools/replace-add-object.ts for the full rationale.
+        // 5 is conservative; if integration artifacts appear, raise
+        // to 8-10 before reaching for a different mask shape.
+        dilateMaskPx: 5,
+        callerKind: "inpaint",
       }),
     {
       maxRetries: 1,
