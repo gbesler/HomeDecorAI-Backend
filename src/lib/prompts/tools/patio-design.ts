@@ -21,6 +21,7 @@ import {
 import { logger } from "../../logger.js";
 import { patioStyles } from "../dictionaries/patio-styles.js";
 import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -52,15 +53,12 @@ export function buildPatioPrompt(params: PatioParams): PromptResult {
   const styleEntry = patioStyles[patioStyle as keyof typeof patioStyles];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "patioDesign",
-        patioStyle,
-        fallback: "generic",
-      },
-      "Unknown patioStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "patioDesign",
+      kind: "style",
+      fields: { patioStyle },
+      message: "Unknown patioStyle — using generic fallback",
+    });
     return buildPatioGenericFallback();
   }
 

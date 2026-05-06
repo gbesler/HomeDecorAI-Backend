@@ -20,6 +20,7 @@ import {
 import { logger } from "../../logger.js";
 import { poolStyles } from "../dictionaries/pool-styles.js";
 import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -51,15 +52,12 @@ export function buildPoolPrompt(params: PoolParams): PromptResult {
   const styleEntry = poolStyles[poolStyle as keyof typeof poolStyles];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "poolDesign",
-        poolStyle,
-        fallback: "generic",
-      },
-      "Unknown poolStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "poolDesign",
+      kind: "style",
+      fields: { poolStyle },
+      message: "Unknown poolStyle — using generic fallback",
+    });
     return buildPoolGenericFallback();
   }
 

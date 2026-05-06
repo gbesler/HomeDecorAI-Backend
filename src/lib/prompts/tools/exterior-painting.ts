@@ -34,6 +34,7 @@ import {
 import { logger } from "../../logger.js";
 import { exteriorPalettes } from "../dictionaries/color-palettes.js";
 import { exteriorMaterials } from "../dictionaries/exterior-materials.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -75,15 +76,12 @@ export function buildExteriorPaintingPrompt(
     exteriorMaterials[params.material as keyof typeof exteriorMaterials];
 
   if (!materialEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_material",
-        tool: "exteriorPainting",
-        material: params.material,
-        fallback: "generic",
-      },
-      "Unknown exterior material — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "exteriorPainting",
+      kind: "material",
+      fields: { material: params.material },
+      message: "Unknown exterior material — using generic fallback",
+    });
     return composeGenericFallback(paletteEntry);
   }
 

@@ -23,6 +23,7 @@ import type { z } from "zod";
 import { logger } from "../../logger.js";
 import { floorTextures } from "../dictionaries/floor-textures.js";
 import { surfaceRestyleLightingAnchor } from "../primitives/lighting-anchors.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import type { PromptResult, FloorTextureEntry } from "../types.js";
 import type { CreateFloorRestyleBody } from "../../../schemas/generated/api.js";
 import {
@@ -60,15 +61,12 @@ export function buildFloorRestylePrompt(
       ? floorTextures[params.textureId]
       : undefined;
     if (!entry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_texture",
-          tool: "floorRestyle",
-          textureId: params.textureId,
-          fallback: "generic",
-        },
-        "Unknown textureId — using generic floor-restyle fallback",
-      );
+      warnUnknownEntry({
+        tool: "floorRestyle",
+        kind: "texture",
+        fields: { textureId: params.textureId },
+        message: "Unknown textureId — using generic floor-restyle fallback",
+      });
       return buildGenericFallback();
     }
     return composeTextureMode(entry);

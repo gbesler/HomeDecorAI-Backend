@@ -29,6 +29,7 @@ import { buildingTypes } from "../dictionaries/building-types.js";
 import { exteriorPalettes } from "../dictionaries/color-palettes.js";
 import { designStyles } from "../dictionaries/design-styles.js";
 import { exteriorStyleOverrides } from "../dictionaries/exterior-style-overrides.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -70,27 +71,20 @@ export function buildExteriorPrompt(params: ExteriorParams): PromptResult {
 
   if (!styleEntry || !buildingEntry) {
     if (!styleEntry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_style",
-          tool: "exteriorDesign",
-          designStyle,
-          buildingType,
-          fallback: "generic",
-        },
-        "Unknown designStyle for exterior — using generic fallback",
-      );
+      warnUnknownEntry({
+        tool: "exteriorDesign",
+        kind: "style",
+        fields: { designStyle, buildingType },
+        message: "Unknown designStyle for exterior — using generic fallback",
+      });
     }
     if (!buildingEntry) {
-      logger.warn(
-        {
-          event: "prompt.unknown_building",
-          tool: "exteriorDesign",
-          buildingType,
-          fallback: "generic",
-        },
-        "Unknown buildingType — using generic fallback",
-      );
+      warnUnknownEntry({
+        tool: "exteriorDesign",
+        kind: "building",
+        fields: { buildingType },
+        message: "Unknown buildingType — using generic fallback",
+      });
     }
     return buildExteriorGenericFallback(buildingType, colorMode);
   }

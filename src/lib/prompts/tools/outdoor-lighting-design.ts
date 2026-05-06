@@ -19,6 +19,7 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { outdoorLightingStyles } from "../dictionaries/outdoor-lighting-styles.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -55,15 +56,12 @@ export function buildOutdoorLightingPrompt(
     ];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "outdoorLightingDesign",
-        lightingStyle,
-        fallback: "generic",
-      },
-      "Unknown lightingStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "outdoorLightingDesign",
+      kind: "style",
+      fields: { lightingStyle },
+      message: "Unknown lightingStyle — using generic fallback",
+    });
     return buildOutdoorLightingGenericFallback();
   }
 
