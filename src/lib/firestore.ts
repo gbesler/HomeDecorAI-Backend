@@ -433,6 +433,52 @@ export async function getGenerationById(
 }
 
 /**
+ * Delete multiple generations by ID for a given user. Only deletes documents
+ * that belong to the specified user (ownership check). Returns the count of
+ * successfully deleted documents.
+ */
+export async function deleteGenerationsByIds(
+  userId: string,
+  generationIds: string[],
+): Promise<{ deletedCount: number; notFoundIds: string[]; foreignIds: string[] }> {
+  if (generationIds.length === 0) {
+    return { deletedCount: 0, notFoundIds: [], foreignIds: [] };
+  }
+
+  const db = getFirestore();
+  const notFoundIds: string[] = [];
+  const foreignIds: string[] = [];
+  const toDelete: string[] = [];
+
+  // Verify ownership before deleting
+  for (const id of generationIds) {
+    const docRef = db.collection(GENERATIONS_COLLECTION).doc(id);
+    const snap = await docRef.get();
+    if (!snap.exists) {
+      notFoundIds.push(id);
+      continue;
+    }
+    const data = snap.data();
+    if (data?.["userId"] !== userId) {
+      foreignIds.push(id);
+      continue;
+    }
+    toDelete.push(id);
+  }
+
+  // Batch delete owned documents
+  if (toDelete.length > 0) {
+    const batch = db.batch();
+    for (const id of toDelete) {
+      batch.delete(db.collection(GENERATIONS_COLLECTION).doc(id));
+    }
+    await batch.commit();
+  }
+
+  return { deletedCount: toDelete.length, notFoundIds, foreignIds };
+}
+
+/**
  * Map a Firestore DocumentSnapshot to a GenerationDoc, defaulting any
  * missing async-pipeline fields to null so legacy documents parse cleanly.
  */
