@@ -22,6 +22,7 @@
 import type { z } from "zod";
 import { logger } from "../../logger.js";
 import { floorTextures } from "../dictionaries/floor-textures.js";
+import { surfaceRestyleLightingAnchor } from "../primitives/lighting-anchors.js";
 import type { PromptResult, FloorTextureEntry } from "../types.js";
 import type { CreateFloorRestyleBody } from "../../../schemas/generated/api.js";
 import {
@@ -108,9 +109,7 @@ function composeTextureMode(entry: FloorTextureEntry): PromptResult {
     `Finish character: ${entry.descriptors.join(", ")}. ` +
     `Surface response: ${entry.lightingCharacter}`;
 
-  const lighting =
-    "Preserve the input photograph's existing lighting, daylight direction, " +
-    "and time of day; only the floor finish responds differently to that light.";
+  const lighting = surfaceRestyleLightingAnchor("floor");
 
   return composeSurfaceRestyleLayers(
     actionDirective,

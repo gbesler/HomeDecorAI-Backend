@@ -25,6 +25,7 @@ import { logger } from "../../logger.js";
 import { gardenPalettes } from "../dictionaries/color-palettes.js";
 import { gardenItems } from "../dictionaries/garden-items.js";
 import { gardenStyles } from "../dictionaries/garden-styles.js";
+import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -138,7 +139,7 @@ function compose(
   // `style.lightingCharacter` (e.g. "warm golden hour glow") on
   // fullRedesign contradicted the input photo's actual time of day —
   // pool/patio dropped this for the same reason; garden now matches.
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
@@ -175,7 +176,7 @@ function buildGardenGenericFallback(
 
   const styleDetail = `Hardscape materials: weathered stone pavers, natural gravel, aged timber. Signature planting: layered perennials, ornamental grasses, a small specimen tree.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,

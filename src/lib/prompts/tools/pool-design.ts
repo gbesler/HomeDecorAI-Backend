@@ -19,6 +19,7 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { poolStyles } from "../dictionaries/pool-styles.js";
+import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -91,7 +92,7 @@ function compose(style: StyleEntry): PromptResult {
 
   // Anchor lighting to the input photograph. `style.lightingCharacter`
   // omitted to prevent contradiction with the original frame's time of day.
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
@@ -111,7 +112,7 @@ function buildPoolGenericFallback(): PromptResult {
 
   const styleDetail = `Materials and surround: travertine or stone coping, pebble pool interior, stone or timber decking, understated planting. Signature features: a clean pool edge, a pair of loungers on the deck, soft planting framing the surround.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,

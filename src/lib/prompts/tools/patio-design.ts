@@ -20,6 +20,7 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { patioStyles } from "../dictionaries/patio-styles.js";
+import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -88,7 +89,7 @@ function compose(style: StyleEntry): PromptResult {
   // per-style dictionary value (e.g. "warm filtered afternoon light") that
   // can contradict the input photo's time-of-day; omitted so the primitive
   // lighting stays coherent with the original frame.
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
@@ -108,7 +109,7 @@ function buildPatioGenericFallback(): PromptResult {
 
   const styleDetail = `Materials and furnishings: timber or wicker outdoor seating, stone or timber decking, cushioned seating, potted greenery. Signature features: a comfortable seating group, layered outdoor textiles, planters framing the space.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
