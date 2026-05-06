@@ -416,7 +416,10 @@ const designRoutes: FastifyPluginAsync = async (app) => {
           500: { ...errorResponse, description: "Failed to delete generations" },
         },
       },
-      preHandler: [app.authenticate],
+      preHandler: [
+        app.authenticate,
+        createRateLimitPreHandler("deleteGenerations"),
+      ],
     },
     deleteGenerations,
   );
