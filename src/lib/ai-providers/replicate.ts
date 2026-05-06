@@ -26,6 +26,13 @@ const replicate = new Replicate({
 });
 
 const TIMEOUT_MS = 60_000;
+// Flux Fill on high-res inputs (e.g. 1144x2048) routinely runs 90-180s on
+// Replicate. The 60s default was firing AbortSignal.timeout before the
+// model finished, and the SDK with `useFileOutput: false` resolves the
+// aborted run to `null` instead of throwing — surfacing as
+// `provider.replicate.empty_response` and burning two retries before we
+// fell back to fal.ai. Match the realistic upper bound for the model.
+const INPAINT_TIMEOUT_MS = 240_000;
 
 export async function callReplicate(
   model: `${string}/${string}`,
@@ -416,7 +423,7 @@ export async function callInpaintReplicate(
 
   const output = (await replicate.run(model, {
     input: replicateInput,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(INPAINT_TIMEOUT_MS),
   })) as unknown;
 
   const durationMs = Date.now() - start;
