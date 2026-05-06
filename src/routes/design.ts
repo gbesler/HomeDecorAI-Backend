@@ -8,6 +8,7 @@ import {
   makeCreateGenerationHandler,
   makeSyncGenerationHandler,
   retryGeneration,
+  deleteGenerations,
 } from "../controllers/design.controller.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 
@@ -377,6 +378,61 @@ const designRoutes: FastifyPluginAsync = async (app) => {
       preHandler: [app.authenticate, createRateLimitPreHandler("historyRead")],
     },
     getHistory,
+  );
+
+  app.delete(
+    "/generations",
+    {
+      schema: {
+        tags: ["Design"],
+        summary: "Delete multiple generations",
+        description:
+          "Deletes the specified generations owned by the authenticated user. " +
+          "Returns the count of deleted items and any IDs that were not found or not owned.",
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
+        body: {
+          type: "object" as const,
+          properties: {
+            generationIds: {
+              type: "array" as const,
+              items: { type: "string" as const },
+              minItems: 1,
+              maxItems: 50,
+              description: "Array of generation IDs to delete (max 50)",
+            },
+          },
+          required: ["generationIds"] as const,
+        },
+        response: {
+          200: {
+            type: "object" as const,
+            description: "Delete operation completed",
+            properties: {
+              deletedCount: {
+                type: "number" as const,
+                description: "Number of generations successfully deleted",
+              },
+              notFoundIds: {
+                type: "array" as const,
+                items: { type: "string" as const },
+                description: "IDs that were not found in the database",
+              },
+              foreignIds: {
+                type: "array" as const,
+                items: { type: "string" as const },
+                description: "IDs that belong to other users (not deleted)",
+              },
+            },
+            required: ["deletedCount", "notFoundIds", "foreignIds"] as const,
+          },
+          400: { ...errorResponse, description: "Invalid request body" },
+          401: { ...errorResponse, description: "Missing or invalid auth token" },
+          500: { ...errorResponse, description: "Failed to delete generations" },
+        },
+      },
+      preHandler: [app.authenticate],
+    },
+    deleteGenerations,
   );
 };
 
