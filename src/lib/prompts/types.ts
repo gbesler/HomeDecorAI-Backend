@@ -70,6 +70,18 @@ export interface StyleEntry {
   materials: string[];
   /** 2-3 style-defining furniture pieces. */
   signatureItems: string[];
+  /**
+   * Per-room overrides for `signatureItems`. When present for the chosen
+   * room, the override list replaces `signatureItems` in the style-detail
+   * layer. Authored for fixture-focused rooms (kitchen, bathroom) where
+   * furniture-only defaults like "curved-back sofa" bias the model into
+   * the wrong scene. Without an override, the interior builder strips
+   * furniture tokens automatically for fixture rooms (see
+   * `resolveStyleAssets` in tools/interior-design.ts).
+   */
+  signatureItemsByRoom?: Partial<Record<RoomType, readonly string[]>>;
+  /** Per-room override for `materials`. Same rationale as `signatureItemsByRoom`. */
+  materialsByRoom?: Partial<Record<RoomType, readonly string[]>>;
   /** Sentence describing ideal lighting character. */
   lightingCharacter: string;
   /** 2-3 mood words. */

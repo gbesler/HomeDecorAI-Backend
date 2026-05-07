@@ -135,6 +135,37 @@ export const designStyles: DesignStylesDict = {
       "organic sculptural floor lamp",
       "large statement wall art",
     ],
+    // Fixture-room overrides: the style's defaults are upholstery- and
+    // free-standing-furniture-led ("curved-back sofa") which produce a
+    // sofa-in-the-kitchen failure mode. These per-room lists keep the
+    // contemporary aesthetic but spell it out in cabinetry / fixture
+    // terms instead, so the model has nothing furniture-shaped to insert.
+    signatureItemsByRoom: {
+      kitchen: [
+        "handleless flat-front cabinetry in smoked oak with matte black reveals",
+        "waterfall-edge stone island with a brushed brass tap",
+        "linear pendant cluster suspended over the island",
+      ],
+      bathroom: [
+        "floating smoked oak vanity with an integrated stone basin",
+        "frameless mirror with backlit warm glow",
+        "matte black brushware with brushed brass accents",
+      ],
+    },
+    materialsByRoom: {
+      kitchen: [
+        "smoked oak cabinetry",
+        "honed natural stone countertops",
+        "brushed brass hardware",
+        "matte black accents",
+      ],
+      bathroom: [
+        "honed natural stone surfaces",
+        "smoked oak vanity wood",
+        "brushed brass fixtures",
+        "large-format matte porcelain tile",
+      ],
+    },
     lightingCharacter: "warm balanced ambient with daylight through large windows",
     moodKeywords: ["current", "refined", "approachable"],
     actionMode: "transform",
