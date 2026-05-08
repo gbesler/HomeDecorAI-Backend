@@ -25,6 +25,7 @@ import { logger } from "../logger.js";
  */
 const GENERATIONS_COLLECTION = "generations";
 const USERS_COLLECTION = "users";
+const ALBUMS_SUBCOLLECTION = "albums";
 const GENERATIONS_BATCH_SIZE = 500;
 /// Maximum wall-clock time the cascade is allowed to spend before bailing
 /// out with a partial result. Cloud Run's default request timeout is 60s;
@@ -95,14 +96,44 @@ export async function deleteUserData(uid: string): Promise<DeleteUserDataResult>
     if (snap.size < GENERATIONS_BATCH_SIZE) break;
   }
 
-  // 2. Recursively delete the user's entire document tree. This handles
-  //    `users/{uid}/albums/{*}/items/{*}` → `albums/{*}` → `users/{uid}` in
-  //    one paginated sweep using the SDK's default BulkWriter. No-op on a
-  //    missing tree, which is what makes the whole helper idempotent.
+  // 2. Explicitly drain the `users/{uid}/albums/*` subcollection before the
+  //    recursiveDelete pass. `recursiveDelete` is documented to walk
+  //    subcollections, but in production we observed album docs surviving
+  //    the sweep (the parent doc + top-level subtree go, but album docs
+  //    occasionally linger). An explicit batched drain here makes the
+  //    delete deterministic regardless of recursiveDelete's traversal
+  //    behavior, and is idempotent — a second call sees an empty
+  //    subcollection and exits immediately. Albums store `generationIds`
+  //    as an array field on the album doc itself, so there are no
+  //    nested subcollections to chase here.
   if (Date.now() - start > CASCADE_DEADLINE_MS) {
     throw new CascadeDeadlineExceededError(generationsDeleted);
   }
   const userRef = db.collection(USERS_COLLECTION).doc(uid);
+  for (;;) {
+    if (Date.now() - start > CASCADE_DEADLINE_MS) {
+      throw new CascadeDeadlineExceededError(generationsDeleted);
+    }
+    const albumsSnap = await userRef
+      .collection(ALBUMS_SUBCOLLECTION)
+      .limit(GENERATIONS_BATCH_SIZE)
+      .get();
+    if (albumsSnap.empty) break;
+    const albumsBatch = db.batch();
+    for (const doc of albumsSnap.docs) {
+      albumsBatch.delete(doc.ref);
+    }
+    await albumsBatch.commit();
+    if (albumsSnap.size < GENERATIONS_BATCH_SIZE) break;
+  }
+
+  // 3. Recursively delete the user's entire document tree. This handles
+  //    the user doc itself plus any unanticipated subcollections added in
+  //    the future. No-op on a missing tree, which is what makes the whole
+  //    helper idempotent.
+  if (Date.now() - start > CASCADE_DEADLINE_MS) {
+    throw new CascadeDeadlineExceededError(generationsDeleted);
+  }
   await db.recursiveDelete(userRef);
 
   logger.info(
