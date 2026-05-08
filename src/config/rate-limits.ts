@@ -178,4 +178,14 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 50,
     dailyLimit: 200,
   },
+  // Account deletion. Cascades the entire user data tree (subcollections
+  // + generations) and removes the Firebase Auth user. Genuine usage is
+  // ~1/lifetime per account; the tight envelope is purely an abuse
+  // damper for credential-stuffing scenarios where a stolen token could
+  // otherwise wipe an account in a single call.
+  deleteAccount: {
+    minuteLimit: 2,
+    hourlyLimit: 5,
+    dailyLimit: 10,
+  },
 };

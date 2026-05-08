@@ -4,6 +4,7 @@ import designRoutes from "./design.js";
 import usersRoutes from "./users.js";
 import albumsRoutes from "./albums.js";
 import exploreRoutes from "./explore.js";
+import accountRoutes from "./account.js";
 
 const routes: FastifyPluginAsync = async (app) => {
   app.register(healthRoutes);
@@ -11,6 +12,7 @@ const routes: FastifyPluginAsync = async (app) => {
   app.register(usersRoutes, { prefix: "/users" });
   app.register(albumsRoutes, { prefix: "/albums" });
   app.register(exploreRoutes, { prefix: "/explore" });
+  app.register(accountRoutes, { prefix: "/account" });
 };
 
 export default routes;
