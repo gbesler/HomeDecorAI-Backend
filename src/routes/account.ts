@@ -38,9 +38,22 @@ const accountRoutes: FastifyPluginAsync = async (app) => {
             },
             required: ["success", "generationsDeleted"] as const,
           },
-          401: { ...errorResponse, description: "Missing or invalid auth token" },
+          401: {
+            ...errorResponse,
+            description:
+              "Missing/invalid token, revoked session, or stale auth_time. " +
+              "When `error == \"ReauthRequired\"`, the client should " +
+              "reauthenticate (e.g., re-prompt for password / Apple / " +
+              "Google) before retrying.",
+          },
           429: { ...errorResponse, description: "Rate limit exceeded" },
           500: { ...errorResponse, description: "Failed to delete account" },
+          503: {
+            ...errorResponse,
+            description:
+              "Cascade hit its deadline; the cascade is idempotent so the " +
+              "client should retry after the `Retry-After` interval.",
+          },
         },
       },
       preHandler: [

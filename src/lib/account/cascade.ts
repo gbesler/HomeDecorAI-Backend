@@ -26,6 +26,19 @@ import { logger } from "../logger.js";
 const GENERATIONS_COLLECTION = "generations";
 const USERS_COLLECTION = "users";
 const GENERATIONS_BATCH_SIZE = 500;
+/// Maximum wall-clock time the cascade is allowed to spend before bailing
+/// out with a partial result. Cloud Run's default request timeout is 60s;
+/// we bail at 45s so the 503 + Retry-After hint actually reaches the
+/// client instead of the platform killing the worker mid-response. The
+/// cascade is idempotent — a retry resumes from wherever drain left off.
+const CASCADE_DEADLINE_MS = 45_000;
+
+export class CascadeDeadlineExceededError extends Error {
+  constructor(public readonly generationsDeleted: number) {
+    super("Cascade exceeded its deadline; partial progress made");
+    this.name = "CascadeDeadlineExceededError";
+  }
+}
 
 export interface DeleteUserDataResult {
   generationsDeleted: number;
@@ -37,12 +50,20 @@ export async function deleteUserData(uid: string): Promise<DeleteUserDataResult>
   }
 
   const db = admin.firestore();
+  const start = Date.now();
   let generationsDeleted = 0;
+  let batchIndex = 0;
 
   // 1. Drain top-level generations owned by this user, 500 at a time. We
   //    delete in chunks because Firestore caps a single batched write at
-  //    500 operations — beyond that the commit fails.
+  //    500 operations — beyond that the commit fails. Heavy users
+  //    (1000+ generations) are bounded by `CASCADE_DEADLINE_MS` so we
+  //    never blow past Cloud Run's request timeout.
   for (;;) {
+    if (Date.now() - start > CASCADE_DEADLINE_MS) {
+      throw new CascadeDeadlineExceededError(generationsDeleted);
+    }
+
     const snap = await db
       .collection(GENERATIONS_COLLECTION)
       .where("userId", "==", uid)
@@ -57,6 +78,17 @@ export async function deleteUserData(uid: string): Promise<DeleteUserDataResult>
     }
     await batch.commit();
     generationsDeleted += snap.size;
+    batchIndex++;
+
+    logger.debug(
+      {
+        event: "account.cascade.batch",
+        batchIndex,
+        batchSize: snap.size,
+        elapsedMs: Date.now() - start,
+      },
+      "Drained generations batch",
+    );
 
     // If we got fewer than the limit back, we just drained the tail —
     // skip the inevitable empty-query round trip on the next iteration.
@@ -67,6 +99,9 @@ export async function deleteUserData(uid: string): Promise<DeleteUserDataResult>
   //    `users/{uid}/albums/{*}/items/{*}` → `albums/{*}` → `users/{uid}` in
   //    one paginated sweep using the SDK's default BulkWriter. No-op on a
   //    missing tree, which is what makes the whole helper idempotent.
+  if (Date.now() - start > CASCADE_DEADLINE_MS) {
+    throw new CascadeDeadlineExceededError(generationsDeleted);
+  }
   const userRef = db.collection(USERS_COLLECTION).doc(uid);
   await db.recursiveDelete(userRef);
 
@@ -74,6 +109,8 @@ export async function deleteUserData(uid: string): Promise<DeleteUserDataResult>
     {
       event: "account.cascade.completed",
       generationsDeleted,
+      batchCount: batchIndex,
+      elapsedMs: Date.now() - start,
     },
     "User Firestore cascade complete",
   );
