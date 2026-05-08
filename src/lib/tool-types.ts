@@ -891,7 +891,6 @@ const virtualStagingBodyJsonSchema = {
     "roomType",
     "designStyle",
     "colorPalette",
-    "stagingMode",
   ] as const,
   properties: {
     imageUrl: {
@@ -915,12 +914,6 @@ const virtualStagingBodyJsonSchema = {
       enum: STAGING_PALETTES,
       description:
         "Color palette id. `surpriseMe` lets the style drive the palette.",
-    },
-    stagingMode: {
-      type: "string" as const,
-      enum: ["keepLayout", "fullStaging"] as const,
-      description:
-        "keepLayout: preserve any existing furniture, add complementary pieces. fullStaging: stage as if the room were empty.",
     },
     language: {
       type: "string" as const,
@@ -1164,7 +1157,7 @@ export const TOOL_TYPES = {
     bodyJsonSchema: virtualStagingBodyJsonSchema,
     summary: "Enqueue a virtual staging transformation",
     description:
-      "Stages empty or sparsely furnished rooms with furniture and decor. Unlike Interior Design which transforms existing furnishings, this tool adds furniture to empty spaces. Supports two modes: `keepLayout` preserves existing furniture and adds complementary pieces; `fullStaging` stages the room as if empty. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+      "Stages empty or sparsely furnished rooms with furniture and decor. Unlike Interior Design which transforms existing furnishings, this tool adds furniture to empty spaces, treating the room as if empty and furnishing it from scratch. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
     buildPrompt: buildVirtualStagingPrompt,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateVirtualStagingBody.parse(raw),

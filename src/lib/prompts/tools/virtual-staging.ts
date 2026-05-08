@@ -3,9 +3,10 @@
  * with furniture and decor. Unlike Interior Design which transforms existing
  * furnishings, this tool adds furniture to empty spaces.
  *
- * Supports two staging modes:
- * - `fullStaging`: stage the room as if empty, full creative freedom
- * - `keepLayout`: preserve any existing furniture, add complementary pieces
+ * The wizard always requests a full staging pass (the room is treated as
+ * empty and furnished from scratch); the previous `stagingMode` toggle is
+ * removed because no wizard step ever sets it to anything other than the
+ * default. See removal note in the plan.
  *
  * Reuses:
  * - `buildPhotographyQuality("interior")`, `buildStructuralPreservation("interior")`,
@@ -55,13 +56,12 @@ export interface VirtualStagingParams {
   roomType: string;
   designStyle: string;
   colorPalette: string;
-  stagingMode: "keepLayout" | "fullStaging";
 }
 
 export function buildVirtualStagingPrompt(
   params: VirtualStagingParams,
 ): PromptResult {
-  const { roomType, designStyle, colorPalette, stagingMode } = params;
+  const { roomType, designStyle, colorPalette } = params;
 
   const styleEntry = designStyles[designStyle as keyof typeof designStyles];
   const roomEntry = rooms[roomType as keyof typeof rooms];
@@ -83,12 +83,12 @@ export function buildVirtualStagingPrompt(
         fields: { designStyle, roomType },
       });
     }
-    return buildStagingGenericFallback(roomType, stagingMode);
+    return buildStagingGenericFallback(roomType);
   }
 
   const resolvedPalette = paletteEntry ?? null;
 
-  return compose(roomType, styleEntry, roomEntry, resolvedPalette, stagingMode);
+  return compose(roomType, styleEntry, roomEntry, resolvedPalette);
 }
 
 // ─── Composition ───────────────────────────────────────────────────────────
@@ -98,22 +98,17 @@ function compose(
   style: StyleEntry,
   room: RoomEntry,
   palette: ColorPaletteEntry | null,
-  stagingMode: VirtualStagingParams["stagingMode"],
 ): PromptResult {
   const humanRoom = humanizeRoomType(roomType);
-  const isKeepLayout = stagingMode === "keepLayout";
 
-  const guidanceBand: GuidanceBand = isKeepLayout ? "faithful" : "balanced";
+  const guidanceBand: GuidanceBand = "balanced";
 
-  const actionDirective = isKeepLayout
-    ? `Add complementary ${style.coreAesthetic} furniture pieces to this ${humanRoom} ` +
-      `while keeping all existing furniture exactly as it is. ` +
-      `Only add items that harmonize with the current layout.`
-    : `Stage this empty ${humanRoom} with ${style.coreAesthetic} furniture and decor ` +
-      `while keeping the exact same room layout, camera angle, and perspective. ` +
-      `Create a fully furnished, inviting space.`;
+  const actionDirective =
+    `Stage this empty ${humanRoom} with ${style.coreAesthetic} furniture and decor ` +
+    `while keeping the exact same room layout, camera angle, and perspective. ` +
+    `Create a fully furnished, inviting space.`;
 
-  const roomFocus = composeRoomFocus(room, isKeepLayout);
+  const roomFocus = composeRoomFocus(room);
 
   const styleCore = buildStyleCore(style, palette);
 
@@ -127,46 +122,29 @@ function compose(
     styleCore,
     styleDetail,
     lighting,
-    isKeepLayout ? "overlay" : "transform",
+    "transform",
     guidanceBand,
     PROMPT_VERSION_CURRENT,
-    // No extra avoidance tokens here — the action directive in keepLayout
-    // mode already states "complement existing furniture" and "harmonize
-    // with the current layout"; duplicating those into the avoidance tail
-    // wastes the token budget for no model uplift.
     undefined,
   );
 }
 
-function composeRoomFocus(room: RoomEntry, isKeepLayout: boolean): string {
+function composeRoomFocus(room: RoomEntry): string {
   const slots = room.focusSlots;
-
-  if (isKeepLayout) {
-    return `Add complementary pieces: ${slots.furnitureDialect}. Ensure new items harmonize with existing furniture.`;
-  }
-
   const parts: string[] = [slots.furnitureDialect];
   if (slots.lightingDialect) parts.push(slots.lightingDialect);
   if (slots.personalization) parts.push(slots.personalization);
   return parts.join(". ") + ".";
 }
 
-function buildStagingGenericFallback(
-  roomType: string,
-  stagingMode: VirtualStagingParams["stagingMode"],
-): PromptResult {
+function buildStagingGenericFallback(roomType: string): PromptResult {
   const humanRoom = humanizeRoomType(roomType || "room");
-  const isKeepLayout = stagingMode === "keepLayout";
 
-  const actionDirective = isKeepLayout
-    ? `Add complementary tasteful furniture pieces to this ${humanRoom} ` +
-      `while keeping all existing furniture exactly as it is.`
-    : `Stage this empty ${humanRoom} with tasteful, timeless furniture and decor ` +
-      `while keeping the exact same room layout, camera angle, and perspective.`;
+  const actionDirective =
+    `Stage this empty ${humanRoom} with tasteful, timeless furniture and decor ` +
+    `while keeping the exact same room layout, camera angle, and perspective.`;
 
-  const roomFocus = isKeepLayout
-    ? `Add complementary pieces that harmonize with existing furniture, filling empty areas appropriately.`
-    : `Furnish the space with balanced proportions: seating, surfaces, lighting, and accents.`;
+  const roomFocus = `Furnish the space with balanced proportions: seating, surfaces, lighting, and accents.`;
 
   const styleCore = `Color palette: warm off-white, soft oak, muted sage, matte black. Mood: calm, balanced, approachable.`;
 
@@ -180,13 +158,9 @@ function buildStagingGenericFallback(
     styleCore,
     styleDetail,
     lighting,
-    isKeepLayout ? "overlay" : "transform",
-    isKeepLayout ? "faithful" : "balanced",
+    "transform",
+    "balanced",
     PROMPT_VERSION_FALLBACK,
-    // No extra avoidance tokens here — the action directive in keepLayout
-    // mode already states "complement existing furniture" and "harmonize
-    // with the current layout"; duplicating those into the avoidance tail
-    // wastes the token budget for no model uplift.
     undefined,
   );
 }
