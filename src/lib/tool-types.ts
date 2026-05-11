@@ -26,6 +26,7 @@ import {
   buildInteriorPrompt,
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
+import { buildInteriorPromptV2 } from "./prompts/tools/interior-design-v2.js";
 import {
   buildFloorRestylePrompt,
   type FloorRestyleParams,
@@ -201,13 +202,33 @@ export interface ToolTypeConfig<
   clientUploadFields?: readonly (keyof TParams & string)[];
 }
 
-// ─── Interior prompt dispatch (legacy safety valve) ─────────────────────────
+// ─── Interior prompt dispatch ──────────────────────────────────────────────
+//
+// Three-way switch driven by PROMPT_BUILDER_VERSION:
+//   - "legacy" → buildInteriorPromptLegacy (D17 F2 escape hatch)
+//   - "v1"     → buildInteriorPrompt       (current default)
+//   - "v2"     → buildInteriorPromptV2     (head-layer preservation,
+//                                            preservationHint, changeBudget)
+//
+// Flip at runtime to roll forward to v2 after staging burn-in, or back to
+// v1/legacy without a code deploy. See
+// docs/runbooks/interior-prompt-version-rollout.md.
 
 function buildInteriorPromptDispatch(params: InteriorParams): PromptResult {
-  if (env.PROMPT_BUILDER_VERSION === "legacy") {
-    return buildInteriorPromptLegacy(params);
+  const version = env.PROMPT_BUILDER_VERSION;
+  switch (version) {
+    case "legacy":
+      return buildInteriorPromptLegacy(params);
+    case "v1":
+      return buildInteriorPrompt(params);
+    case "v2":
+      return buildInteriorPromptV2(params);
   }
-  return buildInteriorPrompt(params);
+  // Exhaustiveness check — adding a new PROMPT_BUILDER_VERSION value to
+  // env.ts without updating this switch fails compilation here rather
+  // than silently routing to v1.
+  const _exhaustive: never = version;
+  throw new Error(`unreachable PROMPT_BUILDER_VERSION: ${_exhaustive as string}`);
 }
 
 // ─── Shared primitives for JSON schemas ────────────────────────────────────

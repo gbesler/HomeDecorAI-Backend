@@ -28,6 +28,8 @@ export const rooms: RoomsDict = {
       personalization:
         "curated shelf objects, framed art on the main wall, a thoughtful throw blanket and cushions",
     },
+    preservationHint:
+      "If a sofa, accent chairs, coffee table, side tables, lamps, or a media wall are visible in the source, restyle them in place and preserve every primary furniture piece in its original position.",
   },
 
   [RoomType.bedroom]: {
@@ -39,6 +41,8 @@ export const rooms: RoomsDict = {
       personalization:
         "layered bedding, a textured throw, a small stack of books on the nightstand",
     },
+    preservationHint:
+      "If a bed, bedside tables, dresser, wardrobe, reading chair, or other primary bedroom furniture are visible, restyle them in place — keep their footprint and the bed's orientation exactly as in the source.",
   },
 
   [RoomType.kitchen]: {
@@ -51,6 +55,8 @@ export const rooms: RoomsDict = {
         "cabinet door style, countertop stone or surface, backsplash tile, hardware metal finish",
       avoidAdditions: ["replace all furniture"],
     },
+    preservationHint:
+      "Keep the existing cabinetry layout, island position, appliance locations, sink position, and window placements exactly as in the source — only restyle the finishes, hardware, countertops, backsplash, and visible decor.",
   },
 
   [RoomType.underStairSpace]: {
@@ -66,6 +72,8 @@ export const rooms: RoomsDict = {
         "add dining table",
       ],
     },
+    preservationHint:
+      "Keep the staircase geometry, angled ceiling line, and any visible built-ins exactly as in the source. Only restyle the finishes, decor, and any small accent pieces that fit the narrow under-stair footprint.",
   },
 
   [RoomType.diningRoom]: {
@@ -77,6 +85,8 @@ export const rooms: RoomsDict = {
       personalization:
         "a considered tablescape, a rug anchoring the table, seasonal centerpiece",
     },
+    preservationHint:
+      "If a dining table, chairs, sideboard, buffet, or overhead pendant/chandelier are visible, restyle them in place — keep the table's position, the chair count, and any visible doorway or window placements exactly as in the source.",
   },
 
   [RoomType.bathroom]: {
@@ -89,6 +99,8 @@ export const rooms: RoomsDict = {
         "tile pattern, vanity countertop stone, metal finishes on faucets and hardware, grout color",
       avoidAdditions: ["replace all furniture"],
     },
+    preservationHint:
+      "Keep the vanity, sink count, mirror position, shower or bath enclosure, toilet position, and tile layout exactly as in the source — only restyle the finishes, hardware, tile pattern, grout color, and visible decor.",
   },
 
   [RoomType.entryway]: {
@@ -104,6 +116,8 @@ export const rooms: RoomsDict = {
         "add dining table",
       ],
     },
+    preservationHint:
+      "Keep the entryway's corridor geometry and every visible front door, side door, doorframe, threshold, coat closet, and stair foot in place. Only restyle finishes, the console or bench, hardware, and accents that fit the entry footprint.",
   },
 
   [RoomType.stairway]: {
@@ -119,6 +133,8 @@ export const rooms: RoomsDict = {
         "add dining table",
       ],
     },
+    preservationHint:
+      "Keep the stair run, step count, landing positions, banister geometry, and any visible doorway or window exactly as in the source. Only restyle the railing finish, runner, wall art, sconces, and surface treatments.",
   },
 
   [RoomType.office]: {
@@ -130,6 +146,8 @@ export const rooms: RoomsDict = {
       personalization:
         "minimal personal items, professional books, a single plant or considered desk object",
     },
+    preservationHint:
+      "If a desk, chair, filing storage, or guest seating are visible, restyle them in place — keep the desk's position and orientation, the chair count, and any visible doorway or window placements exactly as in the source.",
   },
 
   [RoomType.homeOffice]: {
@@ -141,6 +159,8 @@ export const rooms: RoomsDict = {
       personalization:
         "framed personal photos, a plant, a few books, a small decorative object on the desk",
     },
+    preservationHint:
+      "If a desk, task chair, bookshelf, or storage cabinet are visible, restyle them in place. Keep the desk's position, any visible doorway, window, and the surrounding residential context exactly as in the source.",
   },
 
   [RoomType.studyRoom]: {
@@ -152,6 +172,8 @@ export const rooms: RoomsDict = {
       personalization:
         "stacked books, a reading lamp, a throw blanket on the chair, scholarly objects",
     },
+    preservationHint:
+      "If bookshelves, a reading chair, ottoman, or writing desk are visible, restyle them in place. Keep the shelf footprint, the reading chair position, and any visible doorway, window, or ceiling feature exactly as in the source.",
   },
 
   [RoomType.gamingRoom]: {
@@ -164,5 +186,7 @@ export const rooms: RoomsDict = {
         "multi-monitor array, mechanical keyboard, gaming headset stand, acoustic paneling on at least one wall, minimal window glare",
       avoidAdditions: ["replace ergonomic setup"],
     },
+    preservationHint:
+      "Keep the desk position, monitor arrangement, gaming chair, and any speakers, peripherals, or wall-mounted gear exactly as in the source. Only restyle the desk surface finish, accent lighting color, wall treatments, and decor.",
   },
 };
