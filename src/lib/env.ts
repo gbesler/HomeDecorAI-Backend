@@ -83,7 +83,7 @@ const envSchema = z.object({
   PROMPT_BUILDER_VERSION: z
     .enum(["legacy", "v1", "v2"])
     .optional()
-    .default("v1"),
+    .default("v2"),
   DICTIONARY_STRICT_MODE: z
     .enum(["strict", "degraded"])
     .optional()
