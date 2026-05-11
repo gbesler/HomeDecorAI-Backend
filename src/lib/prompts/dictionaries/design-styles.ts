@@ -49,6 +49,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["sophisticated", "intentional", "architectural"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("modern"),
   },
 
@@ -65,6 +66,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["calm", "uncluttered", "serene"],
     actionMode: "transform",
     guidanceBand: "faithful",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("minimalist"),
   },
 
@@ -81,6 +83,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["cozy", "practical", "airy"],
     actionMode: "transform",
     guidanceBand: "faithful",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("scandinavian"),
   },
 
@@ -102,6 +105,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["raw", "masculine", "urban"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("industrial"),
   },
 
@@ -118,6 +122,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["eclectic", "collected", "artistic"],
     actionMode: "transform",
     guidanceBand: "creative",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("bohemian"),
   },
 
@@ -170,6 +175,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["current", "refined", "approachable"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("contemporary"),
   },
 
@@ -191,6 +197,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["retro", "optimistic", "crafted"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("mid-century-modern"),
   },
 
@@ -212,6 +219,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["relaxed", "breezy", "fresh"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("coastal"),
   },
 
@@ -233,6 +241,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["warm", "hospitable", "simple"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("farmhouse"),
   },
 
@@ -255,6 +264,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["serene", "grounded", "intentional"],
     actionMode: "transform",
     guidanceBand: "faithful",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("japandi"),
   },
 
@@ -277,6 +287,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["glamorous", "bold", "sophisticated"],
     actionMode: "transform",
     guidanceBand: "creative",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("art-deco"),
   },
 
@@ -298,6 +309,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["timeless", "refined", "established"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("traditional-interior"),
   },
 
@@ -325,6 +337,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["vibrant", "lush", "resort"],
     actionMode: "transform",
     guidanceBand: "creative",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("tropical-interior"),
   },
 
@@ -351,6 +364,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["cozy", "natural", "grounding"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("rustic-lodge"),
   },
 
@@ -372,6 +386,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["opulent", "refined", "established"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-swap",
     references: placeholderRefs("luxury-interior"),
   },
 
@@ -398,6 +413,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["warm", "inviting", "nostalgic"],
     actionMode: "transform",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
     references: placeholderRefs("cozy-interior"),
   },
 
@@ -427,6 +443,7 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["festive", "warm", "seasonal"],
     actionMode: "overlay",
     guidanceBand: "balanced",
+    changeBudget: "overlay",
     recipeRef: "christmas-recipes",
     references: placeholderRefs("christmas-interior-decor"),
   },
@@ -454,11 +471,17 @@ export const designStyles: DesignStylesDict = {
     moodKeywords: ["inviting", "photogenic", "broadly appealing"],
     actionMode: "target",
     guidanceBand: "balanced",
+    changeBudget: "furniture-restyle",
+    // Positively framed staging description. The earlier copy used negation
+    // tokens ("no family photos, no keepsakes", "no dim mood lighting") that
+    // violated the positive-avoidance invariant — Flux family models bias
+    // toward the negated content. Replaced with positive equivalents that
+    // describe the rental-ready staging directly.
     slotOverrides: {
       personalization:
-        "neutralized styling with minimal personal items, no family photos, no keepsakes",
+        "neutralized styling with minimal generic accents, broadly appealing styling, a single tasteful plant or art piece",
       lightingDialect:
-        "bright neutral LED task lighting with warm accent fills, no dim mood lighting",
+        "bright neutral LED task lighting with warm accent fills throughout the room",
     },
     references: placeholderRefs("airbnb-rental-staging"),
   },
