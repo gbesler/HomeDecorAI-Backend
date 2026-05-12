@@ -5,7 +5,9 @@ import {
   decodeExploreCursor,
   encodeExploreCursor,
   type ExploreQuery,
+  type InspirationSeedInput,
 } from "./schemas.js";
+import { planSeedWrite } from "./seedShape.js";
 import type { Inspiration, InspirationDTO } from "./types.js";
 
 const INSPIRATIONS_COLLECTION = "inspirations";
@@ -32,13 +34,24 @@ function mapDocToInspiration(
 ): Inspiration {
   const data = doc.data() ?? {};
   const epoch = admin.firestore.Timestamp.fromMillis(0);
-  const tagsRaw = data["tags"];
+  // Envelope-shape (`taxonomy: { ... }`) is the new write target. Fall back
+  // to top-level fields for any legacy docs that pre-date the envelope.
+  const taxonomyRaw = data["taxonomy"];
+  const taxonomy: Record<string, unknown> =
+    taxonomyRaw && typeof taxonomyRaw === "object" && !Array.isArray(taxonomyRaw)
+      ? (taxonomyRaw as Record<string, unknown>)
+      : data;
+  const tagsRaw = taxonomy["tags"] ?? data["tags"];
   return {
     id: doc.id,
-    roomType: typeof data["roomType"] === "string" ? data["roomType"] : "",
+    roomType:
+      typeof taxonomy["roomType"] === "string" ? taxonomy["roomType"] : "",
     designStyle:
-      typeof data["designStyle"] === "string" ? data["designStyle"] : "",
-    toolType: typeof data["toolType"] === "string" ? data["toolType"] : "",
+      typeof taxonomy["designStyle"] === "string"
+        ? taxonomy["designStyle"]
+        : "",
+    toolType:
+      typeof taxonomy["toolType"] === "string" ? taxonomy["toolType"] : "",
     tags: Array.isArray(tagsRaw)
       ? (tagsRaw as unknown[]).filter((v): v is string => typeof v === "string")
       : [],
@@ -50,6 +63,17 @@ function mapDocToInspiration(
         ? data["sourceGenerationId"]
         : null,
     createdAt: isTimestamp(data["createdAt"]) ? data["createdAt"] : epoch,
+    // Envelope fields surface on the DTO so the write/verify loop works
+    // (POST writes them, GET returns them). All optional with explicit
+    // null fallbacks so legacy flat-shape docs decode cleanly.
+    kind: typeof data["kind"] === "string" ? data["kind"] : null,
+    imageWidth: typeof data["imageWidth"] === "number" ? data["imageWidth"] : null,
+    imageHeight:
+      typeof data["imageHeight"] === "number" ? data["imageHeight"] : null,
+    imageMime: typeof data["imageMime"] === "string" ? data["imageMime"] : null,
+    prompt: typeof data["prompt"] === "string" ? data["prompt"] : null,
+    schemaVersion:
+      typeof data["schemaVersion"] === "number" ? data["schemaVersion"] : null,
   };
 }
 
@@ -65,6 +89,12 @@ export function inspirationToDTO(insp: Inspiration): InspirationDTO {
     featured: insp.featured,
     sourceGenerationId: insp.sourceGenerationId,
     createdAt: insp.createdAt.toDate().toISOString(),
+    kind: insp.kind,
+    imageWidth: insp.imageWidth,
+    imageHeight: insp.imageHeight,
+    imageMime: insp.imageMime,
+    prompt: insp.prompt,
+    schemaVersion: insp.schemaVersion,
   };
 }
 
@@ -93,9 +123,15 @@ export async function listInspirations(
 ): Promise<ExplorePage> {
   let q: admin.firestore.Query = inspirationsRef();
 
-  if (query.roomType) q = q.where("roomType", "==", query.roomType);
-  if (query.designStyle) q = q.where("designStyle", "==", query.designStyle);
-  if (query.toolType) q = q.where("toolType", "==", query.toolType);
+  // Envelope schema (iOS plan 2026-05-12-001) nests taxonomy fields under
+  // `taxonomy.*`. Composite indexes in `firestore.indexes.json` use the
+  // nested paths to match the on-disk shape; querying the top-level flat
+  // field would miss every envelope doc.
+  if (query.roomType) q = q.where("taxonomy.roomType", "==", query.roomType);
+  if (query.designStyle)
+    q = q.where("taxonomy.designStyle", "==", query.designStyle);
+  if (query.toolType)
+    q = q.where("taxonomy.toolType", "==", query.toolType);
   if (query.featuredOnly) q = q.where("featured", "==", true);
 
   q = q
@@ -137,6 +173,68 @@ export async function getInspiration(
   const snap = await ref.get();
   if (!snap.exists) throw new InspirationNotFoundError(inspirationId);
   return mapDocToInspiration(snap);
+}
+
+// MARK: - Envelope seed writer (iOS plan 2026-05-12-001)
+
+export interface SeedInspirationResult {
+  id: string;
+  /** `true` when the doc was newly created; `false` for an upsert that
+   *  refreshed an existing row's metadata and `updatedAt` stamp. */
+  created: boolean;
+}
+
+/**
+ * Upsert one inspiration envelope at `inspirations/{row.id}`. Idempotent
+ * by id — re-running with the same id refreshes the merge-fields and
+ * advances `updatedAt` while preserving `createdAt` and any
+ * previously-written `prompt` whose value the new input doesn't supply.
+ *
+ * The read-then-write is wrapped in a Firestore transaction so concurrent
+ * upserts to the same id cannot both observe `exists: false` and both
+ * execute the first-write branch (which would silently clobber
+ * `createdAt`). A transaction lets exactly one writer create the doc;
+ * the loser retries against the freshly-created snapshot and falls
+ * through to the merge-fields branch.
+ *
+ * `planSeedWrite` (pure, in `seedShape.ts`) decides which fields land on
+ * each write — including the load-bearing prompt-preservation rule.
+ * Within a transaction each `DocumentReference` can only be written
+ * once, so the previous "metadata set + standalone prompt patch" pair
+ * is collapsed into a single mergeFields write whose field list
+ * conditionally includes `prompt`.
+ */
+export async function seedInspirationDoc(
+  row: InspirationSeedInput,
+): Promise<SeedInspirationResult> {
+  const firestore = getFirestore();
+  const docRef = inspirationsRef().doc(row.id);
+
+  return firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(docRef);
+    const existingPromptRaw = snap.exists
+      ? (snap.get("prompt") as unknown)
+      : undefined;
+    const plan = planSeedWrite(row, {
+      exists: snap.exists,
+      prompt:
+        typeof existingPromptRaw === "string" ? existingPromptRaw : null,
+    });
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    if (plan.mergeFields === null) {
+      // First write — full doc with createdAt + updatedAt.
+      tx.set(docRef, { ...plan.data, createdAt: now, updatedAt: now });
+    } else {
+      tx.set(
+        docRef,
+        { ...plan.data, updatedAt: now },
+        { mergeFields: [...plan.mergeFields] },
+      );
+    }
+
+    return { id: row.id, created: plan.created };
+  });
 }
 
 // Re-export the typed cursor error so controllers can `instanceof`-check it

@@ -31,6 +31,14 @@ export function validationError(
   };
 }
 
+export function badRequest(
+  reply: FastifyReply,
+  message: string,
+): ErrorEnvelope {
+  reply.code(400);
+  return { error: "Validation Error", message };
+}
+
 export function notFound(reply: FastifyReply, message: string): ErrorEnvelope {
   reply.code(404);
   return { error: "Not Found", message };
