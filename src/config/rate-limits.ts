@@ -133,6 +133,15 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 500,
     dailyLimit: 2000,
   },
+  // Admin inspiration seed writes — tight envelope. The endpoint is gated
+  // by ADMIN_UIDS allow-list and writes to a globally-visible catalog;
+  // even a single misbehaving admin token should not be able to flood the
+  // collection or burn Firestore quota.
+  exploreSeed: {
+    minuteLimit: 10,
+    hourlyLimit: 100,
+    dailyLimit: 500,
+  },
   // Failed-generation retry. Skips the per-tool freemium meter, so a
   // tight cap on abuse: a user who really wants more retries is going to
   // generate new jobs instead. A legitimate "oh no try again" pattern

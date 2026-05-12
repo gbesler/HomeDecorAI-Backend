@@ -7,7 +7,9 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "dev": "NODE_ENV=development npm run build && npm run start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:seed-shape": "tsx --test src/lib/inspiration/seedShape.test.ts",
+    "test:inspiration": "tsx --test src/lib/inspiration/seedShape.test.ts src/lib/inspiration/schemas.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.1029.0",

@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import {
   ID_PATTERN,
+  badRequest,
   internalError,
   notFound,
   unauthorized,
@@ -12,9 +13,11 @@ import {
   getInspiration,
   inspirationToDTO,
   listInspirations,
+  seedInspirationDoc,
 } from "../lib/inspiration/firestore.js";
 import {
   ExploreQuerySchema,
+  InspirationSeedInputSchema,
   InvalidCursorError,
 } from "../lib/inspiration/schemas.js";
 
@@ -40,8 +43,7 @@ export async function listInspirationsHandler(
     };
   } catch (err) {
     if (err instanceof InvalidCursorError) {
-      reply.code(400);
-      return { error: "Validation Error", message: err.message };
+      return badRequest(reply, err.message);
     }
     request.log.error(
       {
@@ -81,5 +83,56 @@ export async function getInspirationHandler(
       "Failed to fetch inspiration",
     );
     return internalError(reply, "Failed to fetch inspiration.");
+  }
+}
+
+/**
+ * Admin upsert for one inspiration envelope. Replaces the offline seed
+ * script — the caller hands in a pre-uploaded `imageUrl` (and dimensions)
+ * plus taxonomy + optional prompt, and we write the Firestore doc.
+ *
+ * Auth follows the existing `app.authenticate` pattern (Firebase Bearer
+ * token). Tighten with a custom claim or separate admin gate when an
+ * external authoring surface ships.
+ */
+export async function seedInspirationHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const userId = request.userId;
+  if (!userId) return unauthorized(reply);
+
+  const parsed = InspirationSeedInputSchema.safeParse(request.body ?? {});
+  if (!parsed.success) return validationError(reply, parsed.error);
+
+  try {
+    const result = await seedInspirationDoc(parsed.data);
+    if (result.created) {
+      reply.code(201);
+      // Absolute URI per RFC 9110 / OpenAPI convention. `request.url`
+      // is the path portion of the current request (e.g.
+      // `/api/explore/inspirations`); strip the query string and a
+      // trailing slash, then append the new resource id.
+      const basePath = request.url.split("?", 1)[0].replace(/\/$/, "");
+      reply.header(
+        "Location",
+        `${request.protocol}://${request.hostname}${basePath}/${parsed.data.id}`,
+      );
+    }
+    return result;
+  } catch (err) {
+    // NOTE: Do NOT spread `parsed.data` or `request.body` into this log —
+    // `prompt` may contain proprietary prompting strategies and must stay
+    // out of structured logs. Add fields explicitly if more context is needed.
+    request.log.error(
+      {
+        event: "inspiration.seed_failed",
+        userId,
+        inspirationId: parsed.data.id,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "Failed to seed inspiration",
+    );
+    return internalError(reply, "Failed to seed inspiration.");
   }
 }

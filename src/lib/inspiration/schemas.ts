@@ -1,11 +1,68 @@
 import { z } from "zod";
+import { ID_PATTERN } from "../controller-helpers.js";
+import { env } from "../env.js";
 import {
   DESIGN_STYLE_VALUES,
   EXPLORE_DEFAULT_LIMIT,
   EXPLORE_MAX_LIMIT,
+  INSPIRATION_KIND_VALUES,
   ROOM_TYPE_VALUES,
   TOOL_TYPE_VALUES,
 } from "./types.js";
+
+/**
+ * Hosts the inspiration seed endpoint accepts in `imageUrl`. The author
+ * must upload the image to our own S3 (or the CloudFront distribution
+ * fronting it) before submitting the metadata write — arbitrary external
+ * URLs would let any admin (or attacker who acquires an admin token)
+ * point all iOS clients at attacker-controlled content.
+ *
+ * Built lazily so unit tests can stub `env` without import-time side
+ * effects, and so a future hostname change picks up on the next call
+ * without a restart.
+ */
+function allowedInspirationHosts(): readonly string[] {
+  const hosts: string[] = [];
+  if (env.AWS_CLOUDFRONT_HOST) {
+    hosts.push(env.AWS_CLOUDFRONT_HOST.toLowerCase());
+  }
+  // Virtual-hosted and path-style S3 hostnames. We expect virtual-hosted
+  // in practice (matches how uploaded generation URLs are built), but
+  // accept both so authors aren't tripped up by regional vs global form.
+  hosts.push(
+    `${env.AWS_S3_BUCKET}.s3.amazonaws.com`.toLowerCase(),
+    `${env.AWS_S3_BUCKET}.s3.${env.AWS_S3_REGION}.amazonaws.com`.toLowerCase(),
+  );
+  return hosts;
+}
+
+/**
+ * Refine an HTTPS URL to one of the allow-listed inspiration hosts.
+ * Rejects:
+ *  - non-https schemes (`data:`, `javascript:`, `ftp:`, `file:`, ...)
+ *  - non-default ports (`https://host:9000/...`) — S3 and CloudFront
+ *    don't serve on custom ports, and accepting them would let a caller
+ *    store URLs that resolve to broken images on AWS infrastructure.
+ *  - hostnames outside the env-configured allow-list
+ *
+ * Trailing-dot FQDNs (e.g. `bucket.s3.amazonaws.com.`) are normalized
+ * to their dot-less form before the allow-list comparison so authors
+ * who paste from AWS console (which sometimes emits FQDNs) aren't
+ * tripped by an opaque rejection.
+ */
+function isAllowedInspirationUrl(raw: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:") return false;
+  // Non-empty port means a non-default port was specified.
+  if (parsed.port !== "") return false;
+  const normalizedHost = parsed.hostname.toLowerCase().replace(/\.$/, "");
+  return allowedInspirationHosts().includes(normalizedHost);
+}
 
 /** Zod enum for filter query params (and admin writes). The spread literal
  *  preserves Zod's tuple non-emptiness check that an `as unknown as ...`
@@ -14,8 +71,6 @@ export const RoomTypeSchema = z.enum([...ROOM_TYPE_VALUES]);
 export const DesignStyleSchema = z.enum([...DESIGN_STYLE_VALUES]);
 export const ToolTypeSchema = z.enum([...TOOL_TYPE_VALUES]);
 
-const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
-
 /** A trimmed, sane URL accepted both for source images and CDN-fronted ones. */
 const ImageUrlSchema = z
   .string()
@@ -23,27 +78,56 @@ const ImageUrlSchema = z
   .url()
   .max(2048);
 
-/**
- * Validation of a freshly authored Inspiration document. Used by admin/seed
- * code paths; the iOS client never writes inspirations directly.
- */
-export const InspirationWriteSchema = z.object({
-  id: z.string().regex(ID_PATTERN).optional(),
-  roomType: RoomTypeSchema,
-  designStyle: DesignStyleSchema,
-  toolType: ToolTypeSchema,
-  tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
-  imageUrl: ImageUrlSchema,
-  cdnUrl: ImageUrlSchema.nullable().optional(),
-  featured: z.boolean().default(false),
-  sourceGenerationId: z
-    .string()
-    .regex(ID_PATTERN)
-    .nullable()
-    .optional(),
-});
+// MARK: - Envelope seed (iOS plan 2026-05-12-001)
+//
+// Body schema for the admin seed endpoint that writes the new `InspirationDoc`
+// envelope shape (see `types.ts`). Image upload to S3 is out of scope —
+// the caller hands in a pre-uploaded `imageUrl` plus pixel dimensions, and
+// the seeder writes the Firestore document.
 
-export type InspirationWriteInput = z.infer<typeof InspirationWriteSchema>;
+/** Per-tool taxonomy axes are loose strings on input — the iOS app may ship
+ *  a new raw value before this schema's enum catches up. The seeder
+ *  preserves them verbatim under `taxonomy.*` in the Firestore envelope. */
+const TaxonomyStringSchema = z.string().trim().min(1).max(64).nullable().optional();
+
+/**
+ * Body schema for `POST /explore/inspirations` — one inspiration row per
+ * request. Mirrors `InspirationSeedInput` (see
+ * `src/lib/inspiration/seedShape.ts`). Strict (`.strict()`) so a typo in
+ * an envelope field is rejected at the edge rather than silently dropped.
+ */
+export const InspirationSeedInputSchema = z
+  .object({
+    id: z.string().regex(ID_PATTERN),
+    kind: z.enum([...INSPIRATION_KIND_VALUES]).optional(),
+    toolType: ToolTypeSchema,
+    designStyle: DesignStyleSchema,
+    roomType: TaxonomyStringSchema,
+    buildingType: TaxonomyStringSchema,
+    gardenStyle: TaxonomyStringSchema,
+    patioStyle: TaxonomyStringSchema,
+    poolStyle: TaxonomyStringSchema,
+    outdoorLightingStyle: TaxonomyStringSchema,
+    colorPaletteId: TaxonomyStringSchema,
+    tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+    featured: z.boolean().optional(),
+    imageUrl: ImageUrlSchema.refine(isAllowedInspirationUrl, {
+      message:
+        "imageUrl host is not allowed. Upload the image to the configured S3 bucket (or its CloudFront distribution) first.",
+    }),
+    imageWidth: z.number().int().positive().max(20_000),
+    imageHeight: z.number().int().positive().max(20_000),
+    imageMime: z
+      .string()
+      .trim()
+      .regex(/^image\/[a-z0-9.+-]+$/i, "imageMime must be an image/* MIME type")
+      .max(64)
+      .optional(),
+    prompt: z.string().trim().min(1).max(8000).optional(),
+  })
+  .strict();
+
+export type InspirationSeedInput = z.infer<typeof InspirationSeedInputSchema>;
 
 // MARK: - Cursor
 //

@@ -30,6 +30,15 @@ export const inspirationSchema = {
     featured: { type: "boolean" as const },
     sourceGenerationId: { type: ["string", "null"] as const },
     createdAt: { type: "string" as const, format: "date-time" },
+    // Envelope fields (iOS plan 2026-05-12-001). Surfaced on the DTO so
+    // POST-then-GET round-trips show what the seeder wrote. Nullable for
+    // legacy flat-shape docs that pre-date the envelope migration.
+    kind: { type: ["string", "null"] as const },
+    imageWidth: { type: ["integer", "null"] as const },
+    imageHeight: { type: ["integer", "null"] as const },
+    imageMime: { type: ["string", "null"] as const },
+    prompt: { type: ["string", "null"] as const },
+    schemaVersion: { type: ["integer", "null"] as const },
   },
   required: [
     "id",
@@ -42,5 +51,11 @@ export const inspirationSchema = {
     "featured",
     "sourceGenerationId",
     "createdAt",
+    "kind",
+    "imageWidth",
+    "imageHeight",
+    "imageMime",
+    "prompt",
+    "schemaVersion",
   ] as const,
 };
