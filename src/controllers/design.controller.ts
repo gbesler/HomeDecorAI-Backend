@@ -228,8 +228,31 @@ export function makeCreateGenerationHandler<TParams>(
       }
     }
 
+    // Tool-specific async pre-enqueue gate. Re-validates mutable
+    // server-side state (e.g. `objectInspirations/{id}.active == true`)
+    // and can substitute server-authoritative fields into the params
+    // blob (e.g. swap the client-supplied `prompt` for the curated
+    // Firestore prompt). Returning `ok: false` short-circuits with the
+    // specified status code — `409 CONTENT_UNAVAILABLE` for deactivated
+    // inspirations is the load-bearing case (plan R6).
+    let activeToolBody = toolBody as TParams;
+    if (tool.preEnqueueValidate) {
+      const result = await tool.preEnqueueValidate(activeToolBody);
+      if (!result.ok) {
+        reply.code(result.status);
+        return {
+          error: result.code,
+          message: result.message,
+        };
+      }
+      if (result.params !== undefined) {
+        activeToolBody = result.params;
+      }
+    }
+    const activeBodyRecord = activeToolBody as Record<string, unknown>;
+
     const primaryImageField = tool.imageUrlFields[0];
-    const imageUrl = bodyRecord[primaryImageField] as string;
+    const imageUrl = activeBodyRecord[primaryImageField] as string;
 
     const acceptLanguageHeader =
       typeof request.headers["accept-language"] === "string"
@@ -242,11 +265,14 @@ export function makeCreateGenerationHandler<TParams>(
     );
     const generationId = randomUUID();
 
-    // Tool-specific projection. The processor will round-trip this back via
-    // `tool.fromToolParams` — it never touches tool-specific fields directly.
-    // Pass `toolBody` (language stripped) so the persisted blob does not
-    // duplicate the language column written separately on the doc.
-    const toolParams = tool.toToolParams(toolBody as TParams);
+    // Tool-specific projection. The processor will round-trip this back
+    // via `tool.fromToolParams` — it never touches tool-specific fields
+    // directly. Pass `activeToolBody` (post-`preEnqueueValidate`
+    // substitution, language stripped) so the persisted blob carries
+    // server-authoritative fields (e.g. the canonical Firestore prompt
+    // rather than the client-supplied one) and does not duplicate the
+    // language column written separately on the doc.
+    const toolParams = tool.toToolParams(activeToolBody);
 
     // Legacy interior top-level mirror: only interiorDesign populates these
     // so the iOS history view continues to read them for existing docs.
@@ -417,8 +443,31 @@ export function makeSyncGenerationHandler<TParams>(
       }
     }
 
+    // Tool-specific async pre-enqueue gate. Re-validates mutable
+    // server-side state (e.g. `objectInspirations/{id}.active == true`)
+    // and can substitute server-authoritative fields into the params
+    // blob (e.g. swap the client-supplied `prompt` for the curated
+    // Firestore prompt). Returning `ok: false` short-circuits with the
+    // specified status code — `409 CONTENT_UNAVAILABLE` for deactivated
+    // inspirations is the load-bearing case (plan R6).
+    let activeToolBody = toolBody as TParams;
+    if (tool.preEnqueueValidate) {
+      const result = await tool.preEnqueueValidate(activeToolBody);
+      if (!result.ok) {
+        reply.code(result.status);
+        return {
+          error: result.code,
+          message: result.message,
+        };
+      }
+      if (result.params !== undefined) {
+        activeToolBody = result.params;
+      }
+    }
+    const activeBodyRecord = activeToolBody as Record<string, unknown>;
+
     const primaryImageField = tool.imageUrlFields[0];
-    const imageUrl = bodyRecord[primaryImageField] as string;
+    const imageUrl = activeBodyRecord[primaryImageField] as string;
 
     const acceptLanguageHeader =
       typeof request.headers["accept-language"] === "string"
@@ -431,7 +480,7 @@ export function makeSyncGenerationHandler<TParams>(
     );
     const generationId = randomUUID();
 
-    const toolParams = tool.toToolParams(toolBody as TParams);
+    const toolParams = tool.toToolParams(activeToolBody);
 
     const legacyRoomType =
       tool.toolKey === "interiorDesign"

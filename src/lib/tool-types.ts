@@ -1,6 +1,7 @@
 import type { FastifySchema } from "fastify";
 import { type z } from "zod";
 import { env } from "./env.js";
+import { getActiveObjectInspirationOrNull } from "./objectInspiration/firestore.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
   buildExteriorPrompt,
@@ -199,7 +200,39 @@ export interface ToolTypeConfig<
    * controls (none today, but the opt-in shape keeps it that way).
    */
   clientUploadFields?: readonly (keyof TParams & string)[];
+  /**
+   * Optional async pre-enqueue gate. Runs after body validation + image-URL
+   * checks but before `createQueuedGeneration`. Use it to re-validate
+   * mutable server-side state (e.g. that an `inspirationId` is still
+   * `active==true`) and to substitute server-authoritative values into the
+   * params blob (e.g. swap the client-supplied `prompt` for the canonical
+   * Firestore prompt). On `ok: false`, the controller returns the
+   * specified status code with `{ error: code, message }`.
+   *
+   * Introduced by the object-inspirations migration (plan Unit 3 / R6):
+   * the AI generation endpoint MUST honour admin deactivations between
+   * snapshot and submit. Without this hook, deactivated content reaches
+   * the AI provider.
+   */
+  preEnqueueValidate?: (
+    params: TParams,
+  ) => Promise<PreEnqueueValidateResult<TParams>>;
 }
+
+/** Outcome of `ToolTypeConfig.preEnqueueValidate`. */
+export type PreEnqueueValidateResult<TParams> =
+  | {
+      ok: true;
+      /** Substituted params (e.g. server-authoritative prompt). When omitted,
+       *  the original params are used unchanged. */
+      params?: TParams;
+    }
+  | {
+      ok: false;
+      status: 400 | 404 | 409;
+      code: string;
+      message: string;
+    };
 
 // ─── Interior prompt dispatch (legacy safety valve) ─────────────────────────
 
@@ -1304,6 +1337,36 @@ export const TOOL_TYPES = {
     // rogue client cannot hand Flux Fill an arbitrary URL (SSRF beacon +
     // retry-storm amplification).
     clientUploadFields: ["imageUrl", "maskUrl"] as const,
+    // Server-side moderation gate (plan R6). The client may have selected
+    // an inspiration that the admin deactivated after the snapshot
+    // listener cached it. Re-fetch from `objectInspirations/{id}` and
+    // reject with 409 if it is missing or `active: false`. On success,
+    // substitute the canonical `prompt` from Firestore so a jailbroken /
+    // proxy-modified client cannot inject an arbitrary prompt while
+    // still passing the curated `inspirationId`.
+    preEnqueueValidate: async (params) => {
+      const doc = await getActiveObjectInspirationOrNull(params.inspirationId);
+      if (doc === null) {
+        return {
+          ok: false,
+          status: 409,
+          code: "CONTENT_UNAVAILABLE",
+          message:
+            "Selected inspiration is no longer available. Please pick another.",
+        };
+      }
+      // Substitute server-authoritative prompt + categoryId so the
+      // generation runs against curated content even if the client body
+      // tried to ride along with stale or hand-crafted values.
+      return {
+        ok: true,
+        params: {
+          ...params,
+          prompt: doc.prompt,
+          categoryId: doc.categoryId,
+        },
+      };
+    },
   } satisfies ToolTypeConfig<
     z.infer<typeof CreateReplaceAddObjectBody>,
     PromptResult

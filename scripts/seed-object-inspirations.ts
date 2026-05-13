@@ -23,10 +23,11 @@
  * `--service-account=` overrides for cases where the env can't be
  * pre-set (e.g. one terminal targets staging, another prod).
  *
- * The HTTP endpoints (POST/PATCH/DELETE in `routes/objectInspirations.ts`)
- * are independent — they exist for future admin-panel / Swagger usage
- * and use the `requireAdminClaim` middleware. Bulk seed bypasses HTTP
- * entirely because it's an ops job, not a user-facing operation.
+ * There are NO HTTP endpoints for object inspirations. iOS reads
+ * Firestore directly via snapshot listeners; this script is the only
+ * write path. If a future admin web panel ships, it will get its own
+ * HTTP routes at that point — until then, every catalog mutation
+ * runs through this script (or a direct Admin SDK invocation).
  */
 
 import { readFile } from "node:fs/promises";
@@ -373,6 +374,20 @@ async function main(): Promise<void> {
   const all = [...categoryOutcomes, ...itemOutcomes];
   const summary = summarize(all);
   console.error(`[seed] summary: ${JSON.stringify(summary)}`);
+
+  // Item-phase failures don't abort the batch (item N+1 may still
+  // succeed against the partially-failed state), so surface the
+  // failed ids loudly so an operator can target a re-seed instead of
+  // assuming "exit 1 = redo everything".
+  const itemFailures = itemOutcomes.filter((o) => o.status === "failed");
+  if (itemFailures.length > 0) {
+    console.error(
+      `[seed] WARNING: ${itemFailures.length} item(s) failed mid-batch — catalog may be incomplete. Re-run with the same manifest to fill gaps. Failed ids:`,
+    );
+    for (const o of itemFailures) {
+      console.error(`  - ${o.id}${o.reason ? ` (${o.reason})` : ""}`);
+    }
+  }
 
   process.exit(summary.failed > 0 ? 1 : 0);
 }
