@@ -1,7 +1,7 @@
 import type { FastifySchema } from "fastify";
 import { type z } from "zod";
 import { env } from "./env.js";
-import { getActiveObjectInspirationOrNull } from "./objectInspiration/firestore.js";
+import { getObjectInspirationOrNull } from "./objectInspiration/firestore.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
   buildExteriorPrompt,
@@ -1350,16 +1350,34 @@ export const TOOL_TYPES = {
     // rogue client cannot hand Flux Fill an arbitrary URL (SSRF beacon +
     // retry-storm amplification).
     clientUploadFields: ["imageUrl", "maskUrl"] as const,
-    // Server-side moderation gate (plan R6). The client may have selected
-    // an inspiration that the admin deactivated after the snapshot
-    // listener cached it. Re-fetch from `objectInspirations/{id}` and
-    // reject with 409 if it is missing or `active: false`. On success,
-    // substitute the canonical `prompt` from Firestore so a jailbroken /
-    // proxy-modified client cannot inject an arbitrary prompt while
-    // still passing the curated `inspirationId`.
+    // Server-side moderation gate (plan R6). Three cases:
+    //
+    //   1. Doc doesn't exist in Firestore at all → bundled-enum mode
+    //      (the iOS catalog flag is OFF and the wizard sourced the
+    //      inspiration from the bundled `InspirationCategory` enum).
+    //      Trust the client's `prompt` and `categoryId` and fall
+    //      through — Firestore has no curated record to substitute,
+    //      and rejecting would break the legacy path that was working
+    //      before this migration.
+    //
+    //   2. Doc exists but `active: false` → genuine admin
+    //      deactivation between snapshot and submit. Return 409 so
+    //      iOS surfaces the "item no longer available" recovery copy.
+    //      This is the moderation gap the plan's R6 closes.
+    //
+    //   3. Doc exists and `active: true` → substitute the canonical
+    //      `prompt` + `categoryId` from Firestore so a jailbroken or
+    //      proxy-modified client cannot inject an arbitrary prompt
+    //      while still passing a curated `inspirationId`.
     preEnqueueValidate: async (params) => {
-      const doc = await getActiveObjectInspirationOrNull(params.inspirationId);
+      const doc = await getObjectInspirationOrNull(params.inspirationId);
       if (doc === null) {
+        // Case 1: bundled-enum mode. No Firestore record to gate
+        // against — trust the client body unchanged.
+        return { ok: true };
+      }
+      if (!doc.active) {
+        // Case 2: deactivated after snapshot.
         return {
           ok: false,
           status: 409,
@@ -1368,9 +1386,7 @@ export const TOOL_TYPES = {
             "Selected inspiration is no longer available. Please pick another.",
         };
       }
-      // Substitute server-authoritative prompt + categoryId so the
-      // generation runs against curated content even if the client body
-      // tried to ride along with stale or hand-crafted values.
+      // Case 3: active. Server-authoritative substitution.
       return {
         ok: true,
         params: {

@@ -176,6 +176,13 @@ export async function getObjectInspiration(
  * the controller maps this to `409 content_unavailable`, which iOS turns
  * into the "item no longer available" wizard state. This is the
  * moderation gate that closes the deactivated-content-reaches-AI gap.
+ *
+ * **Use carefully:** this collapses "doesn't exist" and "exists but
+ * inactive" into the same `null` return. The AI submit gate in
+ * `tool-types.ts:replaceAddObject.preEnqueueValidate` distinguishes
+ * the two via `getObjectInspirationOrNull` (below) so the bundled-
+ * enum mode (where Firestore has no doc for any id) doesn't get
+ * misclassified as deactivated content.
  */
 export async function getActiveObjectInspirationOrNull(
   id: string,
@@ -184,6 +191,21 @@ export async function getActiveObjectInspirationOrNull(
   if (!snap.exists) return null;
   const item = mapDocToObjectInspiration(snap);
   return item.active ? item : null;
+}
+
+/**
+ * Lookup without the `active` filter — returns `null` only when the
+ * document doesn't exist at all, returns the decoded doc whether
+ * `active` is true or false. The AI submit gate uses this to
+ * distinguish bundled-mode requests (no Firestore docs seeded yet)
+ * from genuine deactivations.
+ */
+export async function getObjectInspirationOrNull(
+  id: string,
+): Promise<ObjectInspirationItemDoc | null> {
+  const snap = await inspirationsRef().doc(id).get();
+  if (!snap.exists) return null;
+  return mapDocToObjectInspiration(snap);
 }
 
 // MARK: - Writes
