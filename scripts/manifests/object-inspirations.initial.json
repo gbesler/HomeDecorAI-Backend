@@ -1,0 +1,68 @@
+{
+  "$comment": "Phase 1 pilot seed (2 sample categories × 2 sample items). Real Phase 2 content team will expand this to 40 × ~20. Image URLs here use placeholder hostnames — replace with your actual CloudFront distribution before running.",
+  "categories": [
+    {
+      "id": "sofas",
+      "order": 0,
+      "active": true,
+      "title": { "en": "Sofas", "tr": "Koltuklar" },
+      "heroImageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/hero.jpg",
+      "heroImageWidth": 1200,
+      "heroImageHeight": 800,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    },
+    {
+      "id": "lamps",
+      "order": 1,
+      "active": true,
+      "title": { "en": "Lamps", "tr": "Lambalar" },
+      "heroImageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/lamps/hero.jpg",
+      "heroImageWidth": 1200,
+      "heroImageHeight": 800,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    }
+  ],
+  "items": [
+    {
+      "id": "sofas_1",
+      "categoryId": "sofas",
+      "order": 0,
+      "active": true,
+      "title": { "en": "Sectional Sofa", "tr": "Köşe Koltuk" },
+      "prompt": "A modern sectional sofa for a living room",
+      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/sofas_1.jpg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    },
+    {
+      "id": "sofas_2",
+      "categoryId": "sofas",
+      "order": 1,
+      "active": true,
+      "title": { "en": "Chesterfield Sofa", "tr": "Chesterfield Koltuk" },
+      "prompt": "A leather Chesterfield sofa with tufted upholstery",
+      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/sofas_2.jpg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    },
+    {
+      "id": "lamps_1",
+      "categoryId": "lamps",
+      "order": 0,
+      "active": true,
+      "title": { "en": "Floor Lamp", "tr": "Yer Lambası" },
+      "prompt": "A minimalist tripod floor lamp",
+      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/lamps/lamps_1.jpg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    }
+  ]
+}
