@@ -50,7 +50,13 @@ function allowedInspirationHosts(): readonly string[] {
  * who paste from AWS console (which sometimes emits FQDNs) aren't
  * tripped by an opaque rejection.
  */
-function isAllowedInspirationUrl(raw: string): boolean {
+/**
+ * Exported for reuse by `objectInspiration/schemas.ts` (Object inspirations
+ * share the same S3 bucket + CloudFront distribution as Explorer
+ * inspirations). If a future content type needs a different origin set,
+ * parameterize the host source then.
+ */
+export function isAllowedInspirationUrl(raw: string): boolean {
   let parsed: URL;
   try {
     parsed = new URL(raw);

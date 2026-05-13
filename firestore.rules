@@ -56,6 +56,27 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ─── Object inspirations: active-only public-read ─────────────────────
+    // Replace & Add Object wizard catalog (categories + items). Soft
+    // delete (PATCH active=false) hides docs from iOS clients at the
+    // rules level — defense-in-depth on top of the client-side
+    // `.whereField("active", isEqualTo: true)` listener query. Admin
+    // writes go through the backend admin SDK; client writes blocked.
+    //
+    // NOTE: iOS listener MUST scope its query to `active == true` or the
+    // listener will receive `permission-denied` for any doc whose
+    // `active` is false (which is most of the soft-deleted backlog) and
+    // can terminate the stream. The client query and the rules predicate
+    // are intentionally aligned.
+    match /objectCategories/{categoryId} {
+      allow read: if resource.data.active == true;
+      allow write: if false;
+    }
+    match /objectInspirations/{inspirationId} {
+      allow read: if resource.data.active == true;
+      allow write: if false;
+    }
+
     // ─── Public config (revcat, mixpanel, aws) ────────────────────────────
     // The iOS ConfigService reads these documents at launch. They contain
     // public, non-sensitive SDK configuration — no secrets.
