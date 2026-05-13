@@ -1,10 +1,14 @@
 import type { FastifyPluginAsync } from "fastify";
-import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
+import {
+  createConcurrencyPreHandler,
+  createRateLimitPreHandler,
+} from "../lib/rate-limiter.js";
 import {
   getHistory,
   makeCreateGenerationHandler,
   makeSyncGenerationHandler,
   retryGeneration,
+  deleteGenerations,
 } from "../controllers/design.controller.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 
@@ -54,9 +58,9 @@ const enqueueResponseSchemas = {
     properties: {
       error: { type: "string" as const },
       message: { type: "string" as const },
-      retryAfterMs: {
+      retryAfter: {
         type: "number" as const,
-        description: "Milliseconds until the rate limit resets",
+        description: "Seconds until the rate limit resets (mirrors the Retry-After header)",
       },
     },
     required: ["error", "message"] as const,
@@ -116,7 +120,7 @@ const syncResponseSchemas = {
     properties: {
       error: { type: "string" as const },
       message: { type: "string" as const },
-      retryAfterMs: { type: "number" as const },
+      retryAfter: { type: "number" as const },
     },
     required: ["error", "message"] as const,
   },
@@ -232,6 +236,12 @@ const historyResponseSchemas = {
 // ─── Routes ────────────────────────────────────────────────────────────────
 
 const designRoutes: FastifyPluginAsync = async (app) => {
+  // Per-user concurrency cap shared across every generation route (async
+  // tool POST, sync variant, and retry). Two slots leave room for a quick
+  // before/after compare without letting a single user hold the worker
+  // pool open across many /sync requests.
+  const concurrencyLimit = createConcurrencyPreHandler();
+
   // Registry-driven enqueue routes. Adding a new tool is a config-only change:
   // register it in `TOOL_TYPES` and this loop produces the route.
   //
@@ -256,6 +266,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         preHandler: [
           app.authenticate,
           createRateLimitPreHandler(tool.rateLimitKey),
+          concurrencyLimit,
         ],
       },
       makeCreateGenerationHandler(tool),
@@ -281,6 +292,7 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         preHandler: [
           app.authenticate,
           createRateLimitPreHandler(tool.rateLimitKey),
+          concurrencyLimit,
         ],
       },
       makeSyncGenerationHandler(tool),
@@ -329,9 +341,12 @@ const designRoutes: FastifyPluginAsync = async (app) => {
       // Retry shares the per-tool rate-limit pattern but with its own key.
       // Retry bypasses freemium, so the gate against provider-cost abuse
       // is this limiter alone. See `rateLimits.retry` for cap rationale.
+      // Concurrency cap also applies — a retry holds an in-flight slot
+      // identical to a fresh generation.
       preHandler: [
         app.authenticate,
         createRateLimitPreHandler("retry"),
+        concurrencyLimit,
       ],
     },
     retryGeneration,
@@ -360,9 +375,67 @@ const designRoutes: FastifyPluginAsync = async (app) => {
         },
         response: historyResponseSchemas,
       },
-      preHandler: [app.authenticate],
+      preHandler: [app.authenticate, createRateLimitPreHandler("historyRead")],
     },
     getHistory,
+  );
+
+  app.delete(
+    "/generations",
+    {
+      schema: {
+        tags: ["Design"],
+        summary: "Delete multiple generations",
+        description:
+          "Deletes the specified generations owned by the authenticated user. " +
+          "Returns the count of deleted items and any IDs that were not found or not owned.",
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
+        body: {
+          type: "object" as const,
+          properties: {
+            generationIds: {
+              type: "array" as const,
+              items: { type: "string" as const },
+              minItems: 1,
+              maxItems: 50,
+              description: "Array of generation IDs to delete (max 50)",
+            },
+          },
+          required: ["generationIds"] as const,
+        },
+        response: {
+          200: {
+            type: "object" as const,
+            description: "Delete operation completed",
+            properties: {
+              deletedCount: {
+                type: "number" as const,
+                description: "Number of generations successfully deleted",
+              },
+              notFoundIds: {
+                type: "array" as const,
+                items: { type: "string" as const },
+                description: "IDs that were not found in the database",
+              },
+              foreignIds: {
+                type: "array" as const,
+                items: { type: "string" as const },
+                description: "IDs that belong to other users (not deleted)",
+              },
+            },
+            required: ["deletedCount", "notFoundIds", "foreignIds"] as const,
+          },
+          400: { ...errorResponse, description: "Invalid request body" },
+          401: { ...errorResponse, description: "Missing or invalid auth token" },
+          500: { ...errorResponse, description: "Failed to delete generations" },
+        },
+      },
+      preHandler: [
+        app.authenticate,
+        createRateLimitPreHandler("deleteGenerations"),
+      ],
+    },
+    deleteGenerations,
   );
 };
 

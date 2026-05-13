@@ -19,6 +19,9 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { poolStyles } from "../dictionaries/pool-styles.js";
+import { OUTDOOR_INPUT_DAYLIGHT_ANCHOR } from "../primitives/lighting-anchors.js";
+import { buildStyleCore } from "../primitives/style-core.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
@@ -31,8 +34,8 @@ import type {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const PROMPT_VERSION_CURRENT = "poolDesign/v1.1";
-const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1.1";
+const PROMPT_VERSION_CURRENT = "poolDesign/v1.2";
+const PROMPT_VERSION_FALLBACK = "poolDesign/fallback-v1.2";
 
 const PRIMARY_MODEL = "prunaai/p-image-edit";
 const PRIMARY_MAX_TOKENS =
@@ -50,15 +53,12 @@ export function buildPoolPrompt(params: PoolParams): PromptResult {
   const styleEntry = poolStyles[poolStyle as keyof typeof poolStyles];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "poolDesign",
-        poolStyle,
-        fallback: "generic",
-      },
-      "Unknown poolStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "poolDesign",
+      kind: "style",
+      fields: { poolStyle },
+      message: "Unknown poolStyle — using generic fallback",
+    });
     return buildPoolGenericFallback();
   }
 
@@ -72,19 +72,26 @@ function compose(style: StyleEntry): PromptResult {
 
   // Apply the aesthetic to finishes and surround only. Structural-preservation
   // primitive locks the pool shape, edges, and camera angle; this directive
-  // scopes the restyle so the model does not alter geometry or composition.
+  // scopes the restyle to surface-only changes.
+  //
+  // Phrasing rule: positive framing only — the prior wording included "Do not
+  // change the pool shape, edges, or camera angle", which is the negation
+  // anti-pattern Flux/Klein biases toward. Geometry/frame preservation lives
+  // in the structural-preservation primitive; the action directive now states
+  // the scope as a positive boundary.
   const actionDirective =
     `Apply a ${style.coreAesthetic} aesthetic to this swimming pool scene. ` +
-    `Update only the coping finish, interior tile/plaster finish, decking material, ` +
-    `and surround planting. Do not change the pool shape, edges, or camera angle.`;
+    `Restyle only the coping finish, interior tile/plaster finish, decking material, ` +
+    `and surround planting; the pool footprint, edges, waterline, and camera framing ` +
+    `remain identical to the input photograph.`;
 
-  const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail = `Materials and surround: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 
   // Anchor lighting to the input photograph. `style.lightingCharacter`
   // omitted to prevent contradiction with the original frame's time of day.
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,
@@ -104,7 +111,7 @@ function buildPoolGenericFallback(): PromptResult {
 
   const styleDetail = `Materials and surround: travertine or stone coping, pebble pool interior, stone or timber decking, understated planting. Signature features: a clean pool edge, a pair of loungers on the deck, soft planting framing the surround.`;
 
-  const lighting = `Natural outdoor daylight consistent with the input photograph.`;
+  const lighting = OUTDOOR_INPUT_DAYLIGHT_ANCHOR;
 
   return composeLayers(
     actionDirective,

@@ -31,8 +31,13 @@ export function buildStructuralPreservation(subject: Subject): string {
     case "interior":
       return (
         "Maintain identical wall positions, window count, window shapes, " +
-        "ceiling height, door placements, floor plan, camera angle, lens perspective, " +
-        "and vanishing points. Keep the room geometry exactly as it is."
+        "ceiling height, and floor plan. Keep every visible doorway, door, " +
+        "doorframe, threshold, and hinged opening exactly as it appears in the " +
+        "source image. Keep electrical outlets, light switches, vents, mouldings, " +
+        "and trim in their existing positions. Keep ceiling features including " +
+        "beams, coffers, and skylights identical. Keep the camera angle, lens, " +
+        "framing, vanishing points, and field of view exactly the same as the " +
+        "source image."
       );
 
     case "exterior":

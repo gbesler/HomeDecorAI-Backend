@@ -47,6 +47,11 @@ export interface CircuitBreakerStats {
 const DEFAULT_BUFFER_SIZE = 20;
 const DEFAULT_ERROR_THRESHOLD_PERCENT = 30;
 const DEFAULT_RECOVERY_SUCCESS_PERCENT = 90;
+// Don't evaluate the breaker until we have a meaningful sample. With the
+// previous floor of 3, a single primary failure followed by 2 successes
+// (33% error rate) was enough to trip the circuit — far too aggressive
+// for a healthy service that just hit one transient timeout.
+const MIN_EVAL_SAMPLES = 10;
 
 export class CircuitBreaker {
   readonly name: string;
@@ -142,7 +147,7 @@ export class CircuitBreaker {
   }
 
   private evaluateClosed(): void {
-    if (this.buffer.length < 3) return;
+    if (this.buffer.length < MIN_EVAL_SAMPLES) return;
 
     const errorCount = this.buffer.filter((r) => !r.success).length;
     const errorRate = (errorCount / this.buffer.length) * 100;

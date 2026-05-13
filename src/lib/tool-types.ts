@@ -27,6 +27,7 @@ import {
   buildInteriorPrompt,
   type InteriorParams,
 } from "./prompts/tools/interior-design.js";
+import { buildInteriorPromptV2 } from "./prompts/tools/interior-design-v2.js";
 import {
   buildFloorRestylePrompt,
   type FloorRestyleParams,
@@ -234,13 +235,33 @@ export type PreEnqueueValidateResult<TParams> =
       message: string;
     };
 
-// ─── Interior prompt dispatch (legacy safety valve) ─────────────────────────
+// ─── Interior prompt dispatch ──────────────────────────────────────────────
+//
+// Three-way switch driven by PROMPT_BUILDER_VERSION:
+//   - "legacy" → buildInteriorPromptLegacy (D17 F2 escape hatch)
+//   - "v1"     → buildInteriorPrompt       (current default)
+//   - "v2"     → buildInteriorPromptV2     (head-layer preservation,
+//                                            preservationHint, changeBudget)
+//
+// Flip at runtime to roll forward to v2 after staging burn-in, or back to
+// v1/legacy without a code deploy. See
+// docs/runbooks/interior-prompt-version-rollout.md.
 
 function buildInteriorPromptDispatch(params: InteriorParams): PromptResult {
-  if (env.PROMPT_BUILDER_VERSION === "legacy") {
-    return buildInteriorPromptLegacy(params);
+  const version = env.PROMPT_BUILDER_VERSION;
+  switch (version) {
+    case "legacy":
+      return buildInteriorPromptLegacy(params);
+    case "v1":
+      return buildInteriorPrompt(params);
+    case "v2":
+      return buildInteriorPromptV2(params);
   }
-  return buildInteriorPrompt(params);
+  // Exhaustiveness check — adding a new PROMPT_BUILDER_VERSION value to
+  // env.ts without updating this switch fails compilation here rather
+  // than silently routing to v1.
+  const _exhaustive: never = version;
+  throw new Error(`unreachable PROMPT_BUILDER_VERSION: ${_exhaustive as string}`);
 }
 
 // ─── Shared primitives for JSON schemas ────────────────────────────────────
@@ -924,7 +945,6 @@ const virtualStagingBodyJsonSchema = {
     "roomType",
     "designStyle",
     "colorPalette",
-    "stagingMode",
   ] as const,
   properties: {
     imageUrl: {
@@ -948,12 +968,6 @@ const virtualStagingBodyJsonSchema = {
       enum: STAGING_PALETTES,
       description:
         "Color palette id. `surpriseMe` lets the style drive the palette.",
-    },
-    stagingMode: {
-      type: "string" as const,
-      enum: ["keepLayout", "fullStaging"] as const,
-      description:
-        "keepLayout: preserve any existing furniture, add complementary pieces. fullStaging: stage as if the room were empty.",
     },
     language: {
       type: "string" as const,
@@ -1197,7 +1211,7 @@ export const TOOL_TYPES = {
     bodyJsonSchema: virtualStagingBodyJsonSchema,
     summary: "Enqueue a virtual staging transformation",
     description:
-      "Stages empty or sparsely furnished rooms with furniture and decor. Unlike Interior Design which transforms existing furnishings, this tool adds furniture to empty spaces. Supports two modes: `keepLayout` preserves existing furniture and adds complementary pieces; `fullStaging` stages the room as if empty. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+      "Stages empty or sparsely furnished rooms with furniture and decor. Unlike Interior Design which transforms existing furnishings, this tool adds furniture to empty spaces, treating the room as if empty and furnishing it from scratch. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
     buildPrompt: buildVirtualStagingPrompt,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateVirtualStagingBody.parse(raw),
@@ -1237,18 +1251,17 @@ export const TOOL_TYPES = {
     toolKey: "cleanOrganize",
     routePath: "/clean-organize",
     rateLimitKey: "cleanOrganize",
-    // SAM 3 + LaMa pipeline: SAM 3 identifies clutter via concept prompt,
-    // LaMa extends the surrounding surface. Model slugs come from env
-    // (REPLICATE_SEGMENTATION_MODEL / REPLICATE_REMOVAL_MODEL and their
-    // FALAI_* fallbacks). The `models` fields below are decorative for
-    // this mode — the router reads env directly — but kept so the registry
-    // shape stays uniform and a rollback to mode="edit" stays trivial. We
-    // register the fal.ai segmentation slug here to make the fallback
-    // wiring visible alongside the primary.
-    mode: "segment-remove",
+    // Single-step instruction-driven edit (mode defaults to "edit"). Migrated
+    // from the SAM 3 + LaMa segment-remove pipeline in v4.0 (May 2026):
+    // SAM 3 returned all-zero masks for clutter-class concepts on real user
+    // rooms regardless of prompt taxonomy, so the two-stage approach was
+    // structurally untenable. Reuses the same instruction-edit models as the
+    // design tools (interiorDesign, exteriorDesign, etc.) — both slugs are
+    // already capability-registered with role="edit". See
+    // ~/.claude/plans/bence-yol-b-yi-velvet-badger.md for migration notes.
     models: {
       replicate: "prunaai/p-image-edit" as const,
-      falai: "fal-ai/sam-3/image",
+      falai: "fal-ai/flux-2/klein/9b/edit",
     },
     bodySchema: CreateCleanOrganizeBody,
     bodyJsonSchema: cleanOrganizeBodyJsonSchema,

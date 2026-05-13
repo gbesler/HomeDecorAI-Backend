@@ -26,6 +26,13 @@ const replicate = new Replicate({
 });
 
 const TIMEOUT_MS = 60_000;
+// Flux Fill on high-res inputs (e.g. 1144x2048) routinely runs 90-180s on
+// Replicate. The 60s default was firing AbortSignal.timeout before the
+// model finished, and the SDK with `useFileOutput: false` resolves the
+// aborted run to `null` instead of throwing — surfacing as
+// `provider.replicate.empty_response` and burning two retries before we
+// fell back to fal.ai. Match the realistic upper bound for the model.
+const INPAINT_TIMEOUT_MS = 240_000;
 
 export async function callReplicate(
   model: `${string}/${string}`,
@@ -389,16 +396,34 @@ export async function callInpaintReplicate(
     prompt: input.prompt,
   };
 
+  // Resolve guidance: caller value wins, then capabilities default, then
+  // omit the field. The capability default exists because Flux Fill Dev
+  // and Pro live on the same scale but want very different numbers
+  // (Dev ~60, Pro ~30 per BFL model cards). Hard-coding either in the
+  // prompt builder couples the builder to a model choice that is
+  // deploy-flippable via REPLICATE_INPAINT_MODEL.
+  //
+  // 0 is treated as "no caller override" — the Replace & Add Object
+  // builder (prompts/tools/replace-add-object.ts) sends 0 as a sentinel
+  // because PromptResult.guidanceScale is typed `number`, not
+  // `number | undefined`. Real Flux Fill guidance values live in the 1+
+  // range, so 0 has no legitimate meaning here.
+  const callerGuidance =
+    input.guidanceScale !== undefined && input.guidanceScale > 0
+      ? input.guidanceScale
+      : undefined;
+  const resolvedGuidance =
+    callerGuidance ?? capabilities?.defaultGuidanceScale;
   if (
-    input.guidanceScale !== undefined &&
+    resolvedGuidance !== undefined &&
     capabilities?.supportsGuidanceScale
   ) {
-    replicateInput.guidance = input.guidanceScale;
+    replicateInput.guidance = resolvedGuidance;
   }
 
   const output = (await replicate.run(model, {
     input: replicateInput,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(INPAINT_TIMEOUT_MS),
   })) as unknown;
 
   const durationMs = Date.now() - start;

@@ -72,10 +72,16 @@ const BASE_BY_SUBJECT: Record<AvoidanceSubject, string> = {
 
 const NEGATION_PATTERN = /\b(avoid|no|not|without|never|none)\b/i;
 
-function assertPositive(token: string): void {
+/**
+ * Reject any token containing a negation word. Exported so the startup
+ * dictionary validator can apply the same rule to `slotOverrides` values
+ * (which historically bypassed this check and shipped negations into the
+ * v1 airbnb prompt).
+ */
+export function assertPositive(token: string): void {
   if (NEGATION_PATTERN.test(token)) {
     throw new Error(
-      `positive-avoidance: extraToken "${token}" contains a negation word. ` +
+      `positive-avoidance: token "${token}" contains a negation word. ` +
         `Rephrase as a positive description of the desired output.`,
     );
   }

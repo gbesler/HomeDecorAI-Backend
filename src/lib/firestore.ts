@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { deleteOwnedS3Objects } from "./storage/s3-delete.js";
 import type {
   ClaimProcessingResult,
   CreateQueuedGenerationInput,
@@ -430,6 +431,71 @@ export async function getGenerationById(
   const snap = await db.collection(GENERATIONS_COLLECTION).doc(generationId).get();
   if (!snap.exists) return null;
   return mapDocToGeneration(snap);
+}
+
+/**
+ * Delete multiple generations by ID for a given user. Only deletes documents
+ * that belong to the specified user (ownership check). Returns the count of
+ * successfully deleted documents.
+ */
+export async function deleteGenerationsByIds(
+  userId: string,
+  generationIds: string[],
+): Promise<{ deletedCount: number; notFoundIds: string[]; foreignIds: string[] }> {
+  if (generationIds.length === 0) {
+    return { deletedCount: 0, notFoundIds: [], foreignIds: [] };
+  }
+
+  const db = getFirestore();
+  const notFoundIds: string[] = [];
+  const foreignIds: string[] = [];
+  const toDelete: string[] = [];
+  // URLs we own and should remove from S3 once the Firestore delete
+  // succeeds. Captured during ownership verification so we don't have to
+  // re-read the docs after they're gone.
+  const orphanedUrls: (string | null | undefined)[] = [];
+
+  // Verify ownership before deleting
+  for (const id of generationIds) {
+    const docRef = db.collection(GENERATIONS_COLLECTION).doc(id);
+    const snap = await docRef.get();
+    if (!snap.exists) {
+      notFoundIds.push(id);
+      continue;
+    }
+    const data = snap.data();
+    if (data?.["userId"] !== userId) {
+      foreignIds.push(id);
+      continue;
+    }
+    toDelete.push(id);
+    // Collect every URL field that could point at an object we own so the
+    // S3 cleanup pass below can free them. `s3KeyFromOwnedUrl` filters
+    // out anything that isn't on our bucket / CloudFront host.
+    orphanedUrls.push(
+      data?.["inputImageUrl"],
+      data?.["outputImageUrl"],
+      data?.["outputImageCDNUrl"],
+      data?.["tempOutputUrl"],
+      data?.["segmentationMaskUrl"],
+    );
+  }
+
+  // Batch delete owned documents
+  if (toDelete.length > 0) {
+    const batch = db.batch();
+    for (const id of toDelete) {
+      batch.delete(db.collection(GENERATIONS_COLLECTION).doc(id));
+    }
+    await batch.commit();
+
+    // Best-effort S3 cleanup. Runs after the Firestore commit so a delete
+    // failure here doesn't leave the user with a "still visible" record;
+    // any S3 errors are logged and swallowed inside `deleteOwnedS3Objects`.
+    await deleteOwnedS3Objects(orphanedUrls);
+  }
+
+  return { deletedCount: toDelete.length, notFoundIds, foreignIds };
 }
 
 /**

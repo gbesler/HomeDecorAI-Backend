@@ -64,6 +64,14 @@ try {
 // Start intervals only after validation passes
 const breakers = [designCircuitBreaker];
 
+// Heartbeat status log while the breaker is degraded. 30s was too chatty —
+// it produced a status line every half-minute for the entire duration of
+// an outage, drowning real signal in production logs. State *transitions*
+// already log via `transitionTo` and Slack notifications, so this interval
+// only exists as an "are we still degraded?" reminder. 5 minutes is
+// frequent enough to notice during an incident, infrequent enough not to
+// flood the log stream.
+const STATUS_INTERVAL_MS = 5 * 60 * 1000;
 const statusInterval = setInterval(() => {
   for (const breaker of breakers) {
     const state = breaker.getState();
@@ -82,7 +90,7 @@ const statusInterval = setInterval(() => {
       );
     }
   }
-}, 30_000);
+}, STATUS_INTERVAL_MS);
 
 const slackStatusInterval = setInterval(() => {
   for (const breaker of breakers) {

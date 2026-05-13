@@ -152,4 +152,49 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 50,
     dailyLimit: 200,
   },
+  // User profile writes (e.g. POST /users/me/fcm-token). Cheap Firestore
+  // upsert; cap mirrors albumWrite envelope so a flood cannot fan-out
+  // Firestore writes or thrash the user document.
+  userWrite: {
+    minuteLimit: 30,
+    hourlyLimit: 200,
+    dailyLimit: 1000,
+  },
+  // Generation history list reads (GET /design/history). Pure Firestore
+  // read with limit<=100. Mirrors albumRead/exploreRead — pull-to-refresh
+  // and tab-switch on iOS can fire several reads per minute under
+  // legitimate use.
+  historyRead: {
+    minuteLimit: 60,
+    hourlyLimit: 500,
+    dailyLimit: 2000,
+  },
+  // Pre-auth IP throttle. Applied to requests with no Bearer token and
+  // to requests whose Bearer token fails verifyIdToken. Stops invalid-
+  // token brute force from burning Firebase quota / CPU before the
+  // per-user limiter can engage. Authenticated requests do NOT count
+  // against this bucket so NAT-shared clients are not penalized.
+  unauthenticatedIp: {
+    minuteLimit: 60,
+    hourlyLimit: 600,
+    dailyLimit: 6000,
+  },
+  // Bulk delete generations. Firestore batch writes, no AI cost. Loose
+  // envelope but still capped to prevent enumeration/abuse. Max 50 IDs
+  // per request is enforced at the controller level.
+  deleteGenerations: {
+    minuteLimit: 10,
+    hourlyLimit: 50,
+    dailyLimit: 200,
+  },
+  // Account deletion. Cascades the entire user data tree (subcollections
+  // + generations) and removes the Firebase Auth user. Genuine usage is
+  // ~1/lifetime per account; the tight envelope is purely an abuse
+  // damper for credential-stuffing scenarios where a stolen token could
+  // otherwise wipe an account in a single call.
+  deleteAccount: {
+    minuteLimit: 2,
+    hourlyLimit: 5,
+    dailyLimit: 10,
+  },
 };

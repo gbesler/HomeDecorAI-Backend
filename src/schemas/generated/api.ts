@@ -492,9 +492,9 @@ export const CreateFloorRestyleBody = zod
 /**
  * Hand-edited — NOT produced by orval.
  *
- * Accepts a room photo URL + room type + style + color palette + staging mode.
+ * Accepts a room photo URL + room type + style + color palette.
  * Mirrors the iOS virtual staging wizard (VirtualStagingWizardViewModel,
- * RoomType, DesignStyle, ColorPalette.stagingPalettes, StagingColorMode).
+ * RoomType, DesignStyle, ColorPalette.stagingPalettes).
  *
  * Virtual Staging is designed for empty or sparsely furnished rooms — the AI
  * adds furniture and decor to stage the space, unlike Interior Design which
@@ -538,7 +538,6 @@ export const CreateVirtualStagingBody = zod.object({
   ]),
   designStyle: zod.enum(DESIGN_STYLE_VALUES),
   colorPalette: zod.enum(STAGING_PALETTE_VALUES),
-  stagingMode: zod.enum(["keepLayout", "fullStaging"]),
   language: zod.enum(["tr", "en"]).optional(),
 });
 

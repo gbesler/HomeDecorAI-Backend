@@ -30,6 +30,30 @@ import type { WallTexture } from "../../schemas/generated/types/wallTexture.js";
 export type ActionMode = "transform" | "overlay" | "target";
 
 /**
+ * How aggressively the v2 interior builder is permitted to change the room.
+ * Orthogonal to `actionMode`: actionMode picks the compose function,
+ * changeBudget picks the action verb + boundary clause inside `transform` mode.
+ *
+ * - `surface-only`: paint and finishes only; do not touch furniture.
+ *   Reserved for a future paint-only interior preset; no style uses this today.
+ * - `furniture-restyle`: restyle existing furniture in place. Do not add or
+ *   remove primary pieces. Default for v2 styles where the look reads through
+ *   palette and finish (modern, scandinavian, japandi, etc.).
+ * - `furniture-swap`: replace furniture, decor, and finishes wholesale.
+ *   For styles whose identity requires a recognizable piece (industrial
+ *   chesterfield, tropical rattan, artDeco fan-back).
+ * - `overlay`: add layered decor on top of the existing room (christmas).
+ *
+ * Read by `buildInteriorPromptV2` in tools/interior-design-v2.ts.
+ * v1 builder ignores this field entirely.
+ */
+export type ChangeBudget =
+  | "surface-only"
+  | "furniture-restyle"
+  | "furniture-swap"
+  | "overlay";
+
+/**
  * Guidance scale band. Maps to a numeric value per-provider at call time.
  * - `creative`: looser, more interpretive
  * - `balanced`: middle default
@@ -70,6 +94,18 @@ export interface StyleEntry {
   materials: string[];
   /** 2-3 style-defining furniture pieces. */
   signatureItems: string[];
+  /**
+   * Per-room overrides for `signatureItems`. When present for the chosen
+   * room, the override list replaces `signatureItems` in the style-detail
+   * layer. Authored for fixture-focused rooms (kitchen, bathroom) where
+   * furniture-only defaults like "curved-back sofa" bias the model into
+   * the wrong scene. Without an override, the interior builder strips
+   * furniture tokens automatically for fixture rooms (see
+   * `resolveStyleAssets` in tools/interior-design.ts).
+   */
+  signatureItemsByRoom?: Partial<Record<RoomType, readonly string[]>>;
+  /** Per-room override for `materials`. Same rationale as `signatureItemsByRoom`. */
+  materialsByRoom?: Partial<Record<RoomType, readonly string[]>>;
   /** Sentence describing ideal lighting character. */
   lightingCharacter: string;
   /** 2-3 mood words. */
@@ -93,12 +129,30 @@ export interface StyleEntry {
    * defaults. Merged on top of `RoomSlots` at composition time.
    */
   slotOverrides?: Partial<RoomSlots>;
+  /**
+   * v2-only. Controls how aggressively the interior-v2 builder changes the
+   * room: surface-only, furniture-restyle (default), furniture-swap, overlay.
+   * Independent of `actionMode`. Read by `buildInteriorPromptV2`; v1 ignores.
+   */
+  changeBudget?: ChangeBudget;
 }
 
 // ─── Room dictionary entry ──────────────────────────────────────────────────
 
 export interface RoomEntry {
   focusSlots: RoomSlots;
+  /**
+   * v2-only. Descriptive hint about what to preserve in the visible scene,
+   * as opposed to the prescriptive `focusSlots` which describe a target
+   * composition. v1 builder reads `focusSlots`; v2 builder prefers
+   * `preservationHint` for `actionMode: "transform"` and falls back to
+   * `focusSlots` when this field is absent.
+   *
+   * Example (livingRoom): "if a sofa, accent chairs, coffee table, or media
+   * wall are visible, restyle them in place — do not add or remove primary
+   * furniture pieces".
+   */
+  preservationHint?: string;
 }
 
 // ─── Christmas recipe (per-room) ────────────────────────────────────────────

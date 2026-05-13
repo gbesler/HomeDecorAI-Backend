@@ -8,6 +8,10 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { logger } from "./lib/logger.js";
 import firebaseAuthPlugin from "./middlewares/firebase-auth.js";
 import cloudTasksAuthPlugin from "./middlewares/cloud-tasks-auth.js";
+import {
+  registerConcurrencyHook,
+  registerRateLimitGuard,
+} from "./lib/rate-limiter.js";
 import routes from "./routes/index.js";
 import internalRoutes from "./routes/internal.js";
 
@@ -16,6 +20,10 @@ export function buildApp() {
     loggerInstance: logger,
     // AI generation can take up to 60s+ per provider, with retry and fallback
     requestTimeout: 120_000,
+    // Render and other PaaS proxies populate X-Forwarded-For. trustProxy
+    // makes `request.ip` resolve to the real client IP, which is what the
+    // pre-auth IP throttle uses.
+    trustProxy: true,
   });
 
   app.register(fastifySwagger, {
@@ -96,6 +104,17 @@ export function buildApp() {
   app.register(fastifyFormbody);
   app.register(firebaseAuthPlugin);
   app.register(cloudTasksAuthPlugin);
+
+  // Decrement the per-user concurrency counter when each request finishes.
+  // Registered once at app scope so it covers every route.
+  registerConcurrencyHook(app);
+
+  // Boot-time guard: every /api/* route must have a rate-limit preHandler.
+  // Registered BEFORE `routes` so it sees each route as it is added and
+  // can throw at boot time, failing the deploy rather than letting an
+  // unmetered route reach production.
+  registerRateLimitGuard(app);
+
   app.register(routes, { prefix: "/api" });
   // Internal endpoints are deliberately mounted OUTSIDE /api so that the
   // public auth + rate-limit chain does not apply. Cloud Tasks authenticates

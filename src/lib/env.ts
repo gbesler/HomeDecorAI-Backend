@@ -73,10 +73,15 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .optional()
     .default("development"),
-  // Production safety valves for the interior prompt rewrite (D17 F2).
-  // Flip these at runtime to roll back without a code deploy.
+  // Production safety valves for the interior prompt rewrite.
+  // - "legacy": original single-template prompt builder (D17 F2 escape hatch)
+  // - "v1":    current 7-layer composition with action-mode branches (default)
+  // - "v2":    head-layer-inlined preservation, descriptive preservationHint,
+  //            input-anchored photography-quality, changeBudget-driven verbs
+  // Flip at runtime to roll forward to v2 (after staging burn-in) or back to
+  // v1/legacy without a code deploy.
   PROMPT_BUILDER_VERSION: z
-    .enum(["legacy", "v1"])
+    .enum(["legacy", "v1", "v2"])
     .optional()
     .default("v1"),
   DICTIONARY_STRICT_MODE: z
@@ -119,11 +124,19 @@ const envSchema = z.object({
   // Removal: LaMa (WACV 2022) — industry-standard object-removal inpainter.
   // Pipeline: Clean & Organize runs SAM 3 -> LaMa; Remove Objects runs
   // client-brush mask -> LaMa.
+  // SAM 3 is a community model, so Replicate's Aug 2025 endpoint split forces
+  // the pinned `owner/name:version` form on `/v1/predictions` — the bare slug
+  // 404s on the legacy `/v1/models/{owner}/{name}/predictions` path that the
+  // npm client routes unpinned community calls through. Same fix we applied
+  // to LaMa on 2026-04-20.
+  //
+  // Latest version hash as of 2026-04-23, verified via
+  // https://replicate.com/mattsays/sam3-image/versions.
   REPLICATE_SEGMENTATION_MODEL: z
     .string()
-    .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
+    .regex(/^[^/]+\/[^/]+(?::[a-f0-9]{40,64})?$/, "must be in 'owner/name' or 'owner/name:version' form")
     .optional()
-    .default("mattsays/sam3-image")
+    .default("mattsays/sam3-image:d73db077226443ba4fafd34e233b3626b552eac2a433f90c7c32a9ac89bd9e72")
     .transform((v) => v as `${string}/${string}`),
   // `allenhooo/lama` is alive on Replicate; we were hitting the wrong
   // endpoint. Replicate's Aug 2025 changelog restricted the legacy

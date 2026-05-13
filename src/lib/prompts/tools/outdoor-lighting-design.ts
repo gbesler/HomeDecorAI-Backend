@@ -19,7 +19,9 @@ import {
 } from "../../ai-providers/capabilities.js";
 import { logger } from "../../logger.js";
 import { outdoorLightingStyles } from "../dictionaries/outdoor-lighting-styles.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import { trimLayersToBudget, type PromptLayer } from "../token-budget.js";
@@ -55,15 +57,12 @@ export function buildOutdoorLightingPrompt(
     ];
 
   if (!styleEntry) {
-    logger.warn(
-      {
-        event: "prompt.unknown_style",
-        tool: "outdoorLightingDesign",
-        lightingStyle,
-        fallback: "generic",
-      },
-      "Unknown lightingStyle — using generic fallback",
-    );
+    warnUnknownEntry({
+      tool: "outdoorLightingDesign",
+      kind: "style",
+      fields: { lightingStyle },
+      message: "Unknown lightingStyle — using generic fallback",
+    });
     return buildOutdoorLightingGenericFallback();
   }
 
@@ -84,7 +83,7 @@ function compose(style: StyleEntry): PromptResult {
       ? `Relight this outdoor scene as a ${style.coreAesthetic}, keeping the existing layout, planting, and hardscape intact.`
       : `Restyle the lighting fixtures and finishes of this outdoor scene as a ${style.coreAesthetic}, keeping the existing layout and plot boundaries.`;
 
-  const styleCore = `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
   const styleDetail = `Fixtures and materials: ${style.materials.join(", ")}. Signature features: ${style.signatureItems.join(", ")}.`;
 

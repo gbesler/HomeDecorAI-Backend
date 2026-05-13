@@ -38,8 +38,10 @@ import { outdoorLightingStyles } from "./dictionaries/outdoor-lighting-styles.js
 import { rooms } from "./dictionaries/rooms.js";
 import { wallTextures } from "./dictionaries/wall-textures.js";
 import { logger } from "../logger.js";
+import { assertPositive } from "./primitives/positive-avoidance.js";
 import type {
   BuildingEntry,
+  ChangeBudget,
   ColorPaletteEntry,
   FloorTextureEntry,
   GardenItemEntry,
@@ -47,6 +49,13 @@ import type {
   StyleEntry,
   WallTextureEntry,
 } from "./types.js";
+
+const VALID_CHANGE_BUDGETS: ReadonlySet<ChangeBudget> = new Set([
+  "surface-only",
+  "furniture-restyle",
+  "furniture-swap",
+  "overlay",
+]);
 
 // ─── Public API ─────────────────────────────────────────────────────────────
 
@@ -63,7 +72,12 @@ export function validateDictionaries(options: ValidationOptions): void {
       "designStyles",
       Object.values(DesignStyle),
       designStyles,
-      checkStyleEntry,
+      // Interior styles must declare changeBudget when in transform/target
+      // mode — the interior-v2 builder routes by this field and a missing
+      // value silently defaults to "furniture-restyle". Other style
+      // dictionaries (garden/patio/pool/outdoor-lighting) don't consume
+      // changeBudget today; checkStyleEntry skips the requirement for them.
+      (prefix, entry) => checkStyleEntry(prefix, entry, true),
     ),
   );
   failures.push(
@@ -191,7 +205,20 @@ function runValidator<E extends string, V>(
 
 // ─── Entry checks ─────────────────────────────────────────────────────────
 
-function checkStyleEntry(prefix: string, entry: StyleEntry): string[] {
+/**
+ * Validate a StyleEntry. The `requireChangeBudget` flag is only set when
+ * validating the interior `designStyles` dictionary — interior-design-v2
+ * routes by `changeBudget` and a missing field on a new transform/target
+ * style would silently default to "furniture-restyle", regressing styles
+ * whose identity requires furniture replacement. Garden/patio/pool/outdoor-
+ * lighting dictionaries share the StyleEntry shape but don't consume
+ * `changeBudget` today, so the flag stays false for them.
+ */
+function checkStyleEntry(
+  prefix: string,
+  entry: StyleEntry,
+  requireChangeBudget: boolean = false,
+): string[] {
   const failures: string[] = [];
 
   if (!entry.coreAesthetic) failures.push(`${prefix}.coreAesthetic is empty`);
@@ -214,6 +241,54 @@ function checkStyleEntry(prefix: string, entry: StyleEntry): string[] {
     failures.push(`${prefix}.references must have >= 3 URLs per R25`);
   }
 
+  // v2 fields — optional in the type system, but the v2 interior builder
+  // routes by changeBudget and silently defaults a missing field to
+  // "furniture-restyle". For transform/target styles that ship without
+  // setting changeBudget, that default is wrong for any style whose
+  // identity requires furniture replacement (industrial chesterfield,
+  // bohemian rattan, etc.). Require the field for those modes so a new
+  // style added without changeBudget fails boot rather than producing a
+  // silent regression.
+  if (entry.changeBudget !== undefined) {
+    if (!VALID_CHANGE_BUDGETS.has(entry.changeBudget)) {
+      failures.push(
+        `${prefix}.changeBudget="${entry.changeBudget}" is not one of: ${[...VALID_CHANGE_BUDGETS].join(", ")}`,
+      );
+    }
+  } else if (
+    requireChangeBudget &&
+    (entry.actionMode === "transform" || entry.actionMode === "target")
+  ) {
+    failures.push(
+      `${prefix}.changeBudget is required for actionMode="${entry.actionMode}" interior styles (one of: ${[...VALID_CHANGE_BUDGETS].join(", ")})`,
+    );
+  }
+  if (entry.slotOverrides) {
+    for (const [slotName, slotValue] of Object.entries(entry.slotOverrides)) {
+      // avoidAdditions is a string[] — checked element-wise below.
+      if (Array.isArray(slotValue)) {
+        for (const item of slotValue) {
+          try {
+            assertPositive(item);
+          } catch (err) {
+            failures.push(
+              `${prefix}.slotOverrides.${slotName}[*]="${item}" ${(err as Error).message}`,
+            );
+          }
+        }
+        continue;
+      }
+      if (typeof slotValue !== "string") continue;
+      try {
+        assertPositive(slotValue);
+      } catch (err) {
+        failures.push(
+          `${prefix}.slotOverrides.${slotName}="${slotValue}" ${(err as Error).message}`,
+        );
+      }
+    }
+  }
+
   return failures;
 }
 
@@ -224,6 +299,26 @@ function checkRoomEntry(prefix: string, entry: RoomEntry): string[] {
   }
   if (!entry.focusSlots.lightingDialect) {
     failures.push(`${prefix}.focusSlots.lightingDialect is empty`);
+  }
+  // v2 field — optional. When present, must be a non-empty string so the
+  // v2 builder gets a usable hint rather than silently degrading to the
+  // focusSlots fallback for what should have been a populated entry.
+  // Also enforce positive-only phrasing: the v2 interior builder inlines
+  // preservationHint into the priority-1 HEAD layer which never trims, so
+  // a negation token here is the most load-bearing version of the same
+  // failure mode positive-avoidance protects against elsewhere.
+  if (entry.preservationHint !== undefined) {
+    if (!entry.preservationHint) {
+      failures.push(`${prefix}.preservationHint is present but empty`);
+    } else {
+      try {
+        assertPositive(entry.preservationHint);
+      } catch (err) {
+        failures.push(
+          `${prefix}.preservationHint ${(err as Error).message}`,
+        );
+      }
+    }
   }
   return failures;
 }

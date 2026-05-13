@@ -21,13 +21,16 @@ import {
   christmasRecipes,
 } from "../dictionaries/christmas-recipes.js";
 import { humanizeRoomType } from "../primitives/humanize-room-type.js";
+import { warnUnknownEntry } from "../primitives/unknown-entry.js";
 import { buildPhotographyQuality } from "../primitives/photography-quality.js";
+import { buildStyleCore } from "../primitives/style-core.js";
 import { buildPositiveAvoidance } from "../primitives/positive-avoidance.js";
 import { buildStructuralPreservation } from "../primitives/structural-preservation.js";
 import {
   trimLayersToBudget,
   type PromptLayer,
 } from "../token-budget.js";
+import type { RoomType } from "../../../schemas/generated/types/roomType.js";
 import type {
   GuidanceBand,
   PromptResult,
@@ -52,6 +55,40 @@ const CHRISTMAS_WHITELIST = new Set<string>([
   "bedroom",
 ]);
 
+/**
+ * Rooms where the user-facing scene is dominated by built-ins / fixtures /
+ * setups, not free-standing furniture. Default `signatureItems` like
+ * "curved-back sofa" or "tufted chesterfield" make no sense here and the
+ * model will hallucinate the wrong piece into the frame if we leave them
+ * in. The builder either uses a per-room override from the style entry
+ * or strips furniture-bias tokens from the default list for these rooms.
+ */
+const FIXTURE_ROOMS: ReadonlySet<string> = new Set([
+  "kitchen",
+  "bathroom",
+  "stairway",
+  "entryway",
+  "underStairSpace",
+  "gamingRoom",
+]);
+
+/**
+ * Free-standing furniture vocabulary that becomes a non-sequitur in
+ * fixture-focused rooms. Whole-word boundaries so "low-profile sectional
+ * sofa" matches but "softbox" wouldn't (none in current dictionaries —
+ * boundary kept as a safety net for future edits).
+ */
+const FURNITURE_BIAS_TOKEN =
+  /\b(sofa|couch|sectional|loveseat|bed(?:ding|s)?|nightstand|headboard|dresser|wardrobe|armchair|chesterfield|recliner|ottoman|coffee table|dining table|sideboard|buffet|chandelier|wingback|chaise|throw blanket|throw pillow|throw pillows|cushion|pillows|fireplace|hearth|reading chair|club chair|lounge chair)\b/i;
+
+/**
+ * Upholstery / soft-goods vocabulary that becomes a non-sequitur in fixture
+ * rooms. Kitchens and bathrooms don't have velvet upholstery; leaving the
+ * token in biases the model into adding a furniture piece to carry it.
+ */
+const UPHOLSTERY_BIAS_TOKEN =
+  /\b(velvet|tufted|upholstery|upholstered|leather|sheepskin|boucle|knit throw|kilim|macrame|damask|tweed|silk velvet)\b/i;
+
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 export interface InteriorParams {
@@ -68,16 +105,18 @@ export function buildInteriorPrompt(params: InteriorParams): PromptResult {
   // ─── R24 graceful fallback for unknown enums ─────────────────────────
   if (!styleEntry || !roomEntry) {
     if (!styleEntry) {
-      logger.warn(
-        { event: "prompt.unknown_style", designStyle, roomType, fallback: "generic" },
-        "Unknown designStyle — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "interiorDesign",
+        kind: "style",
+        fields: { designStyle, roomType },
+      });
     }
     if (!roomEntry) {
-      logger.warn(
-        { event: "prompt.unknown_room", designStyle, roomType, fallback: "generic" },
-        "Unknown roomType — using generic fallback prompt",
-      );
+      warnUnknownEntry({
+        tool: "interiorDesign",
+        kind: "room",
+        fields: { designStyle, roomType },
+      });
     }
     return buildGenericFallback(roomType);
   }
@@ -101,6 +140,19 @@ function composeTransform(
   room: RoomEntry,
 ): PromptResult {
   const humanRoom = humanizeRoomType(roomType);
+  const isFixtureRoom = FIXTURE_ROOMS.has(roomType);
+
+  // Verb-split for fixture rooms: "Restyle the furniture and decor in this
+  // kitchen" instructs the model to swap free-standing furniture, which is
+  // the wrong primitive for cabinetry/island/appliance scenes. Use the
+  // built-in vocabulary instead so the action layer agrees with the room
+  // focus and `signatureItems` filter below.
+  const restyleObject = isFixtureRoom
+    ? "the cabinetry, fixtures, and finishes"
+    : "the furniture and decor";
+  const onlyChange = isFixtureRoom
+    ? "Only change cabinetry, fixtures, finishes, and decor surfaces."
+    : "Only change the furniture, decor, and finishes.";
 
   // Single aesthetic descriptor — `coreAesthetic` already reads as a full
   // adjective phrase (e.g. "clean, intentional, architecturally honest").
@@ -108,17 +160,16 @@ function composeTransform(
   // like "...architecturally honest sophisticated aesthetic". Fixed in
   // exterior earlier; interior had regressed.
   const actionDirective =
-    `Restyle the furniture and decor in this ${humanRoom} to a ${style.coreAesthetic} aesthetic ` +
+    `Restyle ${restyleObject} in this ${humanRoom} to a ${style.coreAesthetic} aesthetic ` +
     `while keeping the exact same room layout, camera angle, and perspective. ` +
-    `Only change the furniture, decor, and finishes.`;
+    onlyChange;
 
   const roomFocus = composeRoomFocus(room.focusSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
-  const styleDetail =
-    `Materials: ${style.materials.join(", ")}. Signature pieces: ${style.signatureItems.join(", ")}.`;
+  const { items, materials } = resolveStyleAssets(style, roomType);
+  const styleDetail = composeStyleDetail(materials, items);
 
   const lighting = style.lightingCharacter + ".";
 
@@ -204,11 +255,10 @@ function composeTarget(
 
   const roomFocus = composeRoomFocus(mergedSlots);
 
-  const styleCore =
-    `Color palette: ${style.colorPalette.join(", ")}. Mood: ${style.moodKeywords.join(", ")}.`;
+  const styleCore = buildStyleCore(style);
 
-  const styleDetail =
-    `Materials: ${style.materials.join(", ")}. Signature staging pieces: ${style.signatureItems.join(", ")}.`;
+  const { items, materials } = resolveStyleAssets(style, roomType);
+  const styleDetail = composeStyleDetail(materials, items, "Signature staging pieces");
 
   const lighting = style.lightingCharacter + ".";
 
@@ -307,7 +357,7 @@ function composeLayers(
       text: buildPhotographyQuality("interior"),
     },
     { name: "lighting", priority: 7, text: lighting },
-  ];
+  ].filter((l) => l.text.length > 0);
 
   const trimResult = trimLayersToBudget(layers, PRIMARY_MAX_TOKENS);
 
@@ -335,6 +385,54 @@ function composeLayers(
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Resolve the style's `signatureItems` and `materials` for the chosen room.
+ *
+ * Priority:
+ *   1. Style-authored per-room override (`signatureItemsByRoom[roomType]`).
+ *   2. Fixture rooms with no override → strip furniture-bias / upholstery
+ *      tokens from the defaults so kitchens/bathrooms don't inherit
+ *      "curved-back sofa" or "velvet upholstery" by accident.
+ *   3. Otherwise → return the style defaults unchanged.
+ *
+ * Returned arrays may be empty if the filter strips everything; the caller
+ * is expected to handle the empty-layer case via `composeStyleDetail`.
+ */
+function resolveStyleAssets(
+  style: StyleEntry,
+  roomType: string,
+): { items: readonly string[]; materials: readonly string[] } {
+  const key = roomType as RoomType;
+  const itemsOverride = style.signatureItemsByRoom?.[key];
+  const materialsOverride = style.materialsByRoom?.[key];
+  const isFixtureRoom = FIXTURE_ROOMS.has(roomType);
+
+  const items =
+    itemsOverride ??
+    (isFixtureRoom
+      ? style.signatureItems.filter((s) => !FURNITURE_BIAS_TOKEN.test(s))
+      : style.signatureItems);
+
+  const materials =
+    materialsOverride ??
+    (isFixtureRoom
+      ? style.materials.filter((m) => !UPHOLSTERY_BIAS_TOKEN.test(m))
+      : style.materials);
+
+  return { items, materials };
+}
+
+function composeStyleDetail(
+  materials: readonly string[],
+  items: readonly string[],
+  itemsLabel: string = "Signature pieces",
+): string {
+  const parts: string[] = [];
+  if (materials.length > 0) parts.push(`Materials: ${materials.join(", ")}.`);
+  if (items.length > 0) parts.push(`${itemsLabel}: ${items.join(", ")}.`);
+  return parts.join(" ");
+}
 
 function composeRoomFocus(slots: RoomSlots): string {
   const parts: string[] = [slots.furnitureDialect];

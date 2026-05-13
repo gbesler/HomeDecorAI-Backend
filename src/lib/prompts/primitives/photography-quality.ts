@@ -20,10 +20,17 @@ type Subject = "interior" | "exterior" | "garden" | "facade";
 export function buildPhotographyQuality(subject: Subject): string {
   switch (subject) {
     case "interior":
+      // v2 phrasing — input-anchored. The earlier "35mm lens at f/4" literal
+      // was a positive lens directive on an image-to-image edit, which
+      // competed with the source photograph's actual focal length and was a
+      // primary contributor to camera-angle drift. The new phrasing tells the
+      // model to match the source image's framing rather than enforcing a
+      // fixed lens, while keeping the editorial-photography quality anchor.
       return (
-        "Shot as professional editorial architectural interior photography, " +
-        "35mm lens at f/4, soft indirect daylight, balanced composition, " +
-        "realistic materials, subtle reflections on polished surfaces."
+        "Match the source image's framing, lens, focal length, field of view, " +
+        "and exposure. Shot as professional editorial architectural interior " +
+        "photography with realistic materials and subtle reflections on " +
+        "polished surfaces."
       );
 
     case "exterior":

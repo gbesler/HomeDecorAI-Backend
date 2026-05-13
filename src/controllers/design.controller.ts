@@ -12,6 +12,7 @@ import {
   markEnqueueFailed,
   markFailed,
   retryFailedGeneration,
+  deleteGenerationsByIds,
 } from "../lib/firestore.js";
 import { enqueueGenerationTask } from "../lib/cloud-tasks.js";
 import { processGeneration } from "../services/generation-processor.js";
@@ -829,6 +830,69 @@ export async function getHistory(
     return {
       error: "Internal Error",
       message: "Failed to fetch generation history.",
+    };
+  }
+}
+
+// ─── Delete Generations ──────────────────────────────────────────────────────
+
+const DeleteGenerationsBody = z.object({
+  generationIds: z
+    .array(z.string().min(1).max(128))
+    .min(1)
+    .max(50)
+    .describe("Array of generation IDs to delete (max 50)"),
+});
+
+export async function deleteGenerations(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<unknown> {
+  const userId = request.userId;
+  if (!userId) {
+    reply.code(401);
+    return { error: "Unauthorized", message: "Missing user identity." };
+  }
+
+  const parseResult = DeleteGenerationsBody.safeParse(request.body);
+  if (!parseResult.success) {
+    reply.code(400);
+    return {
+      error: "Validation Error",
+      message: parseResult.error.issues.map((i) => i.message).join("; "),
+    };
+  }
+
+  const { generationIds } = parseResult.data;
+
+  try {
+    const result = await deleteGenerationsByIds(userId, generationIds);
+
+    request.log.info(
+      {
+        userId,
+        requested: generationIds.length,
+        deleted: result.deletedCount,
+        notFound: result.notFoundIds.length,
+        foreign: result.foreignIds.length,
+      },
+      "Generations deleted",
+    );
+
+    return {
+      deletedCount: result.deletedCount,
+      notFoundIds: result.notFoundIds,
+      foreignIds: result.foreignIds,
+    };
+  } catch (error) {
+    request.log.error(
+      { userId, error: error instanceof Error ? error.message : String(error) },
+      "Failed to delete generations",
+    );
+    reply.code(500);
+    return {
+      error: "Internal Error",
+      message: "Failed to delete generations.",
     };
   }
 }

@@ -32,6 +32,7 @@ import {
   callRemoval,
   callSegmentation,
 } from "../ai-providers/index.js";
+import { NoMaskDetectedError } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
 import { withRetry } from "../retry.js";
 import {
@@ -159,6 +160,9 @@ export async function runRemoval(
       maxRetries: 1,
       delayMs: 1000,
       isRetryable: (error) => {
+        // Empty-mask is a terminal domain signal, not a transient failure.
+        // Retrying re-downloads the same all-zero mask and re-throws.
+        if (error instanceof NoMaskDetectedError) return false;
         if (error instanceof NormalizeInputError) return false;
         if (error instanceof StorageUploadError) {
           // Allowlist / size-cap / invalid-URL violations are
