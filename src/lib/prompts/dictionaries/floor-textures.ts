@@ -15,10 +15,10 @@ export const floorTextures: FloorTexturesDict = {
   // ─── Wood ───────────────────────────────────────────────────────────────
   [FloorTexture.oakWood]: {
     category: "wood",
-    label: "natural oak hardwood flooring",
+    label: "natural oak herringbone parquet",
     description:
-      "Solid oak planks with a warm honey tone, visible grain, and a matte satin finish.",
-    descriptors: ["warm grain", "matte satin", "tight planks"],
+      "Wide natural oak planks laid in a classic herringbone pattern with a warm honey tone, prominent grain, visible knots, and a matte satin finish.",
+    descriptors: ["wide oak planks", "herringbone layout", "honey tone with prominent knots"],
     lightingCharacter:
       "Warm ambient daylight; the grain reads as a gentle rhythm across the floor.",
   },
@@ -26,17 +26,17 @@ export const floorTextures: FloorTexturesDict = {
     category: "wood",
     label: "walnut hardwood flooring",
     description:
-      "Rich walnut planks with deep chocolate tones and fine, sweeping grain.",
-    descriptors: ["deep chocolate", "sweeping grain", "low sheen"],
+      "Rich walnut planks with deep chocolate tones, fine sweeping grain, and a polished high-gloss lacquered finish.",
+    descriptors: ["deep chocolate", "sweeping grain", "polished high gloss"],
     lightingCharacter:
-      "Warm directional daylight; shadows settle into the grain without glare.",
+      "Warm directional daylight; crisp specular highlights run along the polished planks.",
   },
   [FloorTexture.bamboo]: {
     category: "wood",
     label: "bamboo flooring",
     description:
-      "Horizontal-grain bamboo planks with a light blonde tone and a smooth low-luster finish.",
-    descriptors: ["pale blonde", "horizontal grain", "smooth low-luster"],
+      "Vertical-grain bamboo planks with a light blonde tone, fine pinstripe lines along each plank, and a smooth low-luster finish.",
+    descriptors: ["pale blonde", "vertical pinstripe grain", "smooth low-luster"],
     lightingCharacter:
       "Soft even daylight; the pale surface brightens the room uniformly.",
   },
@@ -44,10 +44,10 @@ export const floorTextures: FloorTexturesDict = {
     category: "wood",
     label: "cherry hardwood flooring",
     description:
-      "Cherry wood planks with reddish-brown warmth, subtle swirl grain, and a gentle satin glow.",
-    descriptors: ["reddish-brown warmth", "swirl grain", "satin glow"],
+      "Cherry wood planks with reddish-brown warmth, swirling figured grain, and a glossy lacquered finish that reflects light richly.",
+    descriptors: ["reddish-brown warmth", "figured swirl grain", "glossy lacquer"],
     lightingCharacter:
-      "Warm indirect daylight; the cherry tone reads richer near window light.",
+      "Warm indirect daylight; bright specular reflections highlight the polished cherry surface.",
   },
 
   // ─── Marble ─────────────────────────────────────────────────────────────
@@ -55,8 +55,8 @@ export const floorTextures: FloorTexturesDict = {
     category: "marble",
     label: "polished white marble flooring",
     description:
-      "Large-format polished white marble slabs with soft gray veining and a mirror finish.",
-    descriptors: ["soft gray veining", "polished", "large-format slabs"],
+      "Polished white marble tiles in a regular square grid with bold gray veining and a mirror finish.",
+    descriptors: ["bold gray veining", "polished", "square-tile grid"],
     lightingCharacter:
       "Bright even daylight; veining and reflections remain crisp.",
   },
@@ -82,10 +82,10 @@ export const floorTextures: FloorTexturesDict = {
     category: "marble",
     label: "beige marble flooring",
     description:
-      "Polished beige marble slabs with warm sand tones and soft taupe veining.",
-    descriptors: ["warm sand tone", "soft taupe veining", "polished"],
+      "Polished beige marble slabs with warm cream-sand tones and distinctive warm gold veining threading across the surface.",
+    descriptors: ["warm cream-sand tone", "warm gold veining", "polished"],
     lightingCharacter:
-      "Warm indirect daylight; the beige slabs spread a soft warm glow.",
+      "Warm indirect daylight; the gold veining catches gentle highlights against the cream slabs.",
   },
 
   // ─── Porcelain ──────────────────────────────────────────────────────────
@@ -93,8 +93,8 @@ export const floorTextures: FloorTexturesDict = {
     category: "porcelain",
     label: "patterned porcelain tile flooring",
     description:
-      "Patterned porcelain tiles with a repeating decorative motif and crisp grout lines.",
-    descriptors: ["repeating motif", "crisp grout", "matte glaze"],
+      "Porcelain tile flooring laid in a checkerboard arrangement of plain cream tiles alternating with ornate gray damask-patterned tiles, crisp grout lines, matte glaze.",
+    descriptors: ["checkerboard layout", "alternating plain and damask tiles", "matte glaze"],
     lightingCharacter:
       "Soft diffused daylight; the pattern reads clearly without glare.",
   },
@@ -111,8 +111,8 @@ export const floorTextures: FloorTexturesDict = {
     category: "porcelain",
     label: "hexagonal porcelain tile flooring",
     description:
-      "Hexagonal porcelain tiles in a tight honeycomb layout with thin grout lines and a matte finish.",
-    descriptors: ["honeycomb layout", "thin grout", "matte"],
+      "Hexagonal porcelain tiles in a tight honeycomb layout, mixing cream, warm beige, and pale gray tones, with thin grout lines and a matte finish.",
+    descriptors: ["honeycomb layout", "cream-beige-gray mix", "matte"],
     lightingCharacter:
       "Soft even daylight; the hexagonal grid reads as a calm repeating rhythm.",
   },
@@ -129,12 +129,12 @@ export const floorTextures: FloorTexturesDict = {
   // ─── Planks ─────────────────────────────────────────────────────────────
   [FloorTexture.naturalPlank]: {
     category: "planks",
-    label: "natural-finish wide-plank flooring",
+    label: "natural-finish plank flooring",
     description:
-      "Wide wood planks with a natural clear finish, visible knots, and a soft matte sheen.",
-    descriptors: ["natural clear finish", "visible knots", "soft matte"],
+      "Narrow to medium-width wood planks in mixed lengths with a natural clear finish, visible knots, warm honey tone, and a soft matte sheen.",
+    descriptors: ["narrow-to-medium planks", "mixed lengths", "natural clear finish with knots"],
     lightingCharacter:
-      "Warm ambient daylight; the grain reads evenly across the wide planks.",
+      "Warm ambient daylight; the grain reads evenly across the planks.",
   },
   [FloorTexture.whitewashedPlank]: {
     category: "planks",

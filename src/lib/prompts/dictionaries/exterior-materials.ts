@@ -45,8 +45,8 @@ export const exteriorMaterials: ExteriorMaterialsDict = {
   [ExteriorMaterial.woodCladding]: {
     label: "wood cladding",
     description:
-      "Vertical wood plank cladding with visible grain, warm tones, and tight reveal lines.",
-    descriptors: ["vertical planks", "visible grain", "warm tones"],
+      "Horizontal wood plank cladding with visible grain, warm honey tones, and tight reveal lines.",
+    descriptors: ["horizontal planks", "visible grain", "warm honey tones"],
   },
 
   [ExteriorMaterial.metalPanel]: {

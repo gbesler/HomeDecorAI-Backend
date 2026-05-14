@@ -35,10 +35,10 @@ export const wallTextures: WallTexturesDict = {
     category: "paintFinish",
     label: "high-gloss lacquer paint",
     description:
-      "High-gloss lacquer paint with a mirror-like finish and crisp reflections.",
-    descriptors: ["mirror-like", "crisp reflections", "smooth lacquer"],
+      "High-gloss lacquer paint with a wet-look reflective sheen and visible soft brush-stroke texture catching light.",
+    descriptors: ["wet-look sheen", "visible brush texture", "lacquered"],
     lightingCharacter:
-      "Bright balanced daylight; reflections preserve room details faithfully.",
+      "Bright balanced daylight; bright specular reflections sweep across the lacquered surface.",
   },
   [WallTexture.eggshell]: {
     category: "paintFinish",
@@ -80,10 +80,10 @@ export const wallTextures: WallTexturesDict = {
   },
   [WallTexture.concrete]: {
     category: "plaster",
-    label: "raw concrete finish",
+    label: "polished concrete finish",
     description:
-      "Cast-in-place concrete with visible formwork lines and a cool gray tone.",
-    descriptors: ["cool gray", "formwork lines", "industrial"],
+      "Polished concrete wall with a smooth cool gray surface, fine surface pitting, and soft cloudy tonal variation.",
+    descriptors: ["cool gray", "fine pitting", "softly mottled"],
     lightingCharacter:
       "Cool even daylight; soft gradient shadows emphasize the concrete's mass.",
   },
@@ -102,8 +102,8 @@ export const wallTextures: WallTexturesDict = {
     category: "stoneBrick",
     label: "natural stone cladding",
     description:
-      "Natural stone cladding with varied stone sizes, tones, and a rough-hewn surface.",
-    descriptors: ["rough-hewn", "tonal variation", "layered"],
+      "Tightly packed rounded river-stone cladding in mixed cream, beige, and warm gray tones with smooth weathered faces.",
+    descriptors: ["rounded river stones", "warm beige and gray tones", "smooth weathered"],
     lightingCharacter:
       "Side-raking natural light; the relief of each stone reads clearly.",
   },
@@ -176,11 +176,11 @@ export const wallTextures: WallTexturesDict = {
   },
   [WallTexture.textured]: {
     category: "decorative",
-    label: "textured feature wall",
+    label: "embossed damask feature wall",
     description:
-      "Textured feature wall with hand-applied organic relief and subtle tonal variation.",
-    descriptors: ["organic relief", "tonal variation", "hand-applied"],
+      "Embossed feature wall with a repeating raised-relief damask floral motif on a soft cream matte surface.",
+    descriptors: ["embossed damask motif", "raised floral relief", "soft cream matte"],
     lightingCharacter:
-      "Soft directional daylight; gentle shadows accentuate the texture.",
+      "Soft directional daylight; gentle shadows accentuate the raised pattern.",
   },
 };
