@@ -9,11 +9,11 @@ import {
   validateForeignKeys,
   type Manifest,
   type SeedOutcome,
-} from "./seed-object-inspirations.js";
+} from "./seed-helpers.js";
 import type {
   ObjectCategorySeedInput,
   ObjectInspirationSeedInput,
-} from "../src/lib/objectInspiration/schemas.js";
+} from "./schemas.js";
 
 const stubCategoryRow: ObjectCategorySeedInput = {
   id: "sofas",
@@ -68,6 +68,10 @@ describe("parseManifestText", () => {
   it("rejects manifest with non-array categories", () => {
     assert.throws(() => parseManifestText('{"categories":{},"items":[]}'));
   });
+
+  it("rejects literal null JSON", () => {
+    assert.throws(() => parseManifestText("null"));
+  });
 });
 
 describe("parseRows", () => {
@@ -99,6 +103,17 @@ describe("parseRows", () => {
     assert.equal(errors.length, 1);
     assert.match(errors[0]!, /item id=sofas_1/);
   });
+
+  it("collects errors from multiple rows independently", () => {
+    const broken: Manifest = {
+      categories: [{ ...stubCategoryRow, id: "BAD_ID" }],
+      items: [{ ...stubItemRow, id: "no-underscore" }],
+    };
+    const { errors, categories, items } = parseRows(broken);
+    assert.equal(errors.length, 2);
+    assert.equal(categories.length, 0);
+    assert.equal(items.length, 0);
+  });
 });
 
 describe("validateForeignKeys", () => {
@@ -116,6 +131,13 @@ describe("validateForeignKeys", () => {
     assert.equal(errs.length, 1);
     assert.match(errs[0]!, /ghost_1/);
     assert.match(errs[0]!, /ghost/);
+  });
+
+  it("reports one error per orphan when multiple", () => {
+    const a: ObjectInspirationSeedInput = { ...stubItemRow, id: "a_1", categoryId: "a" };
+    const b: ObjectInspirationSeedInput = { ...stubItemRow, id: "b_1", categoryId: "b" };
+    const errs = validateForeignKeys([stubCategoryRow], [a, b]);
+    assert.equal(errs.length, 2);
   });
 });
 
@@ -145,9 +167,55 @@ describe("dispatchWithConcurrency", () => {
     }));
     assert.equal(outcomes.length, 2);
   });
+
+  it("invokes onOutcome callback for every outcome in completion order", async () => {
+    const seenIds: string[] = [];
+    await dispatchWithConcurrency(
+      [1, 2, 3],
+      1,
+      async (n) => ({
+        kind: "item" as const,
+        id: `id_${n}`,
+        status: "created" as const,
+        ts: "t",
+      }),
+      (o) => seenIds.push(o.id),
+    );
+    assert.deepEqual(seenIds, ["id_1", "id_2", "id_3"]);
+  });
+
+  it("swallows onOutcome exceptions so the pool completes the full batch", async () => {
+    // A throwing callback must not orphan in-flight workers — the contract
+    // is that all inputs produce outcomes regardless of observer behaviour.
+    const outcomes = await dispatchWithConcurrency(
+      [1, 2, 3],
+      2,
+      async (n) => ({
+        kind: "item" as const,
+        id: `id_${n}`,
+        status: "created" as const,
+        ts: "t",
+      }),
+      () => {
+        throw new Error("observer blew up");
+      },
+    );
+    assert.equal(outcomes.length, 3);
+  });
 });
 
 describe("summarize", () => {
+  it("returns all-zero summary for empty outcomes", () => {
+    const summary = summarize([]);
+    assert.deepEqual(summary, {
+      total: 0,
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      failed: 0,
+    });
+  });
+
   it("counts each status bucket", () => {
     const outcomes: SeedOutcome[] = [
       { kind: "item", id: "a", status: "created", ts: "t" },
