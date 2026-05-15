@@ -1,0 +1,5605 @@
+{
+  "$comment": "Title-only update for all 800 object inspirations. Patches title.{en,tr} on existing items via POST /object-inspirations/bulk-update-titles or scripts/update-object-inspiration-titles.ts. Generated from object-inspirations.full.json.",
+  "titleUpdates": [
+    {
+      "id": "sofas_1",
+      "title": {
+        "en": "Sectional Sofa",
+        "tr": "Köşe Koltuk"
+      }
+    },
+    {
+      "id": "sofas_2",
+      "title": {
+        "en": "Chesterfield Sofa",
+        "tr": "Chesterfield Koltuk"
+      }
+    },
+    {
+      "id": "sofas_3",
+      "title": {
+        "en": "Mid-Century Sofa",
+        "tr": "Mid-Century Koltuk"
+      }
+    },
+    {
+      "id": "sofas_4",
+      "title": {
+        "en": "Modular Sofa",
+        "tr": "Modüler Koltuk"
+      }
+    },
+    {
+      "id": "sofas_5",
+      "title": {
+        "en": "Tufted Sofa",
+        "tr": "Kapitone Koltuk"
+      }
+    },
+    {
+      "id": "sofas_6",
+      "title": {
+        "en": "Linen Sofa",
+        "tr": "Keten Koltuk"
+      }
+    },
+    {
+      "id": "sofas_7",
+      "title": {
+        "en": "Velvet Sofa",
+        "tr": "Kadife Koltuk"
+      }
+    },
+    {
+      "id": "sofas_8",
+      "title": {
+        "en": "Leather Sofa",
+        "tr": "Deri Koltuk"
+      }
+    },
+    {
+      "id": "sofas_9",
+      "title": {
+        "en": "Curved Sofa",
+        "tr": "Kavisli Koltuk"
+      }
+    },
+    {
+      "id": "sofas_10",
+      "title": {
+        "en": "Camelback Sofa",
+        "tr": "Camelback Koltuk"
+      }
+    },
+    {
+      "id": "sofas_11",
+      "title": {
+        "en": "Sleeper Sofa",
+        "tr": "Yataklı Koltuk"
+      }
+    },
+    {
+      "id": "sofas_12",
+      "title": {
+        "en": "Loveseat",
+        "tr": "İkili Koltuk"
+      }
+    },
+    {
+      "id": "sofas_13",
+      "title": {
+        "en": "Low Lounge Sofa",
+        "tr": "Alçak Lounge Koltuk"
+      }
+    },
+    {
+      "id": "sofas_14",
+      "title": {
+        "en": "Bouclé Sofa",
+        "tr": "Bukle Koltuk"
+      }
+    },
+    {
+      "id": "sofas_15",
+      "title": {
+        "en": "Rattan Sofa",
+        "tr": "Rattan Koltuk"
+      }
+    },
+    {
+      "id": "sofas_16",
+      "title": {
+        "en": "Scandinavian Sofa",
+        "tr": "İskandinav Koltuk"
+      }
+    },
+    {
+      "id": "sofas_17",
+      "title": {
+        "en": "Italian Modern Sofa",
+        "tr": "İtalyan Modern Koltuk"
+      }
+    },
+    {
+      "id": "sofas_18",
+      "title": {
+        "en": "Japandi Sofa",
+        "tr": "Japandi Koltuk"
+      }
+    },
+    {
+      "id": "sofas_19",
+      "title": {
+        "en": "Minimalist Sofa",
+        "tr": "Minimalist Koltuk"
+      }
+    },
+    {
+      "id": "sofas_20",
+      "title": {
+        "en": "Retro Sofa",
+        "tr": "Retro Koltuk"
+      }
+    },
+    {
+      "id": "armchairs_1",
+      "title": {
+        "en": "Wingback Chair",
+        "tr": "Kanat Sırtlı Berjer"
+      }
+    },
+    {
+      "id": "armchairs_2",
+      "title": {
+        "en": "Club Chair",
+        "tr": "Kulüp Berjeri"
+      }
+    },
+    {
+      "id": "armchairs_3",
+      "title": {
+        "en": "Reading Chair",
+        "tr": "Okuma Berjeri"
+      }
+    },
+    {
+      "id": "armchairs_4",
+      "title": {
+        "en": "Swivel Chair",
+        "tr": "Döner Berjer"
+      }
+    },
+    {
+      "id": "armchairs_5",
+      "title": {
+        "en": "Lounge Chair",
+        "tr": "Lounge Berjer"
+      }
+    },
+    {
+      "id": "armchairs_6",
+      "title": {
+        "en": "Eames Lounge",
+        "tr": "Eames Lounge Berjer"
+      }
+    },
+    {
+      "id": "armchairs_7",
+      "title": {
+        "en": "Papa Bear Chair",
+        "tr": "Papa Bear Berjer"
+      }
+    },
+    {
+      "id": "armchairs_8",
+      "title": {
+        "en": "Tub Chair",
+        "tr": "Tub Berjer"
+      }
+    },
+    {
+      "id": "armchairs_9",
+      "title": {
+        "en": "Slipper Chair",
+        "tr": "Slipper Berjer"
+      }
+    },
+    {
+      "id": "armchairs_10",
+      "title": {
+        "en": "Accent Armchair",
+        "tr": "Aksesuar Berjer"
+      }
+    },
+    {
+      "id": "armchairs_11",
+      "title": {
+        "en": "Bouclé Armchair",
+        "tr": "Bukle Berjer"
+      }
+    },
+    {
+      "id": "armchairs_12",
+      "title": {
+        "en": "Leather Armchair",
+        "tr": "Deri Berjer"
+      }
+    },
+    {
+      "id": "armchairs_13",
+      "title": {
+        "en": "Rattan Armchair",
+        "tr": "Rattan Berjer"
+      }
+    },
+    {
+      "id": "armchairs_14",
+      "title": {
+        "en": "Barrel Chair",
+        "tr": "Fıçı Berjer"
+      }
+    },
+    {
+      "id": "armchairs_15",
+      "title": {
+        "en": "Bergère Chair",
+        "tr": "Klasik Berjer"
+      }
+    },
+    {
+      "id": "armchairs_16",
+      "title": {
+        "en": "Recliner",
+        "tr": "Recliner Berjer"
+      }
+    },
+    {
+      "id": "armchairs_17",
+      "title": {
+        "en": "Rocking Chair",
+        "tr": "Sallanan Sandalye"
+      }
+    },
+    {
+      "id": "armchairs_18",
+      "title": {
+        "en": "Shell Chair",
+        "tr": "Kabuk Berjer"
+      }
+    },
+    {
+      "id": "armchairs_19",
+      "title": {
+        "en": "Egg Chair",
+        "tr": "Yumurta Berjer"
+      }
+    },
+    {
+      "id": "armchairs_20",
+      "title": {
+        "en": "Cane Armchair",
+        "tr": "Hasır Örgü Berjer"
+      }
+    },
+    {
+      "id": "accentChairs_1",
+      "title": {
+        "en": "Cane Chair",
+        "tr": "Hasır Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_2",
+      "title": {
+        "en": "Bouclé Accent Chair",
+        "tr": "Bukle Aksesuar Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_3",
+      "title": {
+        "en": "Velvet Accent Chair",
+        "tr": "Kadife Aksesuar Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_4",
+      "title": {
+        "en": "Bentwood Chair",
+        "tr": "Bükme Ağaç Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_5",
+      "title": {
+        "en": "Wishbone Chair",
+        "tr": "Wishbone Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_6",
+      "title": {
+        "en": "Ghost Chair",
+        "tr": "Hayalet Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_7",
+      "title": {
+        "en": "Panton Chair",
+        "tr": "Panton Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_8",
+      "title": {
+        "en": "Mushroom Chair",
+        "tr": "Mantar Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_9",
+      "title": {
+        "en": "Sheepskin Chair",
+        "tr": "Kuzu Postlu Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_10",
+      "title": {
+        "en": "Saddle Chair",
+        "tr": "Eyer Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_11",
+      "title": {
+        "en": "Tulip Chair",
+        "tr": "Lale Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_12",
+      "title": {
+        "en": "Barrel Accent Chair",
+        "tr": "Fıçı Aksesuar Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_13",
+      "title": {
+        "en": "Low Slung Chair",
+        "tr": "Alçak Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_14",
+      "title": {
+        "en": "Sculptural Chair",
+        "tr": "Heykelsi Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_15",
+      "title": {
+        "en": "Upholstered Chair",
+        "tr": "Kumaş Kaplı Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_16",
+      "title": {
+        "en": "Rattan Accent Chair",
+        "tr": "Rattan Aksesuar Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_17",
+      "title": {
+        "en": "Bistro Chair",
+        "tr": "Bistro Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_18",
+      "title": {
+        "en": "Paper Cord Chair",
+        "tr": "Kağıt İpli Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_19",
+      "title": {
+        "en": "Geometric Chair",
+        "tr": "Geometrik Sandalye"
+      }
+    },
+    {
+      "id": "accentChairs_20",
+      "title": {
+        "en": "Designer Statement Chair",
+        "tr": "Tasarım İmza Sandalye"
+      }
+    },
+    {
+      "id": "coffeeTables_1",
+      "title": {
+        "en": "Round Wood Coffee Table",
+        "tr": "Yuvarlak Ahşap Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_2",
+      "title": {
+        "en": "Marble Coffee Table",
+        "tr": "Mermer Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_3",
+      "title": {
+        "en": "Glass Coffee Table",
+        "tr": "Cam Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_4",
+      "title": {
+        "en": "Live Edge Coffee Table",
+        "tr": "Doğal Kenarlı Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_5",
+      "title": {
+        "en": "Travertine Coffee Table",
+        "tr": "Traverten Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_6",
+      "title": {
+        "en": "Concrete Coffee Table",
+        "tr": "Beton Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_7",
+      "title": {
+        "en": "Rattan Coffee Table",
+        "tr": "Rattan Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_8",
+      "title": {
+        "en": "Nesting Coffee Tables",
+        "tr": "Zigon Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_9",
+      "title": {
+        "en": "Lift-Top Coffee Table",
+        "tr": "Açılır Tablalı Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_10",
+      "title": {
+        "en": "Mid-Century Coffee Table",
+        "tr": "Mid-Century Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_11",
+      "title": {
+        "en": "Oval Coffee Table",
+        "tr": "Oval Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_12",
+      "title": {
+        "en": "Drum Coffee Table",
+        "tr": "Davul Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_13",
+      "title": {
+        "en": "Burl Wood Coffee Table",
+        "tr": "Kök Ahşap Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_14",
+      "title": {
+        "en": "Minimal Steel Coffee Table",
+        "tr": "Minimal Çelik Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_15",
+      "title": {
+        "en": "Lacquer Coffee Table",
+        "tr": "Lake Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_16",
+      "title": {
+        "en": "Industrial Coffee Table",
+        "tr": "Endüstriyel Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_17",
+      "title": {
+        "en": "Japandi Coffee Table",
+        "tr": "Japandi Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_18",
+      "title": {
+        "en": "Stone Block Coffee Table",
+        "tr": "Taş Blok Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_19",
+      "title": {
+        "en": "Brass Coffee Table",
+        "tr": "Pirinç Sehpa"
+      }
+    },
+    {
+      "id": "coffeeTables_20",
+      "title": {
+        "en": "Artisan Coffee Table",
+        "tr": "Zanaatkar Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_1",
+      "title": {
+        "en": "Marble Side Table",
+        "tr": "Mermer Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_2",
+      "title": {
+        "en": "Rattan Side Table",
+        "tr": "Rattan Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_3",
+      "title": {
+        "en": "Drum Side Table",
+        "tr": "Davul Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_4",
+      "title": {
+        "en": "C-Table",
+        "tr": "C Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_5",
+      "title": {
+        "en": "Nesting Side Tables",
+        "tr": "Zigon Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_6",
+      "title": {
+        "en": "Pedestal Side Table",
+        "tr": "Kaideli Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_7",
+      "title": {
+        "en": "Hourglass Side Table",
+        "tr": "Kum Saati Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_8",
+      "title": {
+        "en": "Acrylic Side Table",
+        "tr": "Akrilik Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_9",
+      "title": {
+        "en": "Travertine Side Table",
+        "tr": "Traverten Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_10",
+      "title": {
+        "en": "Scalloped Side Table",
+        "tr": "Kıvrık Kenarlı Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_11",
+      "title": {
+        "en": "Mushroom Side Table",
+        "tr": "Mantar Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_12",
+      "title": {
+        "en": "Tripod Side Table",
+        "tr": "Üç Ayaklı Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_13",
+      "title": {
+        "en": "Wooden Stool Side Table",
+        "tr": "Ahşap Tabure Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_14",
+      "title": {
+        "en": "Glass Top Side Table",
+        "tr": "Cam Tablalı Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_15",
+      "title": {
+        "en": "Sculptural Side Table",
+        "tr": "Heykelsi Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_16",
+      "title": {
+        "en": "Brass Side Table",
+        "tr": "Pirinç Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_17",
+      "title": {
+        "en": "Folding Side Table",
+        "tr": "Katlanır Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_18",
+      "title": {
+        "en": "Lacquer Side Table",
+        "tr": "Lake Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_19",
+      "title": {
+        "en": "Concrete Side Table",
+        "tr": "Beton Yan Sehpa"
+      }
+    },
+    {
+      "id": "sideTables_20",
+      "title": {
+        "en": "Live Edge Side Table",
+        "tr": "Doğal Kenarlı Yan Sehpa"
+      }
+    },
+    {
+      "id": "consoleTables_1",
+      "title": {
+        "en": "Hallway Console",
+        "tr": "Antre Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_2",
+      "title": {
+        "en": "Marble Console",
+        "tr": "Mermer Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_3",
+      "title": {
+        "en": "Demilune Console",
+        "tr": "Yarım Ay Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_4",
+      "title": {
+        "en": "Live Edge Console",
+        "tr": "Doğal Kenarlı Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_5",
+      "title": {
+        "en": "Rattan Console",
+        "tr": "Rattan Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_6",
+      "title": {
+        "en": "Mirrored Console",
+        "tr": "Aynalı Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_7",
+      "title": {
+        "en": "Sculptural Console",
+        "tr": "Heykelsi Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_8",
+      "title": {
+        "en": "Lacquer Console",
+        "tr": "Lake Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_9",
+      "title": {
+        "en": "Trestle Console",
+        "tr": "Sehpa Ayaklı Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_10",
+      "title": {
+        "en": "Storage Console",
+        "tr": "Depolamalı Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_11",
+      "title": {
+        "en": "Floating Console",
+        "tr": "Duvara Monte Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_12",
+      "title": {
+        "en": "Glass Console",
+        "tr": "Cam Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_13",
+      "title": {
+        "en": "Minimalist Console",
+        "tr": "Minimalist Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_14",
+      "title": {
+        "en": "Mid-Century Console",
+        "tr": "Mid-Century Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_15",
+      "title": {
+        "en": "Industrial Console",
+        "tr": "Endüstriyel Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_16",
+      "title": {
+        "en": "Japandi Console",
+        "tr": "Japandi Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_17",
+      "title": {
+        "en": "Brass Console",
+        "tr": "Pirinç Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_18",
+      "title": {
+        "en": "Carved Wood Console",
+        "tr": "Oymalı Ahşap Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_19",
+      "title": {
+        "en": "Pedestal Console",
+        "tr": "Kaideli Konsol"
+      }
+    },
+    {
+      "id": "consoleTables_20",
+      "title": {
+        "en": "Art Deco Console",
+        "tr": "Art Deco Konsol"
+      }
+    },
+    {
+      "id": "mediaUnits_1",
+      "title": {
+        "en": "Low Media Console",
+        "tr": "Alçak TV Konsolu"
+      }
+    },
+    {
+      "id": "mediaUnits_2",
+      "title": {
+        "en": "Floating Media Unit",
+        "tr": "Duvara Monte TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_3",
+      "title": {
+        "en": "Oak Media Cabinet",
+        "tr": "Meşe TV Dolabı"
+      }
+    },
+    {
+      "id": "mediaUnits_4",
+      "title": {
+        "en": "Walnut Media Cabinet",
+        "tr": "Ceviz TV Dolabı"
+      }
+    },
+    {
+      "id": "mediaUnits_5",
+      "title": {
+        "en": "Rattan Media Console",
+        "tr": "Rattan TV Konsolu"
+      }
+    },
+    {
+      "id": "mediaUnits_6",
+      "title": {
+        "en": "Lacquer TV Stand",
+        "tr": "Lake TV Sehpası"
+      }
+    },
+    {
+      "id": "mediaUnits_7",
+      "title": {
+        "en": "Modular Media Wall",
+        "tr": "Modüler TV Duvarı"
+      }
+    },
+    {
+      "id": "mediaUnits_8",
+      "title": {
+        "en": "Industrial Media Unit",
+        "tr": "Endüstriyel TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_9",
+      "title": {
+        "en": "Minimal TV Stand",
+        "tr": "Minimal TV Sehpası"
+      }
+    },
+    {
+      "id": "mediaUnits_10",
+      "title": {
+        "en": "Japandi Media Cabinet",
+        "tr": "Japandi TV Dolabı"
+      }
+    },
+    {
+      "id": "mediaUnits_11",
+      "title": {
+        "en": "Reeded Media Console",
+        "tr": "Yivli TV Konsolu"
+      }
+    },
+    {
+      "id": "mediaUnits_12",
+      "title": {
+        "en": "Curved Media Unit",
+        "tr": "Kavisli TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_13",
+      "title": {
+        "en": "Smoked Glass Media Cabinet",
+        "tr": "Füme Camlı TV Dolabı"
+      }
+    },
+    {
+      "id": "mediaUnits_14",
+      "title": {
+        "en": "Mid-Century Credenza",
+        "tr": "Mid-Century Kredans"
+      }
+    },
+    {
+      "id": "mediaUnits_15",
+      "title": {
+        "en": "Fluted Media Unit",
+        "tr": "Oluklu TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_16",
+      "title": {
+        "en": "Sideboard TV Stand",
+        "tr": "Büfe TV Sehpası"
+      }
+    },
+    {
+      "id": "mediaUnits_17",
+      "title": {
+        "en": "Open Shelf Media Unit",
+        "tr": "Açık Raflı TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_18",
+      "title": {
+        "en": "Compact TV Stand",
+        "tr": "Kompakt TV Sehpası"
+      }
+    },
+    {
+      "id": "mediaUnits_19",
+      "title": {
+        "en": "Corner Media Unit",
+        "tr": "Köşe TV Ünitesi"
+      }
+    },
+    {
+      "id": "mediaUnits_20",
+      "title": {
+        "en": "Floor-to-Ceiling Media Wall",
+        "tr": "Tavandan Tabana TV Duvarı"
+      }
+    },
+    {
+      "id": "bookshelves_1",
+      "title": {
+        "en": "Ladder Bookshelf",
+        "tr": "Merdiven Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_2",
+      "title": {
+        "en": "Oak Bookshelf",
+        "tr": "Meşe Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_3",
+      "title": {
+        "en": "Modular Bookshelf",
+        "tr": "Modüler Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_4",
+      "title": {
+        "en": "Built-In Bookshelf",
+        "tr": "Gömme Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_5",
+      "title": {
+        "en": "Open Shelving",
+        "tr": "Açık Raf"
+      }
+    },
+    {
+      "id": "bookshelves_6",
+      "title": {
+        "en": "Étagère",
+        "tr": "Étagère Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_7",
+      "title": {
+        "en": "Library Wall",
+        "tr": "Kütüphane Duvarı"
+      }
+    },
+    {
+      "id": "bookshelves_8",
+      "title": {
+        "en": "Industrial Bookshelf",
+        "tr": "Endüstriyel Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_9",
+      "title": {
+        "en": "Minimal Bookshelf",
+        "tr": "Minimal Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_10",
+      "title": {
+        "en": "Mid-Century Bookshelf",
+        "tr": "Mid-Century Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_11",
+      "title": {
+        "en": "Leaning Bookshelf",
+        "tr": "Eğimli Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_12",
+      "title": {
+        "en": "Cube Bookshelf",
+        "tr": "Küp Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_13",
+      "title": {
+        "en": "Geometric Bookshelf",
+        "tr": "Geometrik Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_14",
+      "title": {
+        "en": "Floating Bookshelf",
+        "tr": "Duvara Monte Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_15",
+      "title": {
+        "en": "Brass Trim Bookshelf",
+        "tr": "Pirinç Detaylı Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_16",
+      "title": {
+        "en": "Corner Bookshelf",
+        "tr": "Köşe Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_17",
+      "title": {
+        "en": "Low Bookshelf",
+        "tr": "Alçak Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_18",
+      "title": {
+        "en": "Japandi Bookshelf",
+        "tr": "Japandi Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_19",
+      "title": {
+        "en": "Rotating Bookshelf",
+        "tr": "Döner Kitaplık"
+      }
+    },
+    {
+      "id": "bookshelves_20",
+      "title": {
+        "en": "String Shelving",
+        "tr": "String Raf Sistemi"
+      }
+    },
+    {
+      "id": "diningTables_1",
+      "title": {
+        "en": "Round Dining Table",
+        "tr": "Yuvarlak Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_2",
+      "title": {
+        "en": "Oval Dining Table",
+        "tr": "Oval Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_3",
+      "title": {
+        "en": "Rectangular Dining Table",
+        "tr": "Dikdörtgen Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_4",
+      "title": {
+        "en": "Trestle Dining Table",
+        "tr": "Sehpa Ayaklı Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_5",
+      "title": {
+        "en": "Pedestal Dining Table",
+        "tr": "Kaideli Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_6",
+      "title": {
+        "en": "Extension Dining Table",
+        "tr": "Açılır Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_7",
+      "title": {
+        "en": "Marble Dining Table",
+        "tr": "Mermer Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_8",
+      "title": {
+        "en": "Live Edge Dining Table",
+        "tr": "Doğal Kenarlı Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_9",
+      "title": {
+        "en": "Glass Dining Table",
+        "tr": "Cam Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_10",
+      "title": {
+        "en": "Concrete Dining Table",
+        "tr": "Beton Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_11",
+      "title": {
+        "en": "Tulip Dining Table",
+        "tr": "Lale Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_12",
+      "title": {
+        "en": "Farmhouse Dining Table",
+        "tr": "Country Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_13",
+      "title": {
+        "en": "Mid-Century Dining Table",
+        "tr": "Mid-Century Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_14",
+      "title": {
+        "en": "Travertine Dining Table",
+        "tr": "Traverten Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_15",
+      "title": {
+        "en": "Japandi Dining Table",
+        "tr": "Japandi Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_16",
+      "title": {
+        "en": "Rattan Base Dining Table",
+        "tr": "Rattan Ayaklı Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_17",
+      "title": {
+        "en": "Sculptural Dining Table",
+        "tr": "Heykelsi Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_18",
+      "title": {
+        "en": "Lacquer Dining Table",
+        "tr": "Lake Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_19",
+      "title": {
+        "en": "Brass Base Dining Table",
+        "tr": "Pirinç Ayaklı Yemek Masası"
+      }
+    },
+    {
+      "id": "diningTables_20",
+      "title": {
+        "en": "Bistro Dining Table",
+        "tr": "Bistro Yemek Masası"
+      }
+    },
+    {
+      "id": "diningChairs_1",
+      "title": {
+        "en": "Wishbone Chair",
+        "tr": "Wishbone Sandalye"
+      }
+    },
+    {
+      "id": "diningChairs_2",
+      "title": {
+        "en": "Eames Dining Chair",
+        "tr": "Eames Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_3",
+      "title": {
+        "en": "Upholstered Dining Chair",
+        "tr": "Kumaş Kaplı Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_4",
+      "title": {
+        "en": "Cane Dining Chair",
+        "tr": "Hasır Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_5",
+      "title": {
+        "en": "Bouclé Dining Chair",
+        "tr": "Bukle Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_6",
+      "title": {
+        "en": "Rattan Dining Chair",
+        "tr": "Rattan Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_7",
+      "title": {
+        "en": "Bentwood Dining Chair",
+        "tr": "Bükme Ağaç Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_8",
+      "title": {
+        "en": "Ghost Chair",
+        "tr": "Hayalet Sandalye"
+      }
+    },
+    {
+      "id": "diningChairs_9",
+      "title": {
+        "en": "Windsor Chair",
+        "tr": "Windsor Sandalye"
+      }
+    },
+    {
+      "id": "diningChairs_10",
+      "title": {
+        "en": "Tulip Chair",
+        "tr": "Lale Sandalye"
+      }
+    },
+    {
+      "id": "diningChairs_11",
+      "title": {
+        "en": "Bistro Chair",
+        "tr": "Bistro Sandalye"
+      }
+    },
+    {
+      "id": "diningChairs_12",
+      "title": {
+        "en": "Velvet Dining Chair",
+        "tr": "Kadife Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_13",
+      "title": {
+        "en": "Shell Dining Chair",
+        "tr": "Kabuk Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_14",
+      "title": {
+        "en": "Leather Dining Chair",
+        "tr": "Deri Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_15",
+      "title": {
+        "en": "Metal Dining Chair",
+        "tr": "Metal Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_16",
+      "title": {
+        "en": "Barrel Dining Chair",
+        "tr": "Fıçı Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_17",
+      "title": {
+        "en": "Low-Back Dining Chair",
+        "tr": "Alçak Sırtlı Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_18",
+      "title": {
+        "en": "Mid-Century Dining Chair",
+        "tr": "Mid-Century Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_19",
+      "title": {
+        "en": "Japandi Dining Chair",
+        "tr": "Japandi Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "diningChairs_20",
+      "title": {
+        "en": "Paper Cord Dining Chair",
+        "tr": "Kağıt İpli Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "bars_1",
+      "title": {
+        "en": "Home Bar Cabinet",
+        "tr": "Ev Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_2",
+      "title": {
+        "en": "Bar Cart",
+        "tr": "Bar Arabası"
+      }
+    },
+    {
+      "id": "bars_3",
+      "title": {
+        "en": "Built-In Bar",
+        "tr": "Gömme Bar"
+      }
+    },
+    {
+      "id": "bars_4",
+      "title": {
+        "en": "Mirrored Bar Cabinet",
+        "tr": "Aynalı Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_5",
+      "title": {
+        "en": "Rattan Bar Cart",
+        "tr": "Rattan Bar Arabası"
+      }
+    },
+    {
+      "id": "bars_6",
+      "title": {
+        "en": "Lacquer Bar Cabinet",
+        "tr": "Lake Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_7",
+      "title": {
+        "en": "Brass Bar Cart",
+        "tr": "Pirinç Bar Arabası"
+      }
+    },
+    {
+      "id": "bars_8",
+      "title": {
+        "en": "Mid-Century Bar Cabinet",
+        "tr": "Mid-Century Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_9",
+      "title": {
+        "en": "Marble Bar",
+        "tr": "Mermer Bar"
+      }
+    },
+    {
+      "id": "bars_10",
+      "title": {
+        "en": "Corner Bar",
+        "tr": "Köşe Bar"
+      }
+    },
+    {
+      "id": "bars_11",
+      "title": {
+        "en": "Hidden Bar Cabinet",
+        "tr": "Gizli Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_12",
+      "title": {
+        "en": "Open Shelf Bar",
+        "tr": "Açık Raflı Bar"
+      }
+    },
+    {
+      "id": "bars_13",
+      "title": {
+        "en": "Japandi Bar Cabinet",
+        "tr": "Japandi Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_14",
+      "title": {
+        "en": "Industrial Bar Cart",
+        "tr": "Endüstriyel Bar Arabası"
+      }
+    },
+    {
+      "id": "bars_15",
+      "title": {
+        "en": "Reeded Bar Cabinet",
+        "tr": "Yivli Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_16",
+      "title": {
+        "en": "Glass Front Bar",
+        "tr": "Cam Cepheli Bar"
+      }
+    },
+    {
+      "id": "bars_17",
+      "title": {
+        "en": "Lit Bar Cabinet",
+        "tr": "Aydınlatmalı Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_18",
+      "title": {
+        "en": "Sculptural Bar Cart",
+        "tr": "Heykelsi Bar Arabası"
+      }
+    },
+    {
+      "id": "bars_19",
+      "title": {
+        "en": "Fluted Bar Cabinet",
+        "tr": "Oluklu Bar Dolabı"
+      }
+    },
+    {
+      "id": "bars_20",
+      "title": {
+        "en": "Minimal Bar",
+        "tr": "Minimal Bar"
+      }
+    },
+    {
+      "id": "barStools_1",
+      "title": {
+        "en": "Upholstered Bar Stool",
+        "tr": "Kumaş Kaplı Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_2",
+      "title": {
+        "en": "Backless Bar Stool",
+        "tr": "Sırtsız Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_3",
+      "title": {
+        "en": "Swivel Bar Stool",
+        "tr": "Döner Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_4",
+      "title": {
+        "en": "Rattan Bar Stool",
+        "tr": "Rattan Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_5",
+      "title": {
+        "en": "Metal Bar Stool",
+        "tr": "Metal Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_6",
+      "title": {
+        "en": "Wood Bar Stool",
+        "tr": "Ahşap Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_7",
+      "title": {
+        "en": "Leather Bar Stool",
+        "tr": "Deri Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_8",
+      "title": {
+        "en": "Counter Height Stool",
+        "tr": "Tezgah Boyu Tabure"
+      }
+    },
+    {
+      "id": "barStools_9",
+      "title": {
+        "en": "Industrial Bar Stool",
+        "tr": "Endüstriyel Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_10",
+      "title": {
+        "en": "Mid-Century Bar Stool",
+        "tr": "Mid-Century Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_11",
+      "title": {
+        "en": "Bouclé Bar Stool",
+        "tr": "Bukle Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_12",
+      "title": {
+        "en": "Tolix Bar Stool",
+        "tr": "Tolix Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_13",
+      "title": {
+        "en": "Bentwood Bar Stool",
+        "tr": "Bükme Ağaç Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_14",
+      "title": {
+        "en": "Velvet Bar Stool",
+        "tr": "Kadife Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_15",
+      "title": {
+        "en": "Adjustable Bar Stool",
+        "tr": "Ayarlanabilir Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_16",
+      "title": {
+        "en": "Low-Back Bar Stool",
+        "tr": "Alçak Sırtlı Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_17",
+      "title": {
+        "en": "Cane Bar Stool",
+        "tr": "Hasır Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_18",
+      "title": {
+        "en": "Minimal Bar Stool",
+        "tr": "Minimal Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_19",
+      "title": {
+        "en": "Saddle Bar Stool",
+        "tr": "Eyer Bar Taburesi"
+      }
+    },
+    {
+      "id": "barStools_20",
+      "title": {
+        "en": "Japandi Bar Stool",
+        "tr": "Japandi Bar Taburesi"
+      }
+    },
+    {
+      "id": "beds_1",
+      "title": {
+        "en": "Upholstered Bed",
+        "tr": "Kumaş Kaplı Yatak"
+      }
+    },
+    {
+      "id": "beds_2",
+      "title": {
+        "en": "Canopy Bed",
+        "tr": "Cibinlikli Yatak"
+      }
+    },
+    {
+      "id": "beds_3",
+      "title": {
+        "en": "Platform Bed",
+        "tr": "Platform Yatak"
+      }
+    },
+    {
+      "id": "beds_4",
+      "title": {
+        "en": "Low Platform Bed",
+        "tr": "Alçak Platform Yatak"
+      }
+    },
+    {
+      "id": "beds_5",
+      "title": {
+        "en": "Four-Poster Bed",
+        "tr": "Dört Direkli Yatak"
+      }
+    },
+    {
+      "id": "beds_6",
+      "title": {
+        "en": "Sleigh Bed",
+        "tr": "Kızak Yatak"
+      }
+    },
+    {
+      "id": "beds_7",
+      "title": {
+        "en": "Storage Bed",
+        "tr": "Sandıklı Yatak"
+      }
+    },
+    {
+      "id": "beds_8",
+      "title": {
+        "en": "Rattan Bed",
+        "tr": "Rattan Yatak"
+      }
+    },
+    {
+      "id": "beds_9",
+      "title": {
+        "en": "Bouclé Bed",
+        "tr": "Bukle Yatak"
+      }
+    },
+    {
+      "id": "beds_10",
+      "title": {
+        "en": "Velvet Bed",
+        "tr": "Kadife Yatak"
+      }
+    },
+    {
+      "id": "beds_11",
+      "title": {
+        "en": "Leather Bed",
+        "tr": "Deri Yatak"
+      }
+    },
+    {
+      "id": "beds_12",
+      "title": {
+        "en": "Wood Bed Frame",
+        "tr": "Ahşap Karyola"
+      }
+    },
+    {
+      "id": "beds_13",
+      "title": {
+        "en": "Minimalist Bed",
+        "tr": "Minimalist Yatak"
+      }
+    },
+    {
+      "id": "beds_14",
+      "title": {
+        "en": "Japandi Bed",
+        "tr": "Japandi Yatak"
+      }
+    },
+    {
+      "id": "beds_15",
+      "title": {
+        "en": "Mid-Century Bed",
+        "tr": "Mid-Century Yatak"
+      }
+    },
+    {
+      "id": "beds_16",
+      "title": {
+        "en": "Curved Headboard Bed",
+        "tr": "Kavisli Başlıklı Yatak"
+      }
+    },
+    {
+      "id": "beds_17",
+      "title": {
+        "en": "Wingback Bed",
+        "tr": "Kanat Sırtlı Yatak"
+      }
+    },
+    {
+      "id": "beds_18",
+      "title": {
+        "en": "Tufted Bed",
+        "tr": "Kapitone Yatak"
+      }
+    },
+    {
+      "id": "beds_19",
+      "title": {
+        "en": "Murphy Bed",
+        "tr": "Duvar Yatağı"
+      }
+    },
+    {
+      "id": "beds_20",
+      "title": {
+        "en": "Daybed",
+        "tr": "Gündüz Yatağı"
+      }
+    },
+    {
+      "id": "nightstands_1",
+      "title": {
+        "en": "Marble Nightstand",
+        "tr": "Mermer Komodin"
+      }
+    },
+    {
+      "id": "nightstands_2",
+      "title": {
+        "en": "Rattan Nightstand",
+        "tr": "Rattan Komodin"
+      }
+    },
+    {
+      "id": "nightstands_3",
+      "title": {
+        "en": "Oak Nightstand",
+        "tr": "Meşe Komodin"
+      }
+    },
+    {
+      "id": "nightstands_4",
+      "title": {
+        "en": "Walnut Nightstand",
+        "tr": "Ceviz Komodin"
+      }
+    },
+    {
+      "id": "nightstands_5",
+      "title": {
+        "en": "Lacquer Nightstand",
+        "tr": "Lake Komodin"
+      }
+    },
+    {
+      "id": "nightstands_6",
+      "title": {
+        "en": "Mirrored Nightstand",
+        "tr": "Aynalı Komodin"
+      }
+    },
+    {
+      "id": "nightstands_7",
+      "title": {
+        "en": "Floating Nightstand",
+        "tr": "Duvara Monte Komodin"
+      }
+    },
+    {
+      "id": "nightstands_8",
+      "title": {
+        "en": "Drum Nightstand",
+        "tr": "Davul Komodin"
+      }
+    },
+    {
+      "id": "nightstands_9",
+      "title": {
+        "en": "Reeded Nightstand",
+        "tr": "Yivli Komodin"
+      }
+    },
+    {
+      "id": "nightstands_10",
+      "title": {
+        "en": "Mid-Century Nightstand",
+        "tr": "Mid-Century Komodin"
+      }
+    },
+    {
+      "id": "nightstands_11",
+      "title": {
+        "en": "Japandi Nightstand",
+        "tr": "Japandi Komodin"
+      }
+    },
+    {
+      "id": "nightstands_12",
+      "title": {
+        "en": "Minimal Nightstand",
+        "tr": "Minimal Komodin"
+      }
+    },
+    {
+      "id": "nightstands_13",
+      "title": {
+        "en": "Round Nightstand",
+        "tr": "Yuvarlak Komodin"
+      }
+    },
+    {
+      "id": "nightstands_14",
+      "title": {
+        "en": "Tripod Nightstand",
+        "tr": "Üç Ayaklı Komodin"
+      }
+    },
+    {
+      "id": "nightstands_15",
+      "title": {
+        "en": "Brass Trim Nightstand",
+        "tr": "Pirinç Detaylı Komodin"
+      }
+    },
+    {
+      "id": "nightstands_16",
+      "title": {
+        "en": "Travertine Nightstand",
+        "tr": "Traverten Komodin"
+      }
+    },
+    {
+      "id": "nightstands_17",
+      "title": {
+        "en": "Industrial Nightstand",
+        "tr": "Endüstriyel Komodin"
+      }
+    },
+    {
+      "id": "nightstands_18",
+      "title": {
+        "en": "Fluted Nightstand",
+        "tr": "Oluklu Komodin"
+      }
+    },
+    {
+      "id": "nightstands_19",
+      "title": {
+        "en": "Live Edge Nightstand",
+        "tr": "Doğal Kenarlı Komodin"
+      }
+    },
+    {
+      "id": "nightstands_20",
+      "title": {
+        "en": "Cane Front Nightstand",
+        "tr": "Hasır Cepheli Komodin"
+      }
+    },
+    {
+      "id": "dressers_1",
+      "title": {
+        "en": "Six-Drawer Dresser",
+        "tr": "Altı Çekmeceli Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_2",
+      "title": {
+        "en": "Tall Dresser",
+        "tr": "Uzun Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_3",
+      "title": {
+        "en": "Low Dresser",
+        "tr": "Alçak Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_4",
+      "title": {
+        "en": "Mid-Century Dresser",
+        "tr": "Mid-Century Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_5",
+      "title": {
+        "en": "Reeded Dresser",
+        "tr": "Yivli Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_6",
+      "title": {
+        "en": "Rattan Dresser",
+        "tr": "Rattan Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_7",
+      "title": {
+        "en": "Lacquer Dresser",
+        "tr": "Lake Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_8",
+      "title": {
+        "en": "Oak Dresser",
+        "tr": "Meşe Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_9",
+      "title": {
+        "en": "Walnut Dresser",
+        "tr": "Ceviz Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_10",
+      "title": {
+        "en": "Fluted Dresser",
+        "tr": "Oluklu Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_11",
+      "title": {
+        "en": "Japandi Dresser",
+        "tr": "Japandi Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_12",
+      "title": {
+        "en": "Minimal Dresser",
+        "tr": "Minimal Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_13",
+      "title": {
+        "en": "Mirrored Dresser",
+        "tr": "Aynalı Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_14",
+      "title": {
+        "en": "Cane Front Dresser",
+        "tr": "Hasır Cepheli Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_15",
+      "title": {
+        "en": "Burl Wood Dresser",
+        "tr": "Kök Ahşap Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_16",
+      "title": {
+        "en": "Vintage Dresser",
+        "tr": "Vintage Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_17",
+      "title": {
+        "en": "Brass Trim Dresser",
+        "tr": "Pirinç Detaylı Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_18",
+      "title": {
+        "en": "Industrial Dresser",
+        "tr": "Endüstriyel Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_19",
+      "title": {
+        "en": "Live Edge Dresser",
+        "tr": "Doğal Kenarlı Şifonyer"
+      }
+    },
+    {
+      "id": "dressers_20",
+      "title": {
+        "en": "Scalloped Dresser",
+        "tr": "Kıvrık Kenarlı Şifonyer"
+      }
+    },
+    {
+      "id": "wardrobes_1",
+      "title": {
+        "en": "Freestanding Wardrobe",
+        "tr": "Bağımsız Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_2",
+      "title": {
+        "en": "Mirrored Wardrobe",
+        "tr": "Aynalı Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_3",
+      "title": {
+        "en": "Sliding Door Wardrobe",
+        "tr": "Sürgülü Kapaklı Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_4",
+      "title": {
+        "en": "Built-In Wardrobe",
+        "tr": "Gömme Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_5",
+      "title": {
+        "en": "Oak Wardrobe",
+        "tr": "Meşe Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_6",
+      "title": {
+        "en": "Walnut Wardrobe",
+        "tr": "Ceviz Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_7",
+      "title": {
+        "en": "Rattan Wardrobe",
+        "tr": "Rattan Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_8",
+      "title": {
+        "en": "Lacquer Wardrobe",
+        "tr": "Lake Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_9",
+      "title": {
+        "en": "Japandi Wardrobe",
+        "tr": "Japandi Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_10",
+      "title": {
+        "en": "Minimal Wardrobe",
+        "tr": "Minimal Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_11",
+      "title": {
+        "en": "Reeded Wardrobe",
+        "tr": "Yivli Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_12",
+      "title": {
+        "en": "Fluted Wardrobe",
+        "tr": "Oluklu Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_13",
+      "title": {
+        "en": "Art Deco Wardrobe",
+        "tr": "Art Deco Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_14",
+      "title": {
+        "en": "Mid-Century Wardrobe",
+        "tr": "Mid-Century Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_15",
+      "title": {
+        "en": "Walk-In Wardrobe",
+        "tr": "Giyinme Odası Gardırobu"
+      }
+    },
+    {
+      "id": "wardrobes_16",
+      "title": {
+        "en": "Corner Wardrobe",
+        "tr": "Köşe Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_17",
+      "title": {
+        "en": "Low Wardrobe",
+        "tr": "Alçak Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_18",
+      "title": {
+        "en": "Compact Wardrobe",
+        "tr": "Kompakt Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_19",
+      "title": {
+        "en": "Two-Door Wardrobe",
+        "tr": "İki Kapaklı Gardırop"
+      }
+    },
+    {
+      "id": "wardrobes_20",
+      "title": {
+        "en": "Four-Door Wardrobe",
+        "tr": "Dört Kapaklı Gardırop"
+      }
+    },
+    {
+      "id": "vanities_1",
+      "title": {
+        "en": "Bedroom Vanity",
+        "tr": "Yatak Odası Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_2",
+      "title": {
+        "en": "Modern Vanity",
+        "tr": "Modern Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_3",
+      "title": {
+        "en": "Art Deco Vanity",
+        "tr": "Art Deco Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_4",
+      "title": {
+        "en": "Mirrored Vanity",
+        "tr": "Aynalı Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_5",
+      "title": {
+        "en": "Rattan Vanity",
+        "tr": "Rattan Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_6",
+      "title": {
+        "en": "Oak Vanity",
+        "tr": "Meşe Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_7",
+      "title": {
+        "en": "Walnut Vanity",
+        "tr": "Ceviz Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_8",
+      "title": {
+        "en": "Marble Top Vanity",
+        "tr": "Mermer Tablalı Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_9",
+      "title": {
+        "en": "Minimal Vanity",
+        "tr": "Minimal Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_10",
+      "title": {
+        "en": "Japandi Vanity",
+        "tr": "Japandi Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_11",
+      "title": {
+        "en": "Fluted Vanity",
+        "tr": "Oluklu Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_12",
+      "title": {
+        "en": "Reeded Vanity",
+        "tr": "Yivli Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_13",
+      "title": {
+        "en": "Lacquer Vanity",
+        "tr": "Lake Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_14",
+      "title": {
+        "en": "Lit Vanity",
+        "tr": "Aydınlatmalı Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_15",
+      "title": {
+        "en": "Brass Trim Vanity",
+        "tr": "Pirinç Detaylı Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_16",
+      "title": {
+        "en": "Wall-Mounted Vanity",
+        "tr": "Duvara Monte Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_17",
+      "title": {
+        "en": "Compact Vanity",
+        "tr": "Kompakt Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_18",
+      "title": {
+        "en": "Corner Vanity",
+        "tr": "Köşe Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_19",
+      "title": {
+        "en": "Double Vanity",
+        "tr": "Çift Kişilik Makyaj Masası"
+      }
+    },
+    {
+      "id": "vanities_20",
+      "title": {
+        "en": "Vintage Vanity",
+        "tr": "Vintage Makyaj Masası"
+      }
+    },
+    {
+      "id": "desks_1",
+      "title": {
+        "en": "Writing Desk",
+        "tr": "Yazı Masası"
+      }
+    },
+    {
+      "id": "desks_2",
+      "title": {
+        "en": "Executive Desk",
+        "tr": "Yönetici Masası"
+      }
+    },
+    {
+      "id": "desks_3",
+      "title": {
+        "en": "Standing Desk",
+        "tr": "Ayakta Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_4",
+      "title": {
+        "en": "L-Shape Desk",
+        "tr": "L Şeklinde Masa"
+      }
+    },
+    {
+      "id": "desks_5",
+      "title": {
+        "en": "Corner Desk",
+        "tr": "Köşe Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_6",
+      "title": {
+        "en": "Rattan Desk",
+        "tr": "Rattan Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_7",
+      "title": {
+        "en": "Oak Desk",
+        "tr": "Meşe Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_8",
+      "title": {
+        "en": "Walnut Desk",
+        "tr": "Ceviz Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_9",
+      "title": {
+        "en": "Lacquer Desk",
+        "tr": "Lake Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_10",
+      "title": {
+        "en": "Mid-Century Desk",
+        "tr": "Mid-Century Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_11",
+      "title": {
+        "en": "Japandi Desk",
+        "tr": "Japandi Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_12",
+      "title": {
+        "en": "Minimal Desk",
+        "tr": "Minimal Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_13",
+      "title": {
+        "en": "Glass Top Desk",
+        "tr": "Cam Tablalı Masa"
+      }
+    },
+    {
+      "id": "desks_14",
+      "title": {
+        "en": "Marble Top Desk",
+        "tr": "Mermer Tablalı Masa"
+      }
+    },
+    {
+      "id": "desks_15",
+      "title": {
+        "en": "Live Edge Desk",
+        "tr": "Doğal Kenarlı Masa"
+      }
+    },
+    {
+      "id": "desks_16",
+      "title": {
+        "en": "Fluted Desk",
+        "tr": "Oluklu Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_17",
+      "title": {
+        "en": "Reeded Desk",
+        "tr": "Yivli Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_18",
+      "title": {
+        "en": "Industrial Desk",
+        "tr": "Endüstriyel Çalışma Masası"
+      }
+    },
+    {
+      "id": "desks_19",
+      "title": {
+        "en": "Trestle Desk",
+        "tr": "Sehpa Ayaklı Masa"
+      }
+    },
+    {
+      "id": "desks_20",
+      "title": {
+        "en": "Floating Desk",
+        "tr": "Duvara Monte Masa"
+      }
+    },
+    {
+      "id": "officeChairs_1",
+      "title": {
+        "en": "Ergonomic Office Chair",
+        "tr": "Ergonomik Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_2",
+      "title": {
+        "en": "Leather Executive Chair",
+        "tr": "Deri Yönetici Koltuğu"
+      }
+    },
+    {
+      "id": "officeChairs_3",
+      "title": {
+        "en": "Mesh Office Chair",
+        "tr": "File Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_4",
+      "title": {
+        "en": "Upholstered Office Chair",
+        "tr": "Kumaş Kaplı Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_5",
+      "title": {
+        "en": "Velvet Office Chair",
+        "tr": "Kadife Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_6",
+      "title": {
+        "en": "Bouclé Office Chair",
+        "tr": "Bukle Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_7",
+      "title": {
+        "en": "Mid-Century Office Chair",
+        "tr": "Mid-Century Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_8",
+      "title": {
+        "en": "Swivel Office Chair",
+        "tr": "Döner Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_9",
+      "title": {
+        "en": "Task Chair",
+        "tr": "Görev Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_10",
+      "title": {
+        "en": "Eames Office Chair",
+        "tr": "Eames Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_11",
+      "title": {
+        "en": "Herman Miller Chair",
+        "tr": "Herman Miller Sandalye"
+      }
+    },
+    {
+      "id": "officeChairs_12",
+      "title": {
+        "en": "Industrial Office Chair",
+        "tr": "Endüstriyel Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_13",
+      "title": {
+        "en": "Compact Office Chair",
+        "tr": "Kompakt Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_14",
+      "title": {
+        "en": "Minimal Office Chair",
+        "tr": "Minimal Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_15",
+      "title": {
+        "en": "Japandi Office Chair",
+        "tr": "Japandi Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_16",
+      "title": {
+        "en": "Wood Office Chair",
+        "tr": "Ahşap Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_17",
+      "title": {
+        "en": "Rattan Office Chair",
+        "tr": "Rattan Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_18",
+      "title": {
+        "en": "Sled Base Office Chair",
+        "tr": "Kızak Ayaklı Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_19",
+      "title": {
+        "en": "High-Back Office Chair",
+        "tr": "Yüksek Sırtlı Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "officeChairs_20",
+      "title": {
+        "en": "Low-Back Office Chair",
+        "tr": "Alçak Sırtlı Ofis Sandalyesi"
+      }
+    },
+    {
+      "id": "filingCabinets_1",
+      "title": {
+        "en": "Two-Drawer Filing Cabinet",
+        "tr": "İki Çekmeceli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_2",
+      "title": {
+        "en": "Four-Drawer Filing Cabinet",
+        "tr": "Dört Çekmeceli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_3",
+      "title": {
+        "en": "Lateral Filing Cabinet",
+        "tr": "Yatay Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_4",
+      "title": {
+        "en": "Mobile Filing Cabinet",
+        "tr": "Tekerlekli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_5",
+      "title": {
+        "en": "Wood Filing Cabinet",
+        "tr": "Ahşap Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_6",
+      "title": {
+        "en": "Metal Filing Cabinet",
+        "tr": "Metal Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_7",
+      "title": {
+        "en": "Lacquer Filing Cabinet",
+        "tr": "Lake Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_8",
+      "title": {
+        "en": "Mid-Century Filing Cabinet",
+        "tr": "Mid-Century Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_9",
+      "title": {
+        "en": "Minimal Filing Cabinet",
+        "tr": "Minimal Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_10",
+      "title": {
+        "en": "Japandi Filing Cabinet",
+        "tr": "Japandi Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_11",
+      "title": {
+        "en": "Rattan Front Filing Cabinet",
+        "tr": "Rattan Cepheli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_12",
+      "title": {
+        "en": "Fluted Filing Cabinet",
+        "tr": "Oluklu Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_13",
+      "title": {
+        "en": "Reeded Filing Cabinet",
+        "tr": "Yivli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_14",
+      "title": {
+        "en": "Hidden Filing Cabinet",
+        "tr": "Gizli Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_15",
+      "title": {
+        "en": "Under-Desk Filing Cabinet",
+        "tr": "Masa Altı Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_16",
+      "title": {
+        "en": "Industrial Filing Cabinet",
+        "tr": "Endüstriyel Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_17",
+      "title": {
+        "en": "Cube Filing Cabinet",
+        "tr": "Küp Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_18",
+      "title": {
+        "en": "Compact Filing Cabinet",
+        "tr": "Kompakt Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_19",
+      "title": {
+        "en": "Double-Door Filing Cabinet",
+        "tr": "Çift Kapaklı Dosya Dolabı"
+      }
+    },
+    {
+      "id": "filingCabinets_20",
+      "title": {
+        "en": "Combo Filing Cabinet",
+        "tr": "Kombine Dosya Dolabı"
+      }
+    },
+    {
+      "id": "floorLamps_1",
+      "title": {
+        "en": "Arc Floor Lamp",
+        "tr": "Yay Şeklinde Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_2",
+      "title": {
+        "en": "Tripod Floor Lamp",
+        "tr": "Üç Ayaklı Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_3",
+      "title": {
+        "en": "Task Floor Lamp",
+        "tr": "Çalışma Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_4",
+      "title": {
+        "en": "Paper Shade Floor Lamp",
+        "tr": "Kağıt Şapkalı Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_5",
+      "title": {
+        "en": "Globe Floor Lamp",
+        "tr": "Küre Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_6",
+      "title": {
+        "en": "Sculptural Floor Lamp",
+        "tr": "Heykelsi Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_7",
+      "title": {
+        "en": "Mid-Century Floor Lamp",
+        "tr": "Mid-Century Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_8",
+      "title": {
+        "en": "Brass Floor Lamp",
+        "tr": "Pirinç Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_9",
+      "title": {
+        "en": "Rattan Floor Lamp",
+        "tr": "Rattan Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_10",
+      "title": {
+        "en": "Japandi Floor Lamp",
+        "tr": "Japandi Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_11",
+      "title": {
+        "en": "Minimal Floor Lamp",
+        "tr": "Minimal Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_12",
+      "title": {
+        "en": "Linen Shade Floor Lamp",
+        "tr": "Keten Şapkalı Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_13",
+      "title": {
+        "en": "Industrial Floor Lamp",
+        "tr": "Endüstriyel Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_14",
+      "title": {
+        "en": "Reading Floor Lamp",
+        "tr": "Okuma Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_15",
+      "title": {
+        "en": "Dimmable Floor Lamp",
+        "tr": "Kısılabilir Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_16",
+      "title": {
+        "en": "Torchiere Floor Lamp",
+        "tr": "Torchiere Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_17",
+      "title": {
+        "en": "Multi-Arm Floor Lamp",
+        "tr": "Çok Kollu Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_18",
+      "title": {
+        "en": "Curved Floor Lamp",
+        "tr": "Kavisli Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_19",
+      "title": {
+        "en": "Noguchi Floor Lamp",
+        "tr": "Noguchi Yer Lambası"
+      }
+    },
+    {
+      "id": "floorLamps_20",
+      "title": {
+        "en": "Marble Base Floor Lamp",
+        "tr": "Mermer Tabanlı Yer Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_1",
+      "title": {
+        "en": "Ceramic Table Lamp",
+        "tr": "Seramik Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_2",
+      "title": {
+        "en": "Mushroom Table Lamp",
+        "tr": "Mantar Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_3",
+      "title": {
+        "en": "Glass Table Lamp",
+        "tr": "Cam Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_4",
+      "title": {
+        "en": "Brass Table Lamp",
+        "tr": "Pirinç Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_5",
+      "title": {
+        "en": "Marble Table Lamp",
+        "tr": "Mermer Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_6",
+      "title": {
+        "en": "Linen Shade Table Lamp",
+        "tr": "Keten Şapkalı Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_7",
+      "title": {
+        "en": "Rattan Table Lamp",
+        "tr": "Rattan Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_8",
+      "title": {
+        "en": "Sculptural Table Lamp",
+        "tr": "Heykelsi Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_9",
+      "title": {
+        "en": "Mid-Century Table Lamp",
+        "tr": "Mid-Century Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_10",
+      "title": {
+        "en": "Japandi Table Lamp",
+        "tr": "Japandi Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_11",
+      "title": {
+        "en": "Minimal Table Lamp",
+        "tr": "Minimal Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_12",
+      "title": {
+        "en": "Pleated Shade Table Lamp",
+        "tr": "Pliseli Şapkalı Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_13",
+      "title": {
+        "en": "Alabaster Table Lamp",
+        "tr": "Alabaster Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_14",
+      "title": {
+        "en": "Mini Table Lamp",
+        "tr": "Mini Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_15",
+      "title": {
+        "en": "Tall Table Lamp",
+        "tr": "Uzun Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_16",
+      "title": {
+        "en": "Tripod Table Lamp",
+        "tr": "Üç Ayaklı Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_17",
+      "title": {
+        "en": "Crystal Table Lamp",
+        "tr": "Kristal Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_18",
+      "title": {
+        "en": "Retro Table Lamp",
+        "tr": "Retro Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_19",
+      "title": {
+        "en": "Concrete Table Lamp",
+        "tr": "Beton Masa Lambası"
+      }
+    },
+    {
+      "id": "tableLamps_20",
+      "title": {
+        "en": "Burl Wood Table Lamp",
+        "tr": "Kök Ahşap Masa Lambası"
+      }
+    },
+    {
+      "id": "pendantLights_1",
+      "title": {
+        "en": "Rattan Pendant",
+        "tr": "Rattan Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_2",
+      "title": {
+        "en": "Paper Lantern Pendant",
+        "tr": "Kağıt Fener Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_3",
+      "title": {
+        "en": "Glass Globe Pendant",
+        "tr": "Cam Küre Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_4",
+      "title": {
+        "en": "Brass Pendant",
+        "tr": "Pirinç Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_5",
+      "title": {
+        "en": "Cluster Pendant",
+        "tr": "Kümeli Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_6",
+      "title": {
+        "en": "Linear Pendant",
+        "tr": "Lineer Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_7",
+      "title": {
+        "en": "Drum Pendant",
+        "tr": "Davul Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_8",
+      "title": {
+        "en": "Plaster Pendant",
+        "tr": "Alçı Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_9",
+      "title": {
+        "en": "Mushroom Pendant",
+        "tr": "Mantar Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_10",
+      "title": {
+        "en": "Japandi Pendant",
+        "tr": "Japandi Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_11",
+      "title": {
+        "en": "Minimal Pendant",
+        "tr": "Minimal Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_12",
+      "title": {
+        "en": "Mid-Century Pendant",
+        "tr": "Mid-Century Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_13",
+      "title": {
+        "en": "Industrial Pendant",
+        "tr": "Endüstriyel Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_14",
+      "title": {
+        "en": "Multi-Light Pendant",
+        "tr": "Çoklu Ampul Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_15",
+      "title": {
+        "en": "Oversized Pendant",
+        "tr": "Büyük Boy Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_16",
+      "title": {
+        "en": "Noguchi Pendant",
+        "tr": "Noguchi Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_17",
+      "title": {
+        "en": "Sculptural Pendant",
+        "tr": "Heykelsi Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_18",
+      "title": {
+        "en": "Ribbed Glass Pendant",
+        "tr": "Çizgili Cam Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_19",
+      "title": {
+        "en": "Woven Pendant",
+        "tr": "Örme Sarkıt"
+      }
+    },
+    {
+      "id": "pendantLights_20",
+      "title": {
+        "en": "Concrete Pendant",
+        "tr": "Beton Sarkıt"
+      }
+    },
+    {
+      "id": "ceilingLights_1",
+      "title": {
+        "en": "Flush Mount Ceiling Light",
+        "tr": "Tavana Sıfır Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_2",
+      "title": {
+        "en": "Semi-Flush Ceiling Light",
+        "tr": "Yarı Sıfır Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_3",
+      "title": {
+        "en": "Modern Chandelier",
+        "tr": "Modern Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_4",
+      "title": {
+        "en": "Crystal Chandelier",
+        "tr": "Kristal Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_5",
+      "title": {
+        "en": "Drum Chandelier",
+        "tr": "Davul Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_6",
+      "title": {
+        "en": "Linear Chandelier",
+        "tr": "Lineer Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_7",
+      "title": {
+        "en": "Sputnik Chandelier",
+        "tr": "Sputnik Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_8",
+      "title": {
+        "en": "Mobile Chandelier",
+        "tr": "Mobil Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_9",
+      "title": {
+        "en": "Plaster Ceiling Light",
+        "tr": "Alçı Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_10",
+      "title": {
+        "en": "Japandi Ceiling Light",
+        "tr": "Japandi Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_11",
+      "title": {
+        "en": "Minimal Ceiling Light",
+        "tr": "Minimal Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_12",
+      "title": {
+        "en": "Brass Ceiling Light",
+        "tr": "Pirinç Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_13",
+      "title": {
+        "en": "Geometric Chandelier",
+        "tr": "Geometrik Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_14",
+      "title": {
+        "en": "Globe Chandelier",
+        "tr": "Küre Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_15",
+      "title": {
+        "en": "Ribbed Glass Ceiling Light",
+        "tr": "Çizgili Cam Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_16",
+      "title": {
+        "en": "Mid-Century Ceiling Light",
+        "tr": "Mid-Century Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_17",
+      "title": {
+        "en": "Oversized Chandelier",
+        "tr": "Büyük Boy Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_18",
+      "title": {
+        "en": "Rattan Ceiling Light",
+        "tr": "Rattan Tavan Lambası"
+      }
+    },
+    {
+      "id": "ceilingLights_19",
+      "title": {
+        "en": "Sculptural Chandelier",
+        "tr": "Heykelsi Avize"
+      }
+    },
+    {
+      "id": "ceilingLights_20",
+      "title": {
+        "en": "Recessed Lighting",
+        "tr": "Gömme Spot Aydınlatma"
+      }
+    },
+    {
+      "id": "wallSconces_1",
+      "title": {
+        "en": "Plug-In Sconce",
+        "tr": "Fişli Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_2",
+      "title": {
+        "en": "Hardwired Sconce",
+        "tr": "Sabit Bağlantılı Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_3",
+      "title": {
+        "en": "Picture Light",
+        "tr": "Tablo Aydınlatması"
+      }
+    },
+    {
+      "id": "wallSconces_4",
+      "title": {
+        "en": "Reading Sconce",
+        "tr": "Okuma Apliği"
+      }
+    },
+    {
+      "id": "wallSconces_5",
+      "title": {
+        "en": "Plaster Sconce",
+        "tr": "Alçı Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_6",
+      "title": {
+        "en": "Brass Sconce",
+        "tr": "Pirinç Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_7",
+      "title": {
+        "en": "Sculptural Sconce",
+        "tr": "Heykelsi Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_8",
+      "title": {
+        "en": "Linear Sconce",
+        "tr": "Lineer Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_9",
+      "title": {
+        "en": "Art Deco Sconce",
+        "tr": "Art Deco Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_10",
+      "title": {
+        "en": "Mid-Century Sconce",
+        "tr": "Mid-Century Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_11",
+      "title": {
+        "en": "Japandi Sconce",
+        "tr": "Japandi Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_12",
+      "title": {
+        "en": "Minimal Sconce",
+        "tr": "Minimal Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_13",
+      "title": {
+        "en": "Ribbed Glass Sconce",
+        "tr": "Çizgili Cam Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_14",
+      "title": {
+        "en": "Swing Arm Sconce",
+        "tr": "Mafsallı Kollu Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_15",
+      "title": {
+        "en": "Cluster Sconce",
+        "tr": "Kümeli Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_16",
+      "title": {
+        "en": "Rattan Sconce",
+        "tr": "Rattan Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_17",
+      "title": {
+        "en": "Up-Down Sconce",
+        "tr": "Yukarı-Aşağı Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_18",
+      "title": {
+        "en": "Alabaster Sconce",
+        "tr": "Alabaster Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_19",
+      "title": {
+        "en": "Torch Sconce",
+        "tr": "Meşale Aplik"
+      }
+    },
+    {
+      "id": "wallSconces_20",
+      "title": {
+        "en": "Modern Sconce",
+        "tr": "Modern Aplik"
+      }
+    },
+    {
+      "id": "rugs_1",
+      "title": {
+        "en": "Persian Rug",
+        "tr": "İran Halısı"
+      }
+    },
+    {
+      "id": "rugs_2",
+      "title": {
+        "en": "Turkish Rug",
+        "tr": "Türk Halısı"
+      }
+    },
+    {
+      "id": "rugs_3",
+      "title": {
+        "en": "Moroccan Rug",
+        "tr": "Fas Halısı"
+      }
+    },
+    {
+      "id": "rugs_4",
+      "title": {
+        "en": "Jute Rug",
+        "tr": "Jüt Halı"
+      }
+    },
+    {
+      "id": "rugs_5",
+      "title": {
+        "en": "Sisal Rug",
+        "tr": "Sisal Halı"
+      }
+    },
+    {
+      "id": "rugs_6",
+      "title": {
+        "en": "Wool Rug",
+        "tr": "Yün Halı"
+      }
+    },
+    {
+      "id": "rugs_7",
+      "title": {
+        "en": "Vintage Rug",
+        "tr": "Vintage Halı"
+      }
+    },
+    {
+      "id": "rugs_8",
+      "title": {
+        "en": "Overdyed Rug",
+        "tr": "Üzerine Boyalı Halı"
+      }
+    },
+    {
+      "id": "rugs_9",
+      "title": {
+        "en": "Berber Rug",
+        "tr": "Berber Halı"
+      }
+    },
+    {
+      "id": "rugs_10",
+      "title": {
+        "en": "Flatweave Rug",
+        "tr": "Düz Dokuma Halı"
+      }
+    },
+    {
+      "id": "rugs_11",
+      "title": {
+        "en": "Shag Rug",
+        "tr": "Tüylü Halı"
+      }
+    },
+    {
+      "id": "rugs_12",
+      "title": {
+        "en": "Striped Rug",
+        "tr": "Çizgili Halı"
+      }
+    },
+    {
+      "id": "rugs_13",
+      "title": {
+        "en": "Geometric Rug",
+        "tr": "Geometrik Halı"
+      }
+    },
+    {
+      "id": "rugs_14",
+      "title": {
+        "en": "Abstract Rug",
+        "tr": "Soyut Halı"
+      }
+    },
+    {
+      "id": "rugs_15",
+      "title": {
+        "en": "Neutral Rug",
+        "tr": "Nötr Tonlu Halı"
+      }
+    },
+    {
+      "id": "rugs_16",
+      "title": {
+        "en": "Runner Rug",
+        "tr": "Yolluk Halı"
+      }
+    },
+    {
+      "id": "rugs_17",
+      "title": {
+        "en": "Round Rug",
+        "tr": "Yuvarlak Halı"
+      }
+    },
+    {
+      "id": "rugs_18",
+      "title": {
+        "en": "Minimal Rug",
+        "tr": "Minimal Halı"
+      }
+    },
+    {
+      "id": "rugs_19",
+      "title": {
+        "en": "Japandi Rug",
+        "tr": "Japandi Halı"
+      }
+    },
+    {
+      "id": "rugs_20",
+      "title": {
+        "en": "Hand-Knotted Rug",
+        "tr": "El Düğümü Halı"
+      }
+    },
+    {
+      "id": "curtains_1",
+      "title": {
+        "en": "Linen Curtains",
+        "tr": "Keten Perde"
+      }
+    },
+    {
+      "id": "curtains_2",
+      "title": {
+        "en": "Velvet Curtains",
+        "tr": "Kadife Perde"
+      }
+    },
+    {
+      "id": "curtains_3",
+      "title": {
+        "en": "Sheer Curtains",
+        "tr": "Tül Perde"
+      }
+    },
+    {
+      "id": "curtains_4",
+      "title": {
+        "en": "Blackout Curtains",
+        "tr": "Karartma Perde"
+      }
+    },
+    {
+      "id": "curtains_5",
+      "title": {
+        "en": "Pinch Pleat Curtains",
+        "tr": "Pliseli Perde"
+      }
+    },
+    {
+      "id": "curtains_6",
+      "title": {
+        "en": "Ripplefold Curtains",
+        "tr": "Dalgalı Perde"
+      }
+    },
+    {
+      "id": "curtains_7",
+      "title": {
+        "en": "Cotton Curtains",
+        "tr": "Pamuklu Perde"
+      }
+    },
+    {
+      "id": "curtains_8",
+      "title": {
+        "en": "Silk Curtains",
+        "tr": "İpek Perde"
+      }
+    },
+    {
+      "id": "curtains_9",
+      "title": {
+        "en": "Bouclé Curtains",
+        "tr": "Bukle Perde"
+      }
+    },
+    {
+      "id": "curtains_10",
+      "title": {
+        "en": "Minimal Curtains",
+        "tr": "Minimal Perde"
+      }
+    },
+    {
+      "id": "curtains_11",
+      "title": {
+        "en": "Japandi Curtains",
+        "tr": "Japandi Perde"
+      }
+    },
+    {
+      "id": "curtains_12",
+      "title": {
+        "en": "Café Curtains",
+        "tr": "Café Perde"
+      }
+    },
+    {
+      "id": "curtains_13",
+      "title": {
+        "en": "Floor-Length Curtains",
+        "tr": "Yere Kadar Perde"
+      }
+    },
+    {
+      "id": "curtains_14",
+      "title": {
+        "en": "Layered Curtains",
+        "tr": "Katmanlı Perde"
+      }
+    },
+    {
+      "id": "curtains_15",
+      "title": {
+        "en": "Tie-Back Curtains",
+        "tr": "Bağlamalı Perde"
+      }
+    },
+    {
+      "id": "curtains_16",
+      "title": {
+        "en": "Roller Shades",
+        "tr": "Stor Perde"
+      }
+    },
+    {
+      "id": "curtains_17",
+      "title": {
+        "en": "Roman Shades",
+        "tr": "Roma Perde"
+      }
+    },
+    {
+      "id": "curtains_18",
+      "title": {
+        "en": "Woven Wood Shades",
+        "tr": "Örme Ahşap Perde"
+      }
+    },
+    {
+      "id": "curtains_19",
+      "title": {
+        "en": "Panel Track Curtains",
+        "tr": "Panel Perde"
+      }
+    },
+    {
+      "id": "curtains_20",
+      "title": {
+        "en": "Embroidered Curtains",
+        "tr": "Nakışlı Perde"
+      }
+    },
+    {
+      "id": "pillows_1",
+      "title": {
+        "en": "Linen Pillow",
+        "tr": "Keten Yastık"
+      }
+    },
+    {
+      "id": "pillows_2",
+      "title": {
+        "en": "Velvet Pillow",
+        "tr": "Kadife Yastık"
+      }
+    },
+    {
+      "id": "pillows_3",
+      "title": {
+        "en": "Bouclé Pillow",
+        "tr": "Bukle Yastık"
+      }
+    },
+    {
+      "id": "pillows_4",
+      "title": {
+        "en": "Silk Pillow",
+        "tr": "İpek Yastık"
+      }
+    },
+    {
+      "id": "pillows_5",
+      "title": {
+        "en": "Embroidered Pillow",
+        "tr": "Nakışlı Yastık"
+      }
+    },
+    {
+      "id": "pillows_6",
+      "title": {
+        "en": "Tasseled Pillow",
+        "tr": "Püsküllü Yastık"
+      }
+    },
+    {
+      "id": "pillows_7",
+      "title": {
+        "en": "Lumbar Pillow",
+        "tr": "Bel Yastığı"
+      }
+    },
+    {
+      "id": "pillows_8",
+      "title": {
+        "en": "Square Pillow",
+        "tr": "Kare Yastık"
+      }
+    },
+    {
+      "id": "pillows_9",
+      "title": {
+        "en": "Round Pillow",
+        "tr": "Yuvarlak Yastık"
+      }
+    },
+    {
+      "id": "pillows_10",
+      "title": {
+        "en": "Striped Pillow",
+        "tr": "Çizgili Yastık"
+      }
+    },
+    {
+      "id": "pillows_11",
+      "title": {
+        "en": "Geometric Pillow",
+        "tr": "Geometrik Yastık"
+      }
+    },
+    {
+      "id": "pillows_12",
+      "title": {
+        "en": "Abstract Pillow",
+        "tr": "Soyut Yastık"
+      }
+    },
+    {
+      "id": "pillows_13",
+      "title": {
+        "en": "Floral Pillow",
+        "tr": "Çiçek Desenli Yastık"
+      }
+    },
+    {
+      "id": "pillows_14",
+      "title": {
+        "en": "Minimal Pillow",
+        "tr": "Minimal Yastık"
+      }
+    },
+    {
+      "id": "pillows_15",
+      "title": {
+        "en": "Japandi Pillow",
+        "tr": "Japandi Yastık"
+      }
+    },
+    {
+      "id": "pillows_16",
+      "title": {
+        "en": "Mudcloth Pillow",
+        "tr": "Mudcloth Yastık"
+      }
+    },
+    {
+      "id": "pillows_17",
+      "title": {
+        "en": "Sheepskin Pillow",
+        "tr": "Kuzu Postlu Yastık"
+      }
+    },
+    {
+      "id": "pillows_18",
+      "title": {
+        "en": "Patchwork Pillow",
+        "tr": "Patchwork Yastık"
+      }
+    },
+    {
+      "id": "pillows_19",
+      "title": {
+        "en": "Beaded Pillow",
+        "tr": "Boncuklu Yastık"
+      }
+    },
+    {
+      "id": "pillows_20",
+      "title": {
+        "en": "Outdoor Pillow",
+        "tr": "Dış Mekan Yastığı"
+      }
+    },
+    {
+      "id": "throws_1",
+      "title": {
+        "en": "Cashmere Throw",
+        "tr": "Kaşmir Battaniye"
+      }
+    },
+    {
+      "id": "throws_2",
+      "title": {
+        "en": "Wool Throw",
+        "tr": "Yün Battaniye"
+      }
+    },
+    {
+      "id": "throws_3",
+      "title": {
+        "en": "Mohair Throw",
+        "tr": "Tiftik Battaniye"
+      }
+    },
+    {
+      "id": "throws_4",
+      "title": {
+        "en": "Cotton Throw",
+        "tr": "Pamuklu Battaniye"
+      }
+    },
+    {
+      "id": "throws_5",
+      "title": {
+        "en": "Linen Throw",
+        "tr": "Keten Battaniye"
+      }
+    },
+    {
+      "id": "throws_6",
+      "title": {
+        "en": "Bouclé Throw",
+        "tr": "Bukle Battaniye"
+      }
+    },
+    {
+      "id": "throws_7",
+      "title": {
+        "en": "Faux Fur Throw",
+        "tr": "Suni Kürk Battaniye"
+      }
+    },
+    {
+      "id": "throws_8",
+      "title": {
+        "en": "Knit Throw",
+        "tr": "Örgü Battaniye"
+      }
+    },
+    {
+      "id": "throws_9",
+      "title": {
+        "en": "Fringed Throw",
+        "tr": "Saçaklı Battaniye"
+      }
+    },
+    {
+      "id": "throws_10",
+      "title": {
+        "en": "Striped Throw",
+        "tr": "Çizgili Battaniye"
+      }
+    },
+    {
+      "id": "throws_11",
+      "title": {
+        "en": "Checkered Throw",
+        "tr": "Kareli Battaniye"
+      }
+    },
+    {
+      "id": "throws_12",
+      "title": {
+        "en": "Woven Throw",
+        "tr": "Dokuma Battaniye"
+      }
+    },
+    {
+      "id": "throws_13",
+      "title": {
+        "en": "Minimal Throw",
+        "tr": "Minimal Battaniye"
+      }
+    },
+    {
+      "id": "throws_14",
+      "title": {
+        "en": "Japandi Throw",
+        "tr": "Japandi Battaniye"
+      }
+    },
+    {
+      "id": "throws_15",
+      "title": {
+        "en": "Chunky Knit Throw",
+        "tr": "Kalın Örgü Battaniye"
+      }
+    },
+    {
+      "id": "throws_16",
+      "title": {
+        "en": "Mohair Chunky Throw",
+        "tr": "Tiftik Kalın Battaniye"
+      }
+    },
+    {
+      "id": "throws_17",
+      "title": {
+        "en": "Embroidered Throw",
+        "tr": "Nakışlı Battaniye"
+      }
+    },
+    {
+      "id": "throws_18",
+      "title": {
+        "en": "Patchwork Throw",
+        "tr": "Patchwork Battaniye"
+      }
+    },
+    {
+      "id": "throws_19",
+      "title": {
+        "en": "Tasseled Throw",
+        "tr": "Püsküllü Battaniye"
+      }
+    },
+    {
+      "id": "throws_20",
+      "title": {
+        "en": "Reversible Throw",
+        "tr": "Çift Yüzlü Battaniye"
+      }
+    },
+    {
+      "id": "wallArt_1",
+      "title": {
+        "en": "Abstract Painting",
+        "tr": "Soyut Tablo"
+      }
+    },
+    {
+      "id": "wallArt_2",
+      "title": {
+        "en": "Framed Print",
+        "tr": "Çerçeveli Baskı"
+      }
+    },
+    {
+      "id": "wallArt_3",
+      "title": {
+        "en": "Landscape Painting",
+        "tr": "Manzara Tablosu"
+      }
+    },
+    {
+      "id": "wallArt_4",
+      "title": {
+        "en": "Portrait Painting",
+        "tr": "Portre Tablosu"
+      }
+    },
+    {
+      "id": "wallArt_5",
+      "title": {
+        "en": "Line Art",
+        "tr": "Çizgi Sanatı"
+      }
+    },
+    {
+      "id": "wallArt_6",
+      "title": {
+        "en": "Botanical Print",
+        "tr": "Botanik Baskı"
+      }
+    },
+    {
+      "id": "wallArt_7",
+      "title": {
+        "en": "Photography Print",
+        "tr": "Fotoğraf Baskı"
+      }
+    },
+    {
+      "id": "wallArt_8",
+      "title": {
+        "en": "Gallery Wall",
+        "tr": "Galeri Duvarı"
+      }
+    },
+    {
+      "id": "wallArt_9",
+      "title": {
+        "en": "Oversized Canvas",
+        "tr": "Büyük Boy Tuval"
+      }
+    },
+    {
+      "id": "wallArt_10",
+      "title": {
+        "en": "Triptych",
+        "tr": "Triptik"
+      }
+    },
+    {
+      "id": "wallArt_11",
+      "title": {
+        "en": "Diptych",
+        "tr": "Diptik"
+      }
+    },
+    {
+      "id": "wallArt_12",
+      "title": {
+        "en": "Minimalist Art",
+        "tr": "Minimalist Sanat"
+      }
+    },
+    {
+      "id": "wallArt_13",
+      "title": {
+        "en": "Japandi Art",
+        "tr": "Japandi Sanat"
+      }
+    },
+    {
+      "id": "wallArt_14",
+      "title": {
+        "en": "Mid-Century Art",
+        "tr": "Mid-Century Sanat"
+      }
+    },
+    {
+      "id": "wallArt_15",
+      "title": {
+        "en": "Textured Art",
+        "tr": "Dokulu Sanat"
+      }
+    },
+    {
+      "id": "wallArt_16",
+      "title": {
+        "en": "Relief Sculpture",
+        "tr": "Kabartma Heykel"
+      }
+    },
+    {
+      "id": "wallArt_17",
+      "title": {
+        "en": "Tapestry",
+        "tr": "Goblen"
+      }
+    },
+    {
+      "id": "wallArt_18",
+      "title": {
+        "en": "Fabric Wall Hanging",
+        "tr": "Kumaş Duvar Süsü"
+      }
+    },
+    {
+      "id": "wallArt_19",
+      "title": {
+        "en": "Woven Wall Art",
+        "tr": "Örme Duvar Sanatı"
+      }
+    },
+    {
+      "id": "wallArt_20",
+      "title": {
+        "en": "Metal Wall Art",
+        "tr": "Metal Duvar Sanatı"
+      }
+    },
+    {
+      "id": "mirrors_1",
+      "title": {
+        "en": "Round Mirror",
+        "tr": "Yuvarlak Ayna"
+      }
+    },
+    {
+      "id": "mirrors_2",
+      "title": {
+        "en": "Arched Mirror",
+        "tr": "Kemerli Ayna"
+      }
+    },
+    {
+      "id": "mirrors_3",
+      "title": {
+        "en": "Floor Mirror",
+        "tr": "Boy Aynası"
+      }
+    },
+    {
+      "id": "mirrors_4",
+      "title": {
+        "en": "Wall Mirror",
+        "tr": "Duvar Aynası"
+      }
+    },
+    {
+      "id": "mirrors_5",
+      "title": {
+        "en": "Pill Mirror",
+        "tr": "Hap Şeklinde Ayna"
+      }
+    },
+    {
+      "id": "mirrors_6",
+      "title": {
+        "en": "Venetian Mirror",
+        "tr": "Venedik Ayna"
+      }
+    },
+    {
+      "id": "mirrors_7",
+      "title": {
+        "en": "Rattan Mirror",
+        "tr": "Rattan Ayna"
+      }
+    },
+    {
+      "id": "mirrors_8",
+      "title": {
+        "en": "Sunburst Mirror",
+        "tr": "Güneş Işını Ayna"
+      }
+    },
+    {
+      "id": "mirrors_9",
+      "title": {
+        "en": "Frameless Mirror",
+        "tr": "Çerçevesiz Ayna"
+      }
+    },
+    {
+      "id": "mirrors_10",
+      "title": {
+        "en": "Beveled Mirror",
+        "tr": "Eğimli Kenarlı Ayna"
+      }
+    },
+    {
+      "id": "mirrors_11",
+      "title": {
+        "en": "Gallery Mirror",
+        "tr": "Galeri Ayna"
+      }
+    },
+    {
+      "id": "mirrors_12",
+      "title": {
+        "en": "Irregular Mirror",
+        "tr": "Düzensiz Şekilli Ayna"
+      }
+    },
+    {
+      "id": "mirrors_13",
+      "title": {
+        "en": "Minimal Mirror",
+        "tr": "Minimal Ayna"
+      }
+    },
+    {
+      "id": "mirrors_14",
+      "title": {
+        "en": "Japandi Mirror",
+        "tr": "Japandi Ayna"
+      }
+    },
+    {
+      "id": "mirrors_15",
+      "title": {
+        "en": "Reeded Mirror",
+        "tr": "Yivli Ayna"
+      }
+    },
+    {
+      "id": "mirrors_16",
+      "title": {
+        "en": "Fluted Mirror",
+        "tr": "Oluklu Ayna"
+      }
+    },
+    {
+      "id": "mirrors_17",
+      "title": {
+        "en": "Scalloped Mirror",
+        "tr": "Kıvrık Kenarlı Ayna"
+      }
+    },
+    {
+      "id": "mirrors_18",
+      "title": {
+        "en": "Oval Mirror",
+        "tr": "Oval Ayna"
+      }
+    },
+    {
+      "id": "mirrors_19",
+      "title": {
+        "en": "Full-Length Mirror",
+        "tr": "Tam Boy Ayna"
+      }
+    },
+    {
+      "id": "mirrors_20",
+      "title": {
+        "en": "Mantle Mirror",
+        "tr": "Şömine Üstü Ayna"
+      }
+    },
+    {
+      "id": "plants_1",
+      "title": {
+        "en": "Fiddle Leaf Fig",
+        "tr": "Keman Yapraklı İncir"
+      }
+    },
+    {
+      "id": "plants_2",
+      "title": {
+        "en": "Monstera",
+        "tr": "Monstera"
+      }
+    },
+    {
+      "id": "plants_3",
+      "title": {
+        "en": "Snake Plant",
+        "tr": "Paşa Kılıcı"
+      }
+    },
+    {
+      "id": "plants_4",
+      "title": {
+        "en": "Rubber Plant",
+        "tr": "Kauçuk Bitkisi"
+      }
+    },
+    {
+      "id": "plants_5",
+      "title": {
+        "en": "Olive Tree",
+        "tr": "Zeytin Ağacı"
+      }
+    },
+    {
+      "id": "plants_6",
+      "title": {
+        "en": "Bird of Paradise",
+        "tr": "Cennet Kuşu Çiçeği"
+      }
+    },
+    {
+      "id": "plants_7",
+      "title": {
+        "en": "Pothos",
+        "tr": "Salon Sarmaşığı"
+      }
+    },
+    {
+      "id": "plants_8",
+      "title": {
+        "en": "Philodendron",
+        "tr": "Filodendron"
+      }
+    },
+    {
+      "id": "plants_9",
+      "title": {
+        "en": "ZZ Plant",
+        "tr": "ZZ Bitkisi"
+      }
+    },
+    {
+      "id": "plants_10",
+      "title": {
+        "en": "Peace Lily",
+        "tr": "Barış Çiçeği"
+      }
+    },
+    {
+      "id": "plants_11",
+      "title": {
+        "en": "Parlor Palm",
+        "tr": "Salon Palmiyesi"
+      }
+    },
+    {
+      "id": "plants_12",
+      "title": {
+        "en": "Areca Palm",
+        "tr": "Areka Palmiyesi"
+      }
+    },
+    {
+      "id": "plants_13",
+      "title": {
+        "en": "Succulent",
+        "tr": "Sukulent"
+      }
+    },
+    {
+      "id": "plants_14",
+      "title": {
+        "en": "Cactus",
+        "tr": "Kaktüs"
+      }
+    },
+    {
+      "id": "plants_15",
+      "title": {
+        "en": "Fern",
+        "tr": "Eğrelti Otu"
+      }
+    },
+    {
+      "id": "plants_16",
+      "title": {
+        "en": "Orchid",
+        "tr": "Orkide"
+      }
+    },
+    {
+      "id": "plants_17",
+      "title": {
+        "en": "Eucalyptus Branches",
+        "tr": "Okaliptüs Dalları"
+      }
+    },
+    {
+      "id": "plants_18",
+      "title": {
+        "en": "Dried Pampas",
+        "tr": "Kuru Pampas Otu"
+      }
+    },
+    {
+      "id": "plants_19",
+      "title": {
+        "en": "Dried Wheat",
+        "tr": "Kuru Buğday"
+      }
+    },
+    {
+      "id": "plants_20",
+      "title": {
+        "en": "Ficus Audrey",
+        "tr": "Ficus Audrey"
+      }
+    },
+    {
+      "id": "planters_1",
+      "title": {
+        "en": "Ceramic Planter",
+        "tr": "Seramik Saksı"
+      }
+    },
+    {
+      "id": "planters_2",
+      "title": {
+        "en": "Concrete Planter",
+        "tr": "Beton Saksı"
+      }
+    },
+    {
+      "id": "planters_3",
+      "title": {
+        "en": "Terracotta Planter",
+        "tr": "Terakota Saksı"
+      }
+    },
+    {
+      "id": "planters_4",
+      "title": {
+        "en": "Rattan Planter",
+        "tr": "Rattan Saksı"
+      }
+    },
+    {
+      "id": "planters_5",
+      "title": {
+        "en": "Brass Planter",
+        "tr": "Pirinç Saksı"
+      }
+    },
+    {
+      "id": "planters_6",
+      "title": {
+        "en": "Fiberstone Planter",
+        "tr": "Fibertaş Saksı"
+      }
+    },
+    {
+      "id": "planters_7",
+      "title": {
+        "en": "Glazed Planter",
+        "tr": "Sırlı Saksı"
+      }
+    },
+    {
+      "id": "planters_8",
+      "title": {
+        "en": "Minimal Planter",
+        "tr": "Minimal Saksı"
+      }
+    },
+    {
+      "id": "planters_9",
+      "title": {
+        "en": "Japandi Planter",
+        "tr": "Japandi Saksı"
+      }
+    },
+    {
+      "id": "planters_10",
+      "title": {
+        "en": "Pedestal Planter",
+        "tr": "Kaideli Saksı"
+      }
+    },
+    {
+      "id": "planters_11",
+      "title": {
+        "en": "Hanging Planter",
+        "tr": "Asma Saksı"
+      }
+    },
+    {
+      "id": "planters_12",
+      "title": {
+        "en": "Floor Planter",
+        "tr": "Yer Saksı"
+      }
+    },
+    {
+      "id": "planters_13",
+      "title": {
+        "en": "Tabletop Planter",
+        "tr": "Masa Üstü Saksı"
+      }
+    },
+    {
+      "id": "planters_14",
+      "title": {
+        "en": "Self-Watering Planter",
+        "tr": "Kendi Kendini Sulayan Saksı"
+      }
+    },
+    {
+      "id": "planters_15",
+      "title": {
+        "en": "Indoor Planter",
+        "tr": "İç Mekan Saksı"
+      }
+    },
+    {
+      "id": "planters_16",
+      "title": {
+        "en": "Outdoor Planter",
+        "tr": "Dış Mekan Saksı"
+      }
+    },
+    {
+      "id": "planters_17",
+      "title": {
+        "en": "Tall Planter",
+        "tr": "Uzun Saksı"
+      }
+    },
+    {
+      "id": "planters_18",
+      "title": {
+        "en": "Wide Planter",
+        "tr": "Geniş Saksı"
+      }
+    },
+    {
+      "id": "planters_19",
+      "title": {
+        "en": "Trough Planter",
+        "tr": "Tekne Saksı"
+      }
+    },
+    {
+      "id": "planters_20",
+      "title": {
+        "en": "Stoneware Planter",
+        "tr": "Taş Saksı"
+      }
+    },
+    {
+      "id": "vases_1",
+      "title": {
+        "en": "Ceramic Vase",
+        "tr": "Seramik Vazo"
+      }
+    },
+    {
+      "id": "vases_2",
+      "title": {
+        "en": "Glass Vase",
+        "tr": "Cam Vazo"
+      }
+    },
+    {
+      "id": "vases_3",
+      "title": {
+        "en": "Stoneware Vase",
+        "tr": "Taş Vazo"
+      }
+    },
+    {
+      "id": "vases_4",
+      "title": {
+        "en": "Rattan Vase",
+        "tr": "Rattan Vazo"
+      }
+    },
+    {
+      "id": "vases_5",
+      "title": {
+        "en": "Brass Vase",
+        "tr": "Pirinç Vazo"
+      }
+    },
+    {
+      "id": "vases_6",
+      "title": {
+        "en": "Marble Vase",
+        "tr": "Mermer Vazo"
+      }
+    },
+    {
+      "id": "vases_7",
+      "title": {
+        "en": "Sculptural Vase",
+        "tr": "Heykelsi Vazo"
+      }
+    },
+    {
+      "id": "vases_8",
+      "title": {
+        "en": "Organic Shape Vase",
+        "tr": "Organik Şekilli Vazo"
+      }
+    },
+    {
+      "id": "vases_9",
+      "title": {
+        "en": "Bud Vase",
+        "tr": "Tomurcuk Vazo"
+      }
+    },
+    {
+      "id": "vases_10",
+      "title": {
+        "en": "Large Floor Vase",
+        "tr": "Büyük Yer Vazo"
+      }
+    },
+    {
+      "id": "vases_11",
+      "title": {
+        "en": "Bouquet Vase",
+        "tr": "Buket Vazo"
+      }
+    },
+    {
+      "id": "vases_12",
+      "title": {
+        "en": "Minimal Vase",
+        "tr": "Minimal Vazo"
+      }
+    },
+    {
+      "id": "vases_13",
+      "title": {
+        "en": "Japandi Vase",
+        "tr": "Japandi Vazo"
+      }
+    },
+    {
+      "id": "vases_14",
+      "title": {
+        "en": "Raku Vase",
+        "tr": "Raku Vazo"
+      }
+    },
+    {
+      "id": "vases_15",
+      "title": {
+        "en": "Handmade Vase",
+        "tr": "El Yapımı Vazo"
+      }
+    },
+    {
+      "id": "vases_16",
+      "title": {
+        "en": "Ribbed Vase",
+        "tr": "Çizgili Vazo"
+      }
+    },
+    {
+      "id": "vases_17",
+      "title": {
+        "en": "Pinched Vase",
+        "tr": "Sıkıştırılmış Vazo"
+      }
+    },
+    {
+      "id": "vases_18",
+      "title": {
+        "en": "Turned Wood Vase",
+        "tr": "Torna Ahşap Vazo"
+      }
+    },
+    {
+      "id": "vases_19",
+      "title": {
+        "en": "Crackle Glaze Vase",
+        "tr": "Çatlak Sırlı Vazo"
+      }
+    },
+    {
+      "id": "vases_20",
+      "title": {
+        "en": "Amphora Vase",
+        "tr": "Amfora Vazo"
+      }
+    },
+    {
+      "id": "sculptures_1",
+      "title": {
+        "en": "Abstract Sculpture",
+        "tr": "Soyut Heykel"
+      }
+    },
+    {
+      "id": "sculptures_2",
+      "title": {
+        "en": "Marble Sculpture",
+        "tr": "Mermer Heykel"
+      }
+    },
+    {
+      "id": "sculptures_3",
+      "title": {
+        "en": "Ceramic Sculpture",
+        "tr": "Seramik Heykel"
+      }
+    },
+    {
+      "id": "sculptures_4",
+      "title": {
+        "en": "Wood Sculpture",
+        "tr": "Ahşap Heykel"
+      }
+    },
+    {
+      "id": "sculptures_5",
+      "title": {
+        "en": "Bronze Sculpture",
+        "tr": "Bronz Heykel"
+      }
+    },
+    {
+      "id": "sculptures_6",
+      "title": {
+        "en": "Stone Sculpture",
+        "tr": "Taş Heykel"
+      }
+    },
+    {
+      "id": "sculptures_7",
+      "title": {
+        "en": "Geometric Sculpture",
+        "tr": "Geometrik Heykel"
+      }
+    },
+    {
+      "id": "sculptures_8",
+      "title": {
+        "en": "Organic Sculpture",
+        "tr": "Organik Heykel"
+      }
+    },
+    {
+      "id": "sculptures_9",
+      "title": {
+        "en": "Mobile Sculpture",
+        "tr": "Mobil Heykel"
+      }
+    },
+    {
+      "id": "sculptures_10",
+      "title": {
+        "en": "Kinetic Sculpture",
+        "tr": "Kinetik Heykel"
+      }
+    },
+    {
+      "id": "sculptures_11",
+      "title": {
+        "en": "Figurative Sculpture",
+        "tr": "Figüratif Heykel"
+      }
+    },
+    {
+      "id": "sculptures_12",
+      "title": {
+        "en": "Minimal Sculpture",
+        "tr": "Minimal Heykel"
+      }
+    },
+    {
+      "id": "sculptures_13",
+      "title": {
+        "en": "Japandi Sculpture",
+        "tr": "Japandi Heykel"
+      }
+    },
+    {
+      "id": "sculptures_14",
+      "title": {
+        "en": "Turned Wood Sculpture",
+        "tr": "Torna Ahşap Heykel"
+      }
+    },
+    {
+      "id": "sculptures_15",
+      "title": {
+        "en": "Plaster Sculpture",
+        "tr": "Alçı Heykel"
+      }
+    },
+    {
+      "id": "sculptures_16",
+      "title": {
+        "en": "Sandstone Sculpture",
+        "tr": "Kumtaşı Heykel"
+      }
+    },
+    {
+      "id": "sculptures_17",
+      "title": {
+        "en": "Metal Sculpture",
+        "tr": "Metal Heykel"
+      }
+    },
+    {
+      "id": "sculptures_18",
+      "title": {
+        "en": "Glass Sculpture",
+        "tr": "Cam Heykel"
+      }
+    },
+    {
+      "id": "sculptures_19",
+      "title": {
+        "en": "Totem Sculpture",
+        "tr": "Totem Heykel"
+      }
+    },
+    {
+      "id": "sculptures_20",
+      "title": {
+        "en": "Tabletop Sculpture",
+        "tr": "Masaüstü Heykel"
+      }
+    },
+    {
+      "id": "clocks_1",
+      "title": {
+        "en": "Wall Clock",
+        "tr": "Duvar Saati"
+      }
+    },
+    {
+      "id": "clocks_2",
+      "title": {
+        "en": "Mantel Clock",
+        "tr": "Şömine Saati"
+      }
+    },
+    {
+      "id": "clocks_3",
+      "title": {
+        "en": "Floor Clock",
+        "tr": "Yer Saati"
+      }
+    },
+    {
+      "id": "clocks_4",
+      "title": {
+        "en": "Grandfather Clock",
+        "tr": "Büyük Sarkaçlı Saat"
+      }
+    },
+    {
+      "id": "clocks_5",
+      "title": {
+        "en": "Cuckoo Clock",
+        "tr": "Guguklu Saat"
+      }
+    },
+    {
+      "id": "clocks_6",
+      "title": {
+        "en": "Station Clock",
+        "tr": "İstasyon Saati"
+      }
+    },
+    {
+      "id": "clocks_7",
+      "title": {
+        "en": "Minimal Wall Clock",
+        "tr": "Minimal Duvar Saati"
+      }
+    },
+    {
+      "id": "clocks_8",
+      "title": {
+        "en": "Oversized Wall Clock",
+        "tr": "Büyük Boy Duvar Saati"
+      }
+    },
+    {
+      "id": "clocks_9",
+      "title": {
+        "en": "Japandi Clock",
+        "tr": "Japandi Saat"
+      }
+    },
+    {
+      "id": "clocks_10",
+      "title": {
+        "en": "Skeleton Clock",
+        "tr": "İskelet Saat"
+      }
+    },
+    {
+      "id": "clocks_11",
+      "title": {
+        "en": "Mid-Century Clock",
+        "tr": "Mid-Century Saat"
+      }
+    },
+    {
+      "id": "clocks_12",
+      "title": {
+        "en": "Art Deco Clock",
+        "tr": "Art Deco Saat"
+      }
+    },
+    {
+      "id": "clocks_13",
+      "title": {
+        "en": "Brass Clock",
+        "tr": "Pirinç Saat"
+      }
+    },
+    {
+      "id": "clocks_14",
+      "title": {
+        "en": "Wood Clock",
+        "tr": "Ahşap Saat"
+      }
+    },
+    {
+      "id": "clocks_15",
+      "title": {
+        "en": "Metal Clock",
+        "tr": "Metal Saat"
+      }
+    },
+    {
+      "id": "clocks_16",
+      "title": {
+        "en": "Sunburst Clock",
+        "tr": "Güneş Işını Saat"
+      }
+    },
+    {
+      "id": "clocks_17",
+      "title": {
+        "en": "Silent Clock",
+        "tr": "Sessiz Saat"
+      }
+    },
+    {
+      "id": "clocks_18",
+      "title": {
+        "en": "Smart Clock",
+        "tr": "Akıllı Saat"
+      }
+    },
+    {
+      "id": "clocks_19",
+      "title": {
+        "en": "Desk Clock",
+        "tr": "Masa Saati"
+      }
+    },
+    {
+      "id": "clocks_20",
+      "title": {
+        "en": "Carriage Clock",
+        "tr": "Seyahat Saati"
+      }
+    },
+    {
+      "id": "candles_1",
+      "title": {
+        "en": "Pillar Candle",
+        "tr": "Sütun Mum"
+      }
+    },
+    {
+      "id": "candles_2",
+      "title": {
+        "en": "Taper Candle",
+        "tr": "İnce Uzun Mum"
+      }
+    },
+    {
+      "id": "candles_3",
+      "title": {
+        "en": "Sculptural Candle",
+        "tr": "Heykelsi Mum"
+      }
+    },
+    {
+      "id": "candles_4",
+      "title": {
+        "en": "Scented Candle",
+        "tr": "Kokulu Mum"
+      }
+    },
+    {
+      "id": "candles_5",
+      "title": {
+        "en": "Soy Candle",
+        "tr": "Soya Mum"
+      }
+    },
+    {
+      "id": "candles_6",
+      "title": {
+        "en": "Beeswax Candle",
+        "tr": "Balmumu Mum"
+      }
+    },
+    {
+      "id": "candles_7",
+      "title": {
+        "en": "Floating Candle",
+        "tr": "Yüzen Mum"
+      }
+    },
+    {
+      "id": "candles_8",
+      "title": {
+        "en": "Tea Light",
+        "tr": "Tealight Mum"
+      }
+    },
+    {
+      "id": "candles_9",
+      "title": {
+        "en": "Votive Candle",
+        "tr": "Adak Mumu"
+      }
+    },
+    {
+      "id": "candles_10",
+      "title": {
+        "en": "Spiral Candle",
+        "tr": "Spiral Mum"
+      }
+    },
+    {
+      "id": "candles_11",
+      "title": {
+        "en": "Twisted Candle",
+        "tr": "Burgu Mum"
+      }
+    },
+    {
+      "id": "candles_12",
+      "title": {
+        "en": "Figural Candle",
+        "tr": "Figürlü Mum"
+      }
+    },
+    {
+      "id": "candles_13",
+      "title": {
+        "en": "Bubble Candle",
+        "tr": "Baloncuk Mum"
+      }
+    },
+    {
+      "id": "candles_14",
+      "title": {
+        "en": "Marbled Candle",
+        "tr": "Mermer Desenli Mum"
+      }
+    },
+    {
+      "id": "candles_15",
+      "title": {
+        "en": "Minimal Candle",
+        "tr": "Minimal Mum"
+      }
+    },
+    {
+      "id": "candles_16",
+      "title": {
+        "en": "Japandi Candle",
+        "tr": "Japandi Mum"
+      }
+    },
+    {
+      "id": "candles_17",
+      "title": {
+        "en": "Outdoor Candle",
+        "tr": "Dış Mekan Mum"
+      }
+    },
+    {
+      "id": "candles_18",
+      "title": {
+        "en": "LED Candle",
+        "tr": "LED Mum"
+      }
+    },
+    {
+      "id": "candles_19",
+      "title": {
+        "en": "Wax Melt",
+        "tr": "Eriyen Mum"
+      }
+    },
+    {
+      "id": "candles_20",
+      "title": {
+        "en": "Pillar Set",
+        "tr": "Sütun Mum Seti"
+      }
+    },
+    {
+      "id": "decorativeObjects_1",
+      "title": {
+        "en": "Coffee Table Book",
+        "tr": "Sehpa Kitabı"
+      }
+    },
+    {
+      "id": "decorativeObjects_2",
+      "title": {
+        "en": "Decorative Bowl",
+        "tr": "Dekoratif Kase"
+      }
+    },
+    {
+      "id": "decorativeObjects_3",
+      "title": {
+        "en": "Abstract Object",
+        "tr": "Soyut Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_4",
+      "title": {
+        "en": "Carved Wood Object",
+        "tr": "Oymalı Ahşap Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_5",
+      "title": {
+        "en": "Marble Object",
+        "tr": "Mermer Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_6",
+      "title": {
+        "en": "Stone Object",
+        "tr": "Taş Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_7",
+      "title": {
+        "en": "Ceramic Object",
+        "tr": "Seramik Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_8",
+      "title": {
+        "en": "Brass Object",
+        "tr": "Pirinç Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_9",
+      "title": {
+        "en": "Sculptural Bookend",
+        "tr": "Heykelsi Kitap Tutucu"
+      }
+    },
+    {
+      "id": "decorativeObjects_10",
+      "title": {
+        "en": "Tray",
+        "tr": "Tepsi"
+      }
+    },
+    {
+      "id": "decorativeObjects_11",
+      "title": {
+        "en": "Catchall",
+        "tr": "Anahtarlık Kase"
+      }
+    },
+    {
+      "id": "decorativeObjects_12",
+      "title": {
+        "en": "Decorative Box",
+        "tr": "Dekoratif Kutu"
+      }
+    },
+    {
+      "id": "decorativeObjects_13",
+      "title": {
+        "en": "Glass Object",
+        "tr": "Cam Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_14",
+      "title": {
+        "en": "Candleholder",
+        "tr": "Şamdan"
+      }
+    },
+    {
+      "id": "decorativeObjects_15",
+      "title": {
+        "en": "Incense Holder",
+        "tr": "Tütsülük"
+      }
+    },
+    {
+      "id": "decorativeObjects_16",
+      "title": {
+        "en": "Vessel",
+        "tr": "Dekoratif Kap"
+      }
+    },
+    {
+      "id": "decorativeObjects_17",
+      "title": {
+        "en": "Urn",
+        "tr": "Vazo Kupa"
+      }
+    },
+    {
+      "id": "decorativeObjects_18",
+      "title": {
+        "en": "Figurine",
+        "tr": "Figürin"
+      }
+    },
+    {
+      "id": "decorativeObjects_19",
+      "title": {
+        "en": "Minimal Object",
+        "tr": "Minimal Obje"
+      }
+    },
+    {
+      "id": "decorativeObjects_20",
+      "title": {
+        "en": "Japandi Object",
+        "tr": "Japandi Obje"
+      }
+    },
+    {
+      "id": "baskets_1",
+      "title": {
+        "en": "Rattan Basket",
+        "tr": "Rattan Sepet"
+      }
+    },
+    {
+      "id": "baskets_2",
+      "title": {
+        "en": "Seagrass Basket",
+        "tr": "Deniz Otu Sepet"
+      }
+    },
+    {
+      "id": "baskets_3",
+      "title": {
+        "en": "Wicker Basket",
+        "tr": "Hasır Sepet"
+      }
+    },
+    {
+      "id": "baskets_4",
+      "title": {
+        "en": "Jute Basket",
+        "tr": "Jüt Sepet"
+      }
+    },
+    {
+      "id": "baskets_5",
+      "title": {
+        "en": "Woven Basket",
+        "tr": "Örme Sepet"
+      }
+    },
+    {
+      "id": "baskets_6",
+      "title": {
+        "en": "Storage Basket",
+        "tr": "Depolama Sepeti"
+      }
+    },
+    {
+      "id": "baskets_7",
+      "title": {
+        "en": "Laundry Basket",
+        "tr": "Çamaşır Sepeti"
+      }
+    },
+    {
+      "id": "baskets_8",
+      "title": {
+        "en": "Lidded Basket",
+        "tr": "Kapaklı Sepet"
+      }
+    },
+    {
+      "id": "baskets_9",
+      "title": {
+        "en": "Nesting Baskets",
+        "tr": "Zigon Sepet"
+      }
+    },
+    {
+      "id": "baskets_10",
+      "title": {
+        "en": "Tall Basket",
+        "tr": "Uzun Sepet"
+      }
+    },
+    {
+      "id": "baskets_11",
+      "title": {
+        "en": "Round Basket",
+        "tr": "Yuvarlak Sepet"
+      }
+    },
+    {
+      "id": "baskets_12",
+      "title": {
+        "en": "Rectangular Basket",
+        "tr": "Dikdörtgen Sepet"
+      }
+    },
+    {
+      "id": "baskets_13",
+      "title": {
+        "en": "Handled Basket",
+        "tr": "Saplı Sepet"
+      }
+    },
+    {
+      "id": "baskets_14",
+      "title": {
+        "en": "Minimal Basket",
+        "tr": "Minimal Sepet"
+      }
+    },
+    {
+      "id": "baskets_15",
+      "title": {
+        "en": "Japandi Basket",
+        "tr": "Japandi Sepet"
+      }
+    },
+    {
+      "id": "baskets_16",
+      "title": {
+        "en": "Dyed Basket",
+        "tr": "Boyalı Sepet"
+      }
+    },
+    {
+      "id": "baskets_17",
+      "title": {
+        "en": "Patterned Basket",
+        "tr": "Desenli Sepet"
+      }
+    },
+    {
+      "id": "baskets_18",
+      "title": {
+        "en": "Planter Basket",
+        "tr": "Saksı Sepet"
+      }
+    },
+    {
+      "id": "baskets_19",
+      "title": {
+        "en": "Belly Basket",
+        "tr": "Karın Sepet"
+      }
+    },
+    {
+      "id": "baskets_20",
+      "title": {
+        "en": "Fruit Basket",
+        "tr": "Meyve Sepeti"
+      }
+    },
+    {
+      "id": "outdoorSeating_1",
+      "title": {
+        "en": "Outdoor Sofa",
+        "tr": "Dış Mekan Koltuk"
+      }
+    },
+    {
+      "id": "outdoorSeating_2",
+      "title": {
+        "en": "Outdoor Sectional",
+        "tr": "Dış Mekan Köşe Koltuk"
+      }
+    },
+    {
+      "id": "outdoorSeating_3",
+      "title": {
+        "en": "Outdoor Lounge Chair",
+        "tr": "Dış Mekan Lounge Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_4",
+      "title": {
+        "en": "Rattan Outdoor Chair",
+        "tr": "Rattan Dış Mekan Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_5",
+      "title": {
+        "en": "Teak Outdoor Chair",
+        "tr": "Tik Ağacı Dış Mekan Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_6",
+      "title": {
+        "en": "Adirondack Chair",
+        "tr": "Adirondack Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_7",
+      "title": {
+        "en": "Hanging Egg Chair",
+        "tr": "Asılı Yumurta Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_8",
+      "title": {
+        "en": "Outdoor Chaise",
+        "tr": "Dış Mekan Şezlong"
+      }
+    },
+    {
+      "id": "outdoorSeating_9",
+      "title": {
+        "en": "Porch Swing",
+        "tr": "Veranda Salıncağı"
+      }
+    },
+    {
+      "id": "outdoorSeating_10",
+      "title": {
+        "en": "Hammock",
+        "tr": "Hamak"
+      }
+    },
+    {
+      "id": "outdoorSeating_11",
+      "title": {
+        "en": "Outdoor Bench",
+        "tr": "Dış Mekan Bank"
+      }
+    },
+    {
+      "id": "outdoorSeating_12",
+      "title": {
+        "en": "Outdoor Dining Chair",
+        "tr": "Dış Mekan Yemek Sandalyesi"
+      }
+    },
+    {
+      "id": "outdoorSeating_13",
+      "title": {
+        "en": "Outdoor Bar Stool",
+        "tr": "Dış Mekan Bar Taburesi"
+      }
+    },
+    {
+      "id": "outdoorSeating_14",
+      "title": {
+        "en": "Sun Lounger",
+        "tr": "Güneş Şezlongu"
+      }
+    },
+    {
+      "id": "outdoorSeating_15",
+      "title": {
+        "en": "Daybed Outdoor",
+        "tr": "Dış Mekan Gündüz Yatağı"
+      }
+    },
+    {
+      "id": "outdoorSeating_16",
+      "title": {
+        "en": "Swivel Outdoor Chair",
+        "tr": "Döner Dış Mekan Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_17",
+      "title": {
+        "en": "Bistro Chair",
+        "tr": "Bistro Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_18",
+      "title": {
+        "en": "Minimal Outdoor Chair",
+        "tr": "Minimal Dış Mekan Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_19",
+      "title": {
+        "en": "Japandi Outdoor Chair",
+        "tr": "Japandi Dış Mekan Sandalye"
+      }
+    },
+    {
+      "id": "outdoorSeating_20",
+      "title": {
+        "en": "Woven Outdoor Sofa",
+        "tr": "Örme Dış Mekan Koltuk"
+      }
+    }
+  ]
+}
