@@ -6,22 +6,27 @@ import {
   unauthorized,
 } from "../lib/controller-helpers.js";
 import {
+  ObjectInspirationNotFoundError,
   seedObjectCategoryDoc,
   seedObjectInspirationDoc,
+  updateObjectInspirationTitleDoc,
 } from "../lib/objectInspiration/firestore.js";
 import {
   parseSeedMode,
   type ObjectCategorySeedInput,
   type ObjectInspirationSeedInput,
+  type ObjectInspirationTitleUpdateInput,
   type SeedMode,
 } from "../lib/objectInspiration/schemas.js";
 import {
   dispatchWithConcurrency,
   parseRows,
+  parseTitleUpdateRows,
   summarize,
   validateForeignKeys,
   type Manifest,
   type SeedOutcome,
+  type TitleUpdateManifest,
 } from "../lib/objectInspiration/seed-helpers.js";
 
 /**
@@ -184,6 +189,122 @@ export async function bulkSeedObjectInspirationsHandler(
       "Object inspiration bulk seed failed",
     );
     return internalError(reply, "Failed to bulk seed object inspirations.");
+  }
+}
+
+function isTitleUpdateManifestShape(
+  body: unknown,
+): body is TitleUpdateManifest {
+  return (
+    !!body &&
+    typeof body === "object" &&
+    Array.isArray((body as { titleUpdates?: unknown }).titleUpdates)
+  );
+}
+
+/**
+ * Bulk title-update handler. Patches only the `title.{en,tr}` field on
+ * existing inspiration docs. Missing docs are reported as `failed` (no
+ * upsert) so this path can never accidentally create new items — the
+ * full POST upsert path is the one source of truth for new content.
+ *
+ * Item-row errors return 200 with `summary.failed > 0` and per-row
+ * reasons (parity with bulk-seed: operators inspect outcomes, fix the
+ * manifest, and re-submit — `update` is idempotent on title content).
+ */
+export async function bulkUpdateObjectInspirationTitlesHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const userId = request.userId;
+  if (!userId) return unauthorized(reply);
+
+  const body = request.body;
+  if (!isTitleUpdateManifestShape(body)) {
+    return badRequest(reply, "Body must be `{ titleUpdates: array }`.");
+  }
+
+  const { updates, errors: rowErrors } = parseTitleUpdateRows(body);
+  if (rowErrors.length > 0) {
+    reply.code(400);
+    return {
+      error: "Validation Error",
+      message: `Title-update row validation failed (${rowErrors.length} issue${rowErrors.length === 1 ? "" : "s"}).`,
+      issues: rowErrorsToIssues(rowErrors),
+    };
+  }
+
+  request.log.info(
+    {
+      event: "objectInspirationTitleUpdate.start",
+      userId,
+      updateCount: updates.length,
+    },
+    "Object inspiration bulk title-update starting",
+  );
+
+  try {
+    const outcomes = await dispatchWithConcurrency(
+      updates,
+      SEED_CONCURRENCY,
+      (row) => updateOneTitle(row),
+    );
+    const summary = summarize(outcomes);
+
+    request.log.info(
+      {
+        event: "objectInspirationTitleUpdate.done",
+        userId,
+        summary,
+      },
+      "Object inspiration bulk title-update complete",
+    );
+
+    return { summary, outcomes };
+  } catch (err) {
+    request.log.error(
+      {
+        event: "objectInspirationTitleUpdate.failed",
+        userId,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "Object inspiration bulk title-update failed",
+    );
+    return internalError(
+      reply,
+      "Failed to bulk update object inspiration titles.",
+    );
+  }
+}
+
+async function updateOneTitle(
+  row: ObjectInspirationTitleUpdateInput,
+): Promise<SeedOutcome> {
+  try {
+    await updateObjectInspirationTitleDoc(row.id, row.title);
+    return {
+      kind: "item",
+      id: row.id,
+      status: "updated",
+      ts: new Date().toISOString(),
+    };
+  } catch (err) {
+    // Doc-missing maps to `failed` (not `skipped`) so the operator sees
+    // a non-zero failure count and investigates rather than silently
+    // accepting a no-op for a typo'd id.
+    const reason =
+      err instanceof ObjectInspirationNotFoundError
+        ? `inspiration not found: ${row.id} — title-update path does not create new items; use POST /bulk-seed for new rows`
+        : err instanceof Error
+          ? err.message
+          : String(err);
+    return {
+      kind: "item",
+      id: row.id,
+      status: "failed",
+      reason,
+      ts: new Date().toISOString(),
+    };
   }
 }
 

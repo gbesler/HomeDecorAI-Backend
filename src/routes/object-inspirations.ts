@@ -1,6 +1,9 @@
 import type { FastifyPluginAsync } from "fastify";
 
-import { bulkSeedObjectInspirationsHandler } from "../controllers/objectInspiration.controller.js";
+import {
+  bulkSeedObjectInspirationsHandler,
+  bulkUpdateObjectInspirationTitlesHandler,
+} from "../controllers/objectInspiration.controller.js";
 import { createRateLimitPreHandler } from "../lib/rate-limiter.js";
 import { errorResponse } from "./shared-schemas.js";
 
@@ -133,6 +136,56 @@ const objectInspirationsRoutes: FastifyPluginAsync = async (app) => {
       preHandler: [app.authenticate, objectInspirationSeedLimit],
     },
     bulkSeedObjectInspirationsHandler,
+  );
+
+  app.post(
+    "/bulk-update-titles",
+    {
+      schema: {
+        tags: ["Object Inspirations"],
+        summary:
+          "Bulk-update only the localized `title` field on existing object-inspiration items.",
+        description:
+          "Title-only ops path: patches `title.{en,tr}` on existing items, leaving prompt/image/order/active/categoryId untouched. Missing items report `failed` (no upsert) — use POST /bulk-seed for new rows.",
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: "object",
+          additionalProperties: false,
+          required: ["titleUpdates"],
+          properties: {
+            titleUpdates: {
+              type: "array",
+              maxItems: 5000,
+              items: { type: "object" },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              summary: seedSummarySchema,
+              outcomes: { type: "array", items: seedOutcomeSchema },
+            },
+            required: ["summary", "outcomes"],
+          },
+          400: {
+            type: "object",
+            properties: {
+              error: { type: "string" },
+              message: { type: "string" },
+              issues: { type: "array", items: seedIssueSchema },
+            },
+            required: ["error", "message"],
+          },
+          401: { ...errorResponse, description: "Unauthorized" },
+          429: { ...errorResponse, description: "Rate limit exceeded" },
+          500: { ...errorResponse, description: "Internal error" },
+        },
+      },
+      preHandler: [app.authenticate, objectInspirationSeedLimit],
+    },
+    bulkUpdateObjectInspirationTitlesHandler,
   );
 };
 
