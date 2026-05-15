@@ -23,33 +23,36 @@
  * `--service-account=` overrides for cases where the env can't be
  * pre-set (e.g. one terminal targets staging, another prod).
  *
- * There are NO HTTP endpoints for object inspirations. iOS reads
- * Firestore directly via snapshot listeners; this script is the only
- * write path. If a future admin web panel ships, it will get its own
- * HTTP routes at that point — until then, every catalog mutation
- * runs through this script (or a direct Admin SDK invocation).
+ * An HTTP equivalent (`POST /api/object-inspirations/bulk-seed`) exists
+ * for ad-hoc dev/content iteration; both paths share the same validation
+ * and Firestore upsert helpers (`src/lib/objectInspiration/seed-helpers`).
+ * Prefer the HTTP path when you have a valid Firebase ID token and
+ * convenience matters; prefer this script for ops / long-running batches
+ * where a service account is appropriate.
  */
 
 import { readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import admin from "firebase-admin";
 
-import {
-  ObjectCategorySeedInputSchema,
-  ObjectInspirationSeedInputSchema,
-  type ObjectCategorySeedInput,
-  type ObjectInspirationSeedInput,
-  type SeedMode,
+import type {
+  ObjectCategorySeedInput,
+  ObjectInspirationSeedInput,
+  SeedMode,
 } from "../src/lib/objectInspiration/schemas.js";
+import {
+  dispatchWithConcurrency,
+  parseManifestText,
+  parseRows,
+  summarize,
+  validateForeignKeys,
+  type Manifest,
+  type SeedOutcome,
+} from "../src/lib/objectInspiration/seed-helpers.js";
 import {
   seedObjectCategoryDoc,
   seedObjectInspirationDoc,
 } from "../src/lib/objectInspiration/firestore.js";
-
-interface Manifest {
-  categories: unknown[];
-  items: unknown[];
-}
 
 interface ScriptOptions {
   manifestPath: string;
@@ -59,59 +62,8 @@ interface ScriptOptions {
   concurrency: number;
 }
 
-interface SeedOutcome {
-  kind: "category" | "item";
-  id: string;
-  status: "created" | "updated" | "skipped" | "failed";
-  reason?: string;
-  ts: string;
-}
-
 function emitJsonl(outcome: SeedOutcome): void {
   process.stdout.write(`${JSON.stringify(outcome)}\n`);
-}
-
-function parseManifestText(raw: string): Manifest {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    throw new Error(
-      `Manifest is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    !Array.isArray((parsed as { categories?: unknown }).categories) ||
-    !Array.isArray((parsed as { items?: unknown }).items)
-  ) {
-    throw new Error(
-      "Manifest must be `{ categories: [...], items: [...] }` (both arrays).",
-    );
-  }
-  return parsed as Manifest;
-}
-
-/**
- * Pre-flight FK check operating on already-validated rows. Catches
- * orphan items before any Firestore traffic so a "wrote half the items
- * to a non-existent category" state cannot reach production.
- */
-function validateForeignKeys(
-  categories: ObjectCategorySeedInput[],
-  items: ObjectInspirationSeedInput[],
-): string[] {
-  const categoryIds = new Set(categories.map((c) => c.id));
-  const errors: string[] = [];
-  for (const item of items) {
-    if (!categoryIds.has(item.categoryId)) {
-      errors.push(
-        `item id=${item.id} references unknown categoryId=${item.categoryId}`,
-      );
-    }
-  }
-  return errors;
 }
 
 async function seedOneCategory(
@@ -177,102 +129,6 @@ async function seedOneItem(
       ts: new Date().toISOString(),
     };
   }
-}
-
-async function dispatchWithConcurrency<TInput>(
-  inputs: TInput[],
-  concurrency: number,
-  worker: (input: TInput) => Promise<SeedOutcome>,
-): Promise<SeedOutcome[]> {
-  const outcomes: SeedOutcome[] = [];
-  let next = 0;
-
-  async function take(): Promise<void> {
-    while (next < inputs.length) {
-      const idx = next++;
-      const outcome = await worker(inputs[idx] as TInput);
-      outcomes.push(outcome);
-      emitJsonl(outcome);
-    }
-  }
-
-  const workers = Array.from(
-    { length: Math.max(1, concurrency) },
-    () => take(),
-  );
-  await Promise.all(workers);
-  return outcomes;
-}
-
-function summarize(outcomes: SeedOutcome[]): {
-  total: number;
-  created: number;
-  updated: number;
-  skipped: number;
-  failed: number;
-} {
-  const summary = {
-    total: outcomes.length,
-    created: 0,
-    updated: 0,
-    skipped: 0,
-    failed: 0,
-  };
-  for (const outcome of outcomes) {
-    summary[outcome.status]++;
-  }
-  return summary;
-}
-
-/**
- * Validate each manifest row through the zod schemas — the same ones
- * the HTTP endpoint uses — so the script enforces an identical
- * contract (allow-list, id regex, prompt length, etc).
- */
-function parseRows(manifest: Manifest): {
-  categories: ObjectCategorySeedInput[];
-  items: ObjectInspirationSeedInput[];
-  errors: string[];
-} {
-  const categories: ObjectCategorySeedInput[] = [];
-  const items: ObjectInspirationSeedInput[] = [];
-  const errors: string[] = [];
-
-  for (const raw of manifest.categories) {
-    const parsed = ObjectCategorySeedInputSchema.safeParse(raw);
-    if (!parsed.success) {
-      const id =
-        raw && typeof raw === "object" && typeof (raw as { id?: unknown }).id === "string"
-          ? String((raw as { id?: unknown }).id)
-          : "<unknown>";
-      errors.push(
-        `category id=${id} validation failed: ${parsed.error.issues
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
-          .join("; ")}`,
-      );
-      continue;
-    }
-    categories.push(parsed.data);
-  }
-
-  for (const raw of manifest.items) {
-    const parsed = ObjectInspirationSeedInputSchema.safeParse(raw);
-    if (!parsed.success) {
-      const id =
-        raw && typeof raw === "object" && typeof (raw as { id?: unknown }).id === "string"
-          ? String((raw as { id?: unknown }).id)
-          : "<unknown>";
-      errors.push(
-        `item id=${id} validation failed: ${parsed.error.issues
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
-          .join("; ")}`,
-      );
-      continue;
-    }
-    items.push(parsed.data);
-  }
-
-  return { categories, items, errors };
 }
 
 async function initializeFirebase(serviceAccountPath: string | undefined): Promise<void> {
@@ -356,6 +212,7 @@ async function main(): Promise<void> {
     categories,
     opts.concurrency,
     (cat) => seedOneCategory(cat, opts),
+    emitJsonl,
   );
   const categoryFailed = categoryOutcomes.filter((o) => o.status === "failed");
   if (categoryFailed.length > 0) {
@@ -367,8 +224,11 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const itemOutcomes = await dispatchWithConcurrency(items, opts.concurrency, (item) =>
-    seedOneItem(item, mode, opts),
+  const itemOutcomes = await dispatchWithConcurrency(
+    items,
+    opts.concurrency,
+    (item) => seedOneItem(item, mode, opts),
+    emitJsonl,
   );
 
   const all = [...categoryOutcomes, ...itemOutcomes];
@@ -406,11 +266,15 @@ if (isCli()) {
   });
 }
 
+// Re-export helpers from their new home so any pre-existing import that
+// pointed at this script keeps resolving. New callers should import from
+// `src/lib/objectInspiration/seed-helpers.js` directly.
 export {
+  dispatchWithConcurrency,
   parseManifestText,
   parseRows,
-  validateForeignKeys,
-  dispatchWithConcurrency,
   summarize,
-};
-export type { Manifest, SeedOutcome, ScriptOptions };
+  validateForeignKeys,
+} from "../src/lib/objectInspiration/seed-helpers.js";
+export type { Manifest, SeedOutcome } from "../src/lib/objectInspiration/seed-helpers.js";
+export type { ScriptOptions };

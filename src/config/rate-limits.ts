@@ -133,11 +133,22 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 500,
     dailyLimit: 2000,
   },
-  // Admin inspiration seed writes — tight envelope. The endpoint is gated
-  // by ADMIN_UIDS allow-list and writes to a globally-visible catalog;
-  // even a single misbehaving admin token should not be able to flood the
-  // collection or burn Firestore quota.
+  // Inspiration seed writes — tight envelope. The endpoint is gated by
+  // `app.authenticate` (Firebase Bearer) only; tightening with a custom
+  // admin claim is documented as deferred until an external authoring
+  // surface ships (see `src/controllers/explore.controller.ts` line ~95).
+  // Until then, this cap doubles as both abuse damper and Firestore-quota
+  // guard against a single misbehaving token flooding the globally-visible
+  // catalog.
   exploreSeed: {
+    minuteLimit: 10,
+    hourlyLimit: 100,
+    dailyLimit: 500,
+  },
+  // Object inspiration bulk seed — mirrors exploreSeed envelope. A single
+  // request can write up to ~840 docs (40 categories + 800 items), so the
+  // tight cap doubles as both abuse damper and Firestore-quota guard.
+  objectInspirationSeed: {
     minuteLimit: 10,
     hourlyLimit: 100,
     dailyLimit: 500,
