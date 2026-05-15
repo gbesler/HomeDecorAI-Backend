@@ -1,73 +1,71 @@
 /**
  * Replace & Add Object prompt builder (inpaint-with-prompt pipeline, Flux Fill).
  *
- * Wraps the iOS-supplied inspiration string in an explicit placement
- * directive. The iOS inspiration library ships noun-phrase prompts of the
- * shape:
+ * Wraps the seeded inspiration string in an explicit placement directive.
+ * The seed manifest (`scripts/manifests/object-inspirations.full.json`)
+ * ships prompts of the form:
  *
- *   "A modern velvet sofa — Sofas."
- *   "A wishbone chair — Dining Chairs."
+ *   "A arc floor lamp suitable for interior design placement."
+ *   "A cactus suitable for interior design placement."
  *
- * Passing those verbatim to Flux Fill produced a structural failure mode:
- * Flux Fill's "fill the masked region with content described by the prompt"
- * semantics, given a noun-only prompt and a mask painted over an existing
- * object, often re-stylized the existing pixels toward the noun ("turn
- * this chair into a sofa-looking chair") instead of placing a fresh,
- * structurally-distinct object. Users reported this as "it doesn't place
- * the object I picked, it just modifies what's already there."
+ * Passing those verbatim to Flux Fill re-stylizes the existing pixels
+ * toward the noun ("turn this chair into a sofa-looking chair") instead
+ * of placing a fresh object — users reported it as "I picked a cactus
+ * and got a different plant." Two manifest-side defects compound that:
+ * a generic "suitable for interior design placement." suffix dilutes
+ * the noun, and the hard-coded "A " article mismatches vowel-initial
+ * nouns (~10% of the catalog: "A arc floor lamp", "A outdoor pillow").
+ * `normalizeInspirationNoun` below strips the suffix, fixes the
+ * article, and the wrapper sentence supplies an unambiguous "Place …"
+ * verb plus an integration hint.
  *
- * The wrapper here:
- *   1. Strips the trailing " — Category." author signature (the model
- *      doesn't need the category label as a prompt token).
- *   2. Lowercases the leading "A " so it composes inside our sentence.
- *   3. Wraps the result in "Place {noun} in the masked area, naturally
- *      integrated into the existing scene, photorealistic." — gives Flux
- *      Fill an unambiguous action verb plus an integration hint that
- *      reduces ghost-edge artifacts.
- *
- * Guidance scale used to live here as a hard-coded `30`, calibrated for
- * Flux Fill Pro. Production runs `flux-fill-dev` by default, which wants
- * ~60 per BFL's model card — at half the recommended guidance the model
- * leans on existing pixels rather than the prompt, compounding the
- * "modifies instead of places" symptom. Guidance now lives in
- * `capabilities.ts` (`defaultGuidanceScale` per model) so flipping
- * `REPLICATE_INPAINT_MODEL` between Dev and Pro picks the right value
- * without touching this builder.
+ * Guidance scale is sourced from `capabilities.defaultGuidanceScale`
+ * via the 0 sentinel below; flipping `REPLICATE_INPAINT_MODEL` between
+ * Flux Fill Dev (60) and Pro (30) picks the right value automatically.
  */
 
 import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v1.1-fluxfill-place";
+const PROMPT_VERSION_CURRENT = "replaceAddObject/v1.2-fluxfill-place";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
+// Silent-h words where "an" is the correct article despite the leading
+// consonant letter. The catalog ships `hourglass` today; the rest are
+// included defensively for any future seed additions. No word boundary
+// so compounds (`hourglass`, `heirloom`) also match — every English
+// word with these prefixes happens to be silent-h.
+const SILENT_H_PREFIX = /^(hour|honest|heir|honor|herb)/i;
+
 /**
- * Strip the iOS inspiration signature so the noun composes inside our
- * sentence. Defensive against drift in the iOS template:
- *   - `"A modern velvet sofa — Sofas."` → `"a modern velvet sofa"`
- *   - `"Wishbone chair — Dining Chairs."` → `"wishbone chair"` (no "A " prefix)
- *   - `"A pendant"` (template change, no suffix) → `"a pendant"`
- *
- * Em-dash (—) is the iOS template's separator. Hyphen-minus is also matched
- * to survive a hand-edit that swaps em-dash for "-". Trailing period is
- * dropped — the wrapper sentence supplies its own.
+ * Strip the seed-template boilerplate so the noun composes inside the
+ * wrapper sentence and emits a grammatical indefinite article:
+ *   - "A arc floor lamp suitable for interior design placement." → "an arc floor lamp"
+ *   - "A cactus suitable for interior design placement."         → "a cactus"
+ *   - "A hourglass side table suitable for …"                    → "an hourglass side table"
+ *   - "A pendant" (operator override, no suffix)                 → "a pendant"
  */
 export function normalizeInspirationNoun(raw: string): string {
-  // Drop the " — Category." or " - Category." suffix when present. The
-  // category label is author signature, not prompt material.
-  const withoutCategory = raw.replace(/\s+[—-]\s+[^—-]+\.?\s*$/, "");
-  // Drop a trailing period if the suffix regex didn't match (e.g. raw was
-  // already noun-only).
-  const withoutPeriod = withoutCategory.replace(/\.\s*$/, "");
-  // Lowercase a leading "A " or "An " so the noun reads naturally inside
-  // "Place {noun}…". Preserves casing of any embedded proper nouns.
-  const trimmed = withoutPeriod.trim();
-  if (/^An?\s/.test(trimmed)) {
-    return trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
+  // The seed-template " ... suitable for interior design placement."
+  // suffix is identical across all 800 manifest rows and adds no
+  // useful signal — it dilutes the noun for Flux Fill. Anchored to
+  // end-of-string so a real prompt that happens to contain the phrase
+  // mid-sentence ("lamp suitable for outdoor use") is unaffected.
+  const stripped = raw
+    .replace(/\s+suitable\s+for\s+interior\s+design\s+placement\.?\s*$/i, "")
+    .replace(/\.\s*$/, "")
+    .trim();
+
+  const articleMatch = stripped.match(/^(An?)\s+(.+)$/);
+  if (articleMatch) {
+    const [, , rest = ""] = articleMatch;
+    const startsWithVowelSound =
+      /^[aeiouAEIOU]/.test(rest) || SILENT_H_PREFIX.test(rest);
+    return `${startsWithVowelSound ? "an" : "a"} ${rest}`;
   }
-  return trimmed;
+  return stripped;
 }
 
 export function buildReplaceAddObjectPrompt(
@@ -79,13 +77,10 @@ export function buildReplaceAddObjectPrompt(
   return {
     prompt,
     positiveAvoidance: "",
-    // Sentinel value. The Replicate adapter resolves the real guidance from
-    // capabilities.defaultGuidanceScale when the caller passes undefined;
-    // we cannot pass undefined here because PromptResult.guidanceScale is
-    // typed `number`. The processor treats 0 as "no caller override", and
-    // capabilities-by-model is the source of truth (Flux Fill Dev=60,
-    // Pro=30). Changing PromptResult to allow optional guidance is a
-    // cross-cutting refactor not justified for this single tool.
+    // 0 = "no caller override"; the Replicate adapter resolves the real
+    // guidance from `capabilities.defaultGuidanceScale` (Flux Fill
+    // Dev=60, Pro=30). PromptResult.guidanceScale is typed `number`, so
+    // undefined isn't an option here without a cross-cutting refactor.
     guidanceScale: 0,
     actionMode: "transform",
     guidanceBand: "faithful",
