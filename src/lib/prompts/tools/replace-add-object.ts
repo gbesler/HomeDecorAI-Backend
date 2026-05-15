@@ -1,34 +1,31 @@
 /**
  * Replace & Add Object prompt builder (inpaint-with-prompt pipeline, Flux Fill).
  *
- * Wraps the seeded inspiration string in an explicit placement directive.
- * The seed manifest (`scripts/manifests/object-inspirations.full.json`)
- * ships prompts of the form:
+ * `normalizeInspirationNoun` cleans the seed-template noun phrase
+ * (`scripts/manifests/object-inspirations.full.json` ships
+ * `"A <noun> suitable for interior design placement."`) — strips the
+ * boilerplate, repairs the indefinite article ("a arc"→"an arc",
+ * "a hourglass"→"an hourglass").
  *
- *   "A arc floor lamp suitable for interior design placement."
- *   "A cactus suitable for interior design placement."
+ * `buildReplaceAddObjectPrompt` wraps the result in a noun-first
+ * sentence. Spatial language ("in the masked area") is intentionally
+ * omitted: the mask is Flux Fill's spatial signal, the prompt only
+ * describes the subject. "Prominently visible" is the load-bearing
+ * commitment token — without it, an empty-mask "add" case (mask over
+ * blank wall/floor) leaves Flux Fill biased toward extending the
+ * surrounding texture instead of drawing the object.
  *
- * Passing those verbatim to Flux Fill re-stylizes the existing pixels
- * toward the noun ("turn this chair into a sofa-looking chair") instead
- * of placing a fresh object — users reported it as "I picked a cactus
- * and got a different plant." Two manifest-side defects compound that:
- * a generic "suitable for interior design placement." suffix dilutes
- * the noun, and the hard-coded "A " article mismatches vowel-initial
- * nouns (~10% of the catalog: "A arc floor lamp", "A outdoor pillow").
- * `normalizeInspirationNoun` below strips the suffix, fixes the
- * article, and the wrapper sentence supplies an unambiguous "Place …"
- * verb plus an integration hint.
- *
- * Guidance scale is sourced from `capabilities.defaultGuidanceScale`
- * via the 0 sentinel below; flipping `REPLICATE_INPAINT_MODEL` between
- * Flux Fill Dev (60) and Pro (30) picks the right value automatically.
+ * Guidance scale uses the 0 sentinel; the Replicate adapter resolves
+ * the real value from `capabilities.defaultGuidanceScale` (Flux Fill
+ * Dev=60, Pro=30) so flipping `REPLICATE_INPAINT_MODEL` picks the
+ * right value automatically.
  */
 
 import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v1.2-fluxfill-place";
+const PROMPT_VERSION_CURRENT = "replaceAddObject/v1.3-fluxfill-visible";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -61,8 +58,13 @@ export function normalizeInspirationNoun(raw: string): string {
   const articleMatch = stripped.match(/^(An?)\s+(.+)$/);
   if (articleMatch) {
     const [, , rest = ""] = articleMatch;
+    // Latin vowels including accented forms — the catalog ships
+    // `étagère` (vowel sound) and `bouclé`/`bergère`/`café`
+    // (consonant-initial despite later accents). The `i` flag covers
+    // both cases without listing each variant twice.
     const startsWithVowelSound =
-      /^[aeiouAEIOU]/.test(rest) || SILENT_H_PREFIX.test(rest);
+      /^[aeiouéèêëáàâäíìîïóòôöúùûü]/i.test(rest) ||
+      SILENT_H_PREFIX.test(rest);
     return `${startsWithVowelSound ? "an" : "a"} ${rest}`;
   }
   return stripped;
@@ -72,7 +74,11 @@ export function buildReplaceAddObjectPrompt(
   params: ReplaceAddObjectParams,
 ): PromptResult {
   const noun = normalizeInspirationNoun(params.prompt);
-  const prompt = `Place ${noun} in the masked area, naturally integrated into the existing scene, photorealistic.`;
+  // Capitalize the leading "a "/"an " so the noun reads as a sentence
+  // opener — Flux Fill weighs leading tokens highest, and "A cactus, …"
+  // is the form the model was trained on for object-centered prompts.
+  const subject = noun.charAt(0).toUpperCase() + noun.slice(1);
+  const prompt = `${subject}, photorealistic, prominently visible and naturally integrated with the surrounding room.`;
 
   return {
     prompt,
