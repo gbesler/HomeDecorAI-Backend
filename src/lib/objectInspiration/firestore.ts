@@ -297,6 +297,31 @@ export async function patchObjectInspirationDoc(
 }
 
 /**
+ * Title-only update — used by the bulk title-correction ops path
+ * (`POST /api/object-inspirations/bulk-update-titles` and the
+ * `update-object-inspiration-titles.ts` script). Errors when the doc
+ * is missing rather than upserting: callers who want to create new
+ * items must go through the full POST upsert path so the allow-list +
+ * full validation apply.
+ *
+ * Writes only `title` and `updatedAt`. `createdAt`, `prompt`, image
+ * fields, etc. stay untouched.
+ */
+export async function updateObjectInspirationTitleDoc(
+  id: string,
+  title: LocalizedTitle,
+): Promise<void> {
+  const docRef = inspirationsRef().doc(id);
+  const snap = await docRef.get();
+  if (!snap.exists) throw new ObjectInspirationNotFoundError(id);
+
+  await docRef.update({
+    title: { en: title.en, tr: title.tr },
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+/**
  * Hard delete — used by `DELETE /api/object-inspirations/:id`. Soft
  * deletion goes through `patchObjectInspirationDoc({ active: false })`.
  * Caller is responsible for the `Confirm: true` header UX hurdle + admin

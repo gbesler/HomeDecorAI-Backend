@@ -137,6 +137,24 @@ export const ObjectInspirationPatchSchema = z
 export type ObjectInspirationPatch = z.infer<typeof ObjectInspirationPatchSchema>;
 
 /**
+ * Body row schema for the bulk title-update path. Strict so a caller
+ * cannot smuggle other fields (prompt/imageUrl/etc.) through this
+ * narrow ops surface — those still belong on the full POST upsert
+ * path with the allow-list + audit semantics. The handler enforces
+ * "doc must already exist" so this path can never create new items.
+ */
+export const ObjectInspirationTitleUpdateInputSchema = z
+  .object({
+    id: ObjectItemIdSchema,
+    title: LocalizedTitleSchema,
+  })
+  .strict();
+
+export type ObjectInspirationTitleUpdateInput = z.infer<
+  typeof ObjectInspirationTitleUpdateInputSchema
+>;
+
+/**
  * Header schema for `POST /api/object-inspirations` overwrite mode.
  * The bulk seed script sends `X-Seed-Mode: overwrite` when invoked with
  * `--overwrite-prompts`; absence (or any other value) keeps prompt

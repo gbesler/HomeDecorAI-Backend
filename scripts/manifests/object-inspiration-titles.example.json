@@ -1,0 +1,19 @@
+{
+  "$comment": "Title-only update manifest. Patches `title.{en,tr}` on existing inspiration items; everything else stays untouched. Missing ids are reported as `failed` (no upsert) — use the seed manifest for new rows. Run via: tsx scripts/update-object-inspiration-titles.ts --manifest=<this file>",
+  "titleUpdates": [
+    {
+      "id": "sofas_1",
+      "title": {
+        "en": "Modern Sectional Sofa",
+        "tr": "Modern Köşe Koltuk"
+      }
+    },
+    {
+      "id": "sofas_2",
+      "title": {
+        "en": "Velvet Loveseat",
+        "tr": "Kadife İkili Koltuk"
+      }
+    }
+  ]
+}

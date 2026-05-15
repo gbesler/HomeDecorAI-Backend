@@ -5,6 +5,8 @@ import {
   dispatchWithConcurrency,
   parseManifestText,
   parseRows,
+  parseTitleUpdateManifestText,
+  parseTitleUpdateRows,
   summarize,
   validateForeignKeys,
   type Manifest,
@@ -232,5 +234,84 @@ describe("summarize", () => {
       skipped: 1,
       failed: 1,
     });
+  });
+});
+
+describe("parseTitleUpdateManifestText", () => {
+  it("parses a valid `{ titleUpdates: [...] }` manifest", () => {
+    const raw = JSON.stringify({
+      titleUpdates: [
+        { id: "sofas_1", title: { en: "X", tr: "Y" } },
+      ],
+    });
+    const parsed = parseTitleUpdateManifestText(raw);
+    assert.equal(parsed.titleUpdates.length, 1);
+  });
+
+  it("rejects non-JSON text", () => {
+    assert.throws(() => parseTitleUpdateManifestText("not json"));
+  });
+
+  it("rejects manifests without a titleUpdates array", () => {
+    assert.throws(() => parseTitleUpdateManifestText(JSON.stringify({})));
+    assert.throws(() =>
+      parseTitleUpdateManifestText(JSON.stringify({ titleUpdates: "x" })),
+    );
+  });
+});
+
+describe("parseTitleUpdateRows", () => {
+  it("returns parsed rows when every row is valid", () => {
+    const manifest = {
+      titleUpdates: [
+        { id: "sofas_1", title: { en: "Sofa", tr: "Koltuk" } },
+        { id: "sofas_2", title: { en: "Loveseat", tr: "İkili" } },
+      ],
+    };
+    const { updates, errors } = parseTitleUpdateRows(manifest);
+    assert.equal(errors.length, 0);
+    assert.equal(updates.length, 2);
+  });
+
+  it("collects per-row validation errors with the row id", () => {
+    const manifest = {
+      titleUpdates: [
+        { id: "sofas_1", title: { en: "ok", tr: "ok" } },
+        { id: "BAD_ID", title: { en: "x", tr: "y" } },
+        { id: "sofas_3", title: { en: "x" } },
+      ],
+    };
+    const { updates, errors } = parseTitleUpdateRows(manifest);
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0]?.id, "sofas_1");
+    assert.equal(errors.length, 2);
+    assert.match(errors[0] ?? "", /BAD_ID/);
+    assert.match(errors[1] ?? "", /sofas_3/);
+  });
+
+  it("rejects extra fields (mass-assignment defense)", () => {
+    const manifest = {
+      titleUpdates: [
+        {
+          id: "sofas_1",
+          title: { en: "x", tr: "y" },
+          prompt: "should not pass",
+        },
+      ],
+    };
+    const { updates, errors } = parseTitleUpdateRows(manifest);
+    assert.equal(updates.length, 0);
+    assert.equal(errors.length, 1);
+  });
+
+  it("flags duplicate ids inside the same manifest", () => {
+    const manifest = {
+      titleUpdates: [
+        { id: "sofas_1", title: { en: "first", tr: "ilk" } },
+        { id: "sofas_1", title: { en: "second", tr: "ikinci" } },
+      ],
+    };
+    const { errors } = parseTitleUpdateRows(manifest);
+    assert.ok(errors.some((e) => /more than once/.test(e)));
   });
 });

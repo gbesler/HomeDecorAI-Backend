@@ -1,8 +1,10 @@
 import {
   ObjectCategorySeedInputSchema,
   ObjectInspirationSeedInputSchema,
+  ObjectInspirationTitleUpdateInputSchema,
   type ObjectCategorySeedInput,
   type ObjectInspirationSeedInput,
+  type ObjectInspirationTitleUpdateInput,
 } from "./schemas.js";
 
 export interface Manifest {
@@ -147,6 +149,77 @@ export async function dispatchWithConcurrency<TInput>(
   );
   await Promise.all(workers);
   return outcomes;
+}
+
+// MARK: - Title-only update manifest
+
+export interface TitleUpdateManifest {
+  titleUpdates: unknown[];
+}
+
+export function parseTitleUpdateManifestText(raw: string): TitleUpdateManifest {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(
+      `Manifest is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    !Array.isArray((parsed as { titleUpdates?: unknown }).titleUpdates)
+  ) {
+    throw new Error(
+      "Title-update manifest must be `{ titleUpdates: [...] }`.",
+    );
+  }
+  return parsed as TitleUpdateManifest;
+}
+
+/**
+ * Validate each title-update row through its zod schema. Mirrors
+ * `parseRows` so the controller and the script share one validation
+ * contract.
+ */
+export function parseTitleUpdateRows(manifest: TitleUpdateManifest): {
+  updates: ObjectInspirationTitleUpdateInput[];
+  errors: string[];
+} {
+  const updates: ObjectInspirationTitleUpdateInput[] = [];
+  const errors: string[] = [];
+
+  for (const raw of manifest.titleUpdates) {
+    const parsed = ObjectInspirationTitleUpdateInputSchema.safeParse(raw);
+    if (!parsed.success) {
+      const id =
+        raw && typeof raw === "object" && typeof (raw as { id?: unknown }).id === "string"
+          ? String((raw as { id?: unknown }).id)
+          : "<unknown>";
+      errors.push(
+        `item id=${id} validation failed: ${parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; ")}`,
+      );
+      continue;
+    }
+    updates.push(parsed.data);
+  }
+
+  // Duplicate-id check inside the manifest — silently overwriting your
+  // own row with a later row in the same payload is almost always a
+  // typo. Rejecting at the edge keeps the outcome list interpretable
+  // (one row per id).
+  const seen = new Set<string>();
+  for (const row of updates) {
+    if (seen.has(row.id)) {
+      errors.push(`item id=${row.id} appears more than once in titleUpdates`);
+    }
+    seen.add(row.id);
+  }
+
+  return { updates, errors };
 }
 
 export function summarize(outcomes: SeedOutcome[]): {

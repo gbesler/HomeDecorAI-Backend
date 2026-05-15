@@ -5,6 +5,7 @@ import {
   ObjectCategorySeedInputSchema,
   ObjectInspirationSeedInputSchema,
   ObjectInspirationPatchSchema,
+  ObjectInspirationTitleUpdateInputSchema,
   parseSeedMode,
 } from "./schemas.js";
 
@@ -217,6 +218,65 @@ describe("ObjectInspirationPatchSchema", () => {
     );
     assert.throws(() =>
       ObjectInspirationPatchSchema.parse({ imageUrl: "https://..." }),
+    );
+  });
+});
+
+describe("ObjectInspirationTitleUpdateInputSchema", () => {
+  it("accepts a minimal id+title row", () => {
+    const parsed = ObjectInspirationTitleUpdateInputSchema.parse({
+      id: "sofas_1",
+      title: { en: "Sectional", tr: "Köşe Koltuk" },
+    });
+    assert.equal(parsed.id, "sofas_1");
+    assert.equal(parsed.title.en, "Sectional");
+    assert.equal(parsed.title.tr, "Köşe Koltuk");
+  });
+
+  it("rejects extra fields (strict — mass-assignment defense)", () => {
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas_1",
+        title: { en: "x", tr: "y" },
+        prompt: "should not pass",
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas_1",
+        title: { en: "x", tr: "y" },
+        active: false,
+      }),
+    );
+  });
+
+  it("rejects malformed id", () => {
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "Sofas_1",
+        title: { en: "x", tr: "y" },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas",
+        title: { en: "x", tr: "y" },
+      }),
+    );
+  });
+
+  it("rejects empty or missing localized title fields", () => {
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas_1",
+        title: { en: "", tr: "y" },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas_1",
+        title: { en: "x" },
+      }),
     );
   });
 });
