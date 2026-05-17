@@ -75,13 +75,25 @@ function startsWithVowelSound(word: string): boolean {
 
 // Per-mode guidance overrides for Flux Fill. Higher values pull the
 // generation toward the prompt and away from the masked silhouette.
-// Dev's default is ~60 — these bumps are intentionally on top of that
-// for the failure modes the modes-aware builder was added to fix.
+//
+// Calibrated for `flux-fill-pro` (REPLICATE_INPAINT_MODEL default),
+// whose BFL-documented guidance scale is ~30 — meaningfully tighter
+// than Dev's ~60. The ratios mirror the v1 Dev tuning (replace was
+// 75 = 1.25× Dev default; add was 70 ≈ 1.17× Dev default), preserving
+// the per-mode lift while landing inside Pro's documented operating
+// range. Higher Pro values produced over-baked, neon-saturated output
+// in staging.
+//
+// If reverting to `flux-fill-dev` via env override, raise these to
+// REPLACE_GUIDANCE=75 and ADD_GUIDANCE=70 (the Dev-tuned values from
+// v2.0.0); leaving them at Pro values on Dev will under-anchor the
+// prompt and reintroduce the silhouette-preservation failure.
+//
 // Paired with `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
 // `src/lib/generation/prompt-inpaint.ts` — tune both together when
 // revisiting the mode-aware experiment.
-const REPLACE_GUIDANCE = 75;
-const ADD_GUIDANCE = 70;
+const REPLACE_GUIDANCE = 38;
+const ADD_GUIDANCE = 35;
 
 /**
  * Strip the seed-template boilerplate so the noun composes inside the

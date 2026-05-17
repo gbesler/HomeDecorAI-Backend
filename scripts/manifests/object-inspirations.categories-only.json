@@ -9,7 +9,7 @@
         "en": "Sofas",
         "tr": "Koltuklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/01_sofas.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_sofas.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -26,7 +26,7 @@
         "en": "Armchairs",
         "tr": "Berjerler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/02_armchairs.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/02_armchairs.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -43,7 +43,7 @@
         "en": "Accent Chairs",
         "tr": "Aksesuar Sandalyeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/03_accentchairs.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/03_accentchairs.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -60,7 +60,7 @@
         "en": "Coffee Tables",
         "tr": "Sehpalar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/04_coffeetables.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/04_coffeetables.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -77,7 +77,7 @@
         "en": "Side Tables",
         "tr": "Yan Sehpalar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/05_sidetables.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/05_sidetables.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -94,7 +94,7 @@
         "en": "Console Tables",
         "tr": "Konsollar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/06_consoletables.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_consoletables.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -111,7 +111,7 @@
         "en": "Media Units",
         "tr": "TV Üniteleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/07_mediaunits.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/07_mediaunits.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -128,7 +128,7 @@
         "en": "Bookshelves",
         "tr": "Kitaplıklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/08_bookshelves.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/08_bookshelves.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -145,7 +145,7 @@
         "en": "Dining Tables",
         "tr": "Yemek Masaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/09_diningtables.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/09_diningtables.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -162,7 +162,7 @@
         "en": "Dining Chairs",
         "tr": "Yemek Sandalyeleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/10_diningchairs.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_diningchairs.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -179,7 +179,7 @@
         "en": "Bars",
         "tr": "Barlar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/11_bars.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/11_bars.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -196,7 +196,7 @@
         "en": "Bar Stools",
         "tr": "Bar Tabureleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/12_barstools.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/12_barstools.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -213,7 +213,7 @@
         "en": "Beds",
         "tr": "Yataklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/13_beds.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/13_beds.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -230,7 +230,7 @@
         "en": "Nightstands",
         "tr": "Komodinler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/14_nightstands.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/14_nightstands.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -247,7 +247,7 @@
         "en": "Dressers",
         "tr": "Şifonyerler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/15_dressers.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/15_dressers.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -264,7 +264,7 @@
         "en": "Wardrobes",
         "tr": "Gardıroplar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/16_wardrobes.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/16_wardrobes.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -281,7 +281,7 @@
         "en": "Vanities",
         "tr": "Makyaj Masaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/17_vanities.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/17_vanities.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -298,7 +298,7 @@
         "en": "Desks",
         "tr": "Çalışma Masaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/18_desks.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/18_desks.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -315,7 +315,7 @@
         "en": "Office Chairs",
         "tr": "Ofis Sandalyeleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/19_officechairs.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/19_officechairs.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -332,7 +332,7 @@
         "en": "Filing Cabinets",
         "tr": "Dosya Dolapları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/20_filingcabinets.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/20_filingcabinets.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -349,7 +349,7 @@
         "en": "Floor Lamps",
         "tr": "Yer Lambaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/21_floorlamps.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/21_floorlamps.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -366,7 +366,7 @@
         "en": "Table Lamps",
         "tr": "Masa Lambaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/22_tablelamps.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/22_tablelamps.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -383,7 +383,7 @@
         "en": "Pendant Lights",
         "tr": "Sarkıt Aydınlatmalar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/23_pendantlights.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/23_pendantlights.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -400,7 +400,7 @@
         "en": "Ceiling Lights",
         "tr": "Tavan Aydınlatmaları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/24_ceilinglights.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/24_ceilinglights.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -417,7 +417,7 @@
         "en": "Wall Sconces",
         "tr": "Duvar Aplikleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/25_wallsconces.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/25_wallsconces.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -434,7 +434,7 @@
         "en": "Rugs",
         "tr": "Halılar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/26_rugs.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/26_rugs.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -451,7 +451,7 @@
         "en": "Curtains",
         "tr": "Perdeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/27_curtains.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/27_curtains.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -468,7 +468,7 @@
         "en": "Pillows",
         "tr": "Yastıklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/28_pillows.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/28_pillows.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -485,7 +485,7 @@
         "en": "Throws",
         "tr": "Battaniyeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/29_blankets.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/29_blankets.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -502,7 +502,7 @@
         "en": "Wall Art",
         "tr": "Duvar Sanatı"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/30_wallart.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/30_wallart.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -519,7 +519,7 @@
         "en": "Mirrors",
         "tr": "Aynalar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/31_mirrors.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/31_mirrors.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -536,7 +536,7 @@
         "en": "Plants",
         "tr": "Bitkiler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/32_plants.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/32_plants.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -553,7 +553,7 @@
         "en": "Planters",
         "tr": "Saksılar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/33_planters.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/33_planters.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -570,7 +570,7 @@
         "en": "Vases",
         "tr": "Vazolar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/34_vases.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/34_vases.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -587,7 +587,7 @@
         "en": "Sculptures",
         "tr": "Heykeller"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/35_sculptures.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/35_sculptures.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -604,7 +604,7 @@
         "en": "Clocks",
         "tr": "Saatler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/36_clocks.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/36_clocks.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -621,7 +621,7 @@
         "en": "Candles",
         "tr": "Mumlar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/37_candles.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/37_candles.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -638,7 +638,7 @@
         "en": "Decor Objects",
         "tr": "Dekoratif Objeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/38_decorativeobjects.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/38_decorativeobjects.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -655,7 +655,7 @@
         "en": "Baskets",
         "tr": "Sepetler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/39_baskets.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/39_baskets.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -672,7 +672,7 @@
         "en": "Outdoor Seating",
         "tr": "Dış Mekan Oturma Grupları"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/category_icons/40_outdoorseating.jpeg",
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/40_outdoorseating.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",

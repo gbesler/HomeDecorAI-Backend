@@ -131,8 +131,10 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     );
     assert.equal(result.promptVersion, "replaceAddObject/v2.0-fluxfill-mode-aware");
     // Replace guidance bump — keeps Flux Fill anchored to the prompt
-    // token rather than the surrounding silhouette.
-    assert.equal(result.guidanceScale, 75);
+    // token rather than the surrounding silhouette. Pro-calibrated
+    // (1.25× Pro's BFL default of 30); raise to 75 if the inpaint
+    // model env is reverted to flux-fill-dev.
+    assert.equal(result.guidanceScale, 38);
     assert.equal(result.actionMode, "transform");
     assert.equal(result.guidanceBand, "faithful");
     assert.equal(result.positiveAvoidance, "");
@@ -223,8 +225,10 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     );
     assert.equal(result.promptVersion, "replaceAddObject/v2.0-fluxfill-mode-aware");
     // Add guidance bump — moderate, drives commitment to drawing into
-    // empty space without over-saturating contrast.
-    assert.equal(result.guidanceScale, 70);
+    // empty space without over-saturating contrast. Pro-calibrated
+    // (~1.17× Pro's BFL default of 30); raise to 70 if the inpaint
+    // model env is reverted to flux-fill-dev.
+    assert.equal(result.guidanceScale, 35);
     // Pin the rest of the PromptResult contract for the add branch
     // (the replace-branch canonical test pins these too). A future
     // refactor that moved these fields into the branches must not

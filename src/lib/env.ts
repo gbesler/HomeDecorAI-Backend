@@ -162,13 +162,23 @@ const envSchema = z.object({
     .default("allenhooo/lama:cdac78a1bec5b23c07fd29692fb70baa513ea403a39e643c48ec5edadb15fe72")
     .transform((v) => v as `${string}/${string}`),
   // Prompt-driven inpainting: Flux Fill (BFL). Image + mask + prompt → image.
-  // Used by Replace & Add Object. Flip between `flux-fill-dev` (cheap) and
-  // `flux-fill-pro` (higher quality, ~5× cost) without a deploy.
+  // Used by Replace & Add Object.
+  //
+  // Default flipped to `flux-fill-pro` after staging confirmed Dev was
+  // producing the original failure modes (silhouette preservation on
+  // replace, no-op / texture extension on add) even with the v2.0
+  // mode-aware prompt + dilation tuning. Pro's higher base prompt
+  // fidelity overcomes Dev's "spurious elements" bias on blank-area
+  // masks (per BFL model card). Cost is ~5× Dev's ~$0.04/run; if
+  // sustained run rate makes that unaffordable, revert to Dev via env
+  // override and re-raise REPLACE_GUIDANCE/ADD_GUIDANCE to their Dev-
+  // tuned values (see comment block in
+  // `src/lib/prompts/tools/replace-add-object.ts`).
   REPLICATE_INPAINT_MODEL: z
     .string()
     .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
     .optional()
-    .default("black-forest-labs/flux-fill-dev")
+    .default("black-forest-labs/flux-fill-pro")
     .transform((v) => v as `${string}/${string}`),
   // fal.ai fallback model slugs for the segment/remove/inpaint pipelines.
   // Hot-swappable without a deploy for parity with the REPLICATE_* entries
