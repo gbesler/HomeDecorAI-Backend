@@ -108,6 +108,15 @@ describe("normalizeInspirationNoun", () => {
       normalizeInspirationNoun("An ottoman"),
       "an ottoman",
     );
+    // Bare vowel-initial noun without article: the v2.x test suite
+    // had an explicit guard against `stripLeadingArticle` accidentally
+    // consuming the leading "a" in "armchair". v3.0 deleted that
+    // helper, but the normalize regex `^(An?)\s+(.+)$` still must NOT
+    // match "armchair" (no whitespace after the leading "a"), so the
+    // input passes through unchanged. Pin this here so a future
+    // regex change cannot silently re-introduce the strip bug.
+    assert.equal(normalizeInspirationNoun("armchair"), "armchair");
+    assert.equal(normalizeInspirationNoun("ottoman"), "ottoman");
   });
 
   it("does not strip 'suitable for' that appears mid-sentence", () => {
@@ -127,7 +136,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.equal(
       result.prompt,
-      "a cactus, photorealistic interior photography, natural lighting matching the room",
+      "a cactus, photorealistic, natural lighting matching the scene",
     );
     assert.equal(
       result.promptVersion,
@@ -151,7 +160,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.equal(
       result.prompt,
-      "an arc floor lamp, photorealistic interior photography, natural lighting matching the room",
+      "an arc floor lamp, photorealistic, natural lighting matching the scene",
     );
   });
 
@@ -178,7 +187,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.equal(
       result.prompt,
-      "pendant, photorealistic interior photography, natural lighting matching the room",
+      "pendant, photorealistic, natural lighting matching the scene",
     );
   });
 
@@ -205,7 +214,7 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.equal(
       result.prompt,
-      "a cactus placed in the room, photorealistic interior photography, full object visible, natural shadows",
+      "a cactus placed in the scene, photorealistic, full object visible, natural shadows",
     );
     assert.equal(
       result.promptVersion,
@@ -225,7 +234,7 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
       mode: "add",
       prompt: "An ottoman",
     });
-    assert.match(result.prompt, /^an ottoman placed in the room, /);
+    assert.match(result.prompt, /^an ottoman placed in the scene,/);
   });
 
   it("passes operator-supplied bare nouns through normalize unchanged", () => {
@@ -236,7 +245,7 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.equal(
       result.prompt,
-      "pendant placed in the room, photorealistic interior photography, full object visible, natural shadows",
+      "pendant placed in the scene, photorealistic, full object visible, natural shadows",
     );
   });
 });
@@ -260,9 +269,9 @@ describe("manifest contract", () => {
   //     accented forms (`é` in `étagère`).
   //   - end with the mode's photography tail.
   const VALID_REPLACE_SHAPE =
-    /^(a|an) \p{Ll}[^,]+, photorealistic interior photography, natural lighting matching the room$/u;
+    /^(a|an) \p{Ll}[^,]+, photorealistic, natural lighting matching the scene$/u;
   const VALID_ADD_SHAPE =
-    /^(a|an) \p{Ll}[^,]+ placed in the room, photorealistic interior photography, full object visible, natural shadows$/u;
+    /^(a|an) \p{Ll}[^,]+ placed in the scene, photorealistic, full object visible, natural shadows$/u;
 
   it("every seeded inspiration produces a v3.0 replace caption of the expected shape", () => {
     assert.ok(data.items.length > 0, "manifest must contain items");
@@ -304,13 +313,17 @@ describe("manifest contract", () => {
     // "placed on the floor" inside the add wrapper, which was
     // anatomically wrong for ~100 of 800 catalog items (wallSconces,
     // ceilingLights, wallArt, pendantLights, mirrors, curtains). v2.2
-    // dropped the surface qualifier; v3.0 uses "placed in the room"
-    // as a category-agnostic scene anchor.
+    // dropped the surface qualifier; v3.0 uses "placed in the scene"
+    // as a category-agnostic anchor.
     //
     // The builder has no per-category metadata, so it cannot pick
     // floor vs wall vs ceiling itself. This test pins that no future
     // re-edit accidentally reintroduces a surface-specific token —
     // independent of the exact prompt version in flight.
+    //
+    // Sample covers all 6 categories named in the v2.2 rationale so
+    // the guard surface matches the documented intent, not just the
+    // first three categories.
     for (const item of [
       {
         categoryId: "pendantLights",
@@ -327,6 +340,21 @@ describe("manifest contract", () => {
         id: "ceilingLights_1",
         prompt: "A flush mount ceiling light suitable for interior design placement.",
       },
+      {
+        categoryId: "wallSconces",
+        id: "wallSconces_1",
+        prompt: "A brass wall sconce suitable for interior design placement.",
+      },
+      {
+        categoryId: "mirrors",
+        id: "mirrors_1",
+        prompt: "An arched mirror suitable for interior design placement.",
+      },
+      {
+        categoryId: "curtains",
+        id: "curtains_1",
+        prompt: "A linen curtain suitable for interior design placement.",
+      },
     ]) {
       const result = buildReplaceAddObjectPrompt({
         ...baseParams,
@@ -340,6 +368,61 @@ describe("manifest contract", () => {
         /on the floor|on the wall|on the ceiling|mounted/i,
         `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 100)}"`,
       );
+    }
+  });
+
+  it("never hardcodes interior-only tokens (works for outdoor categories too)", () => {
+    // Regression guard for the v3.0 outdoor-category bug surfaced by
+    // ce:review. The first v3.0 draft hardcoded "interior photography"
+    // and "matching the room" / "placed in the room" in both tails.
+    // Those tokens directly contradict the noun for the 80+ catalog
+    // items in outdoorSeating / outdoorLighting / patio / garden
+    // (e.g. "an outdoor sofa … matching the room"). v2.2 used "scene"
+    // for exactly this reason; v3.0 collapsed to "scene" + dropped
+    // the "interior" qualifier entirely after this guard caught the
+    // regression.
+    //
+    // The builder has no category metadata, so the tail must be
+    // neutral. This test pins that no future re-edit reintroduces an
+    // indoor-only token.
+    for (const item of [
+      {
+        categoryId: "outdoorSeating",
+        id: "outdoorSeating_1",
+        prompt: "An outdoor sofa suitable for interior design placement.",
+      },
+      {
+        categoryId: "outdoorLighting",
+        id: "outdoorLighting_1",
+        prompt: "A solar lantern suitable for interior design placement.",
+      },
+      {
+        categoryId: "patio",
+        id: "patio_1",
+        prompt: "A teak patio chair suitable for interior design placement.",
+      },
+    ]) {
+      const replace = buildReplaceAddObjectPrompt({
+        ...baseParams,
+        mode: "replace",
+        categoryId: item.categoryId,
+        inspirationId: item.id,
+        prompt: item.prompt,
+      });
+      const add = buildReplaceAddObjectPrompt({
+        ...baseParams,
+        mode: "add",
+        categoryId: item.categoryId,
+        inspirationId: item.id,
+        prompt: item.prompt,
+      });
+      for (const result of [replace, add]) {
+        assert.doesNotMatch(
+          result.prompt,
+          /\binterior\b|\bthe room\b/i,
+          `${item.id}: prompt must not hardcode indoor-only tokens; got "${result.prompt.slice(0, 100)}"`,
+        );
+      }
     }
   });
 

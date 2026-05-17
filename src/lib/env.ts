@@ -175,9 +175,10 @@ export const envSchema = z.object({
   // fidelity overcomes Dev's "spurious elements" bias on blank-area
   // masks (per BFL model card). Cost is ~5× Dev's ~$0.04/run; if
   // sustained run rate makes that unaffordable, revert to Dev via env
-  // override and re-raise REPLACE_GUIDANCE/ADD_GUIDANCE to their Dev-
-  // tuned values (see comment block in
-  // `src/lib/prompts/tools/replace-add-object.ts`).
+  // override and re-tune `FLUX_FILL_GUIDANCE` in
+  // `src/lib/prompts/tools/replace-add-object.ts` against fresh Dev
+  // staging output (v3.0 collapsed the per-mode split — both modes
+  // share one guidance value now).
   REPLICATE_INPAINT_MODEL: z
     .string()
     .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
