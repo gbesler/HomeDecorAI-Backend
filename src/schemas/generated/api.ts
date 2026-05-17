@@ -691,6 +691,20 @@ export const CreateReplaceAddObjectBody = zod.object({
     .max(64)
     .regex(/^[a-zA-Z0-9_-]+$/, "must be alphanumeric/underscore/dash")
     .describe("Inspiration item id (analytics key)"),
+  // Hand-edited — NOT produced by orval. Mirrors the `mode` property in
+  // `replaceAddObjectBodyJsonSchema` (src/lib/tool-types.ts). If you
+  // run orval to regenerate this file, propagate this addition by
+  // ensuring the OpenAPI spec source declares `mode` on the
+  // `CreateReplaceAddObjectBody` request body (and re-apply the
+  // `.optional().default("replace")` for backward compatibility with
+  // older iOS clients that pre-date the mode-aware split).
+  mode: zod
+    .enum(["replace", "add"])
+    .optional()
+    .default("replace")
+    .describe(
+      "User intent for the masked region. `replace` swaps an existing object inside the painted region; `add` places the object into empty space. Optional during the rollout window: missing values default server-side to `\"replace\"` so older iOS clients that pre-date the mode-aware split continue to work. Drives prompt wording, mask dilation, and Flux Fill guidance. Recommended explicit value for non-UI callers: `\"replace\"` if the painted region contains an object, `\"add\"` for blank wall/floor.",
+    ),
   language: zod.enum(["tr", "en"]).optional(),
 });
 

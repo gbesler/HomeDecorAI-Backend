@@ -275,6 +275,24 @@ export async function callInpaintFalAI(
 ): Promise<InpaintOutput> {
   const start = Date.now();
 
+  // Surface the silent guidance drop. Replace & Add Object's mode-aware
+  // builder sends 75 (replace) / 70 (add) but fal.ai's flux-pro/v1/fill
+  // doesn't take a `guidance_scale` knob, so those overrides vanish
+  // here without a trace. Quality diff is acceptable per the note
+  // above, but ops needs to know mode tuning is inert on the fallback
+  // path so a sustained spike in fal.ai use (Replicate outage) isn't
+  // misread as "the mode-aware fix regressed".
+  if (input.guidanceScale !== undefined && input.guidanceScale > 0) {
+    logger.info(
+      {
+        event: "provider.falai.inpaint.guidance_dropped",
+        model,
+        callerGuidance: input.guidanceScale,
+      },
+      "Caller-supplied guidance ignored: fal.ai flux-pro/v1/fill does not accept a guidance_scale parameter. Mode-aware tuning is inert on this provider.",
+    );
+  }
+
   const result = (await fal.subscribe(model, {
     input: {
       image_url: input.imageUrl,

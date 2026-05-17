@@ -425,11 +425,47 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
           message: `Tool ${toolType} is mode=inpaint-with-prompt but buildPrompt returned empty prompt`,
         };
       }
+      // `mode` is on `CreateReplaceAddObjectBody` with a Zod
+      // `.default("replace")`, so any request that survived the
+      // controller's Zod parse has `mode` populated. The guard below
+      // is defense-in-depth for a future inpaint-with-prompt tool
+      // whose schema lacks `mode` — its toolParams would route into
+      // this branch without the field, and silently defaulting here
+      // would mask the misconfiguration.
+      //
+      // The code is `VALIDATION_FAILED` only because it is the
+      // closest member of `GenerationErrorCode` — semantically this
+      // is a tool-registration error, NOT a client-input error. The
+      // distinct event name on the log line below
+      // (`processor.inpaint.mode_guard_fired`) is what ops alerting
+      // should key on to separate this from genuine client-input
+      // rejections. Adding a dedicated `INTERNAL_CONFIG_ERROR`
+      // member would be the cleaner expression but is a cross-
+      // cutting change (backend types + iOS mapping) that should be
+      // batched with other taxonomy work.
+      const requestMode = params["mode"];
+      if (requestMode !== "replace" && requestMode !== "add") {
+        logger.error(
+          {
+            event: "processor.inpaint.mode_guard_fired",
+            toolType,
+            generationId,
+            requestMode: requestMode === undefined ? "<missing>" : JSON.stringify(requestMode),
+          },
+          "inpaint-with-prompt mode guard fired — possible tool misconfiguration",
+        );
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
+        };
+      }
       const result = await runPromptInpaint({
         imageUrl: inputImageUrl,
         maskUrl,
         prompt: promptResult.prompt,
         guidanceScale: promptResult.guidanceScale,
+        mode: requestMode,
         userId,
         generationId,
       });

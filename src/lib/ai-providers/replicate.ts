@@ -403,28 +403,84 @@ export async function callInpaintReplicate(
   // prompt builder couples the builder to a model choice that is
   // deploy-flippable via REPLICATE_INPAINT_MODEL.
   //
-  // 0 is treated as "no caller override" — the Replace & Add Object
-  // builder (prompts/tools/replace-add-object.ts) sends 0 as a sentinel
-  // because PromptResult.guidanceScale is typed `number`, not
-  // `number | undefined`. Real Flux Fill guidance values live in the 1+
-  // range, so 0 has no legitimate meaning here.
+  // 0 is treated as "no caller override". Historically the Replace &
+  // Add Object builder (prompts/tools/replace-add-object.ts) sent 0 as
+  // a sentinel because `PromptResult.guidanceScale` is typed `number`,
+  // not `number | undefined`. The v2.0 mode-aware builder now sends
+  // explicit values (75 for replace, 70 for add), so the sentinel path
+  // is reachable today only via builders that have not been migrated.
+  // The `> 0` check stays because real Flux Fill guidance values live
+  // in the 1+ range and 0 has no legitimate meaning here.
   const callerGuidance =
     input.guidanceScale !== undefined && input.guidanceScale > 0
       ? input.guidanceScale
       : undefined;
   const resolvedGuidance =
     callerGuidance ?? capabilities?.defaultGuidanceScale;
-  if (
-    resolvedGuidance !== undefined &&
-    capabilities?.supportsGuidanceScale
-  ) {
+  // Capability-gated assignment: only attach `guidance` to the
+  // Replicate input when the capability matrix says the model accepts
+  // it. If the operator flips `REPLICATE_INPAINT_MODEL` to a model
+  // whose capability entry has `supportsGuidanceScale: false` (e.g.
+  // `prunaai/p-image-edit`), the mode-aware builder's 75/70 override
+  // would otherwise vanish without a trace. Warn loudly when that
+  // happens so the regression surfaces in operator dashboards instead
+  // of as "the cactus replace just stopped working" tickets.
+  const guidanceApplied =
+    resolvedGuidance !== undefined && Boolean(capabilities?.supportsGuidanceScale);
+  if (guidanceApplied) {
     replicateInput.guidance = resolvedGuidance;
+  } else if (callerGuidance !== undefined) {
+    logger.warn(
+      {
+        event: "provider.replicate.inpaint.guidance_dropped",
+        model,
+        callerGuidance,
+        supportsGuidanceScale: capabilities?.supportsGuidanceScale ?? null,
+      },
+      "Caller-supplied guidance ignored: active inpaint model does not declare supportsGuidanceScale=true. Mode-aware tuning is silently inert until the capability entry is updated or REPLICATE_INPAINT_MODEL is flipped back to a Flux Fill model.",
+    );
   }
 
-  const output = (await replicate.run(model, {
-    input: replicateInput,
-    signal: AbortSignal.timeout(INPAINT_TIMEOUT_MS),
-  })) as unknown;
+  logger.info(
+    {
+      event: "provider.replicate.inpaint.request",
+      model,
+      callerGuidance: callerGuidance ?? null,
+      resolvedGuidance: resolvedGuidance ?? null,
+      guidanceApplied,
+      promptPreview: input.prompt.slice(0, 120),
+      promptLen: input.prompt.length,
+    },
+    "Flux Fill request dispatched",
+  );
+
+  let output: unknown;
+  try {
+    output = (await replicate.run(model, {
+      input: replicateInput,
+      signal: AbortSignal.timeout(INPAINT_TIMEOUT_MS),
+    })) as unknown;
+  } catch (error) {
+    const durationMs = Date.now() - start;
+    const isAbort =
+      error instanceof DOMException && error.name === "AbortError";
+    logger.error(
+      {
+        event: isAbort
+          ? "provider.replicate.inpaint.timeout"
+          : "provider.replicate.inpaint.error",
+        model,
+        durationMs,
+        timeoutMs: INPAINT_TIMEOUT_MS,
+        guidanceApplied,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      isAbort
+        ? "Flux Fill request aborted by timeout"
+        : "Flux Fill request failed",
+    );
+    throw error;
+  }
 
   const durationMs = Date.now() - start;
 

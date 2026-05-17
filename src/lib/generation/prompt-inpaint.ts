@@ -28,6 +28,17 @@ export interface RunPromptInpaintInput {
   prompt: string;
   guidanceScale?: number;
   /**
+   * Replace = the masked region contains an object the user wants
+   * swapped out. Add = the masked region is empty (blank wall / floor)
+   * and the user wants an object placed into it. Drives the mask
+   * dilation envelope below — replace needs more dilation (10px) so
+   * Flux Fill's silhouette bias does not return a near-clone of the
+   * original object; add needs less (8px) because there is no
+   * silhouette to break but the brush radius still wants a small
+   * context buffer for natural shadow integration.
+   */
+  mode: "replace" | "add";
+  /**
    * Required for the normalization pre-step (S3 key path for the
    * `normalized/` prefix). Mirrors `RunRemovalInput`. Not used directly
    * by Flux Fill.
@@ -35,6 +46,32 @@ export interface RunPromptInpaintInput {
   userId: string;
   generationId: string;
 }
+
+// Mode-specific mask dilation. Numbers tuned against the failure modes
+// the mode split was introduced to fix:
+//   replace=10: 5px (v1.3) was not enough to break the masked
+//     object's silhouette; Flux Fill kept inpainting a variant of
+//     what was there. 10 widens the envelope so the model genuinely
+//     starts from "draw the new object" instead of "edit these pixels".
+//   add=8: empty-area masks don't have a silhouette to break, so the
+//     dilation is purely a shadow/integration buffer. 8 is the
+//     smallest value that consistently produces a natural cast
+//     shadow at the object's base; tighter masks gave flat,
+//     pasted-in objects in practice.
+//
+// Note on units: `normalizeImageMaskPair` implements dilation as a
+// sharp Gaussian blur + threshold rather than a true morphological
+// dilation, so the *effective* expansion is roughly `dilatePx / 2`
+// pixels of edge growth at the threshold contour, not a flat
+// `dilatePx`-pixel ring. The 10/8 values are calibrated against that
+// implementation; if normalize-image-mask-pair.ts ever switches to a
+// true morphological dilation, these numbers should be re-tuned down.
+//
+// Paired with `REPLACE_GUIDANCE` / `ADD_GUIDANCE` in
+// `src/lib/prompts/tools/replace-add-object.ts` — tune both together
+// when revisiting the mode-aware experiment.
+const REPLACE_DILATION_PX = 10;
+const ADD_DILATION_PX = 8;
 
 export interface RunPromptInpaintOutput {
   outputImageUrl: string;
@@ -51,10 +88,17 @@ export async function runPromptInpaint(
   input: RunPromptInpaintInput,
 ): Promise<RunPromptInpaintOutput> {
   const start = Date.now();
+  const dilateMaskPx =
+    input.mode === "replace" ? REPLACE_DILATION_PX : ADD_DILATION_PX;
+
   logger.info(
     {
       event: "inpaint.started",
-      promptPreview: input.prompt.slice(0, 40),
+      generationId: input.generationId,
+      mode: input.mode,
+      dilateMaskPx,
+      guidanceScale: input.guidanceScale ?? null,
+      promptPreview: input.prompt.slice(0, 120),
       promptLen: input.prompt.length,
     },
     "Flux Fill inpaint starting",
@@ -75,14 +119,7 @@ export async function runPromptInpaint(
         maskUrl: input.maskUrl,
         userId: input.userId,
         generationId: input.generationId,
-        // 5px dilation gives Flux Fill an envelope of surrounding
-        // context around the brush stroke. Without it, tight client
-        // masks bias the model toward modifying the masked region's
-        // existing pixels rather than placing a new object — see
-        // prompts/tools/replace-add-object.ts for the full rationale.
-        // 5 is conservative; if integration artifacts appear, raise
-        // to 8-10 before reaching for a different mask shape.
-        dilateMaskPx: 5,
+        dilateMaskPx,
         callerKind: "inpaint",
       }),
     {
@@ -132,6 +169,9 @@ export async function runPromptInpaint(
       {
         event: "inpaint.completed",
         generationId: input.generationId,
+        mode: input.mode,
+        dilateMaskPx,
+        guidanceScale: input.guidanceScale ?? null,
         durationMs,
         normalizeDurationMs: normalized.durationMs,
         normalizeAction: normalized.action,
@@ -151,6 +191,9 @@ export async function runPromptInpaint(
       {
         event: "inpaint.failed",
         generationId: input.generationId,
+        mode: input.mode,
+        dilateMaskPx,
+        guidanceScale: input.guidanceScale ?? null,
         durationMs,
         error: error instanceof Error ? error.message : String(error),
       },
