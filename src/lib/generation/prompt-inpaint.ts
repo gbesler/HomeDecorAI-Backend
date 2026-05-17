@@ -67,7 +67,7 @@ export interface RunPromptInpaintInput {
 // implementation; if normalize-image-mask-pair.ts ever switches to a
 // true morphological dilation, these numbers should be re-tuned down.
 //
-// Paired with `REPLACE_GUIDANCE` / `ADD_GUIDANCE` in
+// Paired with `FLUX_FILL_GUIDANCE` in
 // `src/lib/prompts/tools/replace-add-object.ts` — tune both together
 // when revisiting the mode-aware experiment.
 const REPLACE_DILATION_PX = 10;

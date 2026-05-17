@@ -95,14 +95,23 @@ const FLUX_FILL_GUIDANCE = 30;
 
 // Photography tail tokens. Kept short — Flux Fill responds best to
 // concise captions per BFL's prompting guidance. The replace tail
-// emphasizes integration ("matching the room's lighting"); the add
+// emphasizes integration ("matching the scene's lighting"); the add
 // tail emphasizes commitment ("full object visible") to counter Flux
 // Fill's empty-area texture-extension bias.
+//
+// "Scene" (not "room") is load-bearing: the catalog includes 80+
+// outdoor items (outdoorSeating, outdoorLighting, patio, garden). The
+// v2.2 wrapper explicitly used "scene" for this reason; v3.0's first
+// draft regressed to "room" and got caught in code review. Token
+// contradictions ("an outdoor sofa … matching the room") confuse
+// Flux Fill. "Scene" is room-neutral and works for both indoor and
+// outdoor categories. Same rule for "photorealistic" (no "interior
+// photography" qualifier).
 const REPLACE_TAIL =
-  "photorealistic interior photography, natural lighting matching the room";
-const ADD_SCENE_ANCHOR = "placed in the room";
+  "photorealistic, natural lighting matching the scene";
+const ADD_SCENE_ANCHOR = "placed in the scene";
 const ADD_TAIL =
-  "photorealistic interior photography, full object visible, natural shadows";
+  "photorealistic, full object visible, natural shadows";
 
 /**
  * Strip the seed-template boilerplate so the noun composes as a clean
@@ -136,6 +145,10 @@ export function buildReplaceAddObjectPrompt(
 ): PromptResult {
   const noun = normalizeInspirationNoun(params.prompt);
 
+  // `mode` is `"replace" | "add"` — never undefined at this point.
+  // Zod's `.default("replace")` is applied during parse, so the
+  // inferred output type strips `undefined` even though the input
+  // schema marks the field optional. No `?? "replace"` guard needed.
   const prompt =
     params.mode === "replace"
       ? `${noun}, ${REPLACE_TAIL}`
