@@ -1,6 +1,10 @@
 import { z } from "zod/v4";
 
-const envSchema = z.object({
+// Exported so test files can call `envSchema.parse(...)` against
+// minimal fixtures without invoking the module-level singleton parse
+// at the bottom of this file. The runtime `env` constant remains the
+// only consumer of the parsed result in production code.
+export const envSchema = z.object({
   PORT: z.coerce.number().int().positive(),
   REPLICATE_API_TOKEN: z.string().min(1),
   FAL_AI_API_KEY: z.string().min(1),

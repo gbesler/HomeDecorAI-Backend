@@ -119,5 +119,21 @@ app.listen({ port, host: "0.0.0.0" }, (err) => {
     process.exit(1);
   }
 
+  // Boot-time model resolution log. Surfaces the active AI provider
+  // model slugs so a default flip (e.g. env.ts switching the inpaint
+  // default from Dev to Pro) is visible in deployment logs — not just
+  // in the billing dashboard after the fact. `flux-fill-pro` runs
+  // ~5× the per-call cost of `flux-fill-dev`; ops needs to confirm
+  // the env actually deployed the intended model.
+  logger.info(
+    {
+      event: "boot.active_models",
+      inpaintModel: env.REPLICATE_INPAINT_MODEL,
+      removalModel: env.REPLICATE_REMOVAL_MODEL,
+      segmentationModel: env.REPLICATE_SEGMENTATION_MODEL,
+    },
+    "Active AI provider model slugs resolved from env",
+  );
+
   logger.info({ port }, "Server listening");
 });

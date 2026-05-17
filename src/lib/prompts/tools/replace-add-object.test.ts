@@ -119,7 +119,7 @@ describe("normalizeInspirationNoun", () => {
 });
 
 describe("buildReplaceAddObjectPrompt — replace mode", () => {
-  it("emits the v2.1 replace wrapper with the seeded cactus prompt", () => {
+  it("emits the v2.2 replace wrapper with the seeded cactus prompt", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -129,7 +129,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
       result.prompt,
       "A cactus in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette. Photorealistic, integrated with the surrounding furniture and surfaces.",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.1-fluxfill-integration");
+    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
     // Replace guidance — Pro's BFL default (30). v2.0's 38 over-shot
     // and produced sticker output; v2.1 lets the model lean on scene
     // pixels for integration cues. Raise to 60 if reverting to
@@ -213,7 +213,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
 });
 
 describe("buildReplaceAddObjectPrompt — add mode", () => {
-  it("emits the v2.1 add wrapper with the seeded cactus prompt", () => {
+  it("emits the v2.2 add wrapper with the seeded cactus prompt (neutral spatial anchor)", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
@@ -221,12 +221,12 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.equal(
       result.prompt,
-      "A cactus placed on the floor inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. Photorealistic.",
+      "A cactus inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. Photorealistic.",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.1-fluxfill-integration");
-    // Add guidance — Pro's BFL default (28). v2.0's 35 over-shot;
-    // v2.1 maximizes scene blending on blank-area placements. Raise
-    // to 56 if reverting to flux-fill-dev.
+    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
+    // Add guidance — Pro's BFL default (~30). 28 maximizes scene
+    // blending on blank-area placements without over-anchoring the
+    // prompt. Re-tune if REPLICATE_INPAINT_MODEL reverts to Dev.
     assert.equal(result.guidanceScale, 28);
     // Pin the rest of the PromptResult contract for the add branch
     // (the replace-branch canonical test pins these too). A future
@@ -245,7 +245,7 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.match(
       result.prompt,
-      /^An ottoman placed on the floor inside the masked region,/,
+      /^An ottoman inside the masked region,/,
     );
   });
 
@@ -262,7 +262,7 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.match(
       result.prompt,
-      /^A pendant placed on the floor inside the masked region,/,
+      /^A pendant inside the masked region,/,
     );
   });
 
@@ -274,8 +274,36 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.match(
       result.prompt,
-      /^An armchair placed on the floor inside the masked region,/,
+      /^An armchair inside the masked region,/,
     );
+  });
+
+  it("uses neutral spatial anchor (no floor mention) for wall/ceiling-mounted categories", () => {
+    // Guards the v2.2 regression fix: v2.1 hardcoded "placed on the
+    // floor" for all categories, which produced anatomically wrong
+    // outputs for wallSconces / ceilingLights / wallArt / pendantLights
+    // / mirrors / curtains (~100 of 800 catalog items). v2.2 uses a
+    // neutral "inside the masked region" anchor that is correct for
+    // every category. This test pins that no future re-edit
+    // accidentally reintroduces a surface qualifier.
+    for (const item of [
+      { categoryId: "pendantLights", id: "pendantLights_1", prompt: "A rattan pendant suitable for interior design placement." },
+      { categoryId: "wallArt", id: "wallArt_1", prompt: "A framed print suitable for interior design placement." },
+      { categoryId: "ceilingLights", id: "ceilingLights_1", prompt: "A flush mount ceiling light suitable for interior design placement." },
+    ]) {
+      const result = buildReplaceAddObjectPrompt({
+        ...baseParams,
+        mode: "add",
+        categoryId: item.categoryId,
+        inspirationId: item.id,
+        prompt: item.prompt,
+      });
+      assert.doesNotMatch(
+        result.prompt,
+        /on the floor|on the wall|on the ceiling|mounted/i,
+        `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 100)}"`,
+      );
+    }
   });
 });
 
@@ -306,9 +334,9 @@ describe("manifest contract", () => {
   const VALID_REPLACE_SHAPE =
     /^(A|An) \p{Ll}[^,]+ in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette\. Photorealistic, integrated with the surrounding furniture and surfaces\.$/u;
   const VALID_ADD_SHAPE =
-    /^(A|An) \p{Ll}[^,]+ placed on the floor inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces\. Photorealistic\.$/u;
+    /^(A|An) \p{Ll}[^,]+ inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces\. Photorealistic\.$/u;
 
-  it("every seeded inspiration produces a v2.1 replace prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v2.2 replace prompt of the expected shape", () => {
     assert.ok(data.items.length > 0, "manifest must contain items");
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
@@ -326,7 +354,7 @@ describe("manifest contract", () => {
     }
   });
 
-  it("every seeded inspiration produces a v2.1 add prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v2.2 add prompt of the expected shape", () => {
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
         ...baseParams,

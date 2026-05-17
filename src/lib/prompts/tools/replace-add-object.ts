@@ -4,46 +4,26 @@
  * `normalizeInspirationNoun` cleans the seed-template noun phrase
  * (`scripts/manifests/object-inspirations.full.json` ships
  * `"A <noun> suitable for interior design placement."`) — strips the
- * boilerplate, repairs the indefinite article ("a arc"→"an arc",
- * "a hourglass"→"an hourglass").
+ * boilerplate, repairs the indefinite article.
  *
- * `buildReplaceAddObjectPrompt` branches on `params.mode`:
- *   - `"replace"` → "Completely replace the masked region with …" override
- *     wording. The previous v1.3 single-wrapper used "naturally integrated
- *     with the surrounding room" which biased Flux Fill toward preserving
- *     the masked silhouette (e.g. asking for a cactus over a flower in a
- *     vase rendered a flower variant). The replace branch removes that
- *     phrasing and instead anchors the model with explicit removal +
- *     replacement language so the existing object inside the mask is
- *     overwritten rather than reinterpreted.
- *   - `"add"` → placement-focused wording that tells the model the masked
- *     area is empty. "Prominently visible" alone (the v1.3 token) was not
- *     enough to overcome Flux Fill Dev's tendency to extend surrounding
- *     texture when the mask covers blank wall/floor; the add branch
- *     restates emptiness explicitly so the model commits to drawing the
- *     object instead of inpainting the wall texture.
+ * `buildReplaceAddObjectPrompt` branches on `params.mode` to emit
+ * scene-integration-focused prompts: replace anchors the model to
+ * overwrite the masked object's silhouette while honoring scene
+ * lighting/perspective/material; add asks for placement inside the
+ * masked region with no surface qualifier (since the builder has no
+ * per-category metadata to pick floor vs wall vs ceiling).
  *
- * Guidance scale: v2.0 emits concrete per-mode values
- * (REPLACE_GUIDANCE=75, ADD_GUIDANCE=70) rather than the v1.3 `0`-as-
- * sentinel "defer to capability default" pattern. Both values are above
- * the adapter's `> 0` filter so they pass through to Flux Fill directly.
- * The capability matrix's `defaultGuidanceScale` (Dev=60, Pro=30) is no
- * longer consulted for this tool. Replace mode needs the 75 to keep
- * Flux Fill anchored to the prompt token rather than the surrounding
- * silhouette; add mode uses 70 to commit to drawing into empty space
- * without over-saturating contrast.
- *
- * Paired tuning: per-mode mask dilation (replace=10px, add=8px) lives
- * in `src/lib/generation/prompt-inpaint.ts` (`REPLACE_DILATION_PX` /
- * `ADD_DILATION_PX`). Tune those together with `REPLACE_GUIDANCE` /
- * `ADD_GUIDANCE` below when revisiting the mode-aware experiment.
+ * Guidance scale is per-mode (REPLACE_GUIDANCE, ADD_GUIDANCE below),
+ * calibrated for `flux-fill-pro` (BFL default ~30). Paired with mask
+ * dilation in `src/lib/generation/prompt-inpaint.ts` — tune both
+ * together when revisiting the mode-aware experiment.
  */
 
 import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.1-fluxfill-integration";
+const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.2-neutral-anchor";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -73,31 +53,18 @@ function startsWithVowelSound(word: string): boolean {
   return VOWEL_INITIAL.test(word) || SILENT_H_PREFIX.test(word);
 }
 
-// Per-mode guidance overrides for Flux Fill. Higher values pull the
-// generation toward the prompt and away from the scene context;
-// lower values let the model lean on surrounding pixels for
-// integration cues (lighting, perspective, color grading).
+// Per-mode guidance overrides for Flux Fill. Higher values anchor
+// generation to the prompt; lower values let the model lean on scene
+// pixels for integration cues (lighting, perspective, color grading).
+// Calibrated for `flux-fill-pro` (BFL default ~30): replace keeps a
+// small lift to overcome the masked object's silhouette; add sits at
+// the model default to maximize scene blending.
 //
-// v2.1 drops the Pro values from 38/35 down to Pro's documented BFL
-// default (30) with a small per-mode lift. Staging on v2.0 produced
-// "sticker" output — the object was rendered but looked pasted onto
-// the scene rather than embedded in it. Root cause was guidance
-// overshoot combined with commitment-heavy prompt tokens
-// ("prominently visible", "sharp focus") that pushed the model to
-// emphasize the object at the expense of scene blending.
-//
-// Replace mode keeps the lift (30 vs 28 for add) because it still has
-// to overcome the masked object's silhouette; add mode sits at Pro's
-// default to maximize integration on blank-area placements.
-//
-// If reverting to `flux-fill-dev` via env override, raise these to
-// REPLACE_GUIDANCE=60 / ADD_GUIDANCE=56 (Dev's default ~60 with the
-// same ratios); the historical Dev v2.0 values (75/70) over-shot on
-// Dev too and produced the same sticker artefact at lower magnitude.
-//
-// Paired with `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
-// `src/lib/generation/prompt-inpaint.ts` — tune both together when
-// revisiting the mode-aware experiment.
+// If REPLICATE_INPAINT_MODEL is reverted to `flux-fill-dev` (native
+// guidance scale ~60), re-tune both values against fresh staging
+// output — do not assume a linear ratio carries over. Paired with
+// `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
+// `src/lib/generation/prompt-inpaint.ts`.
 const REPLACE_GUIDANCE = 30;
 const ADD_GUIDANCE = 28;
 
@@ -167,49 +134,35 @@ export function buildReplaceAddObjectPrompt(
   let guidanceScale: number;
 
   if (params.mode === "replace") {
-    // Replace wrapper (v2.1) — integration-focused phrasing:
-    //   "in place of the object inside the masked region"
-    //     keeps the replace intent (swap whatever is there) without
-    //     the v2.0 "Completely replace … Remove any existing object"
-    //     wording, which read as two commands. Flux Fill is an
-    //     inpainter and does not act on "remove" as an instruction —
-    //     it only synthesizes what is described, so the redundant
-    //     removal clause was contributing prompt-token weight without
-    //     adding semantic signal.
-    //   "matching the scene's lighting direction, perspective, and
-    //    material palette"
-    //     replaces v2.0's bare "matching the room's lighting" with
-    //     three concrete integration anchors. "scene" (not "room")
-    //     because the catalog includes outdoor categories (patio /
-    //     garden / outdoor seating) where "room" would mislead the
-    //     model. Pairs naturally with the lower guidance below so the
-    //     model has room to honor the scene's existing pixels.
-    //   No "prominently visible" / "sharp focus" tokens — those
-    //     drove the v2.0 sticker effect by over-emphasizing the
-    //     object at the expense of scene blending.
+    // Replace wrapper: "in place of the object" keeps the swap
+    // intent without overstating commitment. "Scene" (not "room")
+    // because outdoor categories (patio / garden / outdoor seating)
+    // exist in the catalog. No object-emphasis tokens
+    // ("prominently visible", "sharp focus") — they overcame scene
+    // blending and produced sticker output.
     prompt =
       `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} in place of the object inside the masked region, ` +
       `matching the scene's lighting direction, perspective, and material palette. ` +
       `Photorealistic, integrated with the surrounding furniture and surfaces.`;
     guidanceScale = REPLACE_GUIDANCE;
   } else {
-    // Add wrapper (v2.1) — integration-focused phrasing:
-    //   "placed on the floor inside the masked region"
-    //     spatial anchor ("on the floor") cues the model to ground
-    //     the object in the scene's perspective. The v2.0 wording
-    //     ("The masked area is currently empty") was a lie — mask
-    //     regions over wall or floor still contain texture pixels,
-    //     so the model was being told to ignore real context.
+    // Add wrapper (v2.2) — neutral spatial anchor:
+    //   "inside the masked region" (no surface qualifier)
+    //     The v2.1 wording "placed on the floor inside the masked
+    //     region" was semantically wrong for ~100 of 800 catalog
+    //     items (wallSconces, ceilingLights, wallArt, pendantLights,
+    //     mirrors, curtains). Telling Flux Fill to place a pendant
+    //     light "on the floor" produced anatomically wrong outputs.
+    //     The neutral anchor lets the mask shape + scene context
+    //     dictate placement; the builder has no per-category
+    //     metadata so it cannot pick the right surface itself.
     //   "matching the scene's lighting direction, depth of field,
     //    and color palette so it blends naturally with the
     //    surrounding furniture and surfaces"
-    //     three concrete integration anchors plus an explicit
-    //     blending instruction. "Scene" (not "room") for outdoor
-    //     category support.
-    //   No "clearly visible" / "well-lit" / "sharp focus" tokens —
-    //     those drove the v2.0 sticker effect.
+    //     three integration anchors carried forward from v2.1.
+    //     "Scene" (not "room") for outdoor category support.
     prompt =
-      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} placed on the floor inside the masked region, ` +
+      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} inside the masked region, ` +
       `matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. ` +
       `Photorealistic.`;
     guidanceScale = ADD_GUIDANCE;

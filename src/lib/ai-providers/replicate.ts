@@ -421,10 +421,10 @@ export async function callInpaintReplicate(
   // Replicate input when the capability matrix says the model accepts
   // it. If the operator flips `REPLICATE_INPAINT_MODEL` to a model
   // whose capability entry has `supportsGuidanceScale: false` (e.g.
-  // `prunaai/p-image-edit`), the mode-aware builder's 75/70 override
-  // would otherwise vanish without a trace. Warn loudly when that
-  // happens so the regression surfaces in operator dashboards instead
-  // of as "the cactus replace just stopped working" tickets.
+  // `prunaai/p-image-edit`), the mode-aware builder's override would
+  // otherwise vanish without a trace. Warn loudly when that happens
+  // so the regression surfaces in operator dashboards instead of as
+  // "the cactus replace just stopped working" tickets.
   const guidanceApplied =
     resolvedGuidance !== undefined && Boolean(capabilities?.supportsGuidanceScale);
   if (guidanceApplied) {
@@ -441,6 +441,38 @@ export async function callInpaintReplicate(
     );
   }
 
+  // Mode tuning calibration warn: the builder's per-mode guidance
+  // values (REPLACE_GUIDANCE/ADD_GUIDANCE in replace-add-object.ts)
+  // are tuned for the active model's native scale. If REPLICATE_INPAINT_MODEL
+  // is reverted (e.g. Pro → Dev) WITHOUT raising the constants, the
+  // caller sends a Pro-scale value (~30) into a Dev-scale model
+  // (~60 default) — silently under-anchoring the prompt and
+  // re-introducing the v1.3 silhouette-preservation failure mode.
+  // Fire when caller's value diverges from the model's default by
+  // more than 40% (relative) so the misconfiguration surfaces at
+  // the first request instead of as user-visible quality regression.
+  if (
+    guidanceApplied &&
+    callerGuidance !== undefined &&
+    capabilities?.defaultGuidanceScale !== undefined
+  ) {
+    const defaultScale = capabilities.defaultGuidanceScale;
+    const relativeDivergence =
+      Math.abs(callerGuidance - defaultScale) / defaultScale;
+    if (relativeDivergence > 0.4) {
+      logger.warn(
+        {
+          event: "provider.replicate.inpaint.guidance_calibration_mismatch",
+          model,
+          callerGuidance,
+          defaultGuidanceScale: defaultScale,
+          relativeDivergence: Number(relativeDivergence.toFixed(2)),
+        },
+        "Caller guidance diverges sharply from this model's documented default — the per-mode tuning constants in replace-add-object.ts may be calibrated for a different inpaint model. Verify REPLICATE_INPAINT_MODEL matches the tuning baseline.",
+      );
+    }
+  }
+
   logger.info(
     {
       event: "provider.replicate.inpaint.request",
@@ -450,6 +482,11 @@ export async function callInpaintReplicate(
       guidanceApplied,
       promptPreview: input.prompt.slice(0, 120),
       promptLen: input.prompt.length,
+      // Surfaced on success path too (not only the timeout path) so
+      // log queries can compute durationMs/timeoutMs ratios and
+      // alert on P95 latency creeping toward the ceiling before
+      // requests actually time out.
+      timeoutMs: INPAINT_TIMEOUT_MS,
     },
     "Flux Fill request dispatched",
   );
