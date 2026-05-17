@@ -275,15 +275,16 @@ export async function callInpaintFalAI(
 ): Promise<InpaintOutput> {
   const start = Date.now();
 
-  // Surface the silent guidance drop. Replace & Add Object's mode-aware
-  // builder sends 75 (replace) / 70 (add) but fal.ai's flux-pro/v1/fill
-  // doesn't take a `guidance_scale` knob, so those overrides vanish
-  // here without a trace. Quality diff is acceptable per the note
-  // above, but ops needs to know mode tuning is inert on the fallback
-  // path so a sustained spike in fal.ai use (Replicate outage) isn't
-  // misread as "the mode-aware fix regressed".
+  // Surface the silent guidance drop. The Replace & Add Object
+  // mode-aware builder sends per-mode guidance (30 replace, 28 add)
+  // but fal.ai's flux-pro/v1/fill does not take a `guidance_scale`
+  // knob, so those overrides vanish here without a trace. Logged at
+  // WARN (not INFO) so a sustained fallback condition surfaces in
+  // warn-keyed alerting — during a Replicate outage every Replace &
+  // Add Object request lands here with mode tuning silently inert,
+  // which is a quality regression operators need to see.
   if (input.guidanceScale !== undefined && input.guidanceScale > 0) {
-    logger.info(
+    logger.warn(
       {
         event: "provider.falai.inpaint.guidance_dropped",
         model,

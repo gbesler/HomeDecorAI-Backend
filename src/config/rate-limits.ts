@@ -95,12 +95,14 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     dailyLimit: 100,
   },
   // Replace & Add Object runs one Flux Fill call per submission. Flux Fill
-  // Dev is ~$0.04/run, Pro ~$0.20. Same starting envelope as the rest; if
-  // ops flips REPLICATE_INPAINT_MODEL to Pro, halve dailyLimit to 50.
+  // Dev is ~$0.04/run, Pro ~$0.20. Daily limit halved from 100 (Dev envelope)
+  // to 50 to match Pro's ~5× per-run cost — caps per-user daily spend at
+  // ~$10 instead of unbounded $20. If REPLICATE_INPAINT_MODEL is reverted
+  // to flux-fill-dev via env override, raise dailyLimit back to 100.
   replaceAddObject: {
     minuteLimit: 5,
     hourlyLimit: 30,
-    dailyLimit: 100,
+    dailyLimit: 50,
   },
   // Exterior painting is single-image input on the same Pruna/Klein stack
   // (surface / material edit). Same envelope pending usage telemetry.
