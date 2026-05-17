@@ -1,29 +1,67 @@
 /**
  * Replace & Add Object prompt builder (inpaint-with-prompt pipeline, Flux Fill).
  *
- * `normalizeInspirationNoun` cleans the seed-template noun phrase
- * (`scripts/manifests/object-inspirations.full.json` ships
- * `"A <noun> suitable for interior design placement."`) — strips the
- * boilerplate, repairs the indefinite article.
+ * v3.0 — bare-caption format. The earlier mode-aware wrappers (v2.0
+ * "Completely replace the masked region with …" → v2.1 "integration-
+ * focused" → v2.2 "neutral-anchor") all kept instructional language
+ * inside the prompt. The user-reported bugs survived all three:
+ *   - Replace returned same-category items (sofa → sofa) regardless of
+ *     the picked inspiration.
+ *   - Add returned the unmodified input when the painted area was
+ *     blank wall/floor.
  *
- * `buildReplaceAddObjectPrompt` branches on `params.mode` to emit
- * scene-integration-focused prompts: replace anchors the model to
- * overwrite the masked object's silhouette while honoring scene
- * lighting/perspective/material; add asks for placement inside the
- * masked region with no surface qualifier (since the builder has no
- * per-category metadata to pick floor vs wall vs ceiling).
+ * Two converging root causes:
  *
- * Guidance scale is per-mode (REPLACE_GUIDANCE, ADD_GUIDANCE below),
- * calibrated for `flux-fill-pro` (BFL default ~30). Paired with mask
- * dilation in `src/lib/generation/prompt-inpaint.ts` — tune both
- * together when revisiting the mode-aware experiment.
+ * 1. **Flux Fill treats `prompt` as a caption of the desired masked
+ *    content, not as an instruction.** BFL's own HF sample passes
+ *    `prompt="a white paper cup"` — a bare noun phrase. The v2.x
+ *    wrappers' meta-commentary tokens ("replace", "masked region",
+ *    "existing object", "empty", "in place of the object", "matching
+ *    the scene's lighting direction") were parsed as content, diluted
+ *    the noun signal, and let the visual context (the brush silhouette
+ *    + surrounding pixels) dominate. v2.1/v2.2 trimmed the wording but
+ *    did not eliminate the meta-commentary.
+ *
+ * 2. **Guidance was too high (v2.0 only).** Replicate's `flux-fill-dev`
+ *    default is 60, the documented HF example uses 30, and the HF
+ *    forum's known failure mode for "Flux Fill ignores the prompt" is
+ *    "guidance_scale too high". v2.0 shipped 75 (replace) and 70 (add).
+ *    v2.1/v2.2 already lowered to ~30 — this is preserved in v3.0.
+ *
+ * v3.0 also runs on top of `flux-fill-pro` (default since the v2.2
+ * deploy) — Pro follows prompts more reliably than Dev, so the
+ * cleanest caption gets the most prompt-faithful model.
+ *
+ * v3.0 fix: emit the normalized noun phrase plus a short, training-
+ * distribution-aligned photography tail. No instructional wording. No
+ * mask meta-commentary. Guidance dropped to 30 for both modes (BFL HF
+ * sample value).
+ *
+ * `normalizeInspirationNoun` is unchanged — it still strips the seed-
+ * template boilerplate (`"A <noun> suitable for interior design
+ * placement."` → `"a <noun>"`) and repairs the indefinite article for
+ * vowel-initial and silent-h nouns. The output is now consumed as-is
+ * (article and all) by both modes.
+ *
+ * The add branch keeps a light scene-anchor token (`"placed in the
+ * room"`) to encourage commitment to drawing a new object in empty-area
+ * masks; without it, Flux Fill on blank-wall masks tends to extend the
+ * surrounding texture. The anchor is plain caption language ("a sofa
+ * placed in the room"), not meta-commentary.
+ *
+ * Mask dilation (replace=10px, add=8px) is unchanged in v3.0 — see
+ * `src/lib/generation/prompt-inpaint.ts`. Revisit dilation only after
+ * the v3.0 prompt + guidance change has been A/B'd on staging.
+ *
+ * See `docs/brainstorms/2026-05-17-001-replace-add-object-fluxfill-fix-requirements.md`
+ * for the full diagnosis and Approach A rationale.
  */
 
 import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.2-neutral-anchor";
+const PROMPT_VERSION_CURRENT = "replaceAddObject/v3.0-fluxfill-bare-caption";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -40,37 +78,35 @@ const SILENT_H_PREFIX = /^(hour|honest|heir|honor|herb)/i;
 // "Ottoman" and "ottoman".
 const VOWEL_INITIAL = /^[aeiouéèêëáàâäíìîïóòôöúùûü]/i;
 
-/**
- * Single source of truth for the indefinite-article heuristic. Used by
- * both `normalizeInspirationNoun` (which repairs misspelled `"a"`/`"an"`
- * on seed-template prompts) and `articleFor` (which re-derives the
- * article for the mode-aware wrapper sentences). Extracting it here
- * keeps the vowel-set + silent-h list in one place — divergence
- * between the two call sites used to be a silent failure mode (a new
- * accented vowel could be added to one and not the other).
- */
 function startsWithVowelSound(word: string): boolean {
   return VOWEL_INITIAL.test(word) || SILENT_H_PREFIX.test(word);
 }
 
-// Per-mode guidance overrides for Flux Fill. Higher values anchor
-// generation to the prompt; lower values let the model lean on scene
-// pixels for integration cues (lighting, perspective, color grading).
-// Calibrated for `flux-fill-pro` (BFL default ~30): replace keeps a
-// small lift to overcome the masked object's silhouette; add sits at
-// the model default to maximize scene blending.
+// BFL HF sample value for both Flux Fill Dev and Pro. Same value for
+// both modes — v2.1/v2.2 split (30/28) was a marginal A/B move that
+// produced no visible quality delta. v3.0 collapses to a single number
+// and lets the prompt do the work.
 //
-// If REPLICATE_INPAINT_MODEL is reverted to `flux-fill-dev` (native
-// guidance scale ~60), re-tune both values against fresh staging
-// output — do not assume a linear ratio carries over. Paired with
-// `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
-// `src/lib/generation/prompt-inpaint.ts`.
-const REPLACE_GUIDANCE = 30;
-const ADD_GUIDANCE = 28;
+// If REPLICATE_INPAINT_MODEL is flipped back to flux-fill-dev (native
+// guidance scale ~60), re-tune against fresh staging output rather
+// than assuming this number carries over linearly. Paired with the
+// dilation values in `src/lib/generation/prompt-inpaint.ts`.
+const FLUX_FILL_GUIDANCE = 30;
+
+// Photography tail tokens. Kept short — Flux Fill responds best to
+// concise captions per BFL's prompting guidance. The replace tail
+// emphasizes integration ("matching the room's lighting"); the add
+// tail emphasizes commitment ("full object visible") to counter Flux
+// Fill's empty-area texture-extension bias.
+const REPLACE_TAIL =
+  "photorealistic interior photography, natural lighting matching the room";
+const ADD_SCENE_ANCHOR = "placed in the room";
+const ADD_TAIL =
+  "photorealistic interior photography, full object visible, natural shadows";
 
 /**
- * Strip the seed-template boilerplate so the noun composes inside the
- * wrapper sentence and emits a grammatical indefinite article:
+ * Strip the seed-template boilerplate so the noun composes as a clean
+ * caption and emits a grammatical indefinite article:
  *   - "A arc floor lamp suitable for interior design placement." → "an arc floor lamp"
  *   - "A cactus suitable for interior design placement."         → "a cactus"
  *   - "A hourglass side table suitable for …"                    → "an hourglass side table"
@@ -95,83 +131,20 @@ export function normalizeInspirationNoun(raw: string): string {
   return stripped;
 }
 
-/**
- * Strip the leading indefinite article so the noun composes inside a
- * sentence that supplies its own determiner. Example:
- *   "a cactus"           → "cactus"
- *   "an arc floor lamp"  → "arc floor lamp"
- *   "pendant"            → "pendant"  (no article to strip)
- *
- * The mode-aware wrappers below open with "Completely replace the
- * masked region with a cactus." / "Add a cactus inside …" — the
- * article inside those sentences is supplied by the wrapper, not by
- * the normalized noun, so we strip whatever `normalizeInspirationNoun`
- * emitted to avoid "with a a cactus".
- */
-function stripLeadingArticle(noun: string): string {
-  return noun.replace(/^(an?)\s+/i, "");
-}
-
-/**
- * Pick the correct indefinite article for a bare noun phrase. Shares
- * the `startsWithVowelSound` heuristic with `normalizeInspirationNoun`
- * so the mode wrappers stay grammatical for accented and silent-h nouns
- * (e.g. "an étagère", "an hourglass side table") without two copies of
- * the vowel-set + silent-h list drifting apart silently.
- */
-function articleFor(bareNoun: string): "a" | "an" {
-  return startsWithVowelSound(bareNoun) ? "an" : "a";
-}
-
 export function buildReplaceAddObjectPrompt(
   params: ReplaceAddObjectParams,
 ): PromptResult {
-  const normalized = normalizeInspirationNoun(params.prompt);
-  const bareNoun = stripLeadingArticle(normalized);
-  const article = articleFor(bareNoun);
+  const noun = normalizeInspirationNoun(params.prompt);
 
-  let prompt: string;
-  let guidanceScale: number;
-
-  if (params.mode === "replace") {
-    // Replace wrapper: "in place of the object" keeps the swap
-    // intent without overstating commitment. "Scene" (not "room")
-    // because outdoor categories (patio / garden / outdoor seating)
-    // exist in the catalog. No object-emphasis tokens
-    // ("prominently visible", "sharp focus") — they overcame scene
-    // blending and produced sticker output.
-    prompt =
-      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} in place of the object inside the masked region, ` +
-      `matching the scene's lighting direction, perspective, and material palette. ` +
-      `Photorealistic, integrated with the surrounding furniture and surfaces.`;
-    guidanceScale = REPLACE_GUIDANCE;
-  } else {
-    // Add wrapper (v2.2) — neutral spatial anchor:
-    //   "inside the masked region" (no surface qualifier)
-    //     The v2.1 wording "placed on the floor inside the masked
-    //     region" was semantically wrong for ~100 of 800 catalog
-    //     items (wallSconces, ceilingLights, wallArt, pendantLights,
-    //     mirrors, curtains). Telling Flux Fill to place a pendant
-    //     light "on the floor" produced anatomically wrong outputs.
-    //     The neutral anchor lets the mask shape + scene context
-    //     dictate placement; the builder has no per-category
-    //     metadata so it cannot pick the right surface itself.
-    //   "matching the scene's lighting direction, depth of field,
-    //    and color palette so it blends naturally with the
-    //    surrounding furniture and surfaces"
-    //     three integration anchors carried forward from v2.1.
-    //     "Scene" (not "room") for outdoor category support.
-    prompt =
-      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} inside the masked region, ` +
-      `matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. ` +
-      `Photorealistic.`;
-    guidanceScale = ADD_GUIDANCE;
-  }
+  const prompt =
+    params.mode === "replace"
+      ? `${noun}, ${REPLACE_TAIL}`
+      : `${noun} ${ADD_SCENE_ANCHOR}, ${ADD_TAIL}`;
 
   return {
     prompt,
     positiveAvoidance: "",
-    guidanceScale,
+    guidanceScale: FLUX_FILL_GUIDANCE,
     actionMode: "transform",
     guidanceBand: "faithful",
     promptVersion: PROMPT_VERSION_CURRENT,

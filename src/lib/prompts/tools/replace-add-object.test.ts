@@ -119,7 +119,7 @@ describe("normalizeInspirationNoun", () => {
 });
 
 describe("buildReplaceAddObjectPrompt — replace mode", () => {
-  it("emits the v2.2 replace wrapper with the seeded cactus prompt", () => {
+  it("emits the v3.0 bare-caption replace prompt for the seeded cactus", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -127,93 +127,77 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.equal(
       result.prompt,
-      "A cactus in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette. Photorealistic, integrated with the surrounding furniture and surfaces.",
+      "a cactus, photorealistic interior photography, natural lighting matching the room",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
-    // Replace guidance — Pro's BFL default (30). v2.0's 38 over-shot
-    // and produced sticker output; v2.1 lets the model lean on scene
-    // pixels for integration cues. Raise to 60 if reverting to
-    // flux-fill-dev.
+    assert.equal(
+      result.promptVersion,
+      "replaceAddObject/v3.0-fluxfill-bare-caption",
+    );
+    // BFL HF sample guidance. Same value for both modes in v3.0; the
+    // v2.0 per-mode split (75/70) was tuned on intuition and pushed
+    // the model into image-conditioning territory where it ignored
+    // the text prompt.
     assert.equal(result.guidanceScale, 30);
     assert.equal(result.actionMode, "transform");
     assert.equal(result.guidanceBand, "faithful");
     assert.equal(result.positiveAvoidance, "");
   });
 
-  it("uses 'An' inside the wrapper for vowel-initial nouns", () => {
+  it("uses 'an' for vowel-initial nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
       prompt: "A arc floor lamp suitable for interior design placement.",
     });
-    assert.match(
+    assert.equal(
       result.prompt,
-      /^An arc floor lamp in place of the object inside the masked region,/,
+      "an arc floor lamp, photorealistic interior photography, natural lighting matching the room",
     );
   });
 
-  it("uses 'An' inside the wrapper for silent-h nouns", () => {
+  it("uses 'an' for silent-h nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
       prompt: "A hourglass side table suitable for interior design placement.",
     });
-    assert.match(
-      result.prompt,
-      /^An hourglass side table in place of the object inside the masked region,/,
-    );
+    assert.match(result.prompt, /^an hourglass side table, /);
   });
 
-  it("handles operator-supplied bare nouns without doubling the article", () => {
+  it("passes operator-supplied bare nouns through normalize unchanged", () => {
+    // Operator override path: no seed suffix and no leading article.
+    // The bare-caption format consumes whatever normalize emits, so
+    // "pendant" arrives at Flux Fill as-is, without a synthesized
+    // article. Flux Fill handles bare-noun captions fine ("white paper
+    // cup" is the BFL HF sample), so we don't synthesize an article
+    // for operator overrides.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
       prompt: "pendant",
     });
-    assert.match(
+    assert.equal(
       result.prompt,
-      /^A pendant in place of the object inside the masked region,/,
+      "pendant, photorealistic interior photography, natural lighting matching the room",
     );
   });
 
-  it("handles pre-articled operator-supplied nouns (no seed suffix)", () => {
-    // Guards the operator override path for replace mode: a prompt
-    // arriving without the seed boilerplate but already carrying its
-    // own article ("An ottoman") must survive the
-    // normalize → strip → re-article pipeline without losing the
-    // vowel-sound determination.
+  it("preserves a pre-articled operator-supplied noun (no seed suffix)", () => {
+    // "An ottoman" arriving without the seed boilerplate must survive
+    // normalize's article repair (it already has "an" and the noun is
+    // vowel-initial, so normalize returns it unchanged) and reach the
+    // caption as "an ottoman, ...".
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
       prompt: "An ottoman",
     });
-    assert.match(
-      result.prompt,
-      /^An ottoman in place of the object inside the masked region,/,
-    );
-  });
-
-  it("does not strip the leading letter of a bare vowel-initial noun", () => {
-    // Guards `stripLeadingArticle` against accidentally matching the
-    // 'a' in "armchair" as the indefinite article. Without the `\s+`
-    // requirement in the strip regex, the function would return
-    // "rmchair" and the wrapper would render
-    // "An rmchair in place …" — visibly broken but only on bare
-    // vowel-initial nouns that no test was exercising.
-    const result = buildReplaceAddObjectPrompt({
-      ...baseParams,
-      mode: "replace",
-      prompt: "armchair",
-    });
-    assert.match(
-      result.prompt,
-      /^An armchair in place of the object inside the masked region,/,
-    );
+    assert.match(result.prompt, /^an ottoman, /);
   });
 });
 
 describe("buildReplaceAddObjectPrompt — add mode", () => {
-  it("emits the v2.2 add wrapper with the seeded cactus prompt (neutral spatial anchor)", () => {
+  it("emits the v3.0 bare-caption add prompt for the seeded cactus", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
@@ -221,89 +205,39 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.equal(
       result.prompt,
-      "A cactus inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. Photorealistic.",
+      "a cactus placed in the room, photorealistic interior photography, full object visible, natural shadows",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
-    // Add guidance — Pro's BFL default (~30). 28 maximizes scene
-    // blending on blank-area placements without over-anchoring the
-    // prompt. Re-tune if REPLICATE_INPAINT_MODEL reverts to Dev.
-    assert.equal(result.guidanceScale, 28);
-    // Pin the rest of the PromptResult contract for the add branch
-    // (the replace-branch canonical test pins these too). A future
-    // refactor that moved these fields into the branches must not
-    // silently change them on the add path.
+    assert.equal(
+      result.promptVersion,
+      "replaceAddObject/v3.0-fluxfill-bare-caption",
+    );
+    // Same guidance as replace mode in v3.0 — see replace test for
+    // rationale.
+    assert.equal(result.guidanceScale, 30);
     assert.equal(result.actionMode, "transform");
     assert.equal(result.guidanceBand, "faithful");
     assert.equal(result.positiveAvoidance, "");
   });
 
-  it("uses 'An' inside the add wrapper for vowel-initial nouns", () => {
+  it("uses 'an' for vowel-initial nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
       prompt: "An ottoman",
     });
-    assert.match(
-      result.prompt,
-      /^An ottoman inside the masked region,/,
-    );
+    assert.match(result.prompt, /^an ottoman placed in the room, /);
   });
 
-  it("handles operator-supplied bare nouns without doubling the article", () => {
-    // Symmetry with the replace-branch bare-noun test. The
-    // normalize → strip → re-article pipeline runs identically for
-    // both modes, but exercising it from inside the add wrapper
-    // pins the contract that bare nouns reach the wrapper without
-    // a stray leading article.
+  it("passes operator-supplied bare nouns through normalize unchanged", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
       prompt: "pendant",
     });
-    assert.match(
+    assert.equal(
       result.prompt,
-      /^A pendant inside the masked region,/,
+      "pendant placed in the room, photorealistic interior photography, full object visible, natural shadows",
     );
-  });
-
-  it("does not strip the leading letter of a bare vowel-initial noun", () => {
-    const result = buildReplaceAddObjectPrompt({
-      ...baseParams,
-      mode: "add",
-      prompt: "armchair",
-    });
-    assert.match(
-      result.prompt,
-      /^An armchair inside the masked region,/,
-    );
-  });
-
-  it("uses neutral spatial anchor (no floor mention) for wall/ceiling-mounted categories", () => {
-    // Guards the v2.2 regression fix: v2.1 hardcoded "placed on the
-    // floor" for all categories, which produced anatomically wrong
-    // outputs for wallSconces / ceilingLights / wallArt / pendantLights
-    // / mirrors / curtains (~100 of 800 catalog items). v2.2 uses a
-    // neutral "inside the masked region" anchor that is correct for
-    // every category. This test pins that no future re-edit
-    // accidentally reintroduces a surface qualifier.
-    for (const item of [
-      { categoryId: "pendantLights", id: "pendantLights_1", prompt: "A rattan pendant suitable for interior design placement." },
-      { categoryId: "wallArt", id: "wallArt_1", prompt: "A framed print suitable for interior design placement." },
-      { categoryId: "ceilingLights", id: "ceilingLights_1", prompt: "A flush mount ceiling light suitable for interior design placement." },
-    ]) {
-      const result = buildReplaceAddObjectPrompt({
-        ...baseParams,
-        mode: "add",
-        categoryId: item.categoryId,
-        inspirationId: item.id,
-        prompt: item.prompt,
-      });
-      assert.doesNotMatch(
-        result.prompt,
-        /on the floor|on the wall|on the ceiling|mounted/i,
-        `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 100)}"`,
-      );
-    }
   });
 });
 
@@ -320,23 +254,17 @@ describe("manifest contract", () => {
     items: Array<{ id: string; categoryId: string; prompt: string }>;
   };
 
-  // v2.1 integration-focused shape regexes. Each branch must:
-  //   - open with a capitalized article ("A" or "An") immediately
-  //     followed by the noun (no leading verb token — v2.1 dropped
-  //     "Add" / "Completely replace" because Flux Fill's inpaint
-  //     semantics already imply placement)
-  //   - emit a grammatical article via the SILENT_H_PREFIX + Latin-
-  //     vowel heuristic
-  //   - include the per-mode integration anchors
-  // `\p{Ll}` matches any lowercase letter (including accented forms
-  // like `é` in `étagère`) so the regex passes the full seed including
-  // non-ASCII rows.
+  // v3.0 bare-caption shape. Each branch must:
+  //   - lead with a normalized noun (article + noun, or bare noun for
+  //     operator overrides). `\p{Ll}` covers lowercase Latin including
+  //     accented forms (`é` in `étagère`).
+  //   - end with the mode's photography tail.
   const VALID_REPLACE_SHAPE =
-    /^(A|An) \p{Ll}[^,]+ in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette\. Photorealistic, integrated with the surrounding furniture and surfaces\.$/u;
+    /^(a|an) \p{Ll}[^,]+, photorealistic interior photography, natural lighting matching the room$/u;
   const VALID_ADD_SHAPE =
-    /^(A|An) \p{Ll}[^,]+ inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces\. Photorealistic\.$/u;
+    /^(a|an) \p{Ll}[^,]+ placed in the room, photorealistic interior photography, full object visible, natural shadows$/u;
 
-  it("every seeded inspiration produces a v2.2 replace prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v3.0 replace caption of the expected shape", () => {
     assert.ok(data.items.length > 0, "manifest must contain items");
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
@@ -354,7 +282,7 @@ describe("manifest contract", () => {
     }
   });
 
-  it("every seeded inspiration produces a v2.2 add prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v3.0 add caption of the expected shape", () => {
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
         ...baseParams,
@@ -371,10 +299,10 @@ describe("manifest contract", () => {
     }
   });
 
-  it("silent-h manifest rows open with 'An ' in both wrappers", () => {
+  it("silent-h manifest rows emit 'an ' in both modes", () => {
     // Guards against deleting the SILENT_H_PREFIX branch. Without it,
-    // `hourglass side table` would survive the shape regex above with
-    // "A hourglass…" — grammatically wrong, but visually intact.
+    // `hourglass side table` would survive normalize as
+    // "a hourglass side table" — grammatically wrong.
     const silentH = data.items.filter((it) =>
       /^A\s+(hour|honest|heir|honor|herb)/i.test(it.prompt),
     );
@@ -392,8 +320,8 @@ describe("manifest contract", () => {
       });
       assert.match(
         replace.prompt,
-        /^An /,
-        `${item.id}: silent-h replace prompt should start with "An ", got: ${replace.prompt.slice(0, 40)}`,
+        /^an /,
+        `${item.id}: silent-h replace prompt should start with "an ", got: ${replace.prompt.slice(0, 60)}`,
       );
       const add = buildReplaceAddObjectPrompt({
         ...baseParams,
@@ -404,8 +332,8 @@ describe("manifest contract", () => {
       });
       assert.match(
         add.prompt,
-        /^An /,
-        `${item.id}: silent-h add prompt should start with "An ", got: ${add.prompt.slice(0, 40)}`,
+        /^an /,
+        `${item.id}: silent-h add prompt should start with "an ", got: ${add.prompt.slice(0, 60)}`,
       );
     }
   });
