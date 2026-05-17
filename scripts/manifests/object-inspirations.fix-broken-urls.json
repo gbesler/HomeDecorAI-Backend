@@ -1,0 +1,459 @@
+{
+  "categories": [
+    {
+      "id": "sofas",
+      "order": 0,
+      "active": true,
+      "title": {
+        "en": "Sofas",
+        "tr": "Koltuklar"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Sectional_Sofa.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "armchairs",
+      "order": 1,
+      "active": true,
+      "title": {
+        "en": "Armchairs",
+        "tr": "Berjerler"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Wingback_Chair.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "accentChairs",
+      "order": 2,
+      "active": true,
+      "title": {
+        "en": "Accent Chairs",
+        "tr": "Aksesuar Sandalyeler"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Cane_Chair.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "bookshelves",
+      "order": 7,
+      "active": true,
+      "title": {
+        "en": "Bookshelves",
+        "tr": "Kitaplıklar"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Ladder_Bookshelf.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "diningChairs",
+      "order": 9,
+      "active": true,
+      "title": {
+        "en": "Dining Chairs",
+        "tr": "Yemek Sandalyeleri"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Wishbone_Chair.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "barStools",
+      "order": 11,
+      "active": true,
+      "title": {
+        "en": "Bar Stools",
+        "tr": "Bar Tabureleri"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Upholstered_Bar_Stool.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "beds",
+      "order": 12,
+      "active": true,
+      "title": {
+        "en": "Beds",
+        "tr": "Yataklar"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Upholstered_Bed.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "officeChairs",
+      "order": 18,
+      "active": true,
+      "title": {
+        "en": "Office Chairs",
+        "tr": "Ofis Sandalyeleri"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Ergonomic_Office_Chair.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "curtains",
+      "order": 26,
+      "active": true,
+      "title": {
+        "en": "Curtains",
+        "tr": "Perdeler"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Linen_Curtains.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "pillows",
+      "order": 27,
+      "active": true,
+      "title": {
+        "en": "Pillows",
+        "tr": "Yastıklar"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Linen_Pillow.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "throws",
+      "order": 28,
+      "active": true,
+      "title": {
+        "en": "Throws",
+        "tr": "Battaniyeler"
+      },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Cashmere_Throw.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "sofas_14",
+      "categoryId": "sofas",
+      "order": 13,
+      "active": true,
+      "title": {
+        "en": "Bouclé Sofa",
+        "tr": "Bouclé Sofa"
+      },
+      "prompt": "A bouclé sofa suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/14_Bouclé_Sofa.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "armchairs_11",
+      "categoryId": "armchairs",
+      "order": 10,
+      "active": true,
+      "title": {
+        "en": "Bouclé Armchair",
+        "tr": "Bouclé Armchair"
+      },
+      "prompt": "A bouclé armchair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/11_Bouclé_Armchair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "armchairs_15",
+      "categoryId": "armchairs",
+      "order": 14,
+      "active": true,
+      "title": {
+        "en": "Bergère Chair",
+        "tr": "Bergère Chair"
+      },
+      "prompt": "A bergère chair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/15_Bergère_Chair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "accentChairs_2",
+      "categoryId": "accentChairs",
+      "order": 1,
+      "active": true,
+      "title": {
+        "en": "Bouclé Accent Chair",
+        "tr": "Bouclé Accent Chair"
+      },
+      "prompt": "A bouclé accent chair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/02_Bouclé_Accent_Chair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "accentChairs_7",
+      "categoryId": "accentChairs",
+      "order": 6,
+      "active": true,
+      "title": {
+        "en": "Panton Chair",
+        "tr": "Panton Chair"
+      },
+      "prompt": "A panton chair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/07_Pantone_Chair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "bookshelves_6",
+      "categoryId": "bookshelves",
+      "order": 5,
+      "active": true,
+      "title": {
+        "en": "Étagère",
+        "tr": "Étagère"
+      },
+      "prompt": "A étagère suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Étagère.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "diningChairs_5",
+      "categoryId": "diningChairs",
+      "order": 4,
+      "active": true,
+      "title": {
+        "en": "Bouclé Dining Chair",
+        "tr": "Bouclé Dining Chair"
+      },
+      "prompt": "A bouclé dining chair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/05_Bouclé_Dining_Chair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "barStools_11",
+      "categoryId": "barStools",
+      "order": 10,
+      "active": true,
+      "title": {
+        "en": "Bouclé Bar Stool",
+        "tr": "Bouclé Bar Stool"
+      },
+      "prompt": "A bouclé bar stool suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/11_Bouclé_Bar_Stool.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "beds_9",
+      "categoryId": "beds",
+      "order": 8,
+      "active": true,
+      "title": {
+        "en": "Bouclé Bed",
+        "tr": "Bouclé Bed"
+      },
+      "prompt": "A bouclé bed suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/09_Bouclé_Bed.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "officeChairs_6",
+      "categoryId": "officeChairs",
+      "order": 5,
+      "active": true,
+      "title": {
+        "en": "Bouclé Office Chair",
+        "tr": "Bouclé Office Chair"
+      },
+      "prompt": "A bouclé office chair suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Bouclé_Office_Chair.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "curtains_9",
+      "categoryId": "curtains",
+      "order": 8,
+      "active": true,
+      "title": {
+        "en": "Bouclé Curtains",
+        "tr": "Bouclé Curtains"
+      },
+      "prompt": "A bouclé curtains suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/09_Bouclé_Curtains.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "curtains_12",
+      "categoryId": "curtains",
+      "order": 11,
+      "active": true,
+      "title": {
+        "en": "Café Curtains",
+        "tr": "Café Curtains"
+      },
+      "prompt": "A café curtains suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/12_Café_Curtains.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "pillows_3",
+      "categoryId": "pillows",
+      "order": 2,
+      "active": true,
+      "title": {
+        "en": "Bouclé Pillow",
+        "tr": "Bouclé Pillow"
+      },
+      "prompt": "A bouclé pillow suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/03_Bouclé_Pillow.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "throws_6",
+      "categoryId": "throws",
+      "order": 5,
+      "active": true,
+      "title": {
+        "en": "Bouclé Throw",
+        "tr": "Bouclé Throw"
+      },
+      "prompt": "A bouclé throw suitable for interior design placement.",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Bouclé_Throw.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    }
+  ]
+}
