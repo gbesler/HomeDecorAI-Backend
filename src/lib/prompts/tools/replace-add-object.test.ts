@@ -119,7 +119,7 @@ describe("normalizeInspirationNoun", () => {
 });
 
 describe("buildReplaceAddObjectPrompt — replace mode", () => {
-  it("emits the v2.0 replace wrapper with the seeded cactus prompt", () => {
+  it("emits the v2.1 replace wrapper with the seeded cactus prompt", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -127,20 +127,20 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.equal(
       result.prompt,
-      "Completely replace the masked region with a cactus. Remove any existing object inside the mask. Photorealistic, prominently visible, matching the room's lighting.",
+      "A cactus in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette. Photorealistic, integrated with the surrounding furniture and surfaces.",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.0-fluxfill-mode-aware");
-    // Replace guidance bump — keeps Flux Fill anchored to the prompt
-    // token rather than the surrounding silhouette. Pro-calibrated
-    // (1.25× Pro's BFL default of 30); raise to 75 if the inpaint
-    // model env is reverted to flux-fill-dev.
-    assert.equal(result.guidanceScale, 38);
+    assert.equal(result.promptVersion, "replaceAddObject/v2.1-fluxfill-integration");
+    // Replace guidance — Pro's BFL default (30). v2.0's 38 over-shot
+    // and produced sticker output; v2.1 lets the model lean on scene
+    // pixels for integration cues. Raise to 60 if reverting to
+    // flux-fill-dev.
+    assert.equal(result.guidanceScale, 30);
     assert.equal(result.actionMode, "transform");
     assert.equal(result.guidanceBand, "faithful");
     assert.equal(result.positiveAvoidance, "");
   });
 
-  it("uses 'an' inside the wrapper for vowel-initial nouns", () => {
+  it("uses 'An' inside the wrapper for vowel-initial nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -148,11 +148,11 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.match(
       result.prompt,
-      /^Completely replace the masked region with an arc floor lamp\./,
+      /^An arc floor lamp in place of the object inside the masked region,/,
     );
   });
 
-  it("uses 'an' inside the wrapper for silent-h nouns", () => {
+  it("uses 'An' inside the wrapper for silent-h nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -160,7 +160,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.match(
       result.prompt,
-      /^Completely replace the masked region with an hourglass side table\./,
+      /^An hourglass side table in place of the object inside the masked region,/,
     );
   });
 
@@ -172,7 +172,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.match(
       result.prompt,
-      /^Completely replace the masked region with a pendant\./,
+      /^A pendant in place of the object inside the masked region,/,
     );
   });
 
@@ -189,7 +189,7 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.match(
       result.prompt,
-      /^Completely replace the masked region with an ottoman\./,
+      /^An ottoman in place of the object inside the masked region,/,
     );
   });
 
@@ -198,8 +198,8 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     // 'a' in "armchair" as the indefinite article. Without the `\s+`
     // requirement in the strip regex, the function would return
     // "rmchair" and the wrapper would render
-    // "with a rmchair" — visibly broken but only on bare vowel-
-    // initial nouns that no test was exercising.
+    // "An rmchair in place …" — visibly broken but only on bare
+    // vowel-initial nouns that no test was exercising.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -207,13 +207,13 @@ describe("buildReplaceAddObjectPrompt — replace mode", () => {
     });
     assert.match(
       result.prompt,
-      /^Completely replace the masked region with an armchair\./,
+      /^An armchair in place of the object inside the masked region,/,
     );
   });
 });
 
 describe("buildReplaceAddObjectPrompt — add mode", () => {
-  it("emits the v2.0 add wrapper with the seeded cactus prompt", () => {
+  it("emits the v2.1 add wrapper with the seeded cactus prompt", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
@@ -221,14 +221,13 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     });
     assert.equal(
       result.prompt,
-      "Add a cactus inside the masked region. The masked area is currently empty; place the object clearly visible and well-lit. Photorealistic, sharp focus, natural shadows.",
+      "A cactus placed on the floor inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. Photorealistic.",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.0-fluxfill-mode-aware");
-    // Add guidance bump — moderate, drives commitment to drawing into
-    // empty space without over-saturating contrast. Pro-calibrated
-    // (~1.17× Pro's BFL default of 30); raise to 70 if the inpaint
-    // model env is reverted to flux-fill-dev.
-    assert.equal(result.guidanceScale, 35);
+    assert.equal(result.promptVersion, "replaceAddObject/v2.1-fluxfill-integration");
+    // Add guidance — Pro's BFL default (28). v2.0's 35 over-shot;
+    // v2.1 maximizes scene blending on blank-area placements. Raise
+    // to 56 if reverting to flux-fill-dev.
+    assert.equal(result.guidanceScale, 28);
     // Pin the rest of the PromptResult contract for the add branch
     // (the replace-branch canonical test pins these too). A future
     // refactor that moved these fields into the branches must not
@@ -238,13 +237,16 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
     assert.equal(result.positiveAvoidance, "");
   });
 
-  it("uses 'an' inside the add wrapper for vowel-initial nouns", () => {
+  it("uses 'An' inside the add wrapper for vowel-initial nouns", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
       prompt: "An ottoman",
     });
-    assert.match(result.prompt, /^Add an ottoman inside the masked region\./);
+    assert.match(
+      result.prompt,
+      /^An ottoman placed on the floor inside the masked region,/,
+    );
   });
 
   it("handles operator-supplied bare nouns without doubling the article", () => {
@@ -258,7 +260,10 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
       mode: "add",
       prompt: "pendant",
     });
-    assert.match(result.prompt, /^Add a pendant inside the masked region\./);
+    assert.match(
+      result.prompt,
+      /^A pendant placed on the floor inside the masked region,/,
+    );
   });
 
   it("does not strip the leading letter of a bare vowel-initial noun", () => {
@@ -267,7 +272,10 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
       mode: "add",
       prompt: "armchair",
     });
-    assert.match(result.prompt, /^Add an armchair inside the masked region\./);
+    assert.match(
+      result.prompt,
+      /^An armchair placed on the floor inside the masked region,/,
+    );
   });
 });
 
@@ -284,20 +292,23 @@ describe("manifest contract", () => {
     items: Array<{ id: string; categoryId: string; prompt: string }>;
   };
 
-  // v2.0 mode-aware shape regexes. Each branch must:
-  //   - lead with the mode's load-bearing opener
-  //   - emit a grammatical article ("a" or "an") via the
-  //     SILENT_H_PREFIX + Latin-vowel heuristic
-  //   - end with the mode's commitment-token tail
+  // v2.1 integration-focused shape regexes. Each branch must:
+  //   - open with a capitalized article ("A" or "An") immediately
+  //     followed by the noun (no leading verb token — v2.1 dropped
+  //     "Add" / "Completely replace" because Flux Fill's inpaint
+  //     semantics already imply placement)
+  //   - emit a grammatical article via the SILENT_H_PREFIX + Latin-
+  //     vowel heuristic
+  //   - include the per-mode integration anchors
   // `\p{Ll}` matches any lowercase letter (including accented forms
   // like `é` in `étagère`) so the regex passes the full seed including
   // non-ASCII rows.
   const VALID_REPLACE_SHAPE =
-    /^Completely replace the masked region with (a|an) \p{Ll}[^.]+\. Remove any existing object inside the mask\. Photorealistic, prominently visible, matching the room's lighting\.$/u;
+    /^(A|An) \p{Ll}[^,]+ in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette\. Photorealistic, integrated with the surrounding furniture and surfaces\.$/u;
   const VALID_ADD_SHAPE =
-    /^Add (a|an) \p{Ll}[^.]+ inside the masked region\. The masked area is currently empty; place the object clearly visible and well-lit\. Photorealistic, sharp focus, natural shadows\.$/u;
+    /^(A|An) \p{Ll}[^,]+ placed on the floor inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces\. Photorealistic\.$/u;
 
-  it("every seeded inspiration produces a v2.0 replace prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v2.1 replace prompt of the expected shape", () => {
     assert.ok(data.items.length > 0, "manifest must contain items");
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
@@ -315,7 +326,7 @@ describe("manifest contract", () => {
     }
   });
 
-  it("every seeded inspiration produces a v2.0 add prompt of the expected shape", () => {
+  it("every seeded inspiration produces a v2.1 add prompt of the expected shape", () => {
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
         ...baseParams,
@@ -332,10 +343,10 @@ describe("manifest contract", () => {
     }
   });
 
-  it("silent-h manifest rows emit 'an ' inside both wrappers", () => {
+  it("silent-h manifest rows open with 'An ' in both wrappers", () => {
     // Guards against deleting the SILENT_H_PREFIX branch. Without it,
     // `hourglass side table` would survive the shape regex above with
-    // "… with a hourglass…" — grammatically wrong, but visually intact.
+    // "A hourglass…" — grammatically wrong, but visually intact.
     const silentH = data.items.filter((it) =>
       /^A\s+(hour|honest|heir|honor|herb)/i.test(it.prompt),
     );
@@ -353,8 +364,8 @@ describe("manifest contract", () => {
       });
       assert.match(
         replace.prompt,
-        /with an /,
-        `${item.id}: silent-h replace prompt should include "with an ", got: ${replace.prompt.slice(0, 80)}`,
+        /^An /,
+        `${item.id}: silent-h replace prompt should start with "An ", got: ${replace.prompt.slice(0, 40)}`,
       );
       const add = buildReplaceAddObjectPrompt({
         ...baseParams,
@@ -365,8 +376,8 @@ describe("manifest contract", () => {
       });
       assert.match(
         add.prompt,
-        /^Add an /,
-        `${item.id}: silent-h add prompt should start with "Add an ", got: ${add.prompt.slice(0, 40)}`,
+        /^An /,
+        `${item.id}: silent-h add prompt should start with "An ", got: ${add.prompt.slice(0, 40)}`,
       );
     }
   });
