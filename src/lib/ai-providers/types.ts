@@ -13,6 +13,31 @@ export interface GenerationInput {
    * silently ignore this field.
    */
   referenceImageUrl?: string;
+  /**
+   * Additional images beyond `imageUrl` (slot 1) and `referenceImageUrl`
+   * (slot 2). Appended to the provider's image array in order — so the
+   * full ordering reaching the model is
+   *   [imageUrl, referenceImageUrl, ...extraImageUrls].
+   *
+   * Used by the Replace & Add Object pipeline to send a brush mask as
+   * a third image (image 3 in the instructional prompt). The mask is
+   * NOT a "style reference" in the v3.x sense and would be misleading
+   * to overload onto `referenceImageUrl`. Providers whose capability
+   * matrix does not advertise multi-image support
+   * (`supportsReferenceImage: false`) silently drop this field — same
+   * behavior as `referenceImageUrl`.
+   *
+   * Providers' practical image-array caps (per capabilities.ts notes):
+   *   google/nano-banana       — 14 images
+   *   fal-ai/flux-2/edit       — 4 images
+   *   prunaai/p-image-edit     — 5 images (target + up to 4 refs)
+   *   fal-ai/flux-2/klein/9b/edit — multiple `image_urls` accepted
+   *
+   * The router callers are responsible for not exceeding the target
+   * model's cap — there is no defensive truncation here because the
+   * model's schema rejection is itself a useful regression signal.
+   */
+  extraImageUrls?: string[];
   outputFormat?: string;
   guidanceScale?: number;
   /**

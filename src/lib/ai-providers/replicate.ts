@@ -63,9 +63,23 @@ export async function callReplicate(
   // treat images[0] as the primary; the prompt then invokes images[1] as
   // "image 2". Nano Banana reuses the same [target, ref] ordering without
   // needing a primary-index flag.
+  //
+  // `extraImageUrls` is appended after the reference slot — used by the
+  // Replace & Add Object multi-image-edit pipeline to send a brush mask
+  // as image 3. Capability gate matches `referenceImageUrl`: a model
+  // whose matrix entry sets `supportsReferenceImage: false` will not
+  // receive any of the extras (and shouldn't — the instructional
+  // prompt would reference images the model wasn't told to expect).
+  const extras =
+    capabilities?.supportsReferenceImage === true &&
+    Array.isArray(input.extraImageUrls)
+      ? input.extraImageUrls.filter(
+          (u): u is string => typeof u === "string" && u.length > 0,
+        )
+      : [];
   const images = hasReference
-    ? [input.imageUrl, input.referenceImageUrl as string]
-    : [input.imageUrl];
+    ? [input.imageUrl, input.referenceImageUrl as string, ...extras]
+    : [input.imageUrl, ...extras];
 
   const replicateInput: Record<string, unknown> = {};
   const baseSlug = model.split(":")[0];

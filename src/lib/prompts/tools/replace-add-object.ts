@@ -1,179 +1,200 @@
 /**
- * Replace & Add Object prompt builder (inpaint-with-prompt pipeline, Flux Fill).
+ * Replace & Add Object prompt builder (v4.0 — Nano Banana multi-image
+ * instructional).
  *
- * `normalizeInspirationNoun` cleans the seed-template noun phrase
- * (`scripts/manifests/object-inspirations.full.json` ships
- * `"A <noun> suitable for interior design placement."`) — strips the
- * boilerplate, repairs the indefinite article.
+ * **Why v4.0 is a full rewrite, not another caption tweak.**
  *
- * `buildReplaceAddObjectPrompt` branches on `params.mode` to emit
- * scene-integration-focused prompts: replace anchors the model to
- * overwrite the masked object's silhouette while honoring scene
- * lighting/perspective/material; add asks for placement inside the
- * masked region with no surface qualifier (since the builder has no
- * per-category metadata to pick floor vs wall vs ceiling).
+ * v1.x → v3.0 lived inside the Flux Fill (`black-forest-labs/flux-fill-*`)
+ * pipeline and emitted bare captions ("a rattan pendant, photorealistic, …").
+ * That pipeline shipped five prompt iterations against the same two bugs:
  *
- * Guidance scale is per-mode (REPLACE_GUIDANCE, ADD_GUIDANCE below),
- * calibrated for `flux-fill-pro` (BFL default ~30). Paired with mask
- * dilation in `src/lib/generation/prompt-inpaint.ts` — tune both
- * together when revisiting the mode-aware experiment.
+ *   - **Replace bug:** picking a specific inspiration (rattan pendant)
+ *     returned a different same-category item (plain pendant).
+ *   - **Add bug:** painting over blank wall/floor returned the unmodified
+ *     input or surrounding-texture extension.
+ *
+ * The structural root cause: Flux Fill is a caption-fill model. It
+ * accepts `image + mask + prompt-as-caption`. It does NOT accept a
+ * reference image of the object the user picked, and it cannot express
+ * the Replace vs. Add semantic distinction in its prompt slot — both
+ * read as "describe what should occupy the masked region". No amount
+ * of caption rewording fixes either failure mode.
+ *
+ * v4.0 switches the pipeline to `google/nano-banana` (Gemini 2.5 Flash
+ * Image): an instruction-following multi-image edit model that accepts
+ * up to 14 reference images per call. The room photo, the inspiration
+ * photo, and the brush mask all flow in as first-class `image_input`
+ * entries. The model's job becomes a documented Google pattern —
+ * "Replace the {object} in image 1 with the {object} from image 2,
+ * inside the white region of image 3 (mask)" — instead of caption
+ * inference under a silhouette + noun-phrase bias.
+ *
+ * See `docs/plans/2026-05-17-001-refactor-replace-add-object-nano-banana-plan.md`
+ * for the full architectural rationale, pricing comparison ($0.020 vs
+ * $0.050 per image), and Phase 2 roadmap (crop-and-paste fallback,
+ * Nano Banana 2 upgrade).
+ *
+ * **What this builder emits.**
+ *
+ * A natural-language instruction string referencing three image slots
+ * (image 1 = room, image 2 = inspiration, image 3 = mask). The pipeline
+ * (src/lib/generation/multi-image-edit.ts) is responsible for assembling
+ * the actual `image_input: [room, inspiration, mask]` array — the
+ * builder only produces the text instruction. The `{category}` token
+ * interpolates from `params.inspirationTitle`, which `preEnqueueValidate`
+ * in tool-types.ts populates from `objectInspirations/{id}.title.en`.
+ *
+ * Outside-mask pixel preservation is enforced by a post-process
+ * composite step (src/lib/generation/composite-masked-result.ts), not
+ * by the model. The "Keep all pixels outside the white region of image 3
+ * unchanged" clause in the prompt is a best-effort signal to Gemini, not
+ * a guarantee; the composite step is what actually preserves the
+ * original pixels byte-for-byte after the model returns.
+ *
+ * **No CFG / guidance scale.** Nano Banana does not expose a CFG knob
+ * (`supportsGuidanceScale: false` in capabilities.ts). The provider
+ * layer drops the field when `supportsGuidanceScale` is false, so
+ * shipping `0` here is a documented sentinel meaning "no override
+ * required". The builder's `guidanceBand` is left at `"faithful"` for
+ * telemetry continuity with prior versions — it has no functional
+ * effect on Gemini.
+ *
+ * **No `normalizeInspirationNoun` helper.** v3.0 needed the helper to
+ * derive a clean noun ("a cactus") from the seed-template boilerplate
+ * ("A cactus suitable for interior design placement."). v4.0 reads the
+ * already-clean `title.en` ("Sectional Sofa") from Firestore — no noun
+ * extraction, no article repair, no silent-h handling. The legacy
+ * regex helper is intentionally not preserved.
  */
 
 import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.2-neutral-anchor";
+const PROMPT_VERSION_CURRENT =
+  "replaceAddObject/v4.0-nano-banana-instructional";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
-// Silent-h words where "an" is the correct article despite the leading
-// consonant letter. The catalog ships `hourglass` today; the rest are
-// included defensively for any future seed additions. No word boundary
-// so compounds (`hourglass`, `heirloom`) also match — every English
-// word with these prefixes happens to be silent-h.
-const SILENT_H_PREFIX = /^(hour|honest|heir|honor|herb)/i;
+// Nano Banana has no CFG knob; the provider layer drops the field
+// because the `google/nano-banana` capability entry sets
+// `supportsGuidanceScale: false`. Shipping 0 here documents "no caller
+// override required" — matches the sentinel logic in
+// `src/lib/ai-providers/replicate.ts` (`callerGuidance` check).
+const NANO_BANANA_GUIDANCE = 0;
 
-// Latin vowels including accented forms. The catalog ships `étagère`
-// (vowel sound) and `bouclé` / `bergère` / `café` (consonant-initial
-// despite later accents). Case-insensitive so the same pattern matches
-// "Ottoman" and "ottoman".
-const VOWEL_INITIAL = /^[aeiouéèêëáàâäíìîïóòôöúùûü]/i;
-
-/**
- * Single source of truth for the indefinite-article heuristic. Used by
- * both `normalizeInspirationNoun` (which repairs misspelled `"a"`/`"an"`
- * on seed-template prompts) and `articleFor` (which re-derives the
- * article for the mode-aware wrapper sentences). Extracting it here
- * keeps the vowel-set + silent-h list in one place — divergence
- * between the two call sites used to be a silent failure mode (a new
- * accented vowel could be added to one and not the other).
- */
-function startsWithVowelSound(word: string): boolean {
-  return VOWEL_INITIAL.test(word) || SILENT_H_PREFIX.test(word);
-}
-
-// Per-mode guidance overrides for Flux Fill. Higher values anchor
-// generation to the prompt; lower values let the model lean on scene
-// pixels for integration cues (lighting, perspective, color grading).
-// Calibrated for `flux-fill-pro` (BFL default ~30): replace keeps a
-// small lift to overcome the masked object's silhouette; add sits at
-// the model default to maximize scene blending.
-//
-// If REPLICATE_INPAINT_MODEL is reverted to `flux-fill-dev` (native
-// guidance scale ~60), re-tune both values against fresh staging
-// output — do not assume a linear ratio carries over. Paired with
-// `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
-// `src/lib/generation/prompt-inpaint.ts`.
-const REPLACE_GUIDANCE = 30;
-const ADD_GUIDANCE = 28;
+// Fallback noun phrase when an inspiration somehow reaches the builder
+// without a populated `inspirationTitle`. Should be unreachable —
+// `preEnqueueValidate` in `src/lib/tool-types.ts` 409-rejects any
+// inspiration with an empty title.en + title.tr + prompt chain — but
+// the type system can't enforce that the field is populated, so a
+// defensive default keeps a stray code path from emitting a malformed
+// prompt with a bare `${undefined}` token.
+const FALLBACK_CATEGORY = "object";
 
 /**
- * Strip the seed-template boilerplate so the noun composes inside the
- * wrapper sentence and emits a grammatical indefinite article:
- *   - "A arc floor lamp suitable for interior design placement." → "an arc floor lamp"
- *   - "A cactus suitable for interior design placement."         → "a cactus"
- *   - "A hourglass side table suitable for …"                    → "an hourglass side table"
- *   - "A pendant" (operator override, no suffix)                 → "a pendant"
- */
-export function normalizeInspirationNoun(raw: string): string {
-  // The seed-template " ... suitable for interior design placement."
-  // suffix is identical across all 800 manifest rows and adds no
-  // useful signal — it dilutes the noun for Flux Fill. Anchored to
-  // end-of-string so a real prompt that happens to contain the phrase
-  // mid-sentence ("lamp suitable for outdoor use") is unaffected.
-  const stripped = raw
-    .replace(/\s+suitable\s+for\s+interior\s+design\s+placement\.?\s*$/i, "")
-    .replace(/\.\s*$/, "")
-    .trim();
-
-  const articleMatch = stripped.match(/^(An?)\s+(.+)$/);
-  if (articleMatch) {
-    const [, , rest = ""] = articleMatch;
-    return `${startsWithVowelSound(rest) ? "an" : "a"} ${rest}`;
-  }
-  return stripped;
-}
-
-/**
- * Strip the leading indefinite article so the noun composes inside a
- * sentence that supplies its own determiner. Example:
- *   "a cactus"           → "cactus"
- *   "an arc floor lamp"  → "arc floor lamp"
- *   "pendant"            → "pendant"  (no article to strip)
+ * Build the v4.0 instructional prompt for Nano Banana multi-image edit.
  *
- * The mode-aware wrappers below open with "Completely replace the
- * masked region with a cactus." / "Add a cactus inside …" — the
- * article inside those sentences is supplied by the wrapper, not by
- * the normalized noun, so we strip whatever `normalizeInspirationNoun`
- * emitted to avoid "with a a cactus".
+ * The returned `prompt` string references three image slots:
+ *   - image 1: the room photo (the canonical input being edited)
+ *   - image 2: the inspiration reference photo (the visual identity of
+ *              the object the user picked)
+ *   - image 3: the brush mask (white = modify, black = preserve)
+ *
+ * The pipeline layer assembles the actual provider call with
+ * `image_input: [room, inspiration, mask]` in this exact order. If the
+ * order ever drifts on the call site, the prompt's "image 2" / "image 3"
+ * references become misleading — pin the assembly order in the
+ * pipeline's tests, not here.
  */
-function stripLeadingArticle(noun: string): string {
-  return noun.replace(/^(an?)\s+/i, "");
-}
-
-/**
- * Pick the correct indefinite article for a bare noun phrase. Shares
- * the `startsWithVowelSound` heuristic with `normalizeInspirationNoun`
- * so the mode wrappers stay grammatical for accented and silent-h nouns
- * (e.g. "an étagère", "an hourglass side table") without two copies of
- * the vowel-set + silent-h list drifting apart silently.
- */
-function articleFor(bareNoun: string): "a" | "an" {
-  return startsWithVowelSound(bareNoun) ? "an" : "a";
-}
-
 export function buildReplaceAddObjectPrompt(
   params: ReplaceAddObjectParams,
 ): PromptResult {
-  const normalized = normalizeInspirationNoun(params.prompt);
-  const bareNoun = stripLeadingArticle(normalized);
-  const article = articleFor(bareNoun);
+  // `inspirationTitle` is populated by `preEnqueueValidate` from the
+  // Firestore doc's `title.en` (with a `title.tr` → `doc.prompt` fallback
+  // chain). Treated as optional in the wire schema because iOS clients
+  // do not send it. See the defensive default rationale above.
+  const category = params.inspirationTitle?.trim() || FALLBACK_CATEGORY;
 
-  let prompt: string;
-  let guidanceScale: number;
-
-  if (params.mode === "replace") {
-    // Replace wrapper: "in place of the object" keeps the swap
-    // intent without overstating commitment. "Scene" (not "room")
-    // because outdoor categories (patio / garden / outdoor seating)
-    // exist in the catalog. No object-emphasis tokens
-    // ("prominently visible", "sharp focus") — they overcame scene
-    // blending and produced sticker output.
-    prompt =
-      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} in place of the object inside the masked region, ` +
-      `matching the scene's lighting direction, perspective, and material palette. ` +
-      `Photorealistic, integrated with the surrounding furniture and surfaces.`;
-    guidanceScale = REPLACE_GUIDANCE;
-  } else {
-    // Add wrapper (v2.2) — neutral spatial anchor:
-    //   "inside the masked region" (no surface qualifier)
-    //     The v2.1 wording "placed on the floor inside the masked
-    //     region" was semantically wrong for ~100 of 800 catalog
-    //     items (wallSconces, ceilingLights, wallArt, pendantLights,
-    //     mirrors, curtains). Telling Flux Fill to place a pendant
-    //     light "on the floor" produced anatomically wrong outputs.
-    //     The neutral anchor lets the mask shape + scene context
-    //     dictate placement; the builder has no per-category
-    //     metadata so it cannot pick the right surface itself.
-    //   "matching the scene's lighting direction, depth of field,
-    //    and color palette so it blends naturally with the
-    //    surrounding furniture and surfaces"
-    //     three integration anchors carried forward from v2.1.
-    //     "Scene" (not "room") for outdoor category support.
-    prompt =
-      `${article.charAt(0).toUpperCase()}${article.slice(1)} ${bareNoun} inside the masked region, ` +
-      `matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. ` +
-      `Photorealistic.`;
-    guidanceScale = ADD_GUIDANCE;
-  }
+  // `mode` is `"replace" | "add"` — Zod's `.default("replace")` is
+  // applied during parse, so the inferred output type strips `undefined`
+  // even though the input schema marks the field optional. Switch on
+  // the narrowed value; the exhaustiveness guard below catches a future
+  // enum addition at compile time.
+  const prompt = (() => {
+    switch (params.mode) {
+      case "replace":
+        return buildReplaceInstruction(category);
+      case "add":
+        return buildAddInstruction(category);
+    }
+    const _exhaustive: never = params.mode;
+    throw new Error(
+      `unreachable replaceAddObject mode: ${_exhaustive as string}`,
+    );
+  })();
 
   return {
     prompt,
     positiveAvoidance: "",
-    guidanceScale,
+    guidanceScale: NANO_BANANA_GUIDANCE,
     actionMode: "transform",
     guidanceBand: "faithful",
     promptVersion: PROMPT_VERSION_CURRENT,
   };
+}
+
+/**
+ * Replace mode template. Wording follows Google's "composition" pattern
+ * from the Nano Banana prompting guide:
+ *   "Using image 1 as the base and image 2 as the replacement object
+ *    reference, replace [object] with this new element while keeping
+ *    the rest of the composition intact."
+ *
+ * Diverges from the guide example by adding the explicit mask
+ * reference (image 3) — necessary because the user's brush stroke
+ * is the only signal disambiguating WHICH object to replace when
+ * multiple similar items exist in the scene.
+ */
+function buildReplaceInstruction(category: string): string {
+  // "Edit image 1:" intentionally lacks a "(a room photo)" qualifier.
+  // The catalog includes 80+ outdoor items (outdoorSeating,
+  // outdoorLighting, patio, garden) where image 1 may itself be an
+  // outdoor scene. Indoor-only descriptors contradict the noun for
+  // those categories and were the v3.0 outdoor regression. Gemini
+  // reads the actual image content; the descriptor adds no useful
+  // signal and risks contradiction.
+  return [
+    `Edit image 1: replace the object inside the white region of image 3 (a binary mask, white = modify, black = preserve) with the ${category} shown in image 2.`,
+    `Match image 1's lighting direction, shadow placement, perspective, and physical scale.`,
+    `Keep every pixel outside the white region of image 3 unchanged.`,
+    `Output a photorealistic edit of image 1.`,
+  ].join(" ");
+}
+
+/**
+ * Add mode template. Same three-image structure as Replace, but the
+ * action verb shifts from "replace the object" to "place the
+ * inspiration into the empty region" and adds an explicit shadow
+ * directive — Add mode targets blank wall/floor masks where the
+ * model otherwise defaults to extending surrounding texture.
+ *
+ * No surface-specific anchor ("on the floor", "on the wall"). The
+ * builder has no per-category metadata, so a hardcoded anchor would
+ * be wrong for ~100 of 800 catalog items (wall sconces vs. floor
+ * lamps vs. pendant lights). Phase 2 may revisit this if certain
+ * category clusters consistently surface placement bugs.
+ */
+function buildAddInstruction(category: string): string {
+  // Image-1-relative phrasing throughout — "image 1's perspective"
+  // not "the room's perspective". v3.0 first draft hardcoded indoor-
+  // only tokens here and broke outdoor catalog items. Sibling of the
+  // replace template's identical no-descriptor opening.
+  return [
+    `Edit image 1: place the ${category} shown in image 2 into the white region of image 3 (a binary mask, white = where to place, black = preserve).`,
+    `Cast a natural shadow appropriate to image 1's existing lighting and surfaces.`,
+    `Match image 1's perspective and physical scale.`,
+    `Keep every pixel outside the white region of image 3 unchanged.`,
+    `Output a photorealistic edit of image 1.`,
+  ].join(" ");
 }

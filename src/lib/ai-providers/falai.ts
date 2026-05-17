@@ -39,9 +39,21 @@ export async function callFalAI(
     typeof input.referenceImageUrl === "string" &&
     input.referenceImageUrl.length > 0;
 
+  // `extraImageUrls` is appended after the reference slot. Used by the
+  // Replace & Add Object multi-image-edit pipeline to send a brush mask
+  // as image 3. Gated on `supportsReferenceImage` same as the primary
+  // reference slot — a model without multi-image support has no way to
+  // disambiguate the extras and would silently drop or schema-reject.
+  const extras =
+    capabilities?.supportsReferenceImage === true &&
+    Array.isArray(input.extraImageUrls)
+      ? input.extraImageUrls.filter(
+          (u): u is string => typeof u === "string" && u.length > 0,
+        )
+      : [];
   const imageUrls = hasReference
-    ? [input.imageUrl, input.referenceImageUrl as string]
-    : [input.imageUrl];
+    ? [input.imageUrl, input.referenceImageUrl as string, ...extras]
+    : [input.imageUrl, ...extras];
 
   if (hasReference) {
     // Log every multi-image call so a silent "model ignored image_urls[1]"

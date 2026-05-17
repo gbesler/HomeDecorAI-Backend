@@ -13,7 +13,7 @@ import {
   runRemoval,
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
-import { runPromptInpaint } from "../lib/generation/prompt-inpaint.js";
+import { runMultiImageEdit } from "../lib/generation/multi-image-edit.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -403,69 +403,99 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;
       durationMs = result.durationMs;
-    } else if (mode === "inpaint-with-prompt") {
-      // Replace & Add Object: client mask + inspiration prompt → Flux Fill.
-      // `maskUrl` is a client-uploaded artifact (host-allowlisted by the
-      // controller, same SSRF guard as remove-only). The prompt comes from
-      // `promptResult.prompt` — builder is pass-through over the iOS
-      // inspiration library's authored per-item string, so an empty prompt
-      // means a misconfigured builder, not a user input gap.
+    } else if (mode === "multi-image-edit-with-mask") {
+      // Replace & Add Object (v4.0): client mask + inspiration image →
+      // Nano Banana multi-image instructional edit → composite post-
+      // process. `maskUrl` is a client-uploaded artifact (host-
+      // allowlisted by the controller, same SSRF guard as remove-only).
+      // `inspirationImageUrl` was resolved server-side by
+      // `preEnqueueValidate` (tool-types.ts) from
+      // `objectInspirations/{inspirationId}.imageUrl` — never accepted
+      // from the client body.
       const maskUrl = params["maskUrl"];
       if (typeof maskUrl !== "string" || maskUrl.length === 0) {
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.maskUrl is missing`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.maskUrl is missing`,
+        };
+      }
+      const inspirationImageUrl = params["inspirationImageUrl"];
+      if (
+        typeof inspirationImageUrl !== "string" ||
+        inspirationImageUrl.length === 0
+      ) {
+        // preEnqueueValidate should have populated this from
+        // Firestore. An empty value here means either the tool's
+        // preEnqueueValidate hook is missing from the registry or
+        // the Firestore doc shipped without an imageUrl (which
+        // preEnqueueValidate ALSO 409-rejects today, defense in
+        // depth). Either way, this is a server-side configuration
+        // failure, not a client input issue — log loud and fail
+        // closed.
+        logger.error(
+          {
+            event: "processor.multi_image_edit.inspiration_image_missing",
+            toolType,
+            generationId,
+          },
+          "multi-image-edit-with-mask guard fired — inspirationImageUrl missing from params (preEnqueueValidate should have populated it)",
+        );
+        return {
+          kind: "failed",
+          code: "VALIDATION_FAILED",
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.inspirationImageUrl is missing. This is a server-side tool-registration error, not a client input problem.`,
         };
       }
       if (!promptResult.prompt) {
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but buildPrompt returned empty prompt`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but buildPrompt returned empty prompt`,
         };
       }
       // `mode` is on `CreateReplaceAddObjectBody` with a Zod
       // `.default("replace")`, so any request that survived the
       // controller's Zod parse has `mode` populated. The guard below
-      // is defense-in-depth for a future inpaint-with-prompt tool
-      // whose schema lacks `mode` — its toolParams would route into
-      // this branch without the field, and silently defaulting here
-      // would mask the misconfiguration.
+      // is defense-in-depth for a future multi-image-edit-with-mask
+      // tool whose schema lacks `mode` — its toolParams would route
+      // into this branch without the field, and silently defaulting
+      // here would mask the misconfiguration.
       //
       // The code is `VALIDATION_FAILED` only because it is the
       // closest member of `GenerationErrorCode` — semantically this
-      // is a tool-registration error, NOT a client-input error. The
-      // distinct event name on the log line below
-      // (`processor.inpaint.mode_guard_fired`) is what ops alerting
-      // should key on to separate this from genuine client-input
-      // rejections. Adding a dedicated `INTERNAL_CONFIG_ERROR`
-      // member would be the cleaner expression but is a cross-
-      // cutting change (backend types + iOS mapping) that should be
-      // batched with other taxonomy work.
+      // is a tool-registration error, NOT a client-input error.
+      // Adding a dedicated `INTERNAL_CONFIG_ERROR` member would be
+      // the cleaner expression but is a cross-cutting change
+      // (backend types + iOS mapping) that should be batched with
+      // other taxonomy work.
       const requestMode = params["mode"];
       if (requestMode !== "replace" && requestMode !== "add") {
         logger.error(
           {
-            event: "processor.inpaint.mode_guard_fired",
+            event: "processor.multi_image_edit.mode_guard_fired",
             toolType,
             generationId,
-            requestMode: requestMode === undefined ? "<missing>" : JSON.stringify(requestMode),
+            requestMode:
+              requestMode === undefined
+                ? "<missing>"
+                : JSON.stringify(requestMode),
           },
-          "inpaint-with-prompt mode guard fired — possible tool misconfiguration",
+          "multi-image-edit-with-mask mode guard fired — possible tool misconfiguration",
         );
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
         };
       }
-      const result = await runPromptInpaint({
+      const result = await runMultiImageEdit({
         imageUrl: inputImageUrl,
+        inspirationImageUrl,
         maskUrl,
         prompt: promptResult.prompt,
-        guidanceScale: promptResult.guidanceScale,
         mode: requestMode,
+        models: tool.models,
         userId,
         generationId,
       });

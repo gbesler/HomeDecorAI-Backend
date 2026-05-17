@@ -135,17 +135,34 @@ export interface ToolTypeConfig<
    * - `"remove-only"`:         LaMa with a caller-supplied mask URL.
    *                            Expects `maskUrl` in toolParams; no SAM call.
    *                            `prompt` is ignored (LaMa takes no prompt).
-   * - `"inpaint-with-prompt"`: Flux Fill with a caller-supplied mask URL
-   *                            and a prompt. Generates NEW content inside
-   *                            the masked region (Replace & Add Object).
-   *                            Distinct from `remove-only`: LaMa extends
-   *                            surroundings, Flux Fill synthesizes.
+   * - `"multi-image-edit-with-mask"`:
+   *                            Multi-image instructional edit with a
+   *                            caller-supplied mask URL, used by the
+   *                            Replace & Add Object tool on top of Nano
+   *                            Banana (`google/nano-banana`). The
+   *                            inspiration's reference photo is sent as
+   *                            image 2 and the brush mask as image 3
+   *                            via the provider adapters' multi-image
+   *                            array. A composite post-process
+   *                            (compositeMaskedResult) preserves
+   *                            outside-mask pixels against the original.
+   *                            Replaced the `"inpaint-with-prompt"` mode
+   *                            (Flux Fill caption-fill) as of v4.0.
+   *                            Model slugs are read from the tool's
+   *                            `models` registry field — NOT env —
+   *                            because this mode rides the `edit` role.
    *
-   * Model slugs are sourced from env (`REPLICATE_SEGMENTATION_MODEL`,
-   * `REPLICATE_REMOVAL_MODEL`, `REPLICATE_INPAINT_MODEL`) so new pipeline
-   * tools do not duplicate them in every registry entry.
+   * Model slugs are sourced from env for the segment/remove roles
+   * (`REPLICATE_SEGMENTATION_MODEL`, `REPLICATE_REMOVAL_MODEL`). The
+   * `edit` and `multi-image-edit-with-mask` modes read directly from
+   * the registry entry's `models` field so multi-image tools can
+   * pin their provider choice independently of other edit tools.
    */
-  mode?: "edit" | "segment-remove" | "remove-only" | "inpaint-with-prompt";
+  mode?:
+    | "edit"
+    | "segment-remove"
+    | "remove-only"
+    | "multi-image-edit-with-mask";
   /** AI provider model IDs for the router. Consumed only when mode is "edit". */
   models: {
     replicate: `${string}/${string}`;
@@ -953,7 +970,25 @@ const replaceAddObjectBodyJsonSchema = {
       type: "string" as const,
       enum: ["replace", "add"] as const,
       description:
-        "Optional during the rollout window — defaults to \"replace\" server-side when absent so older iOS clients that pre-date the mode-aware split continue to work. Recommended explicit value for non-UI callers: \"replace\" if the painted region contains an existing object, \"add\" for blank wall/floor. User intent for the masked region: \"replace\" = an existing object inside the mask should be removed and supplanted; \"add\" = the masked area is empty and the object should be placed into it. Drives the prompt wording (\"Completely replace …\" vs \"Add … inside the empty masked region\"), the mask dilation (replace: 10px to break the silhouette, add: 8px), and the Flux Fill guidance scale (replace: 75, add: 70). Without this signal Flux Fill biases toward extending the surrounding context, which is the failure mode this field exists to prevent.",
+        "Optional during the rollout window — defaults to \"replace\" server-side when absent so older iOS clients that pre-date the mode-aware split continue to work. User intent for the masked region: \"replace\" = an existing object inside the mask should be removed and supplanted by the inspiration item; \"add\" = the masked area is empty and the inspiration item should be placed into it. Drives which instructional prompt template (Replace vs. Add) the v4.0 builder emits.",
+    },
+    // Server-internal fields populated by `preEnqueueValidate` (see
+    // registry entry below). Declared here so the JSON schema published
+    // to Swagger documents the wire-level shape, but iOS clients do not
+    // set them and any client-supplied value is overwritten by the
+    // Firestore lookup. Same pattern as the `prompt` / `categoryId`
+    // server substitution.
+    inspirationImageUrl: {
+      type: "string" as const,
+      format: "uri",
+      description:
+        "Server-resolved URL of the inspiration item's reference photo. Populated from `objectInspirations/{inspirationId}.imageUrl`; client-supplied values are ignored.",
+    },
+    inspirationTitle: {
+      type: "string" as const,
+      maxLength: 200,
+      description:
+        "Server-resolved English title of the inspiration item (from `objectInspirations/{inspirationId}.title.en`). Used as the noun phrase in the v4.0 instructional prompt. Client-supplied values are ignored.",
     },
     language: {
       type: "string" as const,
@@ -1347,22 +1382,33 @@ export const TOOL_TYPES = {
     toolKey: "replaceAddObject",
     routePath: "/replace-add-object",
     rateLimitKey: "replaceAddObject",
-    // Inpaint-with-prompt pipeline: client supplies the brush mask + a
-    // prompt from the curated inspiration library, Flux Fill synthesizes
-    // new content inside the masked region. No SAM call. fal.ai
-    // `flux-pro/v1/fill` is the fallback. `models` fields are decorative
-    // (router reads REPLICATE_INPAINT_MODEL / FALAI_INPAINT_MODEL from env)
-    // but kept so the registry shape stays uniform.
-    mode: "inpaint-with-prompt",
+    // Multi-image instructional edit pipeline (v4.0). Replaces the
+    // earlier Flux Fill caption-fill path. The client supplies the
+    // brush mask; `preEnqueueValidate` resolves the inspiration's
+    // reference image and title from Firestore. The processor's
+    // `multi-image-edit-with-mask` branch assembles a 3-image array
+    // (room, inspiration, mask) and feeds it to Nano Banana
+    // (`google/nano-banana`) with an instructional prompt. A
+    // post-process composite step (compositeMaskedResult) enforces
+    // outside-mask pixel preservation against the original room
+    // image. Replicate primary, fal.ai (`fal-ai/flux-2/edit`) fallback
+    // — both are multi-image-edit-capable per `capabilities.ts`.
+    //
+    // `models` fields are NOT decorative for this mode — the
+    // `multi-image-edit-with-mask` branch reads them directly off the
+    // registry entry (unlike segment/remove which read env vars).
+    // Operators that want to flip between Nano Banana and a future
+    // model do so by editing the registry entry, not env.
+    mode: "multi-image-edit-with-mask",
     models: {
-      replicate: "prunaai/p-image-edit" as const,
-      falai: "fal-ai/flux-pro/v1/fill",
+      replicate: "google/nano-banana" as const,
+      falai: "fal-ai/flux-2/edit",
     },
     bodySchema: CreateReplaceAddObjectBody,
     bodyJsonSchema: replaceAddObjectBodyJsonSchema,
-    summary: "Enqueue a replace-&-add-object inpainting",
+    summary: "Enqueue a replace-&-add-object multi-image edit",
     description:
-      "Inpaints the region indicated by a client-drawn mask with new content described by the prompt. Distinct from Remove Objects (LaMa, no prompt, surface extension): this tool uses Flux Fill to synthesize fresh content inside the mask — Replace an existing object with something else, or Add an object into empty space. The mask PNG must already be uploaded (white = replace, black = preserve) and match the image dimensions. `categoryId` + `inspirationId` are analytics keys from the 40×20 inspiration library. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
+      "Edits the region indicated by a client-drawn mask with the inspiration object the user picked, using a multi-image instructional model (Nano Banana / Gemini 2.5 Flash Image). Distinct from Remove Objects (LaMa, no prompt, surface extension): this tool generates a NEW object inside the masked region matching the inspiration's visual identity. The mask PNG must already be uploaded (white = modify, black = preserve) and match the image dimensions. `categoryId` + `inspirationId` are analytics keys from the 40×20 inspiration library; the server resolves the inspiration's reference photo from Firestore and feeds it to the model as image 2. Outside-mask pixels are preserved against the original by a backend composite step. Creates a generation record and enqueues an async Cloud Tasks job; returns 202 with a generationId.",
     buildPrompt: buildReplaceAddObjectPrompt,
     toToolParams: (params) => ({ ...params }),
     fromToolParams: (raw) => CreateReplaceAddObjectBody.parse(raw),
@@ -1405,15 +1451,45 @@ export const TOOL_TYPES = {
             "Selected inspiration is no longer available. Please pick another.",
         };
       }
-      // Substitute server-authoritative prompt + categoryId so the
-      // generation runs against curated content even if the client body
-      // tried to ride along with stale or hand-crafted values.
+      // Defense against a data-quality regression: an inspiration that
+      // somehow shipped to Firestore without an `imageUrl` cannot drive
+      // the v4.0 multi-image pipeline (the model needs the reference
+      // photo to know which specific item the user picked). Treat it as
+      // CONTENT_UNAVAILABLE so the user sees the same wizard-level
+      // remediation as a deactivated inspiration, and surface a
+      // structured log so the operator-side data-quality issue is
+      // visible. Pre-v4.0 this defense was unnecessary because the
+      // pipeline only consumed the prompt string.
+      if (typeof doc.imageUrl !== "string" || doc.imageUrl.length === 0) {
+        return {
+          ok: false,
+          status: 409,
+          code: "CONTENT_UNAVAILABLE",
+          message:
+            "Selected inspiration is missing required content. Please pick another.",
+        };
+      }
+      // Substitute server-authoritative fields so the generation runs
+      // against curated content even if the client body tried to ride
+      // along with stale or hand-crafted values:
+      //   - prompt:               normalized noun string (legacy callers
+      //                           and v3.0 builder still read this)
+      //   - categoryId:           analytics key, must match Firestore
+      //   - inspirationImageUrl:  reference photo URL, consumed by v4.0
+      //                           multi-image pipeline as image 2
+      //   - inspirationTitle:     English title used as the {category}
+      //                           noun phrase in the v4.0 instructional
+      //                           prompt. Falls back to tr → en
+      //                           best-effort if title.en is empty.
+      const fallbackTitle = doc.title.en || doc.title.tr || doc.prompt;
       return {
         ok: true,
         params: {
           ...params,
           prompt: doc.prompt,
           categoryId: doc.categoryId,
+          inspirationImageUrl: doc.imageUrl,
+          inspirationTitle: fallbackTitle,
         },
       };
     },

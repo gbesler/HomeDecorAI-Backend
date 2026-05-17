@@ -2,341 +2,265 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import {
-  buildReplaceAddObjectPrompt,
-  normalizeInspirationNoun,
-} from "./replace-add-object.js";
+import { buildReplaceAddObjectPrompt } from "./replace-add-object.js";
 
-// `mode` and `prompt` are intentionally omitted from this shared
-// fixture: every test in this file provides them explicitly so it
-// exercises one specific branch (mode=replace vs mode=add, seeded
-// noun vs operator-supplied). Moving them into `baseParams` would
-// silently couple every test to one value and erase that intent.
+// `mode` and `inspirationTitle` are intentionally omitted from this
+// shared fixture: every test in this file provides them explicitly so
+// it exercises one specific branch. Moving them into `baseParams`
+// would silently couple every test to one value and erase that intent.
+//
+// `prompt` is still set because zod's parsed `CreateReplaceAddObjectBody`
+// requires it (min 1 char) — but it is unused by the v4.0 builder. The
+// builder reads `inspirationTitle` for the `{category}` noun phrase.
+// `prompt` is preserved on the wire shape for backward compatibility
+// and analytics logging only.
 const baseParams = {
   imageUrl: "https://example.com/room.jpg",
   maskUrl: "https://example.com/mask.png",
+  prompt: "ignored by v4.0 builder",
   categoryId: "plants",
   inspirationId: "plants_14",
+  inspirationImageUrl: "https://example.com/inspiration.jpg",
 } as const;
 
-describe("normalizeInspirationNoun", () => {
-  it("strips seed-template suffix and keeps consonant-initial 'a'", () => {
-    assert.equal(
-      normalizeInspirationNoun(
-        "A cactus suitable for interior design placement.",
-      ),
-      "a cactus",
-    );
-  });
-
-  it("repairs the article before vowel-initial nouns", () => {
-    assert.equal(
-      normalizeInspirationNoun(
-        "A arc floor lamp suitable for interior design placement.",
-      ),
-      "an arc floor lamp",
-    );
-    assert.equal(
-      normalizeInspirationNoun(
-        "A outdoor pillow suitable for interior design placement.",
-      ),
-      "an outdoor pillow",
-    );
-  });
-
-  it("treats silent-h prefixes as vowel-sound", () => {
-    // hourglass is the only silent-h noun in the current seed catalog;
-    // honest/heir/honor/herb are guarded defensively. The heuristic
-    // matches the prefix without word boundary, so compounds count.
-    assert.equal(
-      normalizeInspirationNoun(
-        "A hourglass side table suitable for interior design placement.",
-      ),
-      "an hourglass side table",
-    );
-    assert.equal(
-      normalizeInspirationNoun(
-        "A heirloom dresser suitable for interior design placement.",
-      ),
-      "an heirloom dresser",
-    );
-  });
-
-  it("uses 'an' before accented-vowel-initial nouns", () => {
-    assert.equal(
-      normalizeInspirationNoun(
-        "A étagère suitable for interior design placement.",
-      ),
-      "an étagère",
-    );
-  });
-
-  it("keeps 'a' for consonant-initial nouns even when later letters are accented", () => {
-    assert.equal(
-      normalizeInspirationNoun(
-        "A bouclé sofa suitable for interior design placement.",
-      ),
-      "a bouclé sofa",
-    );
-    assert.equal(
-      normalizeInspirationNoun(
-        "A café curtains suitable for interior design placement.",
-      ),
-      "a café curtains",
-    );
-  });
-
-  it("keeps 'a' for aspirated-h nouns", () => {
-    assert.equal(
-      normalizeInspirationNoun(
-        "A hammock suitable for interior design placement.",
-      ),
-      "a hammock",
-    );
-    assert.equal(
-      normalizeInspirationNoun(
-        "A herman miller chair suitable for interior design placement.",
-      ),
-      "a herman miller chair",
-    );
-  });
-
-  it("passes operator-supplied prompts that lack the seed suffix", () => {
-    assert.equal(normalizeInspirationNoun("A pendant"), "a pendant");
-    assert.equal(normalizeInspirationNoun("pendant"), "pendant");
-    assert.equal(
-      normalizeInspirationNoun("An ottoman"),
-      "an ottoman",
-    );
-  });
-
-  it("does not strip 'suitable for' that appears mid-sentence", () => {
-    assert.equal(
-      normalizeInspirationNoun("A lamp suitable for outdoor use."),
-      "a lamp suitable for outdoor use",
-    );
-  });
-});
-
-describe("buildReplaceAddObjectPrompt — replace mode", () => {
-  it("emits the v2.2 replace wrapper with the seeded cactus prompt", () => {
+describe("buildReplaceAddObjectPrompt — v4.0 metadata", () => {
+  it("stamps the v4.0 promptVersion", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
-      prompt: "A cactus suitable for interior design placement.",
+      inspirationTitle: "Cactus",
     });
     assert.equal(
-      result.prompt,
-      "A cactus in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette. Photorealistic, integrated with the surrounding furniture and surfaces.",
+      result.promptVersion,
+      "replaceAddObject/v4.0-nano-banana-instructional",
     );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
-    // Replace guidance — Pro's BFL default (30). v2.0's 38 over-shot
-    // and produced sticker output; v2.1 lets the model lean on scene
-    // pixels for integration cues. Raise to 60 if reverting to
-    // flux-fill-dev.
-    assert.equal(result.guidanceScale, 30);
+  });
+
+  it("ships guidance=0 (sentinel — Nano Banana has no CFG knob)", () => {
+    // Nano Banana's capability entry sets supportsGuidanceScale=false,
+    // and the Replicate adapter drops the field when the capability
+    // matrix says so. 0 here is the documented sentinel meaning "no
+    // caller override required" — matches `callerGuidance > 0` logic
+    // in src/lib/ai-providers/replicate.ts.
+    const replace = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: "Cactus",
+    });
+    const add = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "add",
+      inspirationTitle: "Cactus",
+    });
+    assert.equal(replace.guidanceScale, 0);
+    assert.equal(add.guidanceScale, 0);
+  });
+
+  it("ships actionMode=transform, guidanceBand=faithful, empty positiveAvoidance", () => {
+    // These three fields exist on PromptResult for telemetry / shared
+    // metadata across tools. v4.0 preserves the v3.0 values so the
+    // analytics-side cross-version comparison stays meaningful.
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: "Cactus",
+    });
     assert.equal(result.actionMode, "transform");
     assert.equal(result.guidanceBand, "faithful");
     assert.equal(result.positiveAvoidance, "");
   });
+});
 
-  it("uses 'An' inside the wrapper for vowel-initial nouns", () => {
+describe("buildReplaceAddObjectPrompt — replace mode", () => {
+  it("interpolates the inspirationTitle as the {category} noun", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
-      prompt: "A arc floor lamp suitable for interior design placement.",
+      inspirationTitle: "Sectional Sofa",
     });
     assert.match(
       result.prompt,
-      /^An arc floor lamp in place of the object inside the masked region,/,
+      /replace the object inside the white region of image 3 .* with the Sectional Sofa shown in image 2/i,
     );
   });
 
-  it("uses 'An' inside the wrapper for silent-h nouns", () => {
+  it("references image 1, image 2, and image 3 explicitly", () => {
+    // Structural guard: the pipeline's `image_input` assembly order
+    // (room, inspiration, mask) is mirrored by these three references
+    // in the prompt. If the builder ever drops one, the model loses a
+    // signal it needs to disambiguate the three inputs.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
-      prompt: "A hourglass side table suitable for interior design placement.",
+      inspirationTitle: "Cactus",
+    });
+    assert.match(result.prompt, /\bimage 1\b/);
+    assert.match(result.prompt, /\bimage 2\b/);
+    assert.match(result.prompt, /\bimage 3\b/);
+  });
+
+  it("includes the mask-preservation clause", () => {
+    // Best-effort signal to Gemini. The composite post-process step
+    // (src/lib/generation/composite-masked-result.ts) is what actually
+    // enforces outside-mask preservation, but the prompt clause
+    // measurably reduces the diff Gemini introduces outside the mask
+    // — fewer pixels for the composite to clobber, faster blends.
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: "Cactus",
     });
     assert.match(
       result.prompt,
-      /^An hourglass side table in place of the object inside the masked region,/,
+      /keep every pixel outside the white region of image 3 unchanged/i,
     );
   });
 
-  it("handles operator-supplied bare nouns without doubling the article", () => {
+  it("includes a 'photorealistic' output directive", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
-      prompt: "pendant",
+      inspirationTitle: "Cactus",
     });
-    assert.match(
-      result.prompt,
-      /^A pendant in place of the object inside the masked region,/,
-    );
+    assert.match(result.prompt, /photorealistic/i);
   });
 
-  it("handles pre-articled operator-supplied nouns (no seed suffix)", () => {
-    // Guards the operator override path for replace mode: a prompt
-    // arriving without the seed boilerplate but already carrying its
-    // own article ("An ottoman") must survive the
-    // normalize → strip → re-article pipeline without losing the
-    // vowel-sound determination.
+  it("documents image 3 as a binary mask (white = modify, black = preserve)", () => {
+    // Mask convention echo. Repeated here AND in the prompt because
+    // Gemini sometimes ignores conventions it has to infer from the
+    // image alone — surfacing the convention in the instruction
+    // measurably improves mask interpretation.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
-      prompt: "An ottoman",
+      inspirationTitle: "Cactus",
     });
     assert.match(
       result.prompt,
-      /^An ottoman in place of the object inside the masked region,/,
-    );
-  });
-
-  it("does not strip the leading letter of a bare vowel-initial noun", () => {
-    // Guards `stripLeadingArticle` against accidentally matching the
-    // 'a' in "armchair" as the indefinite article. Without the `\s+`
-    // requirement in the strip regex, the function would return
-    // "rmchair" and the wrapper would render
-    // "An rmchair in place …" — visibly broken but only on bare
-    // vowel-initial nouns that no test was exercising.
-    const result = buildReplaceAddObjectPrompt({
-      ...baseParams,
-      mode: "replace",
-      prompt: "armchair",
-    });
-    assert.match(
-      result.prompt,
-      /^An armchair in place of the object inside the masked region,/,
+      /binary mask, white = modify, black = preserve/i,
     );
   });
 });
 
 describe("buildReplaceAddObjectPrompt — add mode", () => {
-  it("emits the v2.2 add wrapper with the seeded cactus prompt (neutral spatial anchor)", () => {
+  it("uses 'place … into' verb framing instead of 'replace … with'", () => {
+    // Add mode targets blank wall/floor masks. Reusing the replace
+    // verb here would push the model toward looking for an object
+    // inside the mask to swap out — exactly the v3.0 add bug where
+    // empty masks returned unchanged input or surrounding-texture
+    // extension. The verb shift is the load-bearing semantic
+    // difference between the two templates.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
-      prompt: "A cactus suitable for interior design placement.",
-    });
-    assert.equal(
-      result.prompt,
-      "A cactus inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces. Photorealistic.",
-    );
-    assert.equal(result.promptVersion, "replaceAddObject/v2.2-neutral-anchor");
-    // Add guidance — Pro's BFL default (~30). 28 maximizes scene
-    // blending on blank-area placements without over-anchoring the
-    // prompt. Re-tune if REPLICATE_INPAINT_MODEL reverts to Dev.
-    assert.equal(result.guidanceScale, 28);
-    // Pin the rest of the PromptResult contract for the add branch
-    // (the replace-branch canonical test pins these too). A future
-    // refactor that moved these fields into the branches must not
-    // silently change them on the add path.
-    assert.equal(result.actionMode, "transform");
-    assert.equal(result.guidanceBand, "faithful");
-    assert.equal(result.positiveAvoidance, "");
-  });
-
-  it("uses 'An' inside the add wrapper for vowel-initial nouns", () => {
-    const result = buildReplaceAddObjectPrompt({
-      ...baseParams,
-      mode: "add",
-      prompt: "An ottoman",
+      inspirationTitle: "Rattan Pendant",
     });
     assert.match(
       result.prompt,
-      /^An ottoman inside the masked region,/,
+      /place the Rattan Pendant shown in image 2 into the white region of image 3/i,
     );
+    assert.doesNotMatch(result.prompt, /replace the object/i);
   });
 
-  it("handles operator-supplied bare nouns without doubling the article", () => {
-    // Symmetry with the replace-branch bare-noun test. The
-    // normalize → strip → re-article pipeline runs identically for
-    // both modes, but exercising it from inside the add wrapper
-    // pins the contract that bare nouns reach the wrapper without
-    // a stray leading article.
+  it("includes an explicit shadow directive", () => {
+    // Add mode regression guard: blank-area placements need an
+    // explicit "cast a shadow" directive because Gemini, like most
+    // diffusion-derived models, treats the painted-on object as
+    // sticker-flat unless told otherwise. Specific to add — replace
+    // mode inherits shadow context from the object being replaced.
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
-      prompt: "pendant",
+      inspirationTitle: "Cactus",
     });
     assert.match(
       result.prompt,
-      /^A pendant inside the masked region,/,
+      /cast a natural shadow appropriate to image 1's existing lighting/i,
     );
   });
 
-  it("does not strip the leading letter of a bare vowel-initial noun", () => {
+  it("references image 1, image 2, and image 3 explicitly", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
-      prompt: "armchair",
+      inspirationTitle: "Cactus",
+    });
+    assert.match(result.prompt, /\bimage 1\b/);
+    assert.match(result.prompt, /\bimage 2\b/);
+    assert.match(result.prompt, /\bimage 3\b/);
+  });
+
+  it("includes the mask-preservation clause", () => {
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "add",
+      inspirationTitle: "Cactus",
     });
     assert.match(
       result.prompt,
-      /^An armchair inside the masked region,/,
+      /keep every pixel outside the white region of image 3 unchanged/i,
     );
   });
+});
 
-  it("uses neutral spatial anchor (no floor mention) for wall/ceiling-mounted categories", () => {
-    // Guards the v2.2 regression fix: v2.1 hardcoded "placed on the
-    // floor" for all categories, which produced anatomically wrong
-    // outputs for wallSconces / ceilingLights / wallArt / pendantLights
-    // / mirrors / curtains (~100 of 800 catalog items). v2.2 uses a
-    // neutral "inside the masked region" anchor that is correct for
-    // every category. This test pins that no future re-edit
-    // accidentally reintroduces a surface qualifier.
-    for (const item of [
-      { categoryId: "pendantLights", id: "pendantLights_1", prompt: "A rattan pendant suitable for interior design placement." },
-      { categoryId: "wallArt", id: "wallArt_1", prompt: "A framed print suitable for interior design placement." },
-      { categoryId: "ceilingLights", id: "ceilingLights_1", prompt: "A flush mount ceiling light suitable for interior design placement." },
-    ]) {
-      const result = buildReplaceAddObjectPrompt({
-        ...baseParams,
-        mode: "add",
-        categoryId: item.categoryId,
-        inspirationId: item.id,
-        prompt: item.prompt,
-      });
-      assert.doesNotMatch(
-        result.prompt,
-        /on the floor|on the wall|on the ceiling|mounted/i,
-        `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 100)}"`,
-      );
-    }
+describe("buildReplaceAddObjectPrompt — fallback when title is missing", () => {
+  it("falls back to 'object' when inspirationTitle is undefined", () => {
+    // Should be unreachable in production — preEnqueueValidate
+    // 409-rejects any inspiration with an empty
+    // `title.en || title.tr || prompt` chain. But the wire schema
+    // marks the field optional (iOS doesn't send it), so the type
+    // system can't enforce the populated invariant. Pin the
+    // defensive default so a stray code path can't emit
+    // `… with the undefined shown in image 2`.
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: undefined,
+    });
+    assert.match(result.prompt, /with the object shown in image 2/i);
+    assert.doesNotMatch(result.prompt, /undefined/);
+  });
+
+  it("falls back to 'object' when inspirationTitle is empty / whitespace", () => {
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: "   ",
+    });
+    assert.match(result.prompt, /with the object shown in image 2/i);
   });
 });
 
 describe("manifest contract", () => {
   // One-shot sweep: pins the contract between the manifest and the
-  // builder. Adding a manifest row whose `prompt` breaks our
-  // normalizer (new boilerplate suffix, leading garbage, etc.) trips
-  // this test before it ships to Firestore.
+  // builder. Adding a manifest row whose `title.en` somehow breaks
+  // the instructional template (control characters, runaway length,
+  // empty post-trim) trips this test before it ships to Firestore.
   const manifestPath = new URL(
     "../../../../scripts/manifests/object-inspirations.full.json",
     import.meta.url,
   );
   const data = JSON.parse(readFileSync(manifestPath, "utf8")) as {
-    items: Array<{ id: string; categoryId: string; prompt: string }>;
+    items: Array<{
+      id: string;
+      categoryId: string;
+      title: { en: string; tr: string };
+      prompt: string;
+    }>;
   };
 
-  // v2.1 integration-focused shape regexes. Each branch must:
-  //   - open with a capitalized article ("A" or "An") immediately
-  //     followed by the noun (no leading verb token — v2.1 dropped
-  //     "Add" / "Completely replace" because Flux Fill's inpaint
-  //     semantics already imply placement)
-  //   - emit a grammatical article via the SILENT_H_PREFIX + Latin-
-  //     vowel heuristic
-  //   - include the per-mode integration anchors
-  // `\p{Ll}` matches any lowercase letter (including accented forms
-  // like `é` in `étagère`) so the regex passes the full seed including
-  // non-ASCII rows.
-  const VALID_REPLACE_SHAPE =
-    /^(A|An) \p{Ll}[^,]+ in place of the object inside the masked region, matching the scene's lighting direction, perspective, and material palette\. Photorealistic, integrated with the surrounding furniture and surfaces\.$/u;
-  const VALID_ADD_SHAPE =
-    /^(A|An) \p{Ll}[^,]+ inside the masked region, matching the scene's lighting direction, depth of field, and color palette so it blends naturally with the surrounding furniture and surfaces\. Photorealistic\.$/u;
+  // The 512-token cap from capabilities.ts for `google/nano-banana`.
+  // The instructional templates are ~60 words long (~100 tokens),
+  // so a passing sweep with hundreds of titles confirms the budget
+  // is comfortable. Approximation: 1 token ≈ 4 chars (conservative
+  // for English; Gemini's BPE is closer to 1:3.5 but 4 keeps us
+  // safe). The check is on character count to avoid bringing in a
+  // tokenizer dependency for the test runner.
+  const MAX_PROMPT_TOKENS = 512;
+  const APPROX_CHARS_PER_TOKEN = 4;
+  const PROMPT_CHAR_BUDGET = MAX_PROMPT_TOKENS * APPROX_CHARS_PER_TOKEN;
 
-  it("every seeded inspiration produces a v2.2 replace prompt of the expected shape", () => {
+  it("every seeded inspiration produces a valid replace prompt under the token budget", () => {
     assert.ok(data.items.length > 0, "manifest must contain items");
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
@@ -344,69 +268,139 @@ describe("manifest contract", () => {
         mode: "replace",
         categoryId: item.categoryId,
         inspirationId: item.id,
-        prompt: item.prompt,
+        inspirationTitle: item.title.en,
       });
       assert.match(
         result.prompt,
-        VALID_REPLACE_SHAPE,
-        `${item.id} produced malformed replace prompt: ${result.prompt}`,
+        /\bimage 1\b.*\bimage 2\b.*\bimage 3\b/s,
+        `${item.id} replace prompt missing image references: ${result.prompt.slice(0, 120)}`,
+      );
+      assert.ok(
+        result.prompt.length < PROMPT_CHAR_BUDGET,
+        `${item.id} replace prompt over budget (${result.prompt.length} chars): ${result.prompt.slice(0, 120)}`,
+      );
+      assert.ok(
+        result.prompt.includes(item.title.en),
+        `${item.id} replace prompt does not interpolate title.en (${item.title.en}): ${result.prompt.slice(0, 120)}`,
       );
     }
   });
 
-  it("every seeded inspiration produces a v2.2 add prompt of the expected shape", () => {
+  it("every seeded inspiration produces a valid add prompt under the token budget", () => {
     for (const item of data.items) {
       const result = buildReplaceAddObjectPrompt({
         ...baseParams,
         mode: "add",
         categoryId: item.categoryId,
         inspirationId: item.id,
-        prompt: item.prompt,
+        inspirationTitle: item.title.en,
       });
       assert.match(
         result.prompt,
-        VALID_ADD_SHAPE,
-        `${item.id} produced malformed add prompt: ${result.prompt}`,
+        /\bimage 1\b.*\bimage 2\b.*\bimage 3\b/s,
+        `${item.id} add prompt missing image references: ${result.prompt.slice(0, 120)}`,
+      );
+      assert.ok(
+        result.prompt.length < PROMPT_CHAR_BUDGET,
+        `${item.id} add prompt over budget (${result.prompt.length} chars): ${result.prompt.slice(0, 120)}`,
+      );
+      assert.ok(
+        result.prompt.includes(item.title.en),
+        `${item.id} add prompt does not interpolate title.en (${item.title.en}): ${result.prompt.slice(0, 120)}`,
       );
     }
   });
 
-  it("silent-h manifest rows open with 'An ' in both wrappers", () => {
-    // Guards against deleting the SILENT_H_PREFIX branch. Without it,
-    // `hourglass side table` would survive the shape regex above with
-    // "A hourglass…" — grammatically wrong, but visually intact.
-    const silentH = data.items.filter((it) =>
-      /^A\s+(hour|honest|heir|honor|herb)/i.test(it.prompt),
-    );
-    assert.ok(
-      silentH.length > 0,
-      "expected at least one silent-h row in seed (today: hourglass side table)",
-    );
-    for (const item of silentH) {
+  it("never hardcodes a surface-specific anchor (regression guard from v2.2)", () => {
+    // v2.1 originally shipped "placed on the floor" inside the add
+    // wrapper, which was anatomically wrong for ~100 of 800 catalog
+    // items (wall sconces, ceiling lights, wall art, pendants,
+    // mirrors, curtains). v2.2 dropped the surface qualifier; v3.0
+    // and v4.0 keep it absent. The builder has no per-category
+    // metadata, so no future re-edit should accidentally
+    // reintroduce a surface-specific token.
+    for (const item of [
+      {
+        categoryId: "pendantLights",
+        id: "pendantLights_1",
+        title: "Rattan Pendant",
+      },
+      { categoryId: "wallArt", id: "wallArt_1", title: "Framed Print" },
+      {
+        categoryId: "ceilingLights",
+        id: "ceilingLights_1",
+        title: "Flush Mount Ceiling Light",
+      },
+      {
+        categoryId: "wallSconces",
+        id: "wallSconces_1",
+        title: "Brass Wall Sconce",
+      },
+      { categoryId: "mirrors", id: "mirrors_1", title: "Arched Mirror" },
+      { categoryId: "curtains", id: "curtains_1", title: "Linen Curtain" },
+    ]) {
+      const result = buildReplaceAddObjectPrompt({
+        ...baseParams,
+        mode: "add",
+        categoryId: item.categoryId,
+        inspirationId: item.id,
+        inspirationTitle: item.title,
+      });
+      assert.doesNotMatch(
+        result.prompt,
+        /(?:placed?|hang(?:ing|s)?|mount(?:ed|ing|s)?)\s+on\s+the\s+(?:floor|wall|ceiling)/i,
+        `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 140)}"`,
+      );
+    }
+  });
+
+  it("never hardcodes 'the room' (regression guard from v3.0 outdoor-category bug)", () => {
+    // v3.0's first draft hardcoded "interior photography" and "the
+    // room" in the photography tail. Those tokens directly
+    // contradicted the noun for the 80+ catalog items in
+    // outdoorSeating / outdoorLighting / patio / garden (e.g. "an
+    // outdoor sofa … matching the room"). v3.0 final + v4.0 collapse
+    // to "image 1's lighting / perspective / scale" which is
+    // room-neutral. Pin that no future re-edit reintroduces an
+    // indoor-only token.
+    //
+    // The 'interior' token is allowed in test fixtures and code
+    // comments but must NOT appear in the emitted prompt — this
+    // test reaches into the prompt string itself.
+    for (const item of [
+      {
+        categoryId: "outdoorSeating",
+        id: "outdoorSeating_1",
+        title: "Outdoor Sofa",
+      },
+      {
+        categoryId: "outdoorLighting",
+        id: "outdoorLighting_1",
+        title: "Solar Lantern",
+      },
+      { categoryId: "patio", id: "patio_1", title: "Teak Patio Chair" },
+    ]) {
       const replace = buildReplaceAddObjectPrompt({
         ...baseParams,
         mode: "replace",
         categoryId: item.categoryId,
         inspirationId: item.id,
-        prompt: item.prompt,
+        inspirationTitle: item.title,
       });
-      assert.match(
-        replace.prompt,
-        /^An /,
-        `${item.id}: silent-h replace prompt should start with "An ", got: ${replace.prompt.slice(0, 40)}`,
-      );
       const add = buildReplaceAddObjectPrompt({
         ...baseParams,
         mode: "add",
         categoryId: item.categoryId,
         inspirationId: item.id,
-        prompt: item.prompt,
+        inspirationTitle: item.title,
       });
-      assert.match(
-        add.prompt,
-        /^An /,
-        `${item.id}: silent-h add prompt should start with "An ", got: ${add.prompt.slice(0, 40)}`,
-      );
+      for (const result of [replace, add]) {
+        assert.doesNotMatch(
+          result.prompt,
+          /\bthe room\b/i,
+          `${item.id}: prompt must not hardcode 'the room'; got "${result.prompt.slice(0, 140)}"`,
+        );
+      }
     }
   });
 });

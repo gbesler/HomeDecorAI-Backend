@@ -703,7 +703,29 @@ export const CreateReplaceAddObjectBody = zod.object({
     .optional()
     .default("replace")
     .describe(
-      "User intent for the masked region. `replace` swaps an existing object inside the painted region; `add` places the object into empty space. Optional during the rollout window: missing values default server-side to `\"replace\"` so older iOS clients that pre-date the mode-aware split continue to work. Drives prompt wording, mask dilation, and Flux Fill guidance. Recommended explicit value for non-UI callers: `\"replace\"` if the painted region contains an object, `\"add\"` for blank wall/floor.",
+      "User intent for the masked region. `replace` swaps an existing object inside the painted region; `add` places the object into empty space. Optional during the rollout window: missing values default server-side to `\"replace\"` so older iOS clients that pre-date the mode-aware split continue to work. Drives prompt wording and the multi-image instructional template branch. Recommended explicit value for non-UI callers: `\"replace\"` if the painted region contains an object, `\"add\"` for blank wall/floor.",
+    ),
+  // Hand-edited — NOT produced by orval. Server-internal fields populated
+  // by `preEnqueueValidate` from `objectInspirations/{inspirationId}`. The
+  // fields are accepted as optional in the wire schema so the existing
+  // zod parse + serializer round-trip continues to work; any client-
+  // supplied value is overwritten by the server-authoritative Firestore
+  // lookup before the params reach the generation processor. Same pattern
+  // as the `prompt` / `categoryId` substitution above. iOS clients do not
+  // need to set either field.
+  inspirationImageUrl: zod
+    .string()
+    .url()
+    .optional()
+    .describe(
+      "Server-resolved URL of the inspiration item's reference photo (from `objectInspirations/{id}.imageUrl`). Client-supplied values are ignored — preEnqueueValidate overwrites with the Firestore-authoritative value.",
+    ),
+  inspirationTitle: zod
+    .string()
+    .max(200)
+    .optional()
+    .describe(
+      "Server-resolved English title of the inspiration item (from `objectInspirations/{id}.title.en`). Used as the noun phrase in the v4.0 instructional prompt. Client-supplied values are ignored.",
     ),
   language: zod.enum(["tr", "en"]).optional(),
 });
