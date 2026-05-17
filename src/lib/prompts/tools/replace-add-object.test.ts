@@ -299,6 +299,50 @@ describe("manifest contract", () => {
     }
   });
 
+  it("never hardcodes a surface-specific anchor in the add prompt", () => {
+    // Regression guard inherited from v2.2. v2.1 originally shipped
+    // "placed on the floor" inside the add wrapper, which was
+    // anatomically wrong for ~100 of 800 catalog items (wallSconces,
+    // ceilingLights, wallArt, pendantLights, mirrors, curtains). v2.2
+    // dropped the surface qualifier; v3.0 uses "placed in the room"
+    // as a category-agnostic scene anchor.
+    //
+    // The builder has no per-category metadata, so it cannot pick
+    // floor vs wall vs ceiling itself. This test pins that no future
+    // re-edit accidentally reintroduces a surface-specific token —
+    // independent of the exact prompt version in flight.
+    for (const item of [
+      {
+        categoryId: "pendantLights",
+        id: "pendantLights_1",
+        prompt: "A rattan pendant suitable for interior design placement.",
+      },
+      {
+        categoryId: "wallArt",
+        id: "wallArt_1",
+        prompt: "A framed print suitable for interior design placement.",
+      },
+      {
+        categoryId: "ceilingLights",
+        id: "ceilingLights_1",
+        prompt: "A flush mount ceiling light suitable for interior design placement.",
+      },
+    ]) {
+      const result = buildReplaceAddObjectPrompt({
+        ...baseParams,
+        mode: "add",
+        categoryId: item.categoryId,
+        inspirationId: item.id,
+        prompt: item.prompt,
+      });
+      assert.doesNotMatch(
+        result.prompt,
+        /on the floor|on the wall|on the ceiling|mounted/i,
+        `${item.id}: add prompt must not hardcode a surface-specific anchor; got "${result.prompt.slice(0, 100)}"`,
+      );
+    }
+  });
+
   it("silent-h manifest rows emit 'an ' in both modes", () => {
     // Guards against deleting the SILENT_H_PREFIX branch. Without it,
     // `hourglass side table` would survive normalize as
