@@ -151,8 +151,18 @@ export interface ToolTypeConfig<
     replicate: `${string}/${string}`;
     falai: string;
   };
-  /** Zod body schema (without `language` — the controller factory adds it). */
-  bodySchema: z.ZodType<TParams>;
+  /**
+   * Zod body schema (without `language` — the controller factory adds it).
+   *
+   * The third `Input` type parameter is `unknown` rather than `TParams`
+   * so schemas with `.default()` / `.transform()` (where the parsed
+   * output type differs from the raw input type) satisfy this slot.
+   * `replaceAddObject` uses `mode: zod.enum(...).optional().default("replace")`
+   * to preserve backward compatibility with iOS clients that pre-date
+   * the mode-aware split — the resulting input type allows `mode` to
+   * be absent, but the output type still narrows to `"replace" | "add"`.
+   */
+  bodySchema: z.ZodType<TParams, z.ZodTypeDef, unknown>;
   /** Fastify/OpenAPI body JSON schema for docs. */
   bodyJsonSchema: NonNullable<FastifySchema["body"]>;
   /** Human-readable route summary for Swagger. */
@@ -893,6 +903,16 @@ const removeObjectsBodyJsonSchema = {
 
 const replaceAddObjectBodyJsonSchema = {
   type: "object" as const,
+  // `mode` is intentionally NOT in `required` for one release cycle: any
+  // older iOS binary that shipped before the mode-aware split (TestFlight,
+  // App Store phased rollout, users with auto-update disabled) calls
+  // this endpoint without a `mode` field. Making it required would
+  // 400-reject all of them the moment the backend deploys. The Zod
+  // schema in `schemas/generated/api.ts` defaults missing values to
+  // `"replace"` server-side — that matches the iOS ViewModel default
+  // and reproduces v1.3 behavior for the dominant path (paint over an
+  // existing object). Tighten to required once telemetry confirms
+  // old-client traffic on this endpoint has dropped to ~0.
   required: ["imageUrl", "maskUrl", "prompt", "categoryId", "inspirationId"] as const,
   properties: {
     imageUrl: {
@@ -928,6 +948,12 @@ const replaceAddObjectBodyJsonSchema = {
       maxLength: 64,
       pattern: "^[a-zA-Z0-9_-]+$",
       description: "Inspiration item id (analytics key).",
+    },
+    mode: {
+      type: "string" as const,
+      enum: ["replace", "add"] as const,
+      description:
+        "Optional during the rollout window — defaults to \"replace\" server-side when absent so older iOS clients that pre-date the mode-aware split continue to work. Recommended explicit value for non-UI callers: \"replace\" if the painted region contains an existing object, \"add\" for blank wall/floor. User intent for the masked region: \"replace\" = an existing object inside the mask should be removed and supplanted; \"add\" = the masked area is empty and the object should be placed into it. Drives the prompt wording (\"Completely replace …\" vs \"Add … inside the empty masked region\"), the mask dilation (replace: 10px to break the silhouette, add: 8px), and the Flux Fill guidance scale (replace: 75, add: 70). Without this signal Flux Fill biases toward extending the surrounding context, which is the failure mode this field exists to prevent.",
     },
     language: {
       type: "string" as const,
@@ -1357,6 +1383,17 @@ export const TOOL_TYPES = {
     // substitute the canonical `prompt` from Firestore so a jailbroken /
     // proxy-modified client cannot inject an arbitrary prompt while
     // still passing the curated `inspirationId`.
+    //
+    // `mode` is intentionally NOT substituted here. It represents the
+    // user's stated intent for the painted region ("I painted over an
+    // object" vs "I painted empty space"), which the server cannot
+    // infer authoritatively from the mask alone. A jailbroken client
+    // can mismatch `mode` against the actual mask content (e.g. send
+    // `mode: "add"` while having painted over a sofa), but the worst
+    // outcome is the wrong prompt/dilation/guidance for that single
+    // generation — no security impact, no content-moderation gap. If a
+    // future policy needs to gate `mode` (e.g. limit `"add"` to paid
+    // tiers), this is the correct insertion point.
     preEnqueueValidate: async (params) => {
       const doc = await getActiveObjectInspirationOrNull(params.inspirationId);
       if (doc === null) {
