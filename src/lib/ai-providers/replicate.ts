@@ -617,13 +617,14 @@ export async function callBgRemoveReplicate(
 // ─── Inpaint-refine (Replicate fallback) ───────────────────────────────────
 
 /**
- * Stable Diffusion inpainting refine pass on Replicate. Default slug:
- * `stability-ai/stable-diffusion-inpainting`. Same role as
- * `callInpaintRefineFalAI` — low-strength denoise around dilated mask
- * to blend the pre-composited cutout into the room.
+ * Replicate inpaint refine pass for Replace & Add Object v5.0. Default
+ * slug: `black-forest-labs/flux-fill-pro`. See callInpaintRefineFalAI
+ * docs for why we use Flux Fill (no strength knob) rather than an
+ * actual low-denoise inpaint endpoint.
  *
- * Pins `num_inference_steps: 20` to bound cost; SD inpainting on
- * Replicate runs ~$0.0023 per call at this step count.
+ * The schema mirrors the existing callInpaintReplicate (Flux Fill Pro)
+ * field names — `image`, `mask`, `prompt`. Default guidance defaults to
+ * the model's capability entry (~30 for Pro).
  */
 export async function callInpaintRefineReplicate(
   model: `${string}/${string}`,
@@ -635,14 +636,9 @@ export async function callInpaintRefineReplicate(
     image: input.imageUrl,
     mask: input.maskUrl,
     prompt: input.prompt,
-    num_inference_steps: 20,
-    // SD inpainting takes `prompt_strength` in 0..1 (denoise strength).
-    // Pinned LOW so the model blends edges/lighting without re-imagining
-    // the composited cutout.
-    prompt_strength: 0.35,
   };
   if (input.guidanceScale !== undefined && input.guidanceScale > 0) {
-    replicateInput.guidance_scale = input.guidanceScale;
+    replicateInput.guidance = input.guidanceScale;
   }
 
   const output = (await replicate.run(model, {

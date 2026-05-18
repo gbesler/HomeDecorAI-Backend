@@ -314,12 +314,50 @@ export async function runCropCompositeRefine(
   const refinePrompt = rebuilt.prompt;
 
   const refineStart = Date.now();
-  const refineResult = await callInpaintRefine({
-    imageUrl: preCompositeUrl,
-    maskUrl: normalized.maskUrl,
-    prompt: refinePrompt,
-  });
+  let refineResult: { imageUrl: string; provider: ProviderId } | null = null;
+  let refineError: unknown = null;
+  try {
+    refineResult = await callInpaintRefine({
+      imageUrl: preCompositeUrl,
+      maskUrl: normalized.maskUrl,
+      prompt: refinePrompt,
+    });
+  } catch (err) {
+    refineError = err;
+  }
   const refineDurationMs = Date.now() - refineStart;
+
+  if (refineResult === null) {
+    // Graceful refine skip. Both fal.ai and Replicate refine endpoints
+    // failed — return the pre-composite as the final output. The
+    // spatial accuracy guarantee (the load-bearing reason v5 exists)
+    // is preserved: the user sees the inspiration object pasted at
+    // exactly the painted region. The only thing lost is the
+    // lighting/shadow blend pass, which is polish on top of a
+    // correct result. Cost in this path drops to ~$0.001 (bg-remove
+    // only) since neither refine endpoint billed.
+    logger.warn(
+      {
+        event: "inpaint.refine.skipped",
+        generationId: input.generationId,
+        refineDurationMs,
+        error: refineError instanceof Error ? refineError.message : String(refineError),
+      },
+      "Refine pass failed for both providers — returning pre-composite as final output",
+    );
+    const durationMs = Date.now() - start;
+    return {
+      outputImageUrl: preCompositeUrl,
+      provider: "falai",
+      durationMs,
+      normalizeDurationMs: normalized.durationMs,
+      bgRemoveDurationMs,
+      cropCompositeDurationMs,
+      refineDurationMs,
+      compositeDurationMs: 0,
+    };
+  }
+
   logger.info(
     {
       event: "inpaint.refine.model_completed",
