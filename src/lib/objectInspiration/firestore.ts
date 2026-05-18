@@ -186,6 +186,35 @@ export async function getActiveObjectInspirationOrNull(
   return item.active ? item : null;
 }
 
+/**
+ * Existence check for a batch of category ids — returns the subset that
+ * exists in Firestore. Used by the bulk-seed FK fallback when an item
+ * references a categoryId that wasn't inlined in the submitted
+ * `categories` array (partial-manifest workflow).
+ *
+ * Chunked at 30 to stay under Firestore's `in` query limit. For the
+ * documented design ceiling (40 categories) this is a single round
+ * trip; the chunking only kicks in if a future expansion grows the
+ * catalog past 30 distinct categories per request.
+ */
+export async function getExistingObjectCategoryIds(
+  ids: readonly string[],
+): Promise<Set<string>> {
+  const existing = new Set<string>();
+  if (ids.length === 0) return existing;
+  const chunkSize = 30;
+  const documentId = admin.firestore.FieldPath.documentId();
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    const snap = await categoriesRef()
+      .where(documentId, "in", chunk)
+      .select() // metadata-only, no doc body
+      .get();
+    for (const doc of snap.docs) existing.add(doc.id);
+  }
+  return existing;
+}
+
 // MARK: - Writes
 
 export interface SeedObjectCategoryResult {

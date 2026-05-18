@@ -9,6 +9,7 @@ import {
   parseTitleUpdateRows,
   summarize,
   validateForeignKeys,
+  validateForeignKeysAsync,
   type Manifest,
   type SeedOutcome,
 } from "./seed-helpers.js";
@@ -59,16 +60,28 @@ describe("parseManifestText", () => {
     assert.throws(() => parseManifestText("not json"));
   });
 
-  it("rejects manifest without categories array", () => {
-    assert.throws(() => parseManifestText('{"items":[]}'));
+  it("accepts items-only manifest and defaults categories to []", () => {
+    const m = parseManifestText('{"items":[]}');
+    assert.deepEqual(m.categories, []);
+    assert.deepEqual(m.items, []);
   });
 
-  it("rejects manifest without items array", () => {
-    assert.throws(() => parseManifestText('{"categories":[]}'));
+  it("accepts categories-only manifest and defaults items to []", () => {
+    const m = parseManifestText('{"categories":[]}');
+    assert.deepEqual(m.categories, []);
+    assert.deepEqual(m.items, []);
+  });
+
+  it("rejects manifest without categories or items", () => {
+    assert.throws(() => parseManifestText("{}"));
   });
 
   it("rejects manifest with non-array categories", () => {
     assert.throws(() => parseManifestText('{"categories":{},"items":[]}'));
+  });
+
+  it("rejects manifest with non-array items", () => {
+    assert.throws(() => parseManifestText('{"categories":[],"items":"x"}'));
   });
 
   it("rejects literal null JSON", () => {
@@ -140,6 +153,79 @@ describe("validateForeignKeys", () => {
     const b: ObjectInspirationSeedInput = { ...stubItemRow, id: "b_1", categoryId: "b" };
     const errs = validateForeignKeys([stubCategoryRow], [a, b]);
     assert.equal(errs.length, 2);
+  });
+});
+
+describe("validateForeignKeysAsync", () => {
+  it("returns empty when items reference categories in the payload", async () => {
+    const errs = await validateForeignKeysAsync([stubCategoryRow], [stubItemRow]);
+    assert.deepEqual(errs, []);
+  });
+
+  it("falls back to resolver when categoryId is missing from payload", async () => {
+    const orphan: ObjectInspirationSeedInput = {
+      ...stubItemRow,
+      id: "ghost_1",
+      categoryId: "ghost",
+    };
+    // Resolver says "ghost" exists in Firestore → no FK error.
+    const errs = await validateForeignKeysAsync(
+      [],
+      [orphan],
+      async (ids) => new Set(ids),
+    );
+    assert.deepEqual(errs, []);
+  });
+
+  it("reports orphans the resolver does not find", async () => {
+    const orphan: ObjectInspirationSeedInput = {
+      ...stubItemRow,
+      id: "ghost_1",
+      categoryId: "ghost",
+    };
+    const errs = await validateForeignKeysAsync(
+      [],
+      [orphan],
+      async () => new Set<string>(),
+    );
+    assert.equal(errs.length, 1);
+    assert.match(errs[0]!, /ghost_1/);
+  });
+
+  it("deduplicates orphan ids passed to the resolver", async () => {
+    const a: ObjectInspirationSeedInput = { ...stubItemRow, id: "a_1", categoryId: "ghost" };
+    const b: ObjectInspirationSeedInput = { ...stubItemRow, id: "b_1", categoryId: "ghost" };
+    let resolverInputCount = -1;
+    await validateForeignKeysAsync([], [a, b], async (ids) => {
+      resolverInputCount = ids.length;
+      return new Set(ids);
+    });
+    assert.equal(resolverInputCount, 1, "resolver should receive one deduped id");
+  });
+
+  it("skips resolver entirely when there are no orphans", async () => {
+    let resolverCalled = false;
+    const errs = await validateForeignKeysAsync(
+      [stubCategoryRow],
+      [stubItemRow],
+      async () => {
+        resolverCalled = true;
+        return new Set<string>();
+      },
+    );
+    assert.deepEqual(errs, []);
+    assert.equal(resolverCalled, false);
+  });
+
+  it("treats a missing resolver as 'no fallback' (payload-only check)", async () => {
+    const orphan: ObjectInspirationSeedInput = {
+      ...stubItemRow,
+      id: "ghost_1",
+      categoryId: "ghost",
+    };
+    const errs = await validateForeignKeysAsync([], [orphan]);
+    assert.equal(errs.length, 1);
+    assert.match(errs[0]!, /ghost_1/);
   });
 });
 

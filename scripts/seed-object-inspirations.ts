@@ -46,10 +46,12 @@ import {
   parseRows,
   summarize,
   validateForeignKeys,
+  validateForeignKeysAsync,
   type Manifest,
   type SeedOutcome,
 } from "../src/lib/objectInspiration/seed-helpers.js";
 import {
+  getExistingObjectCategoryIds,
   seedObjectCategoryDoc,
   seedObjectInspirationDoc,
 } from "../src/lib/objectInspiration/firestore.js";
@@ -189,12 +191,14 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const fkErrors = validateForeignKeys(categories, items);
-  if (fkErrors.length > 0) {
-    console.error("Manifest pre-flight FK validation failed:");
-    for (const e of fkErrors) console.error(`  - ${e}`);
-    process.exit(1);
-  }
+  // FK check: payload-only first (fast, no network). If items reference
+  // categoryIds outside the payload, those orphans need Firestore
+  // verification — initialize Firebase first, then re-check with the
+  // Firestore resolver. Dry-run skips the Firestore phase and reports
+  // payload-only orphans as a warning (operator must verify manually
+  // that the missing categoryIds already exist in Firestore).
+  const payloadFkErrors = validateForeignKeys(categories, items);
+  const hasOrphans = payloadFkErrors.length > 0;
 
   console.error(
     `[seed] manifest: ${categories.length} categories, ${items.length} items` +
@@ -202,8 +206,27 @@ async function main(): Promise<void> {
       (opts.overwritePrompts ? " [OVERWRITE PROMPTS]" : ""),
   );
 
+  if (hasOrphans && opts.dryRun) {
+    console.error(
+      `[seed] WARNING: ${payloadFkErrors.length} item(s) reference categoryIds not inlined in this manifest — skipping Firestore FK resolution under --dry-run. Verify those categories exist before running for real:`,
+    );
+    for (const e of payloadFkErrors) console.error(`  - ${e}`);
+  }
+
   if (!opts.dryRun) {
     await initializeFirebase(opts.serviceAccountPath);
+    if (hasOrphans) {
+      const remainingFkErrors = await validateForeignKeysAsync(
+        categories,
+        items,
+        getExistingObjectCategoryIds,
+      );
+      if (remainingFkErrors.length > 0) {
+        console.error("Manifest pre-flight FK validation failed (after Firestore resolve):");
+        for (const e of remainingFkErrors) console.error(`  - ${e}`);
+        process.exit(1);
+      }
+    }
   }
 
   const mode: SeedMode = opts.overwritePrompts ? "overwrite" : "default";

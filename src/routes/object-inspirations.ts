@@ -73,9 +73,9 @@ const objectInspirationsRoutes: FastifyPluginAsync = async (app) => {
       schema: {
         tags: ["Object Inspirations"],
         summary:
-          "Bulk-seed object-inspiration catalog. Body matches the offline manifest format ({categories, items}).",
+          "Bulk-seed object-inspiration catalog. Body matches the offline manifest format ({categories?, items?}).",
         description:
-          "Accepts the same `{ categories, items }` manifest the offline seed script consumes. Per-row validation uses the same zod schemas; foreign-key check rejects items whose categoryId is not in the submitted categories. Set `X-Seed-Mode: overwrite` to replace existing prompts on re-seed; absent/other values preserve them.",
+          "Accepts the same manifest the offline seed script consumes. Both `categories` and `items` are optional but at least one must be present, so operators can update them independently. When `items` references a categoryId not inlined in `categories`, the foreign-key check falls back to a Firestore lookup. Per-row validation uses the same zod schemas. Set `X-Seed-Mode: overwrite` to replace existing prompts on re-seed; absent/other values preserve them.",
         security: [{ bearerAuth: [] }],
         headers: {
           type: "object",
@@ -90,7 +90,6 @@ const objectInspirationsRoutes: FastifyPluginAsync = async (app) => {
         body: {
           type: "object",
           additionalProperties: false,
-          required: ["categories", "items"],
           properties: {
             // Outer-array caps + element shape gates run at the Fastify layer;
             // per-field validation runs in zod inside the handler. Limits are

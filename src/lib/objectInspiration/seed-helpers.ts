@@ -7,6 +7,18 @@ import {
   type ObjectInspirationTitleUpdateInput,
 } from "./schemas.js";
 
+/**
+ * Manifest envelope for the bulk-seed paths. Both `categories` and
+ * `items` are optional, but at least one must be present (and an array).
+ * The partial shape lets operators update categories and items
+ * independently without having to round-trip the full 800-item payload
+ * each time — common workflow once the catalog is in place.
+ *
+ * When `items` references a `categoryId` not in the submitted
+ * `categories`, the FK check falls back to a Firestore lookup (see
+ * `validateForeignKeysAsync`). That keeps a "send items only" payload
+ * safe even though no categories are inlined.
+ */
 export interface Manifest {
   categories: unknown[];
   items: unknown[];
@@ -29,17 +41,29 @@ export function parseManifestText(raw: string): Manifest {
       `Manifest is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    !Array.isArray((parsed as { categories?: unknown }).categories) ||
-    !Array.isArray((parsed as { items?: unknown }).items)
-  ) {
+  if (!parsed || typeof parsed !== "object") {
     throw new Error(
-      "Manifest must be `{ categories: [...], items: [...] }` (both arrays).",
+      "Manifest must be an object with `categories` and/or `items` arrays.",
     );
   }
-  return parsed as Manifest;
+  const obj = parsed as Record<string, unknown>;
+  const hasCategories = "categories" in obj;
+  const hasItems = "items" in obj;
+  if (!hasCategories && !hasItems) {
+    throw new Error(
+      "Manifest must include at least one of `categories` or `items`.",
+    );
+  }
+  if (hasCategories && !Array.isArray(obj.categories)) {
+    throw new Error("`categories` must be an array when present.");
+  }
+  if (hasItems && !Array.isArray(obj.items)) {
+    throw new Error("`items` must be an array when present.");
+  }
+  return {
+    categories: (obj.categories as unknown[] | undefined) ?? [],
+    items: (obj.items as unknown[] | undefined) ?? [],
+  };
 }
 
 /**
@@ -97,6 +121,12 @@ export function parseRows(manifest: Manifest): {
  * Pre-flight FK check operating on already-validated rows. Catches orphan
  * items before any Firestore traffic so a "wrote half the items to a
  * non-existent category" state cannot reach production.
+ *
+ * Payload-only — the items must reference a category in the submitted
+ * `categories` array. For the partial-manifest workflow ("send items
+ * without inlining the categories that already exist in Firestore"),
+ * use `validateForeignKeysAsync` and pass a resolver that fetches
+ * existing category ids.
  */
 export function validateForeignKeys(
   categories: ObjectCategorySeedInput[],
@@ -112,6 +142,47 @@ export function validateForeignKeys(
     }
   }
   return errors;
+}
+
+/**
+ * FK check that falls back to an external resolver (typically a Firestore
+ * lookup) when an item references a categoryId not present in the
+ * submitted `categories` array. Used by the bulk-seed paths so an
+ * operator can send `items` only and have the FK check resolve missing
+ * categoryIds against existing Firestore docs.
+ *
+ * The resolver is invoked at most once with the deduped orphan id set,
+ * not per item — a 5000-item payload referencing 40 distinct
+ * categoryIds hits Firestore at most 40 times (current
+ * `getExistingObjectCategoryIds` uses a single `in` query batched at
+ * 30 ids).
+ */
+export async function validateForeignKeysAsync(
+  categories: ObjectCategorySeedInput[],
+  items: ObjectInspirationSeedInput[],
+  resolveMissing?: (orphanCategoryIds: string[]) => Promise<Set<string>>,
+): Promise<string[]> {
+  const known = new Set(categories.map((c) => c.id));
+  const orphans: { itemId: string; categoryId: string }[] = [];
+  for (const item of items) {
+    if (!known.has(item.categoryId)) {
+      orphans.push({ itemId: item.id, categoryId: item.categoryId });
+    }
+  }
+  if (orphans.length === 0) return [];
+
+  let resolved = new Set<string>();
+  if (resolveMissing) {
+    const orphanCats = [...new Set(orphans.map((o) => o.categoryId))];
+    resolved = await resolveMissing(orphanCats);
+  }
+
+  return orphans
+    .filter((o) => !resolved.has(o.categoryId))
+    .map(
+      (o) =>
+        `item id=${o.itemId} references unknown categoryId=${o.categoryId}`,
+    );
 }
 
 export async function dispatchWithConcurrency<TInput>(
