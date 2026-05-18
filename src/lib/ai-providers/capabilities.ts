@@ -71,7 +71,13 @@ export type { ProviderId };
  *              convolutions. This is the industry-standard pattern behind
  *              Cleanup.pictures, IOPaint, Magic Eraser, and Apple Clean Up.
  */
-export type ModelRole = "edit" | "segment" | "remove" | "inpaint";
+export type ModelRole =
+  | "edit"
+  | "segment"
+  | "remove"
+  | "inpaint"
+  | "inpaint-refine"
+  | "bg-remove";
 
 export interface ProviderCapabilities {
   provider: ProviderId;
@@ -335,6 +341,57 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     role: "inpaint",
     supportsNegativePrompt: false,
     supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
+    aspectRatioField: null,
+  },
+  // ─── Background removal: BiRefNet (BiRefNet, 2024) ────────────────────────
+  // fal.ai birefnet v2 — image → transparent-background PNG. ~$0.001/image,
+  // sub-second on fal hardware. Used by Replace & Add Object v5.0 pipeline
+  // to isolate the inspiration object before pixel-level pasting into the
+  // masked region of the room photo. No prompt; no mask; no guidance.
+  "fal-ai/birefnet/v2": {
+    provider: "falai",
+    role: "bg-remove",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 0,
+    aspectRatioField: null,
+  },
+  // Replicate background-remover fallback. ~$0.0006 per run.
+  "851-labs/background-remover": {
+    provider: "replicate",
+    role: "bg-remove",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: false,
+    supportsReferenceImage: false,
+    maxPromptTokens: 0,
+    aspectRatioField: null,
+  },
+  // ─── Inpaint-refine: SDXL inpainting (low-strength blend) ─────────────────
+  // fal.ai SDXL inpaint, compute-second billed (~$0.005-0.01 at 1024² with
+  // 20 steps on fal optimized SDXL). Used as the refine pass in Replace &
+  // Add Object v5.0: low-denoise blend pass around mask edges over the
+  // pixel-composited cutout. Schema: image_url + mask_url + prompt +
+  // strength + num_inference_steps.
+  "fal-ai/inpaint": {
+    provider: "falai",
+    role: "inpaint-refine",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: true,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
+    aspectRatioField: null,
+  },
+  // Replicate Stable Diffusion inpainting (official, no version pin needed).
+  // ~$0.0023 per run. Schema: image + mask + prompt + num_inference_steps +
+  // guidance_scale.
+  "stability-ai/stable-diffusion-inpainting": {
+    provider: "replicate",
+    role: "inpaint-refine",
+    supportsNegativePrompt: true,
+    supportsGuidanceScale: true,
     supportsReferenceImage: false,
     maxPromptTokens: 512,
     aspectRatioField: null,

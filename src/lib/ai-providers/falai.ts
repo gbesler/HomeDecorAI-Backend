@@ -6,6 +6,8 @@ import { getCapabilities } from "./capabilities.js";
 import {
   NoMaskDetectedError,
   resolveExtraImageUrls,
+  type BgRemoveInput,
+  type BgRemoveOutput,
   type GenerationInput,
   type GenerationOutput,
   type InpaintInput,
@@ -352,6 +354,110 @@ export async function callInpaintFalAI(
       "fal.ai flux-pro fill returned no image",
     );
     throw new Error("fal.ai inpaint returned no image");
+  }
+
+  return { imageUrl, provider: "falai", durationMs };
+}
+
+// ─── Background removal (fal-ai/birefnet/v2) ───────────────────────────────
+
+/**
+ * BiRefNet v2 background removal — single image in, cutout PNG out
+ * (transparent background). Used by Replace & Add Object v5.0 pipeline
+ * to isolate the inspiration object before pixel-level pasting.
+ *
+ * Schema:
+ *   image_url:     source photo URL (required)
+ *   output_format: "png" — transparent background requires PNG
+ *
+ * Output: `result.data.image.url` is the cutout PNG. fal.ai birefnet's
+ * documented shape returns a single `image` object. Falls through to
+ * `images[0]` defensively for parity with sibling endpoints.
+ */
+export async function callBgRemoveFalAI(
+  model: string,
+  input: BgRemoveInput,
+): Promise<BgRemoveOutput> {
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      output_format: "png",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as {
+    data?: {
+      image?: { url?: string };
+      images?: Array<{ url?: string }>;
+    };
+    requestId?: string;
+  };
+
+  const durationMs = Date.now() - start;
+
+  const cutoutUrl = result.data?.image?.url || result.data?.images?.[0]?.url;
+  if (typeof cutoutUrl !== "string" || cutoutUrl.length === 0) {
+    logger.warn(
+      { event: "provider.falai.empty_response", model, durationMs },
+      "fal.ai birefnet returned no cutout image",
+    );
+    throw new Error("fal.ai bg-remove returned no image");
+  }
+
+  return { imageUrl: cutoutUrl, provider: "falai", durationMs };
+}
+
+// ─── Inpaint-refine (fal-ai/inpaint — SDXL inpaint, compute-second) ────────
+
+/**
+ * SDXL inpainting refine pass. Used as Stage 4 of Replace & Add Object
+ * v5.0 (crop-composite-refine): the pixel-composited cutout already
+ * lives in the room photo at the user-painted region, and this call
+ * runs a LOW-strength denoise pass around a SLIGHTLY-DILATED mask to
+ * blend lighting, shadows, and edges so the result doesn't look pasted.
+ *
+ * Schema notes:
+ *   - image_url:           pre-composited room with cutout pasted in (required)
+ *   - mask_url:            dilated brush mask PNG (white = refine zone)
+ *   - prompt:              scene-level description for blending guidance
+ *   - strength:            0..1 denoise — pinned LOW (0.35) to preserve
+ *                          the composited cutout identity rather than
+ *                          re-imagining the object. This is the
+ *                          load-bearing knob for the refine pass.
+ *   - num_inference_steps: 20 — sub-2s on fal optimized SDXL → ~$0.005-0.008.
+ */
+export async function callInpaintRefineFalAI(
+  model: string,
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      mask_url: input.maskUrl,
+      prompt: input.prompt,
+      strength: 0.35,
+      num_inference_steps: 20,
+      output_format: "jpeg",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as { data?: { images?: Array<{ url?: string }> }; requestId?: string };
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = result.data?.images?.[0]?.url;
+  if (typeof imageUrl !== "string" || imageUrl.length === 0) {
+    logger.warn(
+      { event: "provider.falai.empty_response", model, durationMs },
+      "fal.ai inpaint-refine returned no image",
+    );
+    throw new Error("fal.ai inpaint-refine returned no image");
   }
 
   return { imageUrl, provider: "falai", durationMs };

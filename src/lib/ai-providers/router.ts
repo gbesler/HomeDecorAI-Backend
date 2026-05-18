@@ -3,18 +3,24 @@ import { env } from "../env.js";
 import { withRetry } from "../retry.js";
 import { logger } from "../logger.js";
 import {
+  callBgRemoveReplicate,
+  callInpaintRefineReplicate,
   callInpaintReplicate,
   callRemovalReplicate,
   callReplicate,
   callSegmentationReplicate,
 } from "./replicate.js";
 import {
+  callBgRemoveFalAI,
   callFalAI,
   callInpaintFalAI,
+  callInpaintRefineFalAI,
   callRemovalFalAI,
   callSegmentationFalAI,
 } from "./falai.js";
 import type {
+  BgRemoveInput,
+  BgRemoveOutput,
   GenerationInput,
   GenerationOutput,
   InpaintInput,
@@ -128,6 +134,52 @@ export async function callInpaint(
   });
 }
 
+/**
+ * Run background removal with **fal.ai as primary** and Replicate as
+ * fallback — inverted relative to the other roles. The Replace & Add
+ * Object v5.0 pipeline uses BiRefNet v2 on fal.ai as the primary
+ * because fal hosts the lowest-cost cutout endpoint we found
+ * (~$0.001/image) under the project's per-call cost ceiling.
+ *
+ * Note: this routes through `runWithFallback` with `falaiPrimary: true`
+ * to invert primary/fallback without forking the breaker logic.
+ */
+export async function callBgRemove(
+  input: BgRemoveInput,
+): Promise<BgRemoveOutput> {
+  const primaryModel = env.FALAI_BG_REMOVE_MODEL;
+  const fallbackModel = env.REPLICATE_BG_REMOVE_MODEL;
+  return runWithFallback<BgRemoveOutput>({
+    role: "bg-remove",
+    callPrimary: () => callBgRemoveFalAI(primaryModel, input),
+    callFallback: () => callBgRemoveReplicate(fallbackModel, input),
+    primaryModel,
+    fallbackModel,
+    falaiPrimary: true,
+  });
+}
+
+/**
+ * Run inpaint-refine (low-strength SDXL pass) with **fal.ai as primary**
+ * and Replicate as fallback — inverted relative to most other roles
+ * for the same cost-ceiling reason as callBgRemove. The refine pass is
+ * the Stage 4 step in Replace & Add Object v5.0 (crop-composite-refine).
+ */
+export async function callInpaintRefine(
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const primaryModel = env.FALAI_INPAINT_REFINE_MODEL;
+  const fallbackModel = env.REPLICATE_INPAINT_REFINE_MODEL;
+  return runWithFallback<InpaintOutput>({
+    role: "inpaint-refine",
+    callPrimary: () => callInpaintRefineFalAI(primaryModel, input),
+    callFallback: () => callInpaintRefineReplicate(fallbackModel, input),
+    primaryModel,
+    fallbackModel,
+    falaiPrimary: true,
+  });
+}
+
 // ─── Shared primary/fallback envelope ──────────────────────────────────────
 //
 // Single retry + circuit-breaker + probe envelope for every role:
@@ -137,7 +189,13 @@ export async function callInpaint(
 // agnostic to the per-role input shape.
 
 interface FallbackConfig<T> {
-  role: "edit" | "segment" | "remove" | "inpaint";
+  role:
+    | "edit"
+    | "segment"
+    | "remove"
+    | "inpaint"
+    | "bg-remove"
+    | "inpaint-refine";
   callPrimary: () => Promise<T>;
   callFallback: () => Promise<T>;
   primaryModel: string;
@@ -148,6 +206,15 @@ interface FallbackConfig<T> {
    * signals like `NoMaskDetectedError` that are not provider health issues.
    */
   isTerminalError?: (error: Error) => boolean;
+  /**
+   * When true, `callPrimary` targets fal.ai and `callFallback` targets
+   * Replicate (inverted relative to the default). Used by Replace & Add
+   * Object v5.0's `bg-remove` and `inpaint-refine` roles where fal.ai
+   * hosts the lowest-cost endpoint under the project's per-call cost
+   * ceiling. The circuit breaker still tracks Replicate health globally;
+   * the inversion only flips which provider serves the first attempt.
+   */
+  falaiPrimary?: boolean;
 }
 
 async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
@@ -158,9 +225,13 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
     primaryModel,
     fallbackModel,
     isTerminalError,
+    falaiPrimary,
   } = config;
   const breaker = designCircuitBreaker;
-  const fallbackProvider = breaker.fallbackProvider;
+  // Provider identity for log payloads. Inverted when `falaiPrimary` is
+  // set (Replace & Add Object v5.0's bg-remove and inpaint-refine roles).
+  const primaryProvider = falaiPrimary ? "falai" : "replicate";
+  const fallbackProvider = falaiPrimary ? "replicate" : breaker.fallbackProvider;
 
   async function callFallbackWithRetry(
     reason: "circuit_open" | "primary_failed",
@@ -185,6 +256,10 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
           );
         },
       });
+      // Same falaiPrimary carve-out as the primary path — the breaker
+      // tracks Replicate health, so a fal.ai-primary call's fallback is
+      // Replicate and its success/failure DOES feed the breaker
+      // (because that IS Replicate health information).
       breaker.record(true);
       logger.info(
         {
@@ -211,7 +286,11 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
     }
   }
 
-  if (breaker.shouldUseFallback()) {
+  // Breaker shortcut applies only when Replicate is primary. With
+  // `falaiPrimary`, "fallback" is Replicate — opening the breaker
+  // because Replicate is degraded should NOT redirect to a degraded
+  // path. Skip the shortcut and try fal.ai first regardless.
+  if (!falaiPrimary && breaker.shouldUseFallback()) {
     logger.info(
       {
         event: "provider.circuit_open",
@@ -280,11 +359,15 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
         );
       },
     });
-    breaker.record(true);
+    // Only record into the (Replicate-tracking) circuit breaker when
+    // Replicate is actually the primary provider for this call. With
+    // falaiPrimary, success/failure here reflects fal.ai health and
+    // should not feed back into the Replicate breaker.
+    if (!falaiPrimary) breaker.record(true);
     logger.info(
       {
         event: "provider.generation",
-        provider: "replicate",
+        provider: primaryProvider,
         role,
         model: primaryModel,
         fallbackFired: false,
@@ -300,7 +383,7 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
     ) {
       throw error;
     }
-    breaker.record(false);
+    if (!falaiPrimary) breaker.record(false);
 
     logger.error(
       {
@@ -309,7 +392,7 @@ async function runWithFallback<T>(config: FallbackConfig<T>): Promise<T> {
         role,
         error: error instanceof Error ? error.message : String(error),
       },
-      `replicate ${role} failed after retries, trying ${fallbackProvider} fallback`,
+      `${primaryProvider} ${role} failed after retries, trying ${fallbackProvider} fallback`,
     );
 
     return callFallbackWithRetry("primary_failed");

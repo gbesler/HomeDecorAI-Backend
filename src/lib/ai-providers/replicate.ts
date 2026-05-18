@@ -5,6 +5,8 @@ import { getCapabilities } from "./capabilities.js";
 import {
   NoMaskDetectedError,
   resolveExtraImageUrls,
+  type BgRemoveInput,
+  type BgRemoveOutput,
   type GenerationInput,
   type GenerationOutput,
   type InpaintInput,
@@ -570,6 +572,98 @@ export async function callInpaintReplicate(
       "Flux Fill returned no image — empty response",
     );
     throw new Error("Replicate inpaint returned no image");
+  }
+
+  return { imageUrl, provider: "replicate", durationMs };
+}
+
+// ─── Background removal (Replicate fallback) ──────────────────────────────
+
+/**
+ * Replicate background-removal fallback for the Replace & Add Object v5.0
+ * pipeline. Default slug: `851-labs/background-remover`. Returns a cutout
+ * PNG (transparent background).
+ */
+export async function callBgRemoveReplicate(
+  model: `${string}/${string}`,
+  input: BgRemoveInput,
+): Promise<BgRemoveOutput> {
+  const start = Date.now();
+
+  const output = (await replicate.run(model, {
+    input: { image: input.imageUrl },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  })) as unknown;
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = extractImageUrl(output);
+  if (imageUrl === null) {
+    logger.warn(
+      {
+        event: "provider.replicate.empty_response",
+        model,
+        outputShape: describeShape(output),
+        durationMs,
+      },
+      "Replicate bg-remove returned no image",
+    );
+    throw new Error("Replicate bg-remove returned no image");
+  }
+
+  return { imageUrl, provider: "replicate", durationMs };
+}
+
+// ─── Inpaint-refine (Replicate fallback) ───────────────────────────────────
+
+/**
+ * Stable Diffusion inpainting refine pass on Replicate. Default slug:
+ * `stability-ai/stable-diffusion-inpainting`. Same role as
+ * `callInpaintRefineFalAI` — low-strength denoise around dilated mask
+ * to blend the pre-composited cutout into the room.
+ *
+ * Pins `num_inference_steps: 20` to bound cost; SD inpainting on
+ * Replicate runs ~$0.0023 per call at this step count.
+ */
+export async function callInpaintRefineReplicate(
+  model: `${string}/${string}`,
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const start = Date.now();
+
+  const replicateInput: Record<string, unknown> = {
+    image: input.imageUrl,
+    mask: input.maskUrl,
+    prompt: input.prompt,
+    num_inference_steps: 20,
+    // SD inpainting takes `prompt_strength` in 0..1 (denoise strength).
+    // Pinned LOW so the model blends edges/lighting without re-imagining
+    // the composited cutout.
+    prompt_strength: 0.35,
+  };
+  if (input.guidanceScale !== undefined && input.guidanceScale > 0) {
+    replicateInput.guidance_scale = input.guidanceScale;
+  }
+
+  const output = (await replicate.run(model, {
+    input: replicateInput,
+    signal: AbortSignal.timeout(INPAINT_TIMEOUT_MS),
+  })) as unknown;
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = extractImageUrl(output);
+  if (imageUrl === null) {
+    logger.warn(
+      {
+        event: "provider.replicate.empty_response",
+        model,
+        outputShape: describeShape(output),
+        durationMs,
+      },
+      "Replicate inpaint-refine returned no image",
+    );
+    throw new Error("Replicate inpaint-refine returned no image");
   }
 
   return { imageUrl, provider: "replicate", durationMs };

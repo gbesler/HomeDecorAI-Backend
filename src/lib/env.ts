@@ -207,6 +207,36 @@ export const envSchema = z.object({
     .min(1)
     .optional()
     .default("fal-ai/flux-pro/v1/fill"),
+  // ─── Replace & Add Object v5.0 (crop-composite-refine) ─────────────────
+  // BG removal: fal.ai birefnet primary, replicate fallback. Used by the
+  // Replace & Add Object tool's v5 pipeline to isolate the inspiration
+  // object before pixel-level pasting into the masked region.
+  FALAI_BG_REMOVE_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/birefnet/v2"),
+  REPLICATE_BG_REMOVE_MODEL: z
+    .string()
+    .regex(/^[^/]+\/[^/]+(?::[a-f0-9]{40,64})?$/, "must be in 'owner/name' or 'owner/name:version' form")
+    .optional()
+    .default("851-labs/background-remover")
+    .transform((v) => v as `${string}/${string}`),
+  // Refine inpaint: fal.ai SDXL inpaint primary (compute-second billed,
+  // typically ~$0.005-0.01 per 1024² at 20 steps), replicate lucataco
+  // sdxl-inpainting fallback. Low-strength denoise pass around mask
+  // edges to blend lighting/shadows on the pixel-composite result.
+  FALAI_INPAINT_REFINE_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/inpaint"),
+  REPLICATE_INPAINT_REFINE_MODEL: z
+    .string()
+    .regex(/^[^/]+\/[^/]+(?::[a-f0-9]{40,64})?$/, "must be in 'owner/name' or 'owner/name:version' form")
+    .optional()
+    .default("stability-ai/stable-diffusion-inpainting")
+    .transform((v) => v as `${string}/${string}`),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)
@@ -254,7 +284,13 @@ void (async () => {
   // silently hand segmentation-shaped input to an inpainter during the rare
   // fallback path — producing either a schema reject or, worse, a false
   // "already clean" short-circuit that users interpret as a working feature.
-  const checks: Array<[string, string, "segment" | "remove" | "inpaint"]> = [
+  const checks: Array<
+    [
+      string,
+      string,
+      "segment" | "remove" | "inpaint" | "bg-remove" | "inpaint-refine",
+    ]
+  > = [
     [
       "REPLICATE_SEGMENTATION_MODEL",
       env.REPLICATE_SEGMENTATION_MODEL,
@@ -265,6 +301,26 @@ void (async () => {
     ["FALAI_SEGMENTATION_MODEL", env.FALAI_SEGMENTATION_MODEL, "segment"],
     ["FALAI_REMOVAL_MODEL", env.FALAI_REMOVAL_MODEL, "remove"],
     ["FALAI_INPAINT_MODEL", env.FALAI_INPAINT_MODEL, "inpaint"],
+    [
+      "FALAI_BG_REMOVE_MODEL",
+      env.FALAI_BG_REMOVE_MODEL,
+      "bg-remove",
+    ],
+    [
+      "REPLICATE_BG_REMOVE_MODEL",
+      env.REPLICATE_BG_REMOVE_MODEL,
+      "bg-remove",
+    ],
+    [
+      "FALAI_INPAINT_REFINE_MODEL",
+      env.FALAI_INPAINT_REFINE_MODEL,
+      "inpaint-refine",
+    ],
+    [
+      "REPLICATE_INPAINT_REFINE_MODEL",
+      env.REPLICATE_INPAINT_REFINE_MODEL,
+      "inpaint-refine",
+    ],
   ];
   for (const [name, slug, expectedRole] of checks) {
     const capability = getCapabilities(slug);
