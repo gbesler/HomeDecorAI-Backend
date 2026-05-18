@@ -43,7 +43,7 @@ import type { z } from "zod";
 import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
-const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.0-fluxfill-mode-aware";
+const PROMPT_VERSION_CURRENT = "replaceAddObject/v2.1-add-scene-integration";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -75,13 +75,21 @@ function startsWithVowelSound(word: string): boolean {
 
 // Per-mode guidance overrides for Flux Fill. Higher values pull the
 // generation toward the prompt and away from the masked silhouette.
-// Dev's default is ~60 — these bumps are intentionally on top of that
-// for the failure modes the modes-aware builder was added to fix.
+// Dev's default is ~60 — replace stays elevated to overpower the
+// silhouette of whatever is being swapped out, while add drops back
+// to the capability default so the model has enough headroom to
+// integrate the new object with the surrounding scene (matching
+// lighting, perspective, scale, contact shadows). The previous v2.0
+// ADD_GUIDANCE=70 produced over-committed, pasted-in objects — high
+// guidance combined with an "empty area" mask + a sharp-focus prompt
+// biases Flux Fill toward rendering the noun as a foreground subject
+// rather than an integrated room element.
+//
 // Paired with `REPLACE_DILATION_PX` / `ADD_DILATION_PX` in
 // `src/lib/generation/prompt-inpaint.ts` — tune both together when
 // revisiting the mode-aware experiment.
 const REPLACE_GUIDANCE = 75;
-const ADD_GUIDANCE = 70;
+const ADD_GUIDANCE = 60;
 
 /**
  * Strip the seed-template boilerplate so the noun composes inside the
@@ -173,16 +181,25 @@ export function buildReplaceAddObjectPrompt(
     //     practice for Dev's prompt-following.
     //   "The masked area is currently empty"
     //     direct counter to Flux Fill Dev's wall-texture-extension
-    //     bias on blank-area masks. Without this clause the v1.3
-    //     prompt ("prominently visible … naturally integrated") often
-    //     returned an unmodified or texture-extended image.
-    //   "clearly visible and well-lit"
-    //     commitment signal; replaces the bare "prominently visible"
-    //     token from v1.3.
+    //     bias on blank-area masks. Retained from v2.0 because the
+    //     failure mode it fixes (returning an unmodified or
+    //     texture-extended image on blank-wall masks) is independent
+    //     of the integration tokens below.
+    //   "Match the surrounding room's lighting, perspective, and scale"
+    //     scene-integration anchor — replaces v2.0's "clearly visible
+    //     and well-lit" which biased exposure brighter than the room
+    //     and pushed objects to a generic foreground-subject look.
+    //   "soft contact shadows … ambient occlusion"
+    //     commits the model to grounding the object in the scene
+    //     instead of rendering a flat, pasted-in cutout. "sharp focus"
+    //     was removed from v2.0 because it over-crisped edges, which
+    //     read as artificial against the photo's natural microblur.
     prompt =
       `Add ${article} ${bareNoun} inside the masked region. ` +
-      `The masked area is currently empty; place the object clearly visible and well-lit. ` +
-      `Photorealistic, sharp focus, natural shadows.`;
+      `The masked area is currently empty; the object is the only new element rendered there. ` +
+      `Match the surrounding room's lighting, perspective, and scale. ` +
+      `Cast soft contact shadows and natural ambient occlusion where the object meets the floor or wall. ` +
+      `Photorealistic, naturally integrated.`;
     guidanceScale = ADD_GUIDANCE;
   }
 
