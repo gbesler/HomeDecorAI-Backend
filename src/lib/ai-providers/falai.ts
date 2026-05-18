@@ -413,21 +413,27 @@ export async function callBgRemoveFalAI(
 // ─── Inpaint-refine (fal-ai/inpaint — SDXL inpaint, compute-second) ────────
 
 /**
- * SDXL inpainting refine pass. Used as Stage 4 of Replace & Add Object
- * v5.0 (crop-composite-refine): the pixel-composited cutout already
- * lives in the room photo at the user-painted region, and this call
- * runs a LOW-strength denoise pass around a SLIGHTLY-DILATED mask to
- * blend lighting, shadows, and edges so the result doesn't look pasted.
+ * Inpaint refine pass for Replace & Add Object v5.0 (crop-composite-
+ * refine). Operates on the pre-composited room (cutout already pasted at
+ * the user-painted region) and blends lighting/shadows around the mask.
  *
- * Schema notes:
- *   - image_url:           pre-composited room with cutout pasted in (required)
- *   - mask_url:            dilated brush mask PNG (white = refine zone)
- *   - prompt:              scene-level description for blending guidance
- *   - strength:            0..1 denoise — pinned LOW (0.35) to preserve
- *                          the composited cutout identity rather than
- *                          re-imagining the object. This is the
- *                          load-bearing knob for the refine pass.
- *   - num_inference_steps: 20 — sub-2s on fal optimized SDXL → ~$0.005-0.008.
+ * The default endpoint is `fal-ai/flux-pro/v1/fill` (Flux Fill Pro on
+ * fal.ai). It does NOT expose a strength/denoise knob, so this is a
+ * full-denoise inpaint inside the mask: the model will re-imagine the
+ * masked region using the prompt. The pre-composited cutout still helps
+ * because:
+ *   1. Outside the brush mask, original pixels are preserved (the
+ *      pipeline's compositeMaskedResult enforces this).
+ *   2. Even though Flux Fill regenerates inside the mask, the
+ *      scene-level prompt names the inspiration item ("a stone
+ *      object placed naturally...") so the model produces something
+ *      coherent with the user's choice.
+ *
+ * If/when a low-denoise inpaint endpoint becomes available on fal.ai
+ * (`fal-ai/inpaint` 404'd at first deploy), swap FALAI_INPAINT_REFINE_MODEL
+ * to that slug — the schema here intentionally sends only the fields
+ * shared across Flux Fill, SDXL inpaint, and Z-Image inpaint endpoints
+ * (image_url, mask_url, prompt, output_format).
  */
 export async function callInpaintRefineFalAI(
   model: string,
@@ -440,8 +446,6 @@ export async function callInpaintRefineFalAI(
       image_url: input.imageUrl,
       mask_url: input.maskUrl,
       prompt: input.prompt,
-      strength: 0.35,
-      num_inference_steps: 20,
       output_format: "jpeg",
     },
     logs: true,

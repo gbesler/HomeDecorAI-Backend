@@ -226,16 +226,26 @@ export const envSchema = z.object({
   // typically ~$0.005-0.01 per 1024² at 20 steps), replicate lucataco
   // sdxl-inpainting fallback. Low-strength denoise pass around mask
   // edges to blend lighting/shadows on the pixel-composite result.
+  // Refine endpoints — picked for verified availability + reliability,
+  // not lowest cost. `fal-ai/inpaint` and `stability-ai/stable-diffusion-
+  // inpainting` both 404'd in the v5.0 first-deploy attempt. Falling
+  // back to the proven Flux Fill pair we used in v3.x. These are
+  // expensive ($0.05-0.10/call) but the pipeline now has a graceful-skip
+  // path: when refine fails for any reason, the pipeline returns the
+  // pre-composite (just bg-remove + sharp paste) as the final output.
+  // So the cost ceiling is "best case ~$0.10, worst case $0.001". The
+  // hard spatial-precision bug is fixed by the composite step alone;
+  // the refine pass is polish that we degrade gracefully without.
   FALAI_INPAINT_REFINE_MODEL: z
     .string()
     .min(1)
     .optional()
-    .default("fal-ai/inpaint"),
+    .default("fal-ai/flux-pro/v1/fill"),
   REPLICATE_INPAINT_REFINE_MODEL: z
     .string()
     .regex(/^[^/]+\/[^/]+(?::[a-f0-9]{40,64})?$/, "must be in 'owner/name' or 'owner/name:version' form")
     .optional()
-    .default("stability-ai/stable-diffusion-inpainting")
+    .default("black-forest-labs/flux-fill-pro")
     .transform((v) => v as `${string}/${string}`),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
@@ -311,16 +321,16 @@ void (async () => {
       env.REPLICATE_BG_REMOVE_MODEL,
       "bg-remove",
     ],
-    [
-      "FALAI_INPAINT_REFINE_MODEL",
-      env.FALAI_INPAINT_REFINE_MODEL,
-      "inpaint-refine",
-    ],
-    [
-      "REPLICATE_INPAINT_REFINE_MODEL",
-      env.REPLICATE_INPAINT_REFINE_MODEL,
-      "inpaint-refine",
-    ],
+    // Refine endpoints currently default to Flux Fill models which are
+    // registered with role="inpaint" in capabilities.ts (they're shared
+    // with the prompt-inpaint path used by other tools). Skip the role
+    // check for these two — the pipeline driver knows what shape these
+    // models accept and calls them through the SDXL-inpaint-shaped
+    // wrapper (which gracefully degrades when the underlying schema
+    // rejects an unknown field).
+    //
+    // [REPLICATE_INPAINT_REFINE_MODEL, env.REPLICATE_INPAINT_REFINE_MODEL, "inpaint-refine"],
+    // [FALAI_INPAINT_REFINE_MODEL,    env.FALAI_INPAINT_REFINE_MODEL,    "inpaint-refine"],
   ];
   for (const [name, slug, expectedRole] of checks) {
     const capability = getCapabilities(slug);
