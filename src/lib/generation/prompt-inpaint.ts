@@ -53,17 +53,20 @@ export interface RunPromptInpaintInput {
 //     object's silhouette; Flux Fill kept inpainting a variant of
 //     what was there. 10 widens the envelope so the model genuinely
 //     starts from "draw the new object" instead of "edit these pixels".
-//   add=8: empty-area masks don't have a silhouette to break, so the
-//     dilation is purely a shadow/integration buffer. 8 is the
-//     smallest value that consistently produces a natural cast
-//     shadow at the object's base; tighter masks gave flat,
-//     pasted-in objects in practice.
+//   add=14: empty-area masks don't have a silhouette to break, so the
+//     dilation is purely a shadow/integration buffer. v2.0 used 8
+//     which produced flat, pasted-in objects because the model had
+//     no room to render the cast shadow / ambient occlusion the new
+//     prompt asks for. 14 gives roughly a 7px effective edge growth
+//     (see units note below), which is wide enough for Flux Fill to
+//     blend a natural contact shadow into the surrounding floor or
+//     wall without leaking the brush boundary back into the result.
 //
 // Note on units: `normalizeImageMaskPair` implements dilation as a
 // sharp Gaussian blur + threshold rather than a true morphological
 // dilation, so the *effective* expansion is roughly `dilatePx / 2`
 // pixels of edge growth at the threshold contour, not a flat
-// `dilatePx`-pixel ring. The 10/8 values are calibrated against that
+// `dilatePx`-pixel ring. The 10/14 values are calibrated against that
 // implementation; if normalize-image-mask-pair.ts ever switches to a
 // true morphological dilation, these numbers should be re-tuned down.
 //
@@ -71,7 +74,7 @@ export interface RunPromptInpaintInput {
 // `src/lib/prompts/tools/replace-add-object.ts` — tune both together
 // when revisiting the mode-aware experiment.
 const REPLACE_DILATION_PX = 10;
-const ADD_DILATION_PX = 8;
+const ADD_DILATION_PX = 14;
 
 export interface RunPromptInpaintOutput {
   outputImageUrl: string;

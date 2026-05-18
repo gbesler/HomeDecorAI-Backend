@@ -72,14 +72,14 @@ describe("normalizeInspirationNoun — v2.0 boilerplate stripping", () => {
 });
 
 describe("buildReplaceAddObjectPrompt — v2.0 mode-aware Flux Fill", () => {
-  it("stamps the v2.0 promptVersion", () => {
+  it("stamps the v2.1 promptVersion", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
     });
     assert.equal(
       result.promptVersion,
-      "replaceAddObject/v2.0-fluxfill-mode-aware",
+      "replaceAddObject/v2.1-add-scene-integration",
     );
   });
 
@@ -110,12 +110,34 @@ describe("buildReplaceAddObjectPrompt — v2.0 mode-aware Flux Fill", () => {
     assert.match(result.prompt, /masked area is currently empty/i);
   });
 
-  it("add mode ships ADD_GUIDANCE=70", () => {
+  it("add mode anchors scene integration (lighting, perspective, scale, contact shadows)", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "add",
     });
-    assert.equal(result.guidanceScale, 70);
+    assert.match(
+      result.prompt,
+      /Match the surrounding room's lighting, perspective, and scale/i,
+    );
+    assert.match(result.prompt, /contact shadows/i);
+    assert.match(result.prompt, /ambient occlusion/i);
+  });
+
+  it("add mode drops the v2.0 artificial-edge phrases ('sharp focus', 'clearly visible and well-lit')", () => {
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "add",
+    });
+    assert.doesNotMatch(result.prompt, /sharp focus/i);
+    assert.doesNotMatch(result.prompt, /clearly visible and well-lit/i);
+  });
+
+  it("add mode ships ADD_GUIDANCE=60 (drops from v2.0's 70 for scene integration headroom)", () => {
+    const result = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "add",
+    });
+    assert.equal(result.guidanceScale, 60);
   });
 
   it("emits distinct prompts for replace vs add modes", () => {
