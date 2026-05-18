@@ -165,7 +165,8 @@ export interface ToolTypeConfig<
     | "segment-remove"
     | "remove-only"
     | "multi-image-edit-with-mask"
-    | "crop-composite-refine";
+    | "crop-composite-refine"
+    | "inpaint-with-prompt";
   /** AI provider model IDs for the router. Consumed only when mode is "edit". */
   models: {
     replicate: `${string}/${string}`;
@@ -1430,27 +1431,21 @@ export const TOOL_TYPES = {
     toolKey: "replaceAddObject",
     routePath: "/replace-add-object",
     rateLimitKey: "replaceAddObject",
-    // Crop-Composite-Refine pipeline (v5.0). Replaces v4.x multi-image
-    // instructional edit (Nano Banana), which failed in production
-    // because Nano Banana ignored both the mask-as-image-3 signal and
-    // the bbox text-spatial signal. v5.0 moves spatial precision out
-    // of the model: the inspiration is background-removed via fal.ai
-    // BiRefNet, then pixel-composited into the user-painted region
-    // (100% spatial accuracy, no model involved), then a low-strength
-    // SDXL inpaint refine pass blends lighting/shadows around the
-    // mask edge so the result doesn't look pasted.
-    //
-    // The pipeline reads model slugs from env (FALAI_BG_REMOVE_MODEL,
-    // REPLICATE_BG_REMOVE_MODEL, FALAI_INPAINT_REFINE_MODEL,
-    // REPLICATE_INPAINT_REFINE_MODEL) rather than this `models` field.
-    // The registry entry's `models` field is retained as a no-op for
-    // type-shape compatibility with the other tools and as a
-    // documentary record of the legacy v4.x choice for a quick
-    // rollback if v5.0 needs to be reverted.
-    mode: "crop-composite-refine",
+    // v7.0 — revert to the pre-v4.0 inpaint-with-prompt pipeline.
+    // After 6 iterations of multi-step pipelines (v4 Nano Banana
+    // multi-image, v5 birefnet+composite+refine, v6 Kontext), the user
+    // identified that the actual regression was data-flow (DB migration
+    // changed the prompt format from authored to boilerplate), not the
+    // model. v7.0 restores the v2.0 mode-aware Flux Fill Dev architecture
+    // — single model, single call, like every other tool. The `models`
+    // field is decorative here: the runPromptInpaint pipeline reads
+    // REPLICATE_INPAINT_MODEL / FALAI_INPAINT_MODEL from env. Kept for
+    // shape consistency with the rest of the registry and as a rollback
+    // record if a future deploy ever wants to flip back.
+    mode: "inpaint-with-prompt",
     models: {
-      replicate: "stability-ai/stable-diffusion-inpainting" as const,
-      falai: "fal-ai/inpaint",
+      replicate: "black-forest-labs/flux-fill-dev" as const,
+      falai: "fal-ai/flux-pro/v1/fill",
     },
     bodySchema: CreateReplaceAddObjectBody,
     bodyJsonSchema: replaceAddObjectBodyJsonSchema,

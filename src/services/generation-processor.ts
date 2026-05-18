@@ -13,7 +13,7 @@ import {
   runRemoval,
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
-import { runCropCompositeRefine } from "../lib/generation/crop-composite-refine.js";
+import { runPromptInpaint } from "../lib/generation/prompt-inpaint.js";
 import { getActiveObjectInspirationOrNull } from "../lib/objectInspiration/firestore.js";
 import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
 import type {
@@ -407,7 +407,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       durationMs = result.durationMs;
     } else if (
       mode === "multi-image-edit-with-mask" ||
-      mode === "crop-composite-refine"
+      mode === "crop-composite-refine" ||
+      mode === "inpaint-with-prompt"
     ) {
       // Replace & Add Object (v4.0): client mask + inspiration image →
       // Nano Banana multi-image instructional edit → composite post-
@@ -573,12 +574,25 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
           message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
         };
       }
-      const result = await runCropCompositeRefine({
+      // v7.0: route through the single-call Flux Fill inpaint pipeline.
+      // The mode-aware prompt builder (replace-add-object.ts) has
+      // already wrapped the inspiration noun in the per-mode wrapper
+      // sentence and set per-mode guidance (75 replace, 70 add). The
+      // pipeline applies per-mode mask dilation (10px replace, 8px add)
+      // before invoking callInpaint.
+      //
+      // `inspirationImageUrl` and `inspirationTitle` resolution above
+      // is retained because preEnqueueValidate still populates the
+      // params blob with them — they're used to enrich the prompt
+      // (inspirationTitle becomes the noun via the builder) but the
+      // pipeline itself only needs the prompt string + mask + mode.
+      void inspirationImageUrl; // silence unused warning; resolved for parity / future revert
+      void inspirationTitle;
+      const result = await runPromptInpaint({
         imageUrl: inputImageUrl,
-        inspirationImageUrl,
-        inspirationTitle,
         maskUrl,
         prompt: promptResult.prompt,
+        guidanceScale: promptResult.guidanceScale,
         mode: requestMode,
         userId,
         generationId,
