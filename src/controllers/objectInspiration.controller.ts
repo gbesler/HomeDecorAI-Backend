@@ -7,6 +7,7 @@ import {
 } from "../lib/controller-helpers.js";
 import {
   ObjectInspirationNotFoundError,
+  getExistingObjectCategoryIds,
   seedObjectCategoryDoc,
   seedObjectInspirationDoc,
   updateObjectInspirationTitleDoc,
@@ -23,7 +24,7 @@ import {
   parseRows,
   parseTitleUpdateRows,
   summarize,
-  validateForeignKeys,
+  validateForeignKeysAsync,
   type Manifest,
   type SeedOutcome,
   type TitleUpdateManifest,
@@ -60,13 +61,49 @@ function rowErrorsToIssues(rowErrors: string[]): SeedRowIssue[] {
   });
 }
 
-function isManifestShape(body: unknown): body is Manifest {
-  return (
-    !!body &&
-    typeof body === "object" &&
-    Array.isArray((body as { categories?: unknown }).categories) &&
-    Array.isArray((body as { items?: unknown }).items)
-  );
+/**
+ * Manifest shape gate. Both fields are optional but at least one must be
+ * present (and an array when present) — lets operators update categories
+ * or items independently without round-tripping the full payload. The
+ * FK fallback in `validateForeignKeysAsync` resolves missing categoryIds
+ * against Firestore so an items-only payload still gets a real FK check.
+ *
+ * Returns a typed manifest with defaulted-to-empty arrays so the rest of
+ * the handler can treat both fields as always-present.
+ */
+function parseManifestShape(
+  body: unknown,
+): { ok: true; manifest: Manifest } | { ok: false; message: string } {
+  if (!body || typeof body !== "object") {
+    return {
+      ok: false,
+      message:
+        "Body must be an object with `categories` and/or `items` arrays.",
+    };
+  }
+  const obj = body as Record<string, unknown>;
+  const hasCategories = "categories" in obj;
+  const hasItems = "items" in obj;
+  if (!hasCategories && !hasItems) {
+    return {
+      ok: false,
+      message:
+        "Body must include at least one of `categories` or `items`.",
+    };
+  }
+  if (hasCategories && !Array.isArray(obj.categories)) {
+    return { ok: false, message: "`categories` must be an array when present." };
+  }
+  if (hasItems && !Array.isArray(obj.items)) {
+    return { ok: false, message: "`items` must be an array when present." };
+  }
+  return {
+    ok: true,
+    manifest: {
+      categories: (obj.categories as unknown[] | undefined) ?? [],
+      items: (obj.items as unknown[] | undefined) ?? [],
+    },
+  };
 }
 
 /**
@@ -89,15 +126,13 @@ export async function bulkSeedObjectInspirationsHandler(
   const userId = request.userId;
   if (!userId) return unauthorized(reply);
 
-  const body = request.body;
-  if (!isManifestShape(body)) {
-    return badRequest(
-      reply,
-      "Body must be `{ categories: array, items: array }`.",
-    );
+  const parsed = parseManifestShape(request.body);
+  if (!parsed.ok) {
+    return badRequest(reply, parsed.message);
   }
+  const manifest = parsed.manifest;
 
-  const { categories, items, errors: rowErrors } = parseRows(body);
+  const { categories, items, errors: rowErrors } = parseRows(manifest);
   if (rowErrors.length > 0) {
     reply.code(400);
     return {
@@ -107,7 +142,16 @@ export async function bulkSeedObjectInspirationsHandler(
     };
   }
 
-  const fkErrors = validateForeignKeys(categories, items);
+  // FK fallback: items may reference categoryIds not inlined in the
+  // submitted `categories` (partial-manifest workflow — operator
+  // updates items only, trusting Firestore-resident categories).
+  // `validateForeignKeysAsync` invokes the resolver at most once with
+  // the deduped orphan id set.
+  const fkErrors = await validateForeignKeysAsync(
+    categories,
+    items,
+    getExistingObjectCategoryIds,
+  );
   if (fkErrors.length > 0) {
     reply.code(400);
     return {
