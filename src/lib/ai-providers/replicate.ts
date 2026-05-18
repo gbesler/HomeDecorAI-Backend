@@ -471,13 +471,15 @@ export async function callInpaintReplicate(
     );
   }
 
-  // Mode tuning calibration warn: the builder's per-mode guidance
-  // values (REPLACE_GUIDANCE/ADD_GUIDANCE in replace-add-object.ts)
-  // are tuned for the active model's native scale. If REPLICATE_INPAINT_MODEL
-  // is reverted (e.g. Pro → Dev) WITHOUT raising the constants, the
+  // Mode tuning calibration warn: the builder's `FLUX_FILL_GUIDANCE`
+  // constant in replace-add-object.ts is tuned for the active model's
+  // native scale (Pro default ~30). If REPLICATE_INPAINT_MODEL is
+  // reverted (e.g. Pro → Dev) WITHOUT raising the constant, the
   // caller sends a Pro-scale value (~30) into a Dev-scale model
-  // (~60 default) — silently under-anchoring the prompt and
-  // re-introducing the v1.3 silhouette-preservation failure mode.
+  // (Replicate's defaultGuidanceScale=60 in the capability matrix,
+  // though BFL's own HF sample also uses 30 against Dev) — risking
+  // silent under-anchoring of the prompt and re-introducing the v1.3
+  // silhouette-preservation failure mode.
   // Fire when caller's value diverges from the model's default by
   // more than 40% (relative) so the misconfiguration surfaces at
   // the first request instead of as user-visible quality regression.

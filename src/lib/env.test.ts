@@ -31,12 +31,12 @@ describe("envSchema — REPLICATE_INPAINT_MODEL default", () => {
   it("defaults to flux-fill-pro when the env var is absent", () => {
     // Guards against an accidental revert of the env default flip
     // (commit 9071fbc). REPLICATE_INPAINT_MODEL must default to Pro
-    // because the per-mode guidance constants in
-    // src/lib/prompts/tools/replace-add-object.ts (REPLACE_GUIDANCE,
-    // ADD_GUIDANCE) are calibrated for Pro's BFL guidance scale ~30.
-    // A silent revert to Dev would send Pro-scale guidance into
-    // Dev's native scale (~60), under-anchoring the prompt and
-    // re-introducing the v1.3 silhouette-preservation failure.
+    // because `FLUX_FILL_GUIDANCE` in
+    // src/lib/prompts/tools/replace-add-object.ts is calibrated for
+    // Pro's BFL guidance scale (~30). A silent revert to Dev would
+    // send Pro-scale guidance into Dev's native scale (~60),
+    // under-anchoring the prompt and re-introducing the v1.3
+    // silhouette-preservation failure.
     const result = envSchema.parse(minimalEnv());
     assert.equal(result.REPLICATE_INPAINT_MODEL, "black-forest-labs/flux-fill-pro");
   });
