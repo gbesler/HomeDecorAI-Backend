@@ -1,9 +1,12 @@
 import { callDesignGeneration } from "../ai-providers/router.js";
 import type { ProviderId } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
+import { withRetry } from "../retry.js";
+import { StorageUploadError } from "../storage/s3-upload.js";
 import { compositeMaskedResult } from "./composite-masked-result.js";
 import {
   logNormalizeResult,
+  NormalizeInputError,
   normalizeImageMaskPair,
 } from "./normalize-image-mask-pair.js";
 import { probeImageAspectRatio } from "./probe-aspect-ratio.js";
@@ -137,11 +140,16 @@ export async function runMultiImageEdit(
   // two-image array — the structural difference in the model's
   // response would be a quality regression that's hard to diagnose
   // from logs alone. Fail loudly here.
+  //
+  // `NormalizeInputError` (not a plain `Error`) so the processor's
+  // outer catch routes this to `VALIDATION_FAILED` rather than
+  // `AI_PROVIDER_FAILED` — this is a server-side configuration error,
+  // not a provider outage, and dashboard taxonomy should reflect that.
   if (
     typeof input.inspirationImageUrl !== "string" ||
     input.inspirationImageUrl.length === 0
   ) {
-    throw new Error(
+    throw new NormalizeInputError(
       "multi-image-edit: inspirationImageUrl is required but was empty — preEnqueueValidate must populate it",
     );
   }
@@ -165,14 +173,56 @@ export async function runMultiImageEdit(
   // hint the prompt relies on. The normalize step's other guarantees
   // (image long-side cap, EXIF orientation bake, empty-mask refusal)
   // still apply.
-  const normalized = await normalizeImageMaskPair({
-    imageUrl: input.imageUrl,
-    maskUrl: input.maskUrl,
-    userId: input.userId,
-    generationId: input.generationId,
-    dilateMaskPx: 0,
-    callerKind: "inpaint",
-  });
+  //
+  // Wrapped in `withRetry` with the same envelope the deleted
+  // `prompt-inpaint.ts` used: one retry on transient errors, no retry
+  // on deterministic shape/config errors. Without this wrapper a
+  // transient S3 5xx during the normalize-step's PUT permanently
+  // fails the generation as `STORAGE_FAILED` (terminal) before the
+  // model is even called — same regression class the inpaint path
+  // had pre-2026-04 and explicitly guarded against.
+  const normalized = await withRetry(
+    () =>
+      normalizeImageMaskPair({
+        imageUrl: input.imageUrl,
+        maskUrl: input.maskUrl,
+        userId: input.userId,
+        generationId: input.generationId,
+        dilateMaskPx: 0,
+        callerKind: "inpaint",
+      }),
+    {
+      maxRetries: 1,
+      delayMs: 1000,
+      isRetryable: (error) => {
+        if (error instanceof NormalizeInputError) return false;
+        if (error instanceof StorageUploadError) {
+          const msg = error.message;
+          if (
+            msg.includes("Host not in AI download allowlist") ||
+            msg.includes("exceeds limit") ||
+            msg.includes("Invalid source URL") ||
+            msg.includes("refusing to persist an empty buffer") ||
+            msg.includes("Refused to download non-HTTP(S)")
+          ) {
+            return false;
+          }
+        }
+        return true;
+      },
+      onRetry: (error, attempt) => {
+        logger.warn(
+          {
+            event: "inpaint.multi.normalize.retry",
+            generationId: input.generationId,
+            error: error.message,
+            attempt,
+          },
+          "Normalize pre-step failed, retrying",
+        );
+      },
+    },
+  );
   logNormalizeResult(input.generationId, normalized, "inpaint");
 
   // Probe the room image's AR so the provider's `aspect_ratio` field

@@ -646,20 +646,29 @@ export const CreateRemoveObjectsBody = zod.object({
 });
 
 /**
- * Replace & Add Object — prompt-driven inpainting of a user-painted region.
+ * Replace & Add Object — multi-image instructional edit of a user-painted region.
  *
- * Distinct from Remove Objects (which uses LaMa to extend surroundings): this
- * tool generates NEW content inside the masked region guided by an inspiration
- * prompt curated from a 40×20 item library on the client.
+ * v4.0 pipeline (Nano Banana / Gemini 2.5 Flash Image): sends room photo,
+ * inspiration reference photo, and brush mask to a multi-image edit model
+ * with an instruction template referencing image 1 / image 2 / image 3.
+ * A sharp-based composite post-process enforces outside-mask pixel
+ * preservation against the original room photo. Distinct from Remove
+ * Objects (which uses LaMa to extend surroundings); this tool generates a
+ * NEW object inside the masked region matching the visual identity of the
+ * inspiration the user picked.
  *
- * Mask encoding: white pixels = replace, black pixels = preserve. Both
+ * Mask encoding: white pixels = modify, black pixels = preserve. Both
  * `imageUrl` and `maskUrl` must be hosted on an allowlisted host (CloudFront
  * or S3) — SSRF guard, same as Remove Objects.
  *
- * `categoryId` + `inspirationId` ride along for analytics (never reach the
- * AI provider); they live inside `toolParams` on the `GenerationDoc`.
+ * `categoryId` + `inspirationId` are admin-curated lookup keys. The server
+ * resolves `inspirationImageUrl` and `inspirationTitle` from
+ * `objectInspirations/{inspirationId}` in `preEnqueueValidate`; iOS clients
+ * do not need to set those fields. Any client-supplied value for those
+ * server-internal fields is overwritten with the Firestore-authoritative
+ * value.
  *
- * @summary Enqueue a replace/add object inpainting
+ * @summary Enqueue a replace/add object multi-image edit
  */
 export const CreateReplaceAddObjectBody = zod.object({
   imageUrl: zod

@@ -148,7 +148,7 @@ export async function compositeMaskedResult(
 
   logger.info(
     {
-      event: "composite.started",
+      event: "inpaint.composite.started",
       generationId: input.generationId,
       featherSigma,
     },
@@ -165,19 +165,6 @@ export async function compositeMaskedResult(
     downloadSafe(input.maskUrl),
   ]);
 
-  // Read the original's dimensions — they're the source of truth.
-  // Nano Banana usually returns the same shape when `aspect_ratio:
-  // "auto"` is set, but a defensive resize below handles the
-  // occasional off-by-one or aspect drift without bombing the
-  // pipeline.
-  const originalMeta = await sharp(originalDl.buffer).metadata();
-  if (originalMeta.width == null || originalMeta.height == null) {
-    throw new StorageUploadError(
-      `composite: original image has no width/height (format=${originalMeta.format ?? "unknown"})`,
-    );
-  }
-  const { width, height } = originalMeta;
-
   // Decode the original into a normalized RGB buffer at native
   // dimensions. `.rotate()` bakes any EXIF orientation so the
   // downstream composite operates in the same coordinate system the
@@ -185,12 +172,30 @@ export async function compositeMaskedResult(
   // `normalize-image-mask-pair.ts`'s post-rotation pass. No
   // `.withMetadata()`: we don't want sharp re-applying orientation on
   // re-decode of the final output.
-  const originalRgb = await sharp(originalDl.buffer)
+  //
+  // `toBuffer({ resolveWithObject: true })` returns the POST-rotation
+  // dimensions in `info`. A prior implementation read dimensions from
+  // `sharp(originalDl.buffer).metadata()` first — those are the raw
+  // pre-rotation dims (e.g. 4032×3024 for a portrait iPhone shot with
+  // EXIF orientation=6) and using them as resize targets transposed
+  // the editedRgb against the post-rotation originalRgb, producing
+  // geometrically broken composites for the majority of iOS portrait
+  // captures.
+  const { data: originalRgb, info: originalInfo } = await sharp(
+    originalDl.buffer,
+  )
     .rotate()
     .removeAlpha()
     .toColorspace("srgb")
-    .toFormat("png")
-    .toBuffer();
+    .png()
+    .toBuffer({ resolveWithObject: true });
+
+  if (originalInfo.width === 0 || originalInfo.height === 0) {
+    throw new StorageUploadError(
+      `composite: original image has no width/height (format=${originalInfo.format})`,
+    );
+  }
+  const { width, height } = originalInfo;
 
   // Resize the edited image to match the original's dims. `fit: "fill"`
   // (not "cover" or "contain") because Nano Banana usually already
@@ -205,8 +210,14 @@ export async function compositeMaskedResult(
     .toBuffer();
 
   // Convert the mask to a single-channel feathered alpha. Steps:
-  //   1. Greyscale (mask may have shipped as RGB white-on-black; we
-  //      collapse to luminance).
+  //   1. removeAlpha + greyscale: collapse any RGB-or-RGBA mask to a
+  //      single luminance channel. iOS UIGraphicsImageRenderer
+  //      defaults to RGBA, and sharp's `.greyscale()` alone does NOT
+  //      drop the alpha channel (it converts the color channels to
+  //      luminance but retains existing alpha). Forcing single-channel
+  //      here means `joinChannel` below appends EXACTLY one channel,
+  //      not two — preventing a 5-channel buffer that silently
+  //      ignores the feathered alpha.
   //   2. Resize to match original dims (mask may have a different
   //      shape from normalize-image-mask-pair output if anything
   //      drifted upstream).
@@ -223,6 +234,7 @@ export async function compositeMaskedResult(
   // OPPOSITE — a soft feathered alpha. Re-thresholding would
   // re-introduce the hard edge we're trying to remove.
   const featheredAlpha = await sharp(maskDl.buffer)
+    .removeAlpha()
     .greyscale()
     .resize(width, height, { fit: "fill" })
     .blur(featherSigma)
@@ -236,11 +248,18 @@ export async function compositeMaskedResult(
   // original RGB with `blend: "over"` — sharp's standard
   // alpha-over-RGB operation.
   //
-  // Sharp's `joinChannel` requires the joined channel to be the same
-  // dimensions and bit depth as the base, which the explicit resize
-  // + greyscale steps above guarantee.
+  // DO NOT call `.ensureAlpha()` before `.joinChannel()`. sharp's
+  // `joinChannel` APPENDS a channel rather than replacing. ensureAlpha
+  // would first add a fully-opaque alpha channel (255 everywhere),
+  // then joinChannel would append the feathered mask as a FIFTH
+  // channel. When sharp encodes back to PNG it drops to RGBA — keeping
+  // ensureAlpha's all-255 alpha and DISCARDING the feathered mask.
+  // The composite step would then run alpha=255 over the original
+  // everywhere, completely overwriting outside-mask pixels and
+  // defeating the only reason this file exists. joinChannel on a
+  // 3-channel RGB base (editedRgb came through .removeAlpha() above)
+  // appends a 4th channel which becomes alpha at PNG encode time.
   const editedWithAlpha = await sharp(editedRgb)
-    .ensureAlpha()
     .joinChannel(featheredAlpha)
     .toFormat("png")
     .toBuffer();
@@ -267,7 +286,7 @@ export async function compositeMaskedResult(
 
   logger.info(
     {
-      event: "composite.completed",
+      event: "inpaint.composite.completed",
       generationId: input.generationId,
       featherSigma,
       width,

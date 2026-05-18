@@ -435,7 +435,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
         // closed.
         logger.error(
           {
-            event: "processor.multi_image_edit.inspiration_image_missing",
+            event: "processor.inpaint.multi.inspiration_image_missing",
             toolType,
             generationId,
           },
@@ -473,7 +473,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       if (requestMode !== "replace" && requestMode !== "add") {
         logger.error(
           {
-            event: "processor.multi_image_edit.mode_guard_fired",
+            event: "processor.inpaint.multi.mode_guard_fired",
             toolType,
             generationId,
             requestMode:
