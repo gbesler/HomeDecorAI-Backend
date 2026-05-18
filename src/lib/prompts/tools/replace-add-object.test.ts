@@ -203,6 +203,100 @@ describe("buildReplaceAddObjectPrompt — add mode", () => {
   });
 });
 
+describe("buildReplaceAddObjectPrompt — bbox-aware (text-spatial)", () => {
+  // The pipeline (multi-image-edit.ts) computes the brush mask's
+  // white-pixel bounding box after normalize and re-calls this
+  // builder with `{ maskBbox }`. The bbox path emits a
+  // text-coordinate region descriptor instead of referring to
+  // "image 3" — staging confirmed Nano Banana does not interpret
+  // the third image_input slot as a semantic mask, so the bbox
+  // text is the load-bearing spatial signal.
+  const bbox = { left: 0.09, top: 0.64, right: 0.24, bottom: 0.89 };
+
+  it("emits a bbox-aware replace prompt that names percent coords and drops 'image 3'", () => {
+    const result = buildReplaceAddObjectPrompt(
+      {
+        ...baseParams,
+        mode: "replace",
+        inspirationTitle: "Pedestal Dining Table",
+      },
+      { maskBbox: bbox },
+    );
+    assert.match(
+      result.prompt,
+      /replacing the existing object inside the rectangular region of image 1 from \(left 9%, top 64%\) to \(right 24%, bottom 89%\) with the Pedestal Dining Table shown in image 2/i,
+    );
+    assert.doesNotMatch(result.prompt, /\bimage 3\b/i);
+    assert.doesNotMatch(result.prompt, /white region/i);
+  });
+
+  it("emits a bbox-aware add prompt with 'place into' verb framing", () => {
+    const result = buildReplaceAddObjectPrompt(
+      {
+        ...baseParams,
+        mode: "add",
+        inspirationTitle: "Rattan Pendant",
+      },
+      { maskBbox: bbox },
+    );
+    assert.match(
+      result.prompt,
+      /placing the Rattan Pendant shown in image 2 into the rectangular region of image 1 from \(left 9%, top 64%\) to \(right 24%, bottom 89%\)/i,
+    );
+    assert.doesNotMatch(result.prompt, /\bimage 3\b/i);
+    assert.match(
+      result.prompt,
+      /cast a natural shadow appropriate to image 1's existing lighting/i,
+    );
+  });
+
+  it("rounds bbox coordinates to whole percentage points", () => {
+    // Sub-percent precision floats add token weight with no signal.
+    const oddBbox = {
+      left: 0.0834,
+      top: 0.6421,
+      right: 0.2401,
+      bottom: 0.8888,
+    };
+    const result = buildReplaceAddObjectPrompt(
+      { ...baseParams, mode: "replace", inspirationTitle: "Cactus" },
+      { maskBbox: oddBbox },
+    );
+    assert.match(
+      result.prompt,
+      /\(left 8%, top 64%\) to \(right 24%, bottom 89%\)/,
+    );
+    // No decimal points in the percentage tokens.
+    assert.doesNotMatch(result.prompt, /\d+\.\d+%/);
+  });
+
+  it("falls back to the image-3-as-mask template when maskBbox is null", () => {
+    const result = buildReplaceAddObjectPrompt(
+      { ...baseParams, mode: "replace", inspirationTitle: "Cactus" },
+      { maskBbox: null },
+    );
+    assert.match(result.prompt, /\bimage 3\b/);
+    assert.match(result.prompt, /white region of image 3/);
+  });
+
+  it("preserves the v4.0 promptVersion regardless of bbox presence", () => {
+    const withBbox = buildReplaceAddObjectPrompt(
+      { ...baseParams, mode: "replace", inspirationTitle: "Cactus" },
+      { maskBbox: bbox },
+    );
+    const withoutBbox = buildReplaceAddObjectPrompt({
+      ...baseParams,
+      mode: "replace",
+      inspirationTitle: "Cactus",
+    });
+    assert.equal(withBbox.promptVersion, withoutBbox.promptVersion);
+    assert.equal(
+      withBbox.promptVersion,
+      "replaceAddObject/v4.0-nano-banana-instructional",
+    );
+  });
+});
+
 describe("buildReplaceAddObjectPrompt — fallback when title is missing", () => {
   it("falls back to 'object' when inspirationTitle is undefined", () => {
     // Should be unreachable in production — preEnqueueValidate
