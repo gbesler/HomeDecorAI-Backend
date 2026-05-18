@@ -164,7 +164,8 @@ export interface ToolTypeConfig<
     | "edit"
     | "segment-remove"
     | "remove-only"
-    | "multi-image-edit-with-mask";
+    | "multi-image-edit-with-mask"
+    | "crop-composite-refine";
   /** AI provider model IDs for the router. Consumed only when mode is "edit". */
   models: {
     replicate: `${string}/${string}`;
@@ -1429,27 +1430,27 @@ export const TOOL_TYPES = {
     toolKey: "replaceAddObject",
     routePath: "/replace-add-object",
     rateLimitKey: "replaceAddObject",
-    // Multi-image instructional edit pipeline (v4.0). Replaces the
-    // earlier Flux Fill caption-fill path. The client supplies the
-    // brush mask; `preEnqueueValidate` resolves the inspiration's
-    // reference image and title from Firestore. The processor's
-    // `multi-image-edit-with-mask` branch assembles a 3-image array
-    // (room, inspiration, mask) and feeds it to Nano Banana
-    // (`google/nano-banana`) with an instructional prompt. A
-    // post-process composite step (compositeMaskedResult) enforces
-    // outside-mask pixel preservation against the original room
-    // image. Replicate primary, fal.ai (`fal-ai/flux-2/edit`) fallback
-    // — both are multi-image-edit-capable per `capabilities.ts`.
+    // Crop-Composite-Refine pipeline (v5.0). Replaces v4.x multi-image
+    // instructional edit (Nano Banana), which failed in production
+    // because Nano Banana ignored both the mask-as-image-3 signal and
+    // the bbox text-spatial signal. v5.0 moves spatial precision out
+    // of the model: the inspiration is background-removed via fal.ai
+    // BiRefNet, then pixel-composited into the user-painted region
+    // (100% spatial accuracy, no model involved), then a low-strength
+    // SDXL inpaint refine pass blends lighting/shadows around the
+    // mask edge so the result doesn't look pasted.
     //
-    // `models` fields are NOT decorative for this mode — the
-    // `multi-image-edit-with-mask` branch reads them directly off the
-    // registry entry (unlike segment/remove which read env vars).
-    // Operators that want to flip between Nano Banana and a future
-    // model do so by editing the registry entry, not env.
-    mode: "multi-image-edit-with-mask",
+    // The pipeline reads model slugs from env (FALAI_BG_REMOVE_MODEL,
+    // REPLICATE_BG_REMOVE_MODEL, FALAI_INPAINT_REFINE_MODEL,
+    // REPLICATE_INPAINT_REFINE_MODEL) rather than this `models` field.
+    // The registry entry's `models` field is retained as a no-op for
+    // type-shape compatibility with the other tools and as a
+    // documentary record of the legacy v4.x choice for a quick
+    // rollback if v5.0 needs to be reverted.
+    mode: "crop-composite-refine",
     models: {
-      replicate: "google/nano-banana" as const,
-      falai: "fal-ai/flux-2/edit",
+      replicate: "stability-ai/stable-diffusion-inpainting" as const,
+      falai: "fal-ai/inpaint",
     },
     bodySchema: CreateReplaceAddObjectBody,
     bodyJsonSchema: replaceAddObjectBodyJsonSchema,

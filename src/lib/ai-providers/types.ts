@@ -147,6 +147,25 @@ export interface RemovalOutput {
   durationMs: number;
 }
 
+// ─── Background removal (BiRefNet family) ─────────────────────────────────
+//
+// Background-removal models accept an image and return a PNG cutout with
+// transparent background. Used by the Replace & Add Object v5.0 pipeline
+// (crop-composite-refine) to isolate the inspiration object before pasting
+// it into the masked region of the room.
+
+export interface BgRemoveInput {
+  /** Public URL of the source image to cut out. */
+  imageUrl: string;
+}
+
+export interface BgRemoveOutput {
+  /** Public URL of the cutout PNG (transparent background). */
+  imageUrl: string;
+  provider: ProviderId;
+  durationMs: number;
+}
+
 // ─── Inpainting with prompt (Flux Fill family) ─────────────────────────────
 //
 // Flux Fill (and peers like SDXL Inpainting) accept image + mask + prompt,

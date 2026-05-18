@@ -13,7 +13,7 @@ import {
   runRemoval,
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
-import { runMultiImageEdit } from "../lib/generation/multi-image-edit.js";
+import { runCropCompositeRefine } from "../lib/generation/crop-composite-refine.js";
 import { getActiveObjectInspirationOrNull } from "../lib/objectInspiration/firestore.js";
 import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
 import type {
@@ -405,7 +405,10 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;
       durationMs = result.durationMs;
-    } else if (mode === "multi-image-edit-with-mask") {
+    } else if (
+      mode === "multi-image-edit-with-mask" ||
+      mode === "crop-composite-refine"
+    ) {
       // Replace & Add Object (v4.0): client mask + inspiration image →
       // Nano Banana multi-image instructional edit → composite post-
       // process. `maskUrl` is a client-uploaded artifact (host-
@@ -570,14 +573,13 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
           message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
         };
       }
-      const result = await runMultiImageEdit({
+      const result = await runCropCompositeRefine({
         imageUrl: inputImageUrl,
         inspirationImageUrl,
         inspirationTitle,
         maskUrl,
         prompt: promptResult.prompt,
         mode: requestMode,
-        models: tool.models,
         userId,
         generationId,
       });
