@@ -187,7 +187,7 @@ export const envSchema = z.object({
     .string()
     .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")
     .optional()
-    .default("black-forest-labs/flux-fill-pro")
+    .default("black-forest-labs/flux-fill-dev")
     .transform((v) => v as `${string}/${string}`),
   // fal.ai fallback model slugs for the segment/remove/inpaint pipelines.
   // Hot-swappable without a deploy for parity with the REPLICATE_* entries

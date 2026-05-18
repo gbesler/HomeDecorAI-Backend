@@ -28,29 +28,27 @@ function minimalEnv(): Record<string, string> {
 }
 
 describe("envSchema — REPLICATE_INPAINT_MODEL default", () => {
-  it("defaults to flux-fill-pro when the env var is absent", () => {
-    // Guards against an accidental revert of the env default flip
-    // (commit 9071fbc). REPLICATE_INPAINT_MODEL must default to Pro
-    // because `FLUX_FILL_GUIDANCE` in
-    // src/lib/prompts/tools/replace-add-object.ts is calibrated for
-    // Pro's BFL guidance scale (~30). A silent revert to Dev would
-    // send Pro-scale guidance into Dev's native scale (~60),
-    // under-anchoring the prompt and re-introducing the v1.3
-    // silhouette-preservation failure.
+  it("defaults to flux-fill-dev when the env var is absent", () => {
+    // v7.0 default — flux-fill-dev with REPLACE_GUIDANCE=75 /
+    // ADD_GUIDANCE=70 in replace-add-object.ts. The v2.0 mode-aware
+    // builder ships per-mode guidance overrides above Dev's native
+    // ~60 default. If the default ever silently flips to Pro again,
+    // those Dev-scale guidance values would send ~2.5x the recommended
+    // value into Pro's native ~30 scale, over-saturating the prompt
+    // anchor.
     const result = envSchema.parse(minimalEnv());
-    assert.equal(result.REPLICATE_INPAINT_MODEL, "black-forest-labs/flux-fill-pro");
+    assert.equal(result.REPLICATE_INPAINT_MODEL, "black-forest-labs/flux-fill-dev");
   });
 
-  it("respects an explicit override to flux-fill-dev", () => {
-    // Confirms the override path used by the documented revert
-    // recipe (raise guidance constants in replace-add-object.ts AND
-    // set this env var to flux-fill-dev). If override resolution
-    // ever silently drops the override, this test fails.
+  it("respects an explicit override to flux-fill-pro", () => {
+    // Confirms the override path used by the operator-documented
+    // rollback recipe (lower guidance constants in replace-add-object.ts
+    // AND set this env var to flux-fill-pro).
     const result = envSchema.parse({
       ...minimalEnv(),
-      REPLICATE_INPAINT_MODEL: "black-forest-labs/flux-fill-dev",
+      REPLICATE_INPAINT_MODEL: "black-forest-labs/flux-fill-pro",
     });
-    assert.equal(result.REPLICATE_INPAINT_MODEL, "black-forest-labs/flux-fill-dev");
+    assert.equal(result.REPLICATE_INPAINT_MODEL, "black-forest-labs/flux-fill-pro");
   });
 
   it("rejects malformed model slugs", () => {
