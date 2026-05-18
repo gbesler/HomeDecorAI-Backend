@@ -1,7 +1,9 @@
 import type { FastifySchema } from "fastify";
 import { type z } from "zod";
 import { env } from "./env.js";
+import { logger } from "./logger.js";
 import { getActiveObjectInspirationOrNull } from "./objectInspiration/firestore.js";
+import { validatePublicImageUrl } from "./storage/url-validation.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
   buildExteriorPrompt,
@@ -1039,6 +1041,51 @@ const virtualStagingBodyJsonSchema = {
   },
 };
 
+// ─── Helpers for the Replace & Add Object preEnqueueValidate hook ─────────
+
+/**
+ * Maximum length of the `{category}` noun phrase that interpolates into
+ * the v4.0 instructional prompt. 80 chars covers every legitimate
+ * catalog title (longest in the current seed manifest is "Hand-Knotted
+ * Persian Wool Runner" at ~36 chars) with comfortable headroom, while
+ * bounding the worst case if a future admin title runs long or contains
+ * embedded instruction-following content.
+ */
+const INSPIRATION_TITLE_MAX_LENGTH = 80;
+
+/**
+ * Strip prompt-injection-weight characters from the inspiration title
+ * before it interpolates into Gemini's instructional prompt. Removes
+ * newlines, tabs, and other control characters that could let a
+ * malicious admin escape the surrounding template context.
+ */
+const TITLE_STRIP_CHARS = /[\x00-\x1f\x7f]+/g;
+
+/**
+ * Prepare an inspiration's `title.en` for use as the `{category}` noun
+ * phrase in the v4.0 multi-image-edit instructional prompt. Returns an
+ * empty string when `title.en` is missing or empty — the builder treats
+ * that as a signal to emit its `FALLBACK_CATEGORY` ("object").
+ *
+ * Why English-only (no `title.tr` or `doc.prompt` fallback): the
+ * instructional template is in English ("replace the object ... with
+ * the {category} shown in image 2"). Interpolating a Turkish noun or
+ * the seed-template boilerplate ("A cactus suitable for interior
+ * design placement.") produces grammatically broken / contradictory
+ * prompts that confuse Gemini's instruction follower. When `title.en`
+ * is genuinely empty for a catalog item, the FALLBACK_CATEGORY path
+ * produces a sensible degraded prompt ("with the object shown in
+ * image 2") that still conveys the user's mask + reference image
+ * intent.
+ */
+function sanitizeInspirationTitle(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  const stripped = raw.replace(TITLE_STRIP_CHARS, " ").trim();
+  if (stripped.length === 0) return "";
+  if (stripped.length <= INSPIRATION_TITLE_MAX_LENGTH) return stripped;
+  return stripped.slice(0, INSPIRATION_TITLE_MAX_LENGTH).trim();
+}
+
 // ─── Tool registry ─────────────────────────────────────────────────────────
 
 export const TOOL_TYPES = {
@@ -1461,6 +1508,13 @@ export const TOOL_TYPES = {
       // visible. Pre-v4.0 this defense was unnecessary because the
       // pipeline only consumed the prompt string.
       if (typeof doc.imageUrl !== "string" || doc.imageUrl.length === 0) {
+        logger.warn(
+          {
+            event: "preEnqueueValidate.inspiration.image_url_missing",
+            inspirationId: params.inspirationId,
+          },
+          "Inspiration doc missing imageUrl — data quality issue, refusing to dispatch",
+        );
         return {
           ok: false,
           status: 409,
@@ -1469,19 +1523,59 @@ export const TOOL_TYPES = {
             "Selected inspiration is missing required content. Please pick another.",
         };
       }
-      // Substitute server-authoritative fields so the generation runs
-      // against curated content even if the client body tried to ride
-      // along with stale or hand-crafted values:
-      //   - prompt:               normalized noun string (legacy callers
-      //                           and v3.0 builder still read this)
-      //   - categoryId:           analytics key, must match Firestore
-      //   - inspirationImageUrl:  reference photo URL, consumed by v4.0
-      //                           multi-image pipeline as image 2
-      //   - inspirationTitle:     English title used as the {category}
-      //                           noun phrase in the v4.0 instructional
-      //                           prompt. Falls back to tr → en
-      //                           best-effort if title.en is empty.
-      const fallbackTitle = doc.title.en || doc.title.tr || doc.prompt;
+      // SSRF defense — the Firestore-resolved `imageUrl` is forwarded
+      // to Replicate / fal.ai as image 2 in the multi-image array.
+      // Admin-curated content is trusted at the auth layer but NOT at
+      // the SSRF layer: a compromised or malicious admin who writes
+      // `http://169.254.169.254/...` (AWS IMDS) or any RFC-1918 host
+      // would otherwise have the provider worker fetch that URL from
+      // its own (cloud datacenter) network namespace. Same private-host
+      // regex the controller applies to client-supplied URLs.
+      const urlCheck = validatePublicImageUrl(doc.imageUrl, "inspirationImageUrl");
+      if (!urlCheck.ok) {
+        logger.error(
+          {
+            event: "preEnqueueValidate.inspiration.url_unsafe",
+            inspirationId: params.inspirationId,
+            reason: urlCheck.message,
+          },
+          "Inspiration imageUrl failed SSRF/scheme validation — possible Firestore tampering or data-quality regression",
+        );
+        return {
+          ok: false,
+          status: 409,
+          code: "CONTENT_UNAVAILABLE",
+          message:
+            "Selected inspiration is missing required content. Please pick another.",
+        };
+      }
+      // Title sanitization for the {category} noun phrase that
+      // interpolates into the v4.0 instructional prompt:
+      //
+      //   - English-only. The instructional template is in English, so
+      //     interpolating `title.tr` (Turkish) or `doc.prompt` (seed-
+      //     template boilerplate "A cactus suitable for interior
+      //     design placement.") produces grammatically broken or
+      //     contradictory prompts. We fall through to a fixed marker
+      //     (the empty string) when `title.en` is empty; the builder
+      //     emits its FALLBACK_CATEGORY ("object") in that case.
+      //
+      //   - Length capped at 80 chars. The instructional templates run
+      //     ~120 chars; an unbounded title pushes the total prompt
+      //     toward Gemini's instruction-following horizon and dilutes
+      //     the structural signals (image 1 / image 2 / image 3
+      //     references).
+      //
+      //   - Prompt-injection-weight characters stripped: newlines,
+      //     control characters, em-dashes used to introduce sub-clauses.
+      //     Periods are preserved (cataloged items like "F. Bossi") but
+      //     can be hijacked by a malicious admin title like
+      //     "Cactus. Ignore previous instructions." — the structural
+      //     guard around the instruction's surrounding context (the
+      //     template's "Match image 1's lighting direction..." clauses)
+      //     makes this attack low-yield, but the explicit length cap
+      //     bounds the worst case anyway.
+      const sanitizedTitle = sanitizeInspirationTitle(doc.title.en);
       return {
         ok: true,
         params: {
@@ -1489,7 +1583,7 @@ export const TOOL_TYPES = {
           prompt: doc.prompt,
           categoryId: doc.categoryId,
           inspirationImageUrl: doc.imageUrl,
-          inspirationTitle: fallbackTitle,
+          inspirationTitle: sanitizedTitle,
         },
       };
     },

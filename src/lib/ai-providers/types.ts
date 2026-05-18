@@ -40,6 +40,9 @@ export interface GenerationInput {
   extraImageUrls?: string[];
   outputFormat?: string;
   guidanceScale?: number;
+  // (extraImageUrls filter helper lives below — kept colocated with
+  // the GenerationInput shape so both provider adapters consume an
+  // identical capability gate + URL filter without copy-paste.)
   /**
    * Aspect ratio snapped to one of the provider's supported enum values
    * (e.g. "16:9", "4:3", "1:1", "3:4", "9:16"). When set, the adapter
@@ -60,6 +63,30 @@ export interface GenerationOutput {
   provider: ProviderId;
   durationMs: number;
   requestId?: string;
+}
+
+/**
+ * Provider-adapter helper. Returns the validated subset of
+ * `input.extraImageUrls` that should ride along after `imageUrl` and
+ * `referenceImageUrl` in the model's image array. Gates on
+ * `supportsReferenceImage: true` (same capability that enables the
+ * primary reference slot) because a model without multi-image support
+ * has no way to disambiguate the extras and would silently drop or
+ * schema-reject them. Filters out non-string and empty entries.
+ *
+ * Shared between `callReplicate` and `callFalAI` so any future change
+ * (additional capability gate, length cap, URL validation pass) lives
+ * in one place rather than diverging across adapters.
+ */
+export function resolveExtraImageUrls(
+  capabilities: { supportsReferenceImage?: boolean } | undefined,
+  input: { extraImageUrls?: string[] },
+): string[] {
+  if (capabilities?.supportsReferenceImage !== true) return [];
+  if (!Array.isArray(input.extraImageUrls)) return [];
+  return input.extraImageUrls.filter(
+    (u): u is string => typeof u === "string" && u.length > 0,
+  );
 }
 
 // ─── Segmentation (Grounded-SAM family) ─────────────────────────────────────

@@ -9,7 +9,7 @@ import {
   NormalizeInputError,
   normalizeImageMaskPair,
 } from "./normalize-image-mask-pair.js";
-import { probeImageAspectRatio } from "./probe-aspect-ratio.js";
+import { snapToSupportedRatio } from "./probe-aspect-ratio.js";
 
 /**
  * Multi-image instructional edit pipeline (v4.0 — Nano Banana).
@@ -225,15 +225,21 @@ export async function runMultiImageEdit(
   );
   logNormalizeResult(input.generationId, normalized, "inpaint");
 
-  // Probe the room image's AR so the provider's `aspect_ratio` field
-  // gets the input's actual orientation. Nano Banana's
-  // `aspect_ratio: "auto"` default usually does this correctly, but
-  // an explicit value short-circuits any provider-side AR snapping
-  // that would produce dims slightly off from the original — saving
-  // the composite step a defensive resize. Returns null when the
-  // probe fails (e.g. unusual content type), and the adapter
-  // gracefully skips the field in that case.
-  const aspectRatio = await probeImageAspectRatio(normalized.imageUrl);
+  // Snap the room image's AR to the provider's `aspect_ratio` enum
+  // using the dimensions normalizeImageMaskPair already computed in
+  // memory — no extra HTTP download required. (A prior implementation
+  // called probeImageAspectRatio(normalized.imageUrl) here, which
+  // re-downloaded the just-uploaded normalized image purely to ask
+  // sharp for its dimensions a second time. The dimensions are right
+  // there in `normalized.after.image`.) Explicit AR forwarding
+  // short-circuits any provider-side AR snapping that would produce
+  // dims slightly off from the original.
+  const aspectRatio =
+    normalized.after.image.width > 0 && normalized.after.image.height > 0
+      ? snapToSupportedRatio(
+          normalized.after.image.width / normalized.after.image.height,
+        )
+      : undefined;
 
   // Stage 2: call the multi-image edit model. The provider adapters
   // (replicate.ts / falai.ts) construct the 3-element image array
@@ -250,7 +256,7 @@ export async function runMultiImageEdit(
     imageUrl: normalized.imageUrl,
     referenceImageUrl: input.inspirationImageUrl,
     extraImageUrls: [normalized.maskUrl],
-    aspectRatio: aspectRatio ?? undefined,
+    aspectRatio,
     // No guidanceScale — Nano Banana has no CFG knob
     // (supportsGuidanceScale: false). Provider adapters drop the
     // field when the capability matrix says so, but explicitly
@@ -270,17 +276,25 @@ export async function runMultiImageEdit(
     "Multi-image edit model call completed",
   );
 
-  // Stage 3: composite the model output back over the ORIGINAL room
-  // image (not the normalized one) using the ORIGINAL brush mask.
-  // Using the originals here is intentional — the user uploaded that
-  // image expecting their pixels back outside the mask region, not
-  // the normalize step's re-encoded JPEG. The composite resizes
-  // model output to the original's dimensions defensively (sharp's
-  // `fit: "fill"`); see compositeMaskedResult for the math.
+  // Stage 3: composite the model output back over the NORMALIZED room
+  // image using the NORMALIZED mask. Using the originals would bypass
+  // the normalize step's MAX_LONG_SIDE=2048 cap — a 48 MP iPhone
+  // capture would allocate ~80 MB of RGBA buffers through the sharp
+  // composite pipeline and approach the Render instance's 512 MB
+  // memory ceiling under concurrent load. The normalize step already
+  // baked EXIF orientation and matched image+mask dims, so the
+  // composite runs in a known-bounded, dim-aligned coordinate space.
+  //
+  // The "user expects original pixels back outside the mask" property
+  // is preserved at the perceptual level: normalize's re-encode is a
+  // single q=90 JPEG pass, visually identical to the input at the
+  // resolution caps we ship. Strict byte-identical preservation was
+  // never available anyway — the normalize step's re-encode of the
+  // user upload runs upstream of any composite work.
   const composite = await compositeMaskedResult({
-    originalUrl: input.imageUrl,
+    originalUrl: normalized.imageUrl,
     editedUrl: modelResult.imageUrl,
-    maskUrl: input.maskUrl,
+    maskUrl: normalized.maskUrl,
     userId: input.userId,
     generationId: input.generationId,
   });

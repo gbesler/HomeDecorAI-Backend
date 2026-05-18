@@ -14,6 +14,8 @@ import {
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
 import { runMultiImageEdit } from "../lib/generation/multi-image-edit.js";
+import { getActiveObjectInspirationOrNull } from "../lib/objectInspiration/firestore.js";
+import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -420,32 +422,111 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
           message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.maskUrl is missing`,
         };
       }
-      const inspirationImageUrl = params["inspirationImageUrl"];
-      if (
-        typeof inspirationImageUrl !== "string" ||
-        inspirationImageUrl.length === 0
-      ) {
-        // preEnqueueValidate should have populated this from
-        // Firestore. An empty value here means either the tool's
-        // preEnqueueValidate hook is missing from the registry or
-        // the Firestore doc shipped without an imageUrl (which
-        // preEnqueueValidate ALSO 409-rejects today, defense in
-        // depth). Either way, this is a server-side configuration
-        // failure, not a client input issue — log loud and fail
-        // closed.
-        logger.error(
+      let inspirationImageUrl =
+        typeof params["inspirationImageUrl"] === "string"
+          ? (params["inspirationImageUrl"] as string)
+          : "";
+      let inspirationTitle =
+        typeof params["inspirationTitle"] === "string"
+          ? (params["inspirationTitle"] as string)
+          : "";
+      if (inspirationImageUrl.length === 0) {
+        // Pre-v4.0 deploy-boundary fallback. Cloud Tasks jobs that
+        // were enqueued under v3.x (before this rebuild shipped) have
+        // a toolParams blob that lacks inspirationImageUrl /
+        // inspirationTitle — preEnqueueValidate did not populate them
+        // because they did not exist in the schema. Failing closed
+        // here would mark every in-flight v3.x generation as
+        // permanently failed at the deploy cut-over. Instead, inline
+        // the Firestore lookup that preEnqueueValidate would have
+        // run — same trust gate (active=true), same SSRF check on
+        // the resolved URL. If the inspiration is no longer active
+        // we still fail with CONTENT_UNAVAILABLE so the user sees a
+        // sensible "pick another item" message rather than
+        // VALIDATION_FAILED.
+        const inspirationId = params["inspirationId"];
+        if (typeof inspirationId !== "string" || inspirationId.length === 0) {
+          logger.error(
+            {
+              event: "processor.inpaint.multi.inspiration_id_missing",
+              toolType,
+              generationId,
+            },
+            "multi-image-edit-with-mask guard fired — inspirationId missing from params, cannot recover",
+          );
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.inspirationId is missing — cannot resolve inspiration server-side.`,
+          };
+        }
+        logger.info(
           {
-            event: "processor.inpaint.multi.inspiration_image_missing",
+            event: "processor.inpaint.multi.inspiration_image_recovery",
             toolType,
             generationId,
+            inspirationId,
           },
-          "multi-image-edit-with-mask guard fired — inspirationImageUrl missing from params (preEnqueueValidate should have populated it)",
+          "Pre-v4.0 toolParams detected (no inspirationImageUrl) — resolving inline from Firestore",
         );
-        return {
-          kind: "failed",
-          code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.inspirationImageUrl is missing. This is a server-side tool-registration error, not a client input problem.`,
-        };
+        const doc = await getActiveObjectInspirationOrNull(inspirationId);
+        if (
+          doc === null ||
+          typeof doc.imageUrl !== "string" ||
+          doc.imageUrl.length === 0
+        ) {
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message:
+              "Selected inspiration is no longer available. Please pick another.",
+          };
+        }
+        const urlCheck = validatePublicImageUrl(
+          doc.imageUrl,
+          "inspirationImageUrl",
+        );
+        if (!urlCheck.ok) {
+          logger.error(
+            {
+              event: "processor.inpaint.multi.inspiration_url_unsafe",
+              toolType,
+              generationId,
+              inspirationId,
+              reason: urlCheck.message,
+            },
+            "Inline-resolved inspiration imageUrl failed SSRF validation",
+          );
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message:
+              "Selected inspiration is no longer available. Please pick another.",
+          };
+        }
+        inspirationImageUrl = doc.imageUrl;
+        inspirationTitle =
+          typeof doc.title.en === "string" ? doc.title.en.trim() : "";
+        // Rebuild the prompt with the recovered title so the inline-
+        // resolved inspiration gets the same high-quality v4.0
+        // instructional template as fresh requests, instead of the
+        // FALLBACK_CATEGORY ("object") prompt the builder emits when
+        // inspirationTitle is empty. Without this rebuild, pre-v4.0
+        // recovered jobs would run with a generic noun phrase even
+        // though we just resolved the real title from Firestore.
+        try {
+          promptResult = tool.buildPrompt({
+            ...params,
+            inspirationImageUrl,
+            inspirationTitle,
+          } as typeof params);
+        } catch (err) {
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message: err instanceof Error ? err.message : String(err),
+          };
+        }
       }
       if (!promptResult.prompt) {
         return {

@@ -686,7 +686,7 @@ export const CreateReplaceAddObjectBody = zod.object({
     .min(1)
     .max(500)
     .describe(
-      "Inspiration prompt describing what to place in the masked region",
+      "Vestigial field preserved for v3.x backward compatibility and analytics logging. The v4.0 multi-image-edit pipeline does NOT consume this value — it reads `inspirationTitle` (server-resolved from Firestore) as the noun phrase in the instructional prompt. preEnqueueValidate also overwrites this field with the Firestore-authoritative `objectInspirations/{inspirationId}.prompt` value before it reaches the processor, so a dummy or stale value sent by the client has no behavioral effect. Required (not optional) to keep older iOS clients that send a non-empty value passing Zod validation without a wire-breaking schema change.",
     ),
   categoryId: zod
     .string()

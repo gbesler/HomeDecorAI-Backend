@@ -1,10 +1,36 @@
 import sharp from "sharp";
 import { logger } from "../logger.js";
+import { withRetry } from "../retry.js";
 import {
   downloadSafe,
   persistGenerationBuffer,
   StorageUploadError,
 } from "../storage/s3-upload.js";
+
+/**
+ * Predicate shared by the composite step's two retry envelopes. Mirror
+ * of the discriminator in `multi-image-edit.ts`'s normalize wrapper:
+ * retry transient transport failures (5xx, connection resets, brief
+ * timeouts) once, but treat deterministic shape/config errors as
+ * terminal. Without the carve-outs, a permanent allowlist-block or
+ * URL-shape failure would burn the retry budget for no benefit and
+ * delay the user-visible failure by another second.
+ */
+function isRetryableDownloadOrPersist(error: Error): boolean {
+  if (error instanceof StorageUploadError) {
+    const msg = error.message;
+    if (
+      msg.includes("Host not in AI download allowlist") ||
+      msg.includes("exceeds limit") ||
+      msg.includes("Invalid source URL") ||
+      msg.includes("refusing to persist an empty buffer") ||
+      msg.includes("Refused to download non-HTTP(S)")
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /**
  * Composite-masked-result helper for the Nano Banana multi-image edit
@@ -159,11 +185,37 @@ export async function compositeMaskedResult(
   // CloudFront/S3 origin (original, normalized mask) or Replicate's
   // CDN (Nano Banana output). Network latency dominates the per-URL
   // fixed cost, so parallel is unambiguously faster.
-  const [originalDl, editedDl, maskDl] = await Promise.all([
-    downloadSafe(input.originalUrl),
-    downloadSafe(input.editedUrl),
-    downloadSafe(input.maskUrl),
-  ]);
+  //
+  // Wrapped in withRetry so a transient 5xx from Replicate's CDN
+  // (where editedUrl lives) or a transient S3 hiccup does not
+  // permanently waste the already-billed Nano Banana model call.
+  // The deterministic-error carve-outs in isRetryableDownloadOrPersist
+  // make sure permanent allowlist blocks fail fast instead of burning
+  // the retry budget.
+  const [originalDl, editedDl, maskDl] = await withRetry(
+    () =>
+      Promise.all([
+        downloadSafe(input.originalUrl),
+        downloadSafe(input.editedUrl),
+        downloadSafe(input.maskUrl),
+      ]),
+    {
+      maxRetries: 1,
+      delayMs: 1000,
+      isRetryable: isRetryableDownloadOrPersist,
+      onRetry: (error, attempt) => {
+        logger.warn(
+          {
+            event: "inpaint.composite.download.retry",
+            generationId: input.generationId,
+            error: error.message,
+            attempt,
+          },
+          "Composite download failed, retrying",
+        );
+      },
+    },
+  );
 
   // Decode the original into a normalized RGB buffer at native
   // dimensions. `.rotate()` bakes any EXIF orientation so the
@@ -272,13 +324,40 @@ export async function compositeMaskedResult(
   // Persist under the dedicated `composite/` prefix. Single artifact
   // per generation, so no suffix needed (the MULTI_ARTIFACT_PREFIXES
   // guard in persistGenerationBuffer permits this).
-  const persisted = await persistGenerationBuffer({
-    userId: input.userId,
-    generationId: input.generationId,
-    buffer: compositeBuffer,
-    mime: "image/jpeg",
-    keyPrefix: COMPOSITE_KEY_PREFIX,
-  });
+  //
+  // Wrapped in withRetry (same envelope as the downloads above) so a
+  // transient S3 throttle on the PUT does not waste the already-
+  // billed Nano Banana model call. The composite buffer is in memory
+  // at this point — the retry has zero recomputation cost; it is
+  // strictly a transport-layer resilience guard. Deterministic
+  // failures (empty-buffer guard, size-cap exceedance) short-circuit
+  // via the shared isRetryableDownloadOrPersist predicate.
+  const persisted = await withRetry(
+    () =>
+      persistGenerationBuffer({
+        userId: input.userId,
+        generationId: input.generationId,
+        buffer: compositeBuffer,
+        mime: "image/jpeg",
+        keyPrefix: COMPOSITE_KEY_PREFIX,
+      }),
+    {
+      maxRetries: 1,
+      delayMs: 1000,
+      isRetryable: isRetryableDownloadOrPersist,
+      onRetry: (error, attempt) => {
+        logger.warn(
+          {
+            event: "inpaint.composite.persist.retry",
+            generationId: input.generationId,
+            error: error.message,
+            attempt,
+          },
+          "Composite S3 persist failed, retrying",
+        );
+      },
+    },
+  );
 
   const durationMs = Date.now() - start;
   const outputImageUrl =
