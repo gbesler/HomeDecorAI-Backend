@@ -21,6 +21,11 @@ import {
 fal.config({ credentials: env.FAL_AI_API_KEY });
 
 const TIMEOUT_MS = 60_000;
+// Kontext at 30 inference steps on 1024² typically takes 15-30s; the
+// tail can stretch past 60s under fal's load. 120s ceiling matches the
+// realistic worst case without burning the retry budget on healthy
+// long-running calls.
+const KONTEXT_INPAINT_TIMEOUT_MS = 120_000;
 
 export async function callFalAI(
   model: string,
@@ -462,6 +467,83 @@ export async function callInpaintRefineFalAI(
       "fal.ai inpaint-refine returned no image",
     );
     throw new Error("fal.ai inpaint-refine returned no image");
+  }
+
+  return { imageUrl, provider: "falai", durationMs };
+}
+
+// ─── Kontext LoRA Inpaint — Replace & Add Object v6.0 ──────────────────────
+
+/**
+ * Reference-aware inpaint via fal-ai/flux-kontext-lora/inpaint. The first
+ * verified-live endpoint in 2026 that natively accepts the four-tensor
+ * signature needed for "place this specific reference object into this
+ * masked region with identity preservation":
+ *
+ *   - image_url:           target image (the room photo)
+ *   - mask_url:            binary mask PNG (white = inpaint zone)
+ *   - reference_image_url: the inspiration item's catalog photo
+ *   - prompt:              short scene-anchored directive
+ *
+ * Schema also supports `strength` (0..1, default 0.88), `guidance_scale`
+ * (default 2.5), `num_inference_steps` (default 30), `loras[]`, and
+ * `seed`. The reference image enters the DiT via in-context token
+ * concatenation (ACE++ lineage), so subject identity is preserved
+ * through cross-attention rather than CLIP-projected style transfer.
+ *
+ * Caller must populate `input.referenceImageUrl` — silently dropping a
+ * missing reference here would mask a wiring bug in the pipeline. Throw
+ * loudly instead.
+ */
+export async function callKontextInpaintFalAI(
+  model: string,
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  if (
+    typeof input.referenceImageUrl !== "string" ||
+    input.referenceImageUrl.length === 0
+  ) {
+    throw new Error(
+      "callKontextInpaintFalAI: referenceImageUrl is required — Kontext is a reference-aware inpaint endpoint and silently dropping the reference would degrade output to a generic Flux Fill behavior",
+    );
+  }
+
+  const start = Date.now();
+
+  const result = (await fal.subscribe(model, {
+    input: {
+      image_url: input.imageUrl,
+      mask_url: input.maskUrl,
+      reference_image_url: input.referenceImageUrl,
+      prompt: input.prompt,
+      // Kontext schema defaults — pin them so a fal-side default change
+      // doesn't silently shift output. 0.88 strength is the documented
+      // default and produces the right balance: high enough to overwrite
+      // the masked region (erasing the original object) but low enough
+      // to preserve the reference identity rather than re-imagining it
+      // from the prompt.
+      strength: input.strength ?? 0.88,
+      guidance_scale:
+        input.guidanceScale !== undefined && input.guidanceScale > 0
+          ? input.guidanceScale
+          : 2.5,
+      num_inference_steps: 30,
+      output_format: "jpeg",
+    },
+    logs: true,
+    abortSignal: AbortSignal.timeout(KONTEXT_INPAINT_TIMEOUT_MS),
+    pollInterval: 1000,
+  })) as { data?: { images?: Array<{ url?: string }> }; requestId?: string };
+
+  const durationMs = Date.now() - start;
+
+  const imageUrl = result.data?.images?.[0]?.url;
+  if (typeof imageUrl !== "string" || imageUrl.length === 0) {
+    logger.warn(
+      { event: "provider.falai.empty_response", model, durationMs },
+      "fal.ai Kontext inpaint returned no image",
+    );
+    throw new Error("fal.ai Kontext inpaint returned no image");
   }
 
   return { imageUrl, provider: "falai", durationMs };

@@ -5,14 +5,14 @@ import { buildReplaceAddObjectPrompt } from "./replace-add-object.js";
 const baseParams = {
   imageUrl: "https://example.com/room.jpg",
   maskUrl: "https://example.com/mask.png",
-  prompt: "ignored by v5.0 builder",
+  prompt: "ignored by v6.0 builder",
   categoryId: "diningTables",
   inspirationId: "diningTables_5",
   inspirationImageUrl: "https://example.com/inspiration.jpg",
 } as const;
 
-describe("buildReplaceAddObjectPrompt — v5.0 refine-pass prompt", () => {
-  it("stamps the v5.0 promptVersion", () => {
+describe("buildReplaceAddObjectPrompt — v6.0 Kontext inpaint prompt", () => {
+  it("stamps the v6.0 promptVersion", () => {
     const result = buildReplaceAddObjectPrompt({
       ...baseParams,
       mode: "replace",
@@ -20,7 +20,7 @@ describe("buildReplaceAddObjectPrompt — v5.0 refine-pass prompt", () => {
     });
     assert.equal(
       result.promptVersion,
-      "replaceAddObject/v5.0-crop-composite-refine",
+      "replaceAddObject/v6.0-kontext-inpaint",
     );
   });
 

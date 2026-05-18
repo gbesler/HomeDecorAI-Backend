@@ -77,7 +77,8 @@ export type ModelRole =
   | "remove"
   | "inpaint"
   | "inpaint-refine"
-  | "bg-remove";
+  | "bg-remove"
+  | "kontext-inpaint";
 
 export interface ProviderCapabilities {
   provider: ProviderId;
@@ -392,6 +393,37 @@ export const PROVIDER_CAPABILITIES: Record<string, ProviderCapabilities> = {
     role: "inpaint-refine",
     supportsNegativePrompt: true,
     supportsGuidanceScale: true,
+    supportsReferenceImage: false,
+    maxPromptTokens: 512,
+    aspectRatioField: null,
+  },
+  // ─── Kontext LoRA Inpaint (Replace & Add Object v6.0) ─────────────────────
+  // ACE++ architecture lineage. Native reference-aware inpaint: accepts
+  // image_url + mask_url + reference_image_url + prompt + strength (denoise
+  // within mask, default 0.88) + guidance_scale (default 2.5). The reference
+  // image is delivered as an in-context token to the DiT's cross-attention
+  // rather than a CLIP-projected style embedding, so subject identity is
+  // preserved through the inpaint (unlike Flux Fill or SDXL Inpaint which
+  // only accept a text prompt).
+  //
+  // ~$0.035/MP — ~$0.035 per 1024² generation at 30 inference steps.
+  //
+  // No Replicate equivalent verified in 2026; this is a fal-only role.
+  "fal-ai/flux-kontext-lora/inpaint": {
+    provider: "falai",
+    role: "kontext-inpaint",
+    supportsNegativePrompt: false,
+    supportsGuidanceScale: true,
+    // The reference image is a first-class native input — but it's NOT
+    // routed through the existing `referenceImageUrl` slot in
+    // GenerationInput because that field is gated by the multi-image-edit
+    // pattern (which assembles `image_urls: [image, ref, ...extras]`).
+    // Kontext takes a separate `reference_image_url` field. The adapter
+    // reads it directly off InpaintInput's optional `referenceImageUrl`
+    // we're adding alongside this entry. supportsReferenceImage stays
+    // false here to keep the multi-image array machinery from also
+    // appending the reference URL into the `image_urls` field of an
+    // unrelated edit call.
     supportsReferenceImage: false,
     maxPromptTokens: 512,
     aspectRatioField: null,

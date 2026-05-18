@@ -196,6 +196,20 @@ export interface InpaintInput {
    * `RemovalInput.normalizedDims`.
    */
   normalizedDims?: { width: number; height: number };
+  /**
+   * Optional reference image URL forwarded to reference-aware inpaint
+   * endpoints like `fal-ai/flux-kontext-lora/inpaint`. Identity-preserving
+   * inpaint adapters consume this as `reference_image_url`; classical
+   * inpaint adapters (Flux Fill, SDXL inpaint) silently ignore it. The
+   * adapter is responsible for capability-gated forwarding.
+   */
+  referenceImageUrl?: string;
+  /**
+   * Optional denoise strength (0..1) for inpaint adapters that expose
+   * one (Kontext: default 0.88; SDXL inpaint: 0.35-0.5 for low-strength
+   * refine). Adapters silently ignore when not supported.
+   */
+  strength?: number;
 }
 
 export interface InpaintOutput {
