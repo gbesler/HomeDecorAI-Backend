@@ -1,15 +1,13 @@
 import sharp from "sharp";
-import { callBgRemove, callInpaintRefine } from "../ai-providers/router.js";
+import { callBgRemove } from "../ai-providers/router.js";
 import type { ProviderId } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
-import { buildReplaceAddObjectPrompt } from "../prompts/tools/replace-add-object.js";
 import { withRetry } from "../retry.js";
 import {
   downloadSafe,
   persistGenerationBuffer,
   StorageUploadError,
 } from "../storage/s3-upload.js";
-import { compositeMaskedResult } from "./composite-masked-result.js";
 import {
   logNormalizeResult,
   NormalizeInputError,
@@ -202,70 +200,91 @@ export async function runCropCompositeRefine(
     Math.ceil((bbox.bottom - bbox.top) * roomHeight),
   );
 
-  // Download room + cutout in parallel and produce the pre-composited image.
+  // Download room + cutout in parallel.
   const [roomDl, cutoutDl] = await Promise.all([
     downloadSafe(normalized.imageUrl),
     downloadSafe(bgRemoveResult.imageUrl),
   ]);
 
-  // Scale cutout to fit inside the bbox (preserve aspect; center).
-  // `fit: "inside"` keeps the inspiration's silhouette intact even if the
-  // user painted an off-aspect mask region — the refine pass fills any
-  // gaps. `fit: "cover"` would crop the inspiration which can clip
-  // visually important features (legs of furniture, lampshade tops).
+  // Scale the cutout to COVER the bbox: the user's brush stroke defines
+  // the region they want the object to occupy. `fit: "cover"` fills the
+  // entire bbox (cropping minor overflow) so the user does not see
+  // remnants of the original object peeking through unfilled bbox
+  // space. v5.0 first iteration used `fit: "inside"` which left
+  // top/bottom strips of original pixels visible — for replace mode
+  // that meant the user still saw fragments of the old object.
+  //
+  // The cropping risk (clipping a vase top or chair leg) is acceptable
+  // because brush strokes are user-authored: the user paints what they
+  // want covered. Any clip happens at the edge they chose to paint.
   const cutoutResized = await sharp(cutoutDl.buffer)
     .rotate()
     .resize(bboxWidthPx, bboxHeightPx, {
-      fit: "inside",
-      withoutEnlargement: false,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      fit: "cover",
+      position: "center",
     })
+    .ensureAlpha()
     .png()
     .toBuffer({ resolveWithObject: true });
 
-  // Center the resized cutout within the bbox.
-  const cutoutLeftPx =
-    bboxLeftPx + Math.floor((bboxWidthPx - cutoutResized.info.width) / 2);
-  const cutoutTopPx =
-    bboxTopPx + Math.floor((bboxHeightPx - cutoutResized.info.height) / 2);
+  // Soften the cutout's alpha edge with a small gaussian blur. Without
+  // this the composite produces a hard outline where the model's
+  // bg-remove cut transitioned from object to transparent, which reads
+  // as "pasted" to viewers. Sigma 1.5 px keeps the silhouette intact
+  // while smoothing the 1-2px hard edge that birefnet leaves.
+  const cutoutSoftened = await sharp(cutoutResized.data)
+    .blur(1.5)
+    .png()
+    .toBuffer({ resolveWithObject: true });
 
-  // Alpha-composite the cutout onto the normalized room. Sharp's
-  // `.composite([{input, left, top, blend: "over"}])` handles the
-  // transparent background of the cutout PNG correctly — pixels with
-  // alpha=0 leave the underlying room unchanged.
+  // Alpha-composite the cutout onto the normalized room at the bbox
+  // top-left. fit:"cover" already sized it to bbox dims, so no center
+  // offset math required.
   const preCompositeBuffer = await sharp(roomDl.buffer)
     .rotate()
     .removeAlpha()
     .composite([
       {
-        input: cutoutResized.data,
-        left: cutoutLeftPx,
-        top: cutoutTopPx,
+        input: cutoutSoftened.data,
+        left: bboxLeftPx,
+        top: bboxTopPx,
         blend: "over",
       },
     ])
     .jpeg({ quality: REFINE_INPUT_JPEG_QUALITY })
     .toBuffer();
 
-  // Persist pre-composite to S3 so the refine model can fetch via URL.
-  const preCompositePersisted = await persistGenerationBuffer({
+  // Persist final composite to S3. This IS the user-facing output —
+  // v5.1 dropped the Flux Fill refine pass because it full-denoise
+  // regenerates the masked region from prompt alone, destroying the
+  // pre-composited cutout identity (the actual reason the user picked
+  // the inspiration item in the first place). The visible cost: no
+  // model-driven lighting/shadow blend. The benefit: the user sees
+  // their selected item, at exactly the region they painted, at every
+  // single generation. Identity + spatial preservation > model polish.
+  //
+  // When a verified low-denoise reference-aware inpaint endpoint
+  // becomes available (fal-ai/flux-kontext-lora/inpaint with
+  // reference_image_url, or fal-ai/lora/inpaint with IP-Adapter
+  // configured at low strength), revisit this stage as an optional
+  // polish pass behind a feature flag.
+  const finalPersisted = await persistGenerationBuffer({
     userId: input.userId,
     generationId: input.generationId,
     buffer: preCompositeBuffer,
     mime: "image/jpeg",
     keyPrefix: PRECOMPOSITE_KEY_PREFIX,
   });
-  const preCompositeUrl =
-    preCompositePersisted.outputImageCDNUrl ??
-    preCompositePersisted.outputImageUrl;
+  const finalOutputUrl =
+    finalPersisted.outputImageCDNUrl ?? finalPersisted.outputImageUrl;
 
-  // Also persist the cutout buffer for debuggability — cheap and a
-  // common ask when investigating "why does the object look weird".
-  // Single artifact write; failure is non-fatal.
+  // Best-effort debug artifact: persist the softened cutout PNG so
+  // operators can sanity-check bg-remove output without re-running the
+  // pipeline. Failure is non-fatal.
   void persistGenerationBuffer({
     userId: input.userId,
     generationId: input.generationId,
-    buffer: cutoutResized.data,
+    buffer: cutoutSoftened.data,
     mime: "image/png",
     keyPrefix: CUTOUT_KEY_PREFIX,
   }).catch((err) => {
@@ -280,10 +299,19 @@ export async function runCropCompositeRefine(
   });
 
   const cropCompositeDurationMs = Date.now() - cropStart;
+  const durationMs = Date.now() - start;
   logger.info(
     {
-      event: "inpaint.refine.precomposite_completed",
+      event: "inpaint.refine.completed",
       generationId: input.generationId,
+      mode: input.mode,
+      provider: "falai",
+      durationMs,
+      normalizeDurationMs: normalized.durationMs,
+      bgRemoveDurationMs,
+      cropCompositeDurationMs,
+      refineDurationMs: 0,
+      compositeDurationMs: 0,
       bbox,
       bboxPx: {
         left: bboxLeftPx,
@@ -291,123 +319,21 @@ export async function runCropCompositeRefine(
         width: bboxWidthPx,
         height: bboxHeightPx,
       },
-      cutoutResized: cutoutResized.info,
-      cropCompositeDurationMs,
-      preCompositeUrl,
+      cutoutInfo: cutoutResized.info,
+      finalOutputUrl,
     },
-    "Pre-composite ready for refine pass",
-  );
-
-  // Stage 4: refine pass — low-strength denoise blends edges/lighting.
-  // Rebuild the prompt with scene-level wording (drop any v4 bbox/
-  // image-3 text). The mode signal stays in the wording (replace vs add).
-  const rebuilt = buildReplaceAddObjectPrompt({
-    imageUrl: input.imageUrl,
-    maskUrl: input.maskUrl,
-    prompt: "",
-    categoryId: "",
-    inspirationId: "",
-    inspirationImageUrl: input.inspirationImageUrl,
-    inspirationTitle: input.inspirationTitle,
-    mode: input.mode,
-  });
-  const refinePrompt = rebuilt.prompt;
-
-  const refineStart = Date.now();
-  let refineResult: { imageUrl: string; provider: ProviderId } | null = null;
-  let refineError: unknown = null;
-  try {
-    refineResult = await callInpaintRefine({
-      imageUrl: preCompositeUrl,
-      maskUrl: normalized.maskUrl,
-      prompt: refinePrompt,
-    });
-  } catch (err) {
-    refineError = err;
-  }
-  const refineDurationMs = Date.now() - refineStart;
-
-  if (refineResult === null) {
-    // Graceful refine skip. Both fal.ai and Replicate refine endpoints
-    // failed — return the pre-composite as the final output. The
-    // spatial accuracy guarantee (the load-bearing reason v5 exists)
-    // is preserved: the user sees the inspiration object pasted at
-    // exactly the painted region. The only thing lost is the
-    // lighting/shadow blend pass, which is polish on top of a
-    // correct result. Cost in this path drops to ~$0.001 (bg-remove
-    // only) since neither refine endpoint billed.
-    logger.warn(
-      {
-        event: "inpaint.refine.skipped",
-        generationId: input.generationId,
-        refineDurationMs,
-        error: refineError instanceof Error ? refineError.message : String(refineError),
-      },
-      "Refine pass failed for both providers — returning pre-composite as final output",
-    );
-    const durationMs = Date.now() - start;
-    return {
-      outputImageUrl: preCompositeUrl,
-      provider: "falai",
-      durationMs,
-      normalizeDurationMs: normalized.durationMs,
-      bgRemoveDurationMs,
-      cropCompositeDurationMs,
-      refineDurationMs,
-      compositeDurationMs: 0,
-    };
-  }
-
-  logger.info(
-    {
-      event: "inpaint.refine.model_completed",
-      generationId: input.generationId,
-      provider: refineResult.provider,
-      refineDurationMs,
-      refineOutputUrl: refineResult.imageUrl,
-    },
-    "Refine model returned",
-  );
-
-  // Stage 5: composite enforcement against the original normalized room
-  // using the user's brush mask as a feathered alpha. This guarantees
-  // outside-mask pixels are preserved against any drift the refine
-  // model might introduce.
-  const composite = await compositeMaskedResult({
-    originalUrl: normalized.imageUrl,
-    editedUrl: refineResult.imageUrl,
-    maskUrl: normalized.maskUrl,
-    userId: input.userId,
-    generationId: input.generationId,
-  });
-
-  const durationMs = Date.now() - start;
-  logger.info(
-    {
-      event: "inpaint.refine.completed",
-      generationId: input.generationId,
-      mode: input.mode,
-      provider: refineResult.provider,
-      durationMs,
-      normalizeDurationMs: normalized.durationMs,
-      bgRemoveDurationMs,
-      cropCompositeDurationMs,
-      refineDurationMs,
-      compositeDurationMs: composite.durationMs,
-      finalOutputUrl: composite.outputImageUrl,
-    },
-    "Crop-composite-refine pipeline completed",
+    "Crop-composite pipeline completed (refine pass disabled in v5.1)",
   );
 
   return {
-    outputImageUrl: composite.outputImageUrl,
-    provider: refineResult.provider,
+    outputImageUrl: finalOutputUrl,
+    provider: "falai",
     durationMs,
     normalizeDurationMs: normalized.durationMs,
     bgRemoveDurationMs,
     cropCompositeDurationMs,
-    refineDurationMs,
-    compositeDurationMs: composite.durationMs,
+    refineDurationMs: 0,
+    compositeDurationMs: 0,
   };
 }
 
