@@ -47,7 +47,7 @@ import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
 const PROMPT_VERSION_CURRENT =
-  "replaceAddObject/v6.0-kontext-inpaint";
+  "replaceAddObject/v6.1-hybrid-composite-kontext";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -80,12 +80,18 @@ export function buildReplaceAddObjectPrompt(
 ): PromptResult {
   const category = params.inspirationTitle?.trim() || FALLBACK_CATEGORY;
 
+  // v6.1 hybrid context: the input image already contains the
+  // composited cutout. The prompt's job is to bias the model toward
+  // BLEND (lighting, shadows, edges) rather than REGENERATE. Naming
+  // the object reinforces identity but the operative verb is
+  // "integrate" / "blend" — not "place" — so the model treats the
+  // existing pixels as authoritative.
   const prompt = (() => {
     switch (params.mode) {
       case "replace":
-        return `place this ${category} in the masked region, replacing the existing object; match scene lighting, perspective, and shadows; preserve product color, material, and proportions`;
+        return `seamlessly integrate the ${category} into the room; match scene lighting, perspective, and shadows; preserve product color, material, and proportions`;
       case "add":
-        return `place this ${category} in the masked region; match scene lighting, perspective, and shadows; preserve product color, material, and proportions`;
+        return `seamlessly integrate the ${category} into the room; match scene lighting, perspective, and shadows; cast natural shadows on the supporting surface; preserve product color, material, and proportions`;
     }
     const _exhaustive: never = params.mode;
     throw new Error(
