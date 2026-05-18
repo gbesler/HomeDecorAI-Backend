@@ -226,16 +226,11 @@ export const envSchema = z.object({
   // typically ~$0.005-0.01 per 1024² at 20 steps), replicate lucataco
   // sdxl-inpainting fallback. Low-strength denoise pass around mask
   // edges to blend lighting/shadows on the pixel-composite result.
-  // Refine endpoints — picked for verified availability + reliability,
-  // not lowest cost. `fal-ai/inpaint` and `stability-ai/stable-diffusion-
-  // inpainting` both 404'd in the v5.0 first-deploy attempt. Falling
-  // back to the proven Flux Fill pair we used in v3.x. These are
-  // expensive ($0.05-0.10/call) but the pipeline now has a graceful-skip
-  // path: when refine fails for any reason, the pipeline returns the
-  // pre-composite (just bg-remove + sharp paste) as the final output.
-  // So the cost ceiling is "best case ~$0.10, worst case $0.001". The
-  // hard spatial-precision bug is fixed by the composite step alone;
-  // the refine pass is polish that we degrade gracefully without.
+  // Refine endpoints — orphaned in v6.0 (kept for env-validation
+  // backward compat). v6.0 replaced the v5.x birefnet+composite+refine
+  // pipeline with a single call to fal-ai/flux-kontext-lora/inpaint
+  // which natively accepts image_url + mask_url + reference_image_url.
+  // These env vars no longer drive any code path.
   FALAI_INPAINT_REFINE_MODEL: z
     .string()
     .min(1)
@@ -247,6 +242,24 @@ export const envSchema = z.object({
     .optional()
     .default("black-forest-labs/flux-fill-pro")
     .transform((v) => v as `${string}/${string}`),
+  // ─── Replace & Add Object v6.0 (Flux Kontext LoRA Inpaint) ──────────────
+  // Reference-aware inpaint endpoint. Native schema: image_url + mask_url
+  // + reference_image_url + prompt. ACE++ architecture lineage (in-context
+  // token concatenation), purpose-built for "place this specific reference
+  // object into this masked region with identity preservation". ~$0.035
+  // per 1024² inference at default 30 inference steps.
+  //
+  // No Replicate fallback — researched and confirmed no Replicate
+  // endpoint hosts a verified reference-aware inpaint model in May 2026.
+  // If Kontext fails, the pipeline fails the generation (the user sees
+  // the standard AI_PROVIDER_FAILED error and a retry). This is
+  // acceptable because Kontext is a verified-live production endpoint
+  // with proper status reporting — failures will be transient.
+  FALAI_KONTEXT_INPAINT_MODEL: z
+    .string()
+    .min(1)
+    .optional()
+    .default("fal-ai/flux-kontext-lora/inpaint"),
   ALLOWED_AI_DOWNLOAD_HOSTS: z
     .string()
     .min(1)

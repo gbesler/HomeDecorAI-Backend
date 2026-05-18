@@ -1,13 +1,10 @@
-import sharp from "sharp";
-import { callBgRemove } from "../ai-providers/router.js";
+import { callKontextInpaint } from "../ai-providers/router.js";
 import type { ProviderId } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
+import { buildReplaceAddObjectPrompt } from "../prompts/tools/replace-add-object.js";
 import { withRetry } from "../retry.js";
-import {
-  downloadSafe,
-  persistGenerationBuffer,
-  StorageUploadError,
-} from "../storage/s3-upload.js";
+import { StorageUploadError } from "../storage/s3-upload.js";
+import { compositeMaskedResult } from "./composite-masked-result.js";
 import {
   logNormalizeResult,
   NormalizeInputError,
@@ -15,82 +12,62 @@ import {
 } from "./normalize-image-mask-pair.js";
 
 /**
- * Replace & Add Object v5.0 — Crop-Composite-Refine pipeline.
+ * Replace & Add Object v6.0 — Flux Kontext LoRA Inpaint.
  *
- * Replaces the v4.x multi-image-edit-with-mask (Nano Banana) flow. Both
- * v4.0 (mask-as-image-3) and v4.1 (bbox text-spatial) failed in
- * production because instruction-following multi-image edit models do
- * not reliably follow spatial signals from text or auxiliary mask
- * images. v5.0 moves spatial precision OUT of the model and INTO
- * pixel-level composite — the model's only job is to blend lighting
- * and shadows around the edge of the user-painted region.
+ * Replaces v5.x crop-composite-refine. The v5 pipeline (birefnet bg-remove
+ * + sharp composite + optional refine) failed the user's quality bar
+ * because pixel-level pasting is not a model condition — downstream
+ * inpaint models either ignored the pasted cutout (Flux Fill regenerated
+ * from prompt only) or the original object's pixels around the cutout
+ * remained visible (no refine path).
  *
- * **Pipeline stages.**
+ * v6.0 uses fal-ai/flux-kontext-lora/inpaint, the first verified-live
+ * endpoint in 2026 with native reference-aware inpaint:
  *
+ *   image_url + mask_url + reference_image_url + prompt
+ *
+ * Kontext (ACE++ architecture lineage) ingests the reference image as
+ * an in-context token to the DiT's cross-attention, so subject identity
+ * is preserved through the inpaint denoise — the model erases the
+ * original object inside the mask AND places the reference object in
+ * the same forward pass.
+ *
+ * **Pipeline:**
  *   1. Normalize room + mask (existing) — align dims, bake EXIF, validate
  *      mask non-emptiness.
+ *   2. callKontextInpaint — single fal.ai call. ~$0.035/generation.
+ *   3. compositeMaskedResult — defensive composite enforcement against
+ *      the original normalized room using the brush mask as a feathered
+ *      alpha. Kontext's inpaint is well-behaved outside the mask but
+ *      JPEG re-encode can introduce subtle color drift; the composite
+ *      step's byte-identical preservation guarantee is cheap insurance.
  *
- *   2. Background-remove the inspiration object via `callBgRemove`
- *      (fal.ai birefnet/v2 primary, Replicate `851-labs/background-remover`
- *      fallback). Returns a cutout PNG with transparent background.
- *      Cost ~$0.001.
- *
- *   3. Compute mask bbox + crop-composite: scale the cutout to fit inside
- *      the bbox (preserve aspect, center), then alpha-composite it onto
- *      the normalized room photo at the bbox top-left. Pure sharp pixel
- *      ops — zero model cost, 100% spatial accuracy. Output is uploaded
- *      to S3 under `precomposite/` so the refine model can fetch it.
- *
- *   4. Refine pass via `callInpaintRefine` (fal.ai `fal-ai/inpaint`
- *      primary at ~$0.005-0.01, Replicate `stability-ai/
- *      stable-diffusion-inpainting` fallback at ~$0.002). LOW-strength
- *      denoise (0.35) inside the user's brush mask blends lighting,
- *      shadows, and edges so the cutout doesn't look pasted. The model
- *      can't move the object — strength is too low to re-imagine
- *      identity — but it can harmonize tone.
- *
- *   5. Composite enforcement (existing `compositeMaskedResult`): blend
- *      the refine output back over the ORIGINAL normalized room using
- *      the user's brush mask as a feathered alpha. Guarantees byte-
- *      perceptual outside-mask preservation against any drift the
- *      refine model may introduce.
- *
- * Total cost target: ~$0.006-0.012 per generation.
+ * **Function name retained** as `runCropCompositeRefine` to minimize
+ * the diff against the generation-processor's import. The pipeline body
+ * is entirely rewritten; the bg-remove + sharp composite + refine paths
+ * are gone.
  *
  * See `docs/plans/2026-05-18-001-refactor-replace-add-object-v5-crop-composite-refine-plan.md`
- * for the full design rationale and the v4.x failure post-mortem.
+ * (extended with v6.0 outcome) for the cumulative failure timeline that
+ * led here.
  */
 
 export interface RunCropCompositeRefineInput {
-  /** Public URL of the room photo (image 1 / target). */
   imageUrl: string;
-  /**
-   * Public URL of the inspiration item's reference photo. Resolved
-   * server-side by `preEnqueueValidate` from
-   * `objectInspirations/{inspirationId}.imageUrl` — never accepted from
-   * the client request body.
-   */
   inspirationImageUrl: string;
-  /** Public URL of the client-uploaded brush mask PNG. */
   maskUrl: string;
-  /** Pre-built prompt from `buildReplaceAddObjectPrompt`. Retained for
-   *  logging; the pipeline rebuilds with scene-level wording so the
-   *  refine pass gets directive guidance, not the bbox/image-3 v4
-   *  text. */
+  /** Pre-built prompt from buildReplaceAddObjectPrompt — kept on the
+   *  shape for processor logging continuity. The pipeline rebuilds with
+   *  the v6.0 concise template before dispatch. */
   prompt: string;
-  /** Server-resolved English title of the inspiration item. */
   inspirationTitle: string;
-  /** Replace vs Add mode. Drives wording in the rebuild step. */
   mode: "replace" | "add";
-  /** S3 key prefix component (matches existing pipelines). */
   userId: string;
-  /** Generation record id, S3 key disambiguator. */
   generationId: string;
 }
 
 export interface RunCropCompositeRefineOutput {
   outputImageUrl: string;
-  /** Provider that served the refine call. */
   provider: ProviderId;
   durationMs: number;
   normalizeDurationMs: number;
@@ -99,10 +76,6 @@ export interface RunCropCompositeRefineOutput {
   refineDurationMs: number;
   compositeDurationMs: number;
 }
-
-const PRECOMPOSITE_KEY_PREFIX = "precomposite";
-const CUTOUT_KEY_PREFIX = "cutout";
-const REFINE_INPUT_JPEG_QUALITY = 92;
 
 export async function runCropCompositeRefine(
   input: RunCropCompositeRefineInput,
@@ -114,20 +87,20 @@ export async function runCropCompositeRefine(
     input.inspirationImageUrl.length === 0
   ) {
     throw new NormalizeInputError(
-      "crop-composite-refine: inspirationImageUrl is required but was empty — preEnqueueValidate must populate it",
+      "kontext-inpaint: inspirationImageUrl is required but was empty — preEnqueueValidate must populate it",
     );
   }
 
   logger.info(
     {
-      event: "inpaint.refine.started",
+      event: "inpaint.kontext.started",
       generationId: input.generationId,
       mode: input.mode,
     },
-    "Crop-composite-refine pipeline starting",
+    "Kontext inpaint pipeline starting (v6.0)",
   );
 
-  // Stage 1: normalize room + mask.
+  // Stage 1: normalize.
   const normalized = await withRetry(
     () =>
       normalizeImageMaskPair({
@@ -161,243 +134,95 @@ export async function runCropCompositeRefine(
   );
   logNormalizeResult(input.generationId, normalized, "inpaint");
 
-  const roomWidth = normalized.after.image.width;
-  const roomHeight = normalized.after.image.height;
-
-  // Stage 2: background-remove the inspiration object.
-  const bgRemoveStart = Date.now();
-  const bgRemoveResult = await callBgRemove({
-    imageUrl: input.inspirationImageUrl,
+  // Stage 2: rebuild prompt with v6.0 concise template and call Kontext.
+  // The researcher's recommendation: keep the prompt short and
+  // category-anchored, let the reference image do the identity work.
+  // Long descriptive prompts fight the reference signal in DiT models.
+  const rebuilt = buildReplaceAddObjectPrompt({
+    imageUrl: input.imageUrl,
+    maskUrl: input.maskUrl,
+    prompt: "",
+    categoryId: "",
+    inspirationId: "",
+    inspirationImageUrl: input.inspirationImageUrl,
+    inspirationTitle: input.inspirationTitle,
+    mode: input.mode,
   });
-  const bgRemoveDurationMs = Date.now() - bgRemoveStart;
+  const kontextPrompt = rebuilt.prompt;
+
+  // Strength tuning per mode:
+  //   - replace (0.88, Kontext default): full denoise inside the mask —
+  //     erases the original object completely while reference guides
+  //     the new content.
+  //   - add (0.85): slightly lower so the new object blends with the
+  //     surrounding empty surface (wall/floor) more naturally without
+  //     drifting away from the reference identity.
+  const strength = input.mode === "add" ? 0.85 : 0.88;
+
+  const kontextStart = Date.now();
+  const kontextResult = await callKontextInpaint({
+    imageUrl: normalized.imageUrl,
+    maskUrl: normalized.maskUrl,
+    referenceImageUrl: input.inspirationImageUrl,
+    prompt: kontextPrompt,
+    strength,
+  });
+  const kontextDurationMs = Date.now() - kontextStart;
+
   logger.info(
     {
-      event: "inpaint.refine.bgremove_completed",
+      event: "inpaint.kontext.model_completed",
       generationId: input.generationId,
-      provider: bgRemoveResult.provider,
-      bgRemoveDurationMs,
-      cutoutUrl: bgRemoveResult.imageUrl,
+      mode: input.mode,
+      provider: kontextResult.provider,
+      kontextDurationMs,
+      strength,
+      kontextOutputUrl: kontextResult.imageUrl,
+      promptPreview: kontextPrompt.slice(0, 200),
+      promptLen: kontextPrompt.length,
     },
-    "Inspiration cutout produced",
+    "Kontext inpaint model returned",
   );
 
-  // Stage 3: compute bbox + crop-composite.
-  const cropStart = Date.now();
-  const bbox = await computeMaskBbox(normalized.maskUrl, input.generationId);
-  if (bbox === null) {
-    throw new NormalizeInputError(
-      "crop-composite-refine: mask bbox compute failed — mask is degenerate or unreadable",
-    );
-  }
-  const bboxLeftPx = Math.floor(bbox.left * roomWidth);
-  const bboxTopPx = Math.floor(bbox.top * roomHeight);
-  const bboxWidthPx = Math.max(
-    1,
-    Math.ceil((bbox.right - bbox.left) * roomWidth),
-  );
-  const bboxHeightPx = Math.max(
-    1,
-    Math.ceil((bbox.bottom - bbox.top) * roomHeight),
-  );
-
-  // Download room + cutout in parallel.
-  const [roomDl, cutoutDl] = await Promise.all([
-    downloadSafe(normalized.imageUrl),
-    downloadSafe(bgRemoveResult.imageUrl),
-  ]);
-
-  // Scale the cutout to COVER the bbox: the user's brush stroke defines
-  // the region they want the object to occupy. `fit: "cover"` fills the
-  // entire bbox (cropping minor overflow) so the user does not see
-  // remnants of the original object peeking through unfilled bbox
-  // space. v5.0 first iteration used `fit: "inside"` which left
-  // top/bottom strips of original pixels visible — for replace mode
-  // that meant the user still saw fragments of the old object.
-  //
-  // The cropping risk (clipping a vase top or chair leg) is acceptable
-  // because brush strokes are user-authored: the user paints what they
-  // want covered. Any clip happens at the edge they chose to paint.
-  const cutoutResized = await sharp(cutoutDl.buffer)
-    .rotate()
-    .resize(bboxWidthPx, bboxHeightPx, {
-      fit: "cover",
-      position: "center",
-    })
-    .ensureAlpha()
-    .png()
-    .toBuffer({ resolveWithObject: true });
-
-  // Soften the cutout's alpha edge with a small gaussian blur. Without
-  // this the composite produces a hard outline where the model's
-  // bg-remove cut transitioned from object to transparent, which reads
-  // as "pasted" to viewers. Sigma 1.5 px keeps the silhouette intact
-  // while smoothing the 1-2px hard edge that birefnet leaves.
-  const cutoutSoftened = await sharp(cutoutResized.data)
-    .blur(1.5)
-    .png()
-    .toBuffer({ resolveWithObject: true });
-
-  // Alpha-composite the cutout onto the normalized room at the bbox
-  // top-left. fit:"cover" already sized it to bbox dims, so no center
-  // offset math required.
-  const preCompositeBuffer = await sharp(roomDl.buffer)
-    .rotate()
-    .removeAlpha()
-    .composite([
-      {
-        input: cutoutSoftened.data,
-        left: bboxLeftPx,
-        top: bboxTopPx,
-        blend: "over",
-      },
-    ])
-    .jpeg({ quality: REFINE_INPUT_JPEG_QUALITY })
-    .toBuffer();
-
-  // Persist final composite to S3. This IS the user-facing output —
-  // v5.1 dropped the Flux Fill refine pass because it full-denoise
-  // regenerates the masked region from prompt alone, destroying the
-  // pre-composited cutout identity (the actual reason the user picked
-  // the inspiration item in the first place). The visible cost: no
-  // model-driven lighting/shadow blend. The benefit: the user sees
-  // their selected item, at exactly the region they painted, at every
-  // single generation. Identity + spatial preservation > model polish.
-  //
-  // When a verified low-denoise reference-aware inpaint endpoint
-  // becomes available (fal-ai/flux-kontext-lora/inpaint with
-  // reference_image_url, or fal-ai/lora/inpaint with IP-Adapter
-  // configured at low strength), revisit this stage as an optional
-  // polish pass behind a feature flag.
-  const finalPersisted = await persistGenerationBuffer({
+  // Stage 3: defensive composite enforcement against original normalized
+  // room using brush mask. Kontext's inpaint is well-behaved outside the
+  // mask but JPEG re-encode can introduce subtle color drift; this step
+  // guarantees byte-perceptual outside-mask preservation against any
+  // drift the model introduces.
+  const composite = await compositeMaskedResult({
+    originalUrl: normalized.imageUrl,
+    editedUrl: kontextResult.imageUrl,
+    maskUrl: normalized.maskUrl,
     userId: input.userId,
     generationId: input.generationId,
-    buffer: preCompositeBuffer,
-    mime: "image/jpeg",
-    keyPrefix: PRECOMPOSITE_KEY_PREFIX,
-  });
-  const finalOutputUrl =
-    finalPersisted.outputImageCDNUrl ?? finalPersisted.outputImageUrl;
-
-  // Best-effort debug artifact: persist the softened cutout PNG so
-  // operators can sanity-check bg-remove output without re-running the
-  // pipeline. Failure is non-fatal.
-  void persistGenerationBuffer({
-    userId: input.userId,
-    generationId: input.generationId,
-    buffer: cutoutSoftened.data,
-    mime: "image/png",
-    keyPrefix: CUTOUT_KEY_PREFIX,
-  }).catch((err) => {
-    logger.warn(
-      {
-        event: "inpaint.refine.cutout_persist_failed",
-        generationId: input.generationId,
-        error: err instanceof Error ? err.message : String(err),
-      },
-      "Cutout debug-persist failed — non-fatal",
-    );
   });
 
-  const cropCompositeDurationMs = Date.now() - cropStart;
   const durationMs = Date.now() - start;
   logger.info(
     {
-      event: "inpaint.refine.completed",
+      event: "inpaint.kontext.completed",
       generationId: input.generationId,
       mode: input.mode,
-      provider: "falai",
+      provider: kontextResult.provider,
       durationMs,
       normalizeDurationMs: normalized.durationMs,
-      bgRemoveDurationMs,
-      cropCompositeDurationMs,
-      refineDurationMs: 0,
-      compositeDurationMs: 0,
-      bbox,
-      bboxPx: {
-        left: bboxLeftPx,
-        top: bboxTopPx,
-        width: bboxWidthPx,
-        height: bboxHeightPx,
-      },
-      cutoutInfo: cutoutResized.info,
-      finalOutputUrl,
+      kontextDurationMs,
+      compositeDurationMs: composite.durationMs,
+      finalOutputUrl: composite.outputImageUrl,
     },
-    "Crop-composite pipeline completed (refine pass disabled in v5.1)",
+    "Kontext inpaint pipeline completed (v6.0)",
   );
 
   return {
-    outputImageUrl: finalOutputUrl,
-    provider: "falai",
+    outputImageUrl: composite.outputImageUrl,
+    provider: kontextResult.provider,
     durationMs,
     normalizeDurationMs: normalized.durationMs,
-    bgRemoveDurationMs,
-    cropCompositeDurationMs,
-    refineDurationMs: 0,
-    compositeDurationMs: 0,
+    // v5 fields retained for output-shape continuity; bg-remove and
+    // crop-composite stages no longer exist in v6.0.
+    bgRemoveDurationMs: 0,
+    cropCompositeDurationMs: 0,
+    refineDurationMs: kontextDurationMs,
+    compositeDurationMs: composite.durationMs,
   };
-}
-
-interface MaskBbox {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-
-async function computeMaskBbox(
-  maskUrl: string,
-  generationId: string,
-): Promise<MaskBbox | null> {
-  try {
-    const { buffer } = await downloadSafe(maskUrl);
-    const { data, info } = await sharp(buffer)
-      .removeAlpha()
-      .greyscale()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    const width = info.width;
-    const height = info.height;
-    if (width === 0 || height === 0) return null;
-
-    let minX = width;
-    let minY = height;
-    let maxX = -1;
-    let maxY = -1;
-    for (let y = 0; y < height; y += 1) {
-      const rowOffset = y * width;
-      for (let x = 0; x < width; x += 1) {
-        if (data[rowOffset + x] > 127) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    if (maxX < 0) {
-      logger.warn(
-        { event: "inpaint.refine.bbox.all_black", generationId, width, height },
-        "Mask bbox compute found no white pixels",
-      );
-      return null;
-    }
-
-    return {
-      left: minX / width,
-      top: minY / height,
-      right: (maxX + 1) / width,
-      bottom: (maxY + 1) / height,
-    };
-  } catch (err) {
-    logger.warn(
-      {
-        event: "inpaint.refine.bbox.error",
-        generationId,
-        error: err instanceof Error ? err.message : String(err),
-      },
-      "Mask bbox compute failed",
-    );
-    return null;
-  }
 }

@@ -47,7 +47,7 @@ import type { PromptResult } from "../types.js";
 import type { CreateReplaceAddObjectBody } from "../../../schemas/generated/api.js";
 
 const PROMPT_VERSION_CURRENT =
-  "replaceAddObject/v5.0-crop-composite-refine";
+  "replaceAddObject/v6.0-kontext-inpaint";
 
 export type ReplaceAddObjectParams = z.infer<typeof CreateReplaceAddObjectBody>;
 
@@ -64,45 +64,28 @@ const REFINE_NO_OVERRIDE = 0;
 const FALLBACK_CATEGORY = "object";
 
 /**
- * Build the v5.0 refine-pass prompt for the SDXL inpaint blend step.
+ * Build the v6.0 prompt for Flux Kontext LoRA Inpaint.
  *
- * The pipeline calls this builder AFTER pre-compositing the inspiration
- * cutout onto the room at the user-painted region. The refine model
- * sees an image where the object is already placed — it just needs to
- * harmonize lighting and edges. The prompt is scene-level descriptive,
- * naming the inspiration item so the model preserves its identity
- * during the low-strength denoise.
+ * Researcher's recommendation for Kontext-style endpoints: keep the
+ * prompt SHORT and category-anchored. The reference image is the
+ * authoritative identity signal — long descriptive prompts dilute it
+ * because they fight the cross-attention conditioning that Kontext
+ * uses to align the reference into the masked region. We name the
+ * category (so the model knows what kind of object it is), keep the
+ * scene-integration phrases brief, and let the reference image carry
+ * color/material/proportions.
  */
 export function buildReplaceAddObjectPrompt(
   params: ReplaceAddObjectParams,
 ): PromptResult {
   const category = params.inspirationTitle?.trim() || FALLBACK_CATEGORY;
 
-  // Mode-aware wording: replace mode mentions "replacing" the previous
-  // object, add mode mentions "placing" the new one. The structural
-  // diff is minor — the refine model is operating on an already-
-  // composited frame in both cases — but keeps prompt telemetry
-  // distinguishable per-mode and gives the model a slight nudge to
-  // expect either an existing surface (replace) or empty space (add)
-  // behind the cutout.
   const prompt = (() => {
     switch (params.mode) {
       case "replace":
-        return [
-          `A photorealistic interior with a ${category} placed naturally in the room.`,
-          `Match the surrounding lighting direction, color temperature, and perspective exactly.`,
-          `Add soft realistic shadows under and around the ${category} so it grounds into the scene.`,
-          `Blend the ${category}'s edges seamlessly with the surrounding floor, wall, and nearby furniture.`,
-          `Preserve fine detail and texture of the ${category}.`,
-        ].join(" ");
+        return `place this ${category} in the masked region, replacing the existing object; match scene lighting, perspective, and shadows; preserve product color, material, and proportions`;
       case "add":
-        return [
-          `A photorealistic interior with a ${category} placed into the room.`,
-          `Match the room's existing lighting direction, color temperature, and perspective exactly.`,
-          `Cast soft natural shadows beneath the ${category} so it sits convincingly on its supporting surface.`,
-          `Integrate the ${category}'s edges seamlessly with surrounding walls, floor, and furniture.`,
-          `Preserve fine detail and texture of the ${category}.`,
-        ].join(" ");
+        return `place this ${category} in the masked region; match scene lighting, perspective, and shadows; preserve product color, material, and proportions`;
     }
     const _exhaustive: never = params.mode;
     throw new Error(

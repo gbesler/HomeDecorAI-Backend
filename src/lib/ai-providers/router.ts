@@ -15,6 +15,7 @@ import {
   callFalAI,
   callInpaintFalAI,
   callInpaintRefineFalAI,
+  callKontextInpaintFalAI,
   callRemovalFalAI,
   callSegmentationFalAI,
 } from "./falai.js";
@@ -164,6 +165,10 @@ export async function callBgRemove(
  * and Replicate as fallback — inverted relative to most other roles
  * for the same cost-ceiling reason as callBgRemove. The refine pass is
  * the Stage 4 step in Replace & Add Object v5.0 (crop-composite-refine).
+ *
+ * v6.0 NOTE: this function is orphaned. The Replace & Add Object tool
+ * migrated to callKontextInpaint below. Retained temporarily for env
+ * verification compatibility — slated for removal after v6.0 burn-in.
  */
 export async function callInpaintRefine(
   input: InpaintInput,
@@ -177,6 +182,42 @@ export async function callInpaintRefine(
     primaryModel,
     fallbackModel,
     falaiPrimary: true,
+  });
+}
+
+/**
+ * Run reference-aware inpaint via fal-ai/flux-kontext-lora/inpaint.
+ * No Replicate fallback — no Replicate endpoint hosts a verified
+ * reference-aware inpaint model in 2026. Direct call bypasses the
+ * runWithFallback envelope since there's no fallback to fall back to;
+ * a Kontext failure surfaces as the normal AI_PROVIDER_FAILED error.
+ *
+ * Caller must populate `input.referenceImageUrl`; the adapter throws
+ * loudly if it's missing rather than degrading to non-reference Flux
+ * Fill behavior silently.
+ */
+export async function callKontextInpaint(
+  input: InpaintInput,
+): Promise<InpaintOutput> {
+  const primaryModel = env.FALAI_KONTEXT_INPAINT_MODEL;
+  // Wrap in withRetry for transient-failure resilience (single retry,
+  // same envelope as other roles). No fallback provider — see comment
+  // above; a permanent Kontext outage surfaces as AI_PROVIDER_FAILED.
+  return withRetry(() => callKontextInpaintFalAI(primaryModel, input), {
+    maxRetries: 1,
+    delayMs: 1000,
+    onRetry: (error, attempt) => {
+      logger.warn(
+        {
+          event: "provider.retry",
+          provider: "falai",
+          role: "kontext-inpaint",
+          error: error.message,
+          attempt,
+        },
+        "fal.ai kontext-inpaint call failed, retrying",
+      );
+    },
   });
 }
 
