@@ -573,6 +573,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       const result = await runMultiImageEdit({
         imageUrl: inputImageUrl,
         inspirationImageUrl,
+        inspirationTitle,
         maskUrl,
         prompt: promptResult.prompt,
         mode: requestMode,

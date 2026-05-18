@@ -1,8 +1,13 @@
+import sharp from "sharp";
 import { callDesignGeneration } from "../ai-providers/router.js";
 import type { ProviderId } from "../ai-providers/types.js";
 import { logger } from "../logger.js";
+import {
+  buildReplaceAddObjectPrompt,
+  type MaskBbox,
+} from "../prompts/tools/replace-add-object.js";
 import { withRetry } from "../retry.js";
-import { StorageUploadError } from "../storage/s3-upload.js";
+import { downloadSafe, StorageUploadError } from "../storage/s3-upload.js";
 import { compositeMaskedResult } from "./composite-masked-result.js";
 import {
   logNormalizeResult,
@@ -74,23 +79,37 @@ export interface RunMultiImageEditInput {
    */
   inspirationImageUrl: string;
   /**
-   * Public URL of the client-uploaded brush mask PNG (image 3).
+   * Public URL of the client-uploaded brush mask PNG.
    * White = modify, black = preserve. SSRF-guarded at controller
-   * level via `clientUploadFields`.
+   * level via `clientUploadFields`. The pipeline now computes a
+   * bounding box from the mask and feeds it to the model as a
+   * text-spatial region descriptor (not as image_input[2]).
    */
   maskUrl: string;
   /**
-   * v4.0 instructional prompt from `buildReplaceAddObjectPrompt`.
-   * References image 1 / image 2 / image 3 explicitly — the
-   * provider call must put the URLs in matching slot order or the
-   * model's image numbering breaks.
+   * Pre-bbox v4.0 instructional prompt from
+   * `buildReplaceAddObjectPrompt(params)`. Retained for telemetry /
+   * logging; the pipeline rebuilds the prompt with the computed
+   * mask bbox before dispatch, so the value sent to the model is
+   * not this string — it is the bbox-aware variant produced inside
+   * `runMultiImageEdit`. The string is kept on the input shape so
+   * the processor's promptResult chain (which logs
+   * promptResult.prompt at the start of the AI call) stays
+   * consistent with the rest of the codebase.
    */
   prompt: string;
   /**
-   * Replace vs. Add mode signal. Forwarded to logs for per-mode
-   * telemetry; the actual replace/add branching lives in the prompt
-   * builder, not here. The pipeline runs the same stages for both
-   * modes — only the prompt wording differs.
+   * Server-resolved English title of the inspiration item, used as
+   * the `{category}` noun phrase when the pipeline rebuilds the
+   * prompt with the computed mask bbox. Sanitized + length-capped
+   * by `preEnqueueValidate` in tool-types.ts.
+   */
+  inspirationTitle: string;
+  /**
+   * Replace vs. Add mode signal. Drives which prompt template
+   * (Replace vs. Add) the bbox-aware rebuild emits. The pipeline
+   * runs the same stages for both modes — only the prompt wording
+   * differs.
    */
   mode: "replace" | "add";
   /**
@@ -241,21 +260,79 @@ export async function runMultiImageEdit(
         )
       : undefined;
 
-  // Stage 2: call the multi-image edit model. The provider adapters
-  // (replicate.ts / falai.ts) construct the 3-element image array
-  // from these three slots in this order:
-  //   imageUrl         → image_input[0] = image 1 (target room)
-  //   referenceImageUrl → image_input[1] = image 2 (inspiration)
-  //   extraImageUrls[0] → image_input[2] = image 3 (brush mask)
-  // The v4.0 instructional prompt references "image 1", "image 2",
-  // "image 3" — DO NOT reorder these args without also updating the
-  // prompt template in `prompts/tools/replace-add-object.ts`.
+  // Compute the brush mask's white-pixel bounding box, then rebuild
+  // the instructional prompt so the model receives a text-spatial
+  // region descriptor ("the rectangular region from left 9% to right
+  // 24%") rather than relying on it to interpret a 3rd image slot
+  // as a semantic mask. Staging confirmed Nano Banana ignores the
+  // image-3-as-mask signal — it would place the inspiration in the
+  // visual center of the room regardless of where the user painted,
+  // and the composite step would correctly drop the misplaced edit
+  // leaving the user with an unchanged scene. The bbox text path
+  // matches Google's documented "composition" pattern from the Nano
+  // Banana prompting guide.
+  //
+  // When bbox computation fails (degenerate mask, sharp decode
+  // error), we fall back to the legacy image-3-as-mask template +
+  // 3-image array — same behavior as the v4.0 baseline. This is a
+  // strict improvement on the broken path: at worst we get the same
+  // failure mode we shipped with, at best we get a working edit.
+  const maskBbox = await computeMaskBbox(
+    normalized.maskUrl,
+    input.generationId,
+  );
+  const rebuilt = buildReplaceAddObjectPrompt(
+    {
+      // Reconstruct the minimal subset of ReplaceAddObjectParams the
+      // builder actually consumes (mode + inspirationTitle). The
+      // builder ignores the other fields; passing them through
+      // would mean threading the full params blob into the pipeline
+      // signature for no behavioral benefit.
+      imageUrl: input.imageUrl,
+      maskUrl: input.maskUrl,
+      prompt: "",
+      categoryId: "",
+      inspirationId: "",
+      inspirationImageUrl: input.inspirationImageUrl,
+      inspirationTitle: input.inspirationTitle,
+      mode: input.mode,
+    },
+    { maskBbox },
+  );
+  const finalPrompt = rebuilt.prompt;
+
+  logger.info(
+    {
+      event: "inpaint.multi.prompt_rebuilt",
+      generationId: input.generationId,
+      mode: input.mode,
+      hasMaskBbox: maskBbox !== null,
+      bbox: maskBbox,
+      promptLen: finalPrompt.length,
+      promptPreview: finalPrompt.slice(0, 200),
+    },
+    maskBbox
+      ? "Multi-image edit prompt rebuilt with bbox text-spatial template"
+      : "Multi-image edit prompt fell back to image-3-as-mask template (bbox compute failed or all-black mask)",
+  );
+
+  // Stage 2: call the multi-image edit model.
+  //   - When bbox was computed: 2-image array [room, inspiration].
+  //     The mask is NOT sent as a 3rd image — the bbox text in the
+  //     prompt is the spatial signal. This matches the well-tested
+  //     google/nano-banana pattern from Google's docs and is what
+  //     Replicate's example payloads ship.
+  //   - When bbox was null (fallback): 3-image array [room,
+  //     inspiration, mask] + legacy image-3 prompt — the v4.0
+  //     baseline behavior, retained because something is better
+  //     than nothing for the unreachable-in-practice edge case.
+  const extraImageUrls = maskBbox ? [] : [normalized.maskUrl];
   const modelStart = Date.now();
   const modelResult = await callDesignGeneration(input.models, {
-    prompt: input.prompt,
+    prompt: finalPrompt,
     imageUrl: normalized.imageUrl,
     referenceImageUrl: input.inspirationImageUrl,
-    extraImageUrls: [normalized.maskUrl],
+    extraImageUrls,
     aspectRatio,
     // No guidanceScale — Nano Banana has no CFG knob
     // (supportsGuidanceScale: false). Provider adapters drop the
@@ -324,4 +401,93 @@ export async function runMultiImageEdit(
     modelDurationMs,
     compositeDurationMs: composite.durationMs,
   };
+}
+
+/**
+ * Compute the white-pixel bounding box of a binary mask PNG, in
+ * normalized [0..1] coordinates. Used to feed Nano Banana a
+ * text-spatial region descriptor that the model actually follows
+ * instead of relying on it to interpret a 3rd image_input slot as a
+ * semantic mask.
+ *
+ * Threshold: pixel value > 127 = white. The normalize step
+ * upstream already collapses RGB masks to greyscale and rejects
+ * effectively-empty masks (MIN_MASK_WHITE_FRACTION = 0.001), so by
+ * the time we reach this point the mask is well-formed and the
+ * threshold is a no-op cleanup against soft edges that survived
+ * the Gaussian-blur dilation.
+ *
+ * Failure modes return null and let the pipeline fall back to the
+ * legacy image-3-as-mask template:
+ *   - sharp decode error on the mask buffer
+ *   - all-black mask post-threshold (no white pixels — should be
+ *     unreachable since normalize rejects this upstream, but
+ *     defended here so a thin-slice escape doesn't crash the
+ *     pipeline)
+ *
+ * Cost: O(width × height) single-pass scan. At 1024×1024 ≈ 10ms
+ * on the deployment instance. Cheap relative to the 5-15s Nano
+ * Banana call that follows.
+ */
+async function computeMaskBbox(
+  maskUrl: string,
+  generationId: string,
+): Promise<MaskBbox | null> {
+  try {
+    const { buffer } = await downloadSafe(maskUrl);
+    const { data, info } = await sharp(buffer)
+      .removeAlpha()
+      .greyscale()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const width = info.width;
+    const height = info.height;
+    if (width === 0 || height === 0) return null;
+
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
+    for (let y = 0; y < height; y += 1) {
+      const rowOffset = y * width;
+      for (let x = 0; x < width; x += 1) {
+        if (data[rowOffset + x] > 127) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (maxX < 0) {
+      logger.warn(
+        {
+          event: "inpaint.multi.bbox.all_black",
+          generationId,
+          width,
+          height,
+        },
+        "Mask bbox compute found no white pixels (should be unreachable; normalize step rejects empty masks)",
+      );
+      return null;
+    }
+
+    return {
+      left: minX / width,
+      top: minY / height,
+      right: (maxX + 1) / width,
+      bottom: (maxY + 1) / height,
+    };
+  } catch (err) {
+    logger.warn(
+      {
+        event: "inpaint.multi.bbox.error",
+        generationId,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      "Mask bbox compute failed, falling back to image-3-as-mask prompt template",
+    );
+    return null;
+  }
 }
