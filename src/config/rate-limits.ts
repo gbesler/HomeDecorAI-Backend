@@ -160,6 +160,13 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 100,
     dailyLimit: 500,
   },
+  // Explore inspiration bulk seed — mirrors objectInspirationSeed envelope.
+  // A single request can write up to ~340 docs, same abuse + quota concerns.
+  exploreBulkSeed: {
+    minuteLimit: 10,
+    hourlyLimit: 100,
+    dailyLimit: 500,
+  },
   // Failed-generation retry. Skips the per-tool freemium meter, so a
   // tight cap on abuse: a user who really wants more retries is going to
   // generate new jobs instead. A legitimate "oh no try again" pattern

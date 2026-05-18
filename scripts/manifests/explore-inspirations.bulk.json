@@ -1,0 +1,5444 @@
+{
+  "items": [
+    {
+      "id": "interior_bathroom_bathroom_coastal001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "coastal",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_coastal001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_luxury002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_luxury002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_minimalist002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_minimalist002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bathroom_bathroom_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "bathroom",
+      "tags": [
+        "bathroom",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroombohemian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "bohemian",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "bohemian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroombohemian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomcoastal001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "coastal",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcoastal001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomcozy001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcozy001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomcozy002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcozy002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomjapandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomjapandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomjapandi002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomjapandi002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomluxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomluxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomminimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomminimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroommodern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroommodern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_bedroom_bedroomscandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "bedroom",
+      "tags": [
+        "bedroom",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomscandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_farmhouse001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "farmhouse",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_farmhouse001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_midcentury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "midCentury",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "midCentury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_midcentury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_midcentury002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "midCentury",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "midCentury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_midcentury002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_diningRoom_diningroom_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "traditional",
+      "roomType": "diningRoom",
+      "tags": [
+        "diningRoom",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_coastal001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "coastal",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_coastal001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_farmhouse001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "farmhouse",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_farmhouse001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_scandinavian00",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_scandinavian00.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_entryway_entryway_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "traditional",
+      "roomType": "entryway",
+      "tags": [
+        "entryway",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_10_gamingroom_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_gamingroom_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_1_gamingroom_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_gamingroom_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_2_gamingroom_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_gamingroom_modern002.jpeg",
+      "imageWidth": 1536,
+      "imageHeight": 2752,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_3_gamingroom_modern003",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_gamingroom_modern003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_4_gamingroom_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_gamingroom_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_5_gamingroom_industrial002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_gamingroom_industrial002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_6_gamingroom_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_gamingroom_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_7_gamingroom_contemporary",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_gamingroom_contemporary.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_8_gamingroom_cozy001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_gamingroom_cozy001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_gamingRoom_9_gamingroom_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "gamingRoom",
+      "tags": [
+        "gamingRoom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_gamingroom_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_10_homeoffice_bohemian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "bohemian",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "bohemian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_homeoffice_bohemian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_1_homeoffice_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_homeoffice_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_2_homeoffice_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_homeoffice_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_3_homeoffice_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_homeoffice_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_4_homeoffice_scandinavian002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_homeoffice_scandinavian002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_5_homeoffice_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_homeoffice_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_6_homeoffice_minimalist002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_homeoffice_minimalist002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_7_homeoffice_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_homeoffice_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_8_homeoffice_cozy001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_homeoffice_cozy001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_homeOffice_9_homeoffice_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "homeOffice",
+      "tags": [
+        "homeOffice",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_homeoffice_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_10_kitchen_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_kitchen_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_1_kitchen_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_kitchen_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_2_kitchen_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_kitchen_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_3_kitchen_farmhouse001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "farmhouse",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_kitchen_farmhouse001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_4_kitchen_farmhouse002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "farmhouse",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_kitchen_farmhouse002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_5_kitchen_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_kitchen_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_6_kitchen_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_kitchen_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_7_kitchen_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_kitchen_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_8_kitchen_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_kitchen_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_kitchen_9_kitchen_rustic001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "rustic",
+      "roomType": "kitchen",
+      "tags": [
+        "kitchen",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_kitchen_rustic001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_Japandi",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japandi.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_Scandinavian",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Scandinavian.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_bohemian",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "bohemian",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "bohemian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bohemian.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_coastal",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "coastal",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/coastal.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_contemporary",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/contemporary.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_cozy",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/cozy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_luxury",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/luxury.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_minimalist",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/minimalist.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_modern_01",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/modern_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_livingRoom_modern_02",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "livingRoom",
+      "tags": [
+        "livingRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/modern_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_10_office_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "traditional",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_office_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_1_office_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_office_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_2_office_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_office_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_3_office_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_office_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_4_office_industrial002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_office_industrial002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_5_office_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_office_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_6_office_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_office_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_7_office_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_office_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_8_office_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_office_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_office_9_office_midcentury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "midCentury",
+      "roomType": "office",
+      "tags": [
+        "office",
+        "midCentury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_office_midcentury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_10_stairway_artdeco001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "artDeco",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_stairway_artdeco001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_1_stairway_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_stairway_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_2_stairway_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_stairway_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_3_stairway_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_stairway_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_4_stairway_luxury002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_stairway_luxury002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_5_stairway_contemporary001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "contemporary",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_stairway_contemporary001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_6_stairway_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_stairway_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_7_stairway_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "traditional",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_stairway_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_8_stairway_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_stairway_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_stairway_9_stairway_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "stairway",
+      "tags": [
+        "stairway",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_stairway_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_10_studyroom_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_studyroom_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_1_studyroom_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "traditional",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_studyroom_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_3_studyroom_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_studyroom_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_4_studyroom_artdeco001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "artDeco",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_studyroom_artdeco001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_5_studyroom_midcentury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "midCentury",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "midCentury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_studyroom_midcentury001.jpeg",
+      "imageWidth": 1536,
+      "imageHeight": 2752,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_6_studyroom_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_studyroom_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_7_studyroom_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_studyroom_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_8_studyroom_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "luxury",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_studyroom_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_studyRoom_9_studyroom_cozy001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "studyRoom",
+      "tags": [
+        "studyRoom",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_studyroom_cozy001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_10_understair_japandi001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "japandi",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "japandi"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_understair_japandi001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_1_understair_cozy001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_understair_cozy001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_2_understair_cozy002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "cozy",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_understair_cozy002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_3_understair_modern001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_understair_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_4_understair_modern002",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "modern",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_understair_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_5_understair_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "minimalist",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_understair_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_6_understair_scandinavian",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "scandinavian",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_understair_scandinavian.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_7_understair_farmhouse001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "farmhouse",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_understair_farmhouse001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_8_understair_industrial001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "industrial",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_understair_industrial001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "interior_underStairSpace_9_understair_bohemian001",
+      "kind": "roomPhoto",
+      "toolType": "interiorDesign",
+      "designStyle": "bohemian",
+      "roomType": "underStairSpace",
+      "tags": [
+        "underStairSpace",
+        "bohemian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_understair_bohemian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_10_apartment_artdeco_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "artDeco",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_apartment_artdeco_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_1_apartment_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_apartment_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_2_apartment_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_apartment_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_3_apartment_modern_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_apartment_modern_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_4_apartment_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_apartment_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_5_apartment_contemporary_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_apartment_contemporary_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_6_apartment_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_apartment_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_7_apartment_minimalist_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_apartment_minimalist_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_8_apartment_industrial_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_apartment_industrial_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_apartment_9_apartment_luxury_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "apartment",
+      "tags": [
+        "apartment",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_apartment_luxury_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_coastal_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "coastal",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_coastal_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_coastal_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "coastal",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_coastal_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_cozy_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "cozy",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_cozy_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_scandinavian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_scandinavian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_tropical_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "tropical",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_tropical_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_bungalow_exterior_bungalow_tropical_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "tropical",
+      "buildingType": "bungalow",
+      "tags": [
+        "bungalow",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_tropical_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_cozy_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "cozy",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_cozy_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_cozy_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "cozy",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_cozy_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_rustic_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_rustic_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_scandinavian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_scandinavian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_scandinavian_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_scandinavian_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cabin_exterior_cabin_traditional_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "cabin",
+      "tags": [
+        "cabin",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_traditional_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_10_exterior_commercial_luxury_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_commercial_luxury_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_1_exterior_commercial_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_commercial_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_2_exterior_commercial_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_commercial_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_3_exterior_commercial_modern_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_commercial_modern_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_4_exterior_commercial_industrial_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_commercial_industrial_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_5_exterior_commercial_industrial_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_commercial_industrial_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_6_exterior_commercial_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_commercial_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_7_exterior_commercial_contemporary_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_commercial_contemporary_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_8_exterior_commercial_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_commercial_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_commercial_9_exterior_commercial_minimalist_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "commercial",
+      "tags": [
+        "commercial",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_commercial_minimalist_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_10_exterior_cottage_bohemian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "bohemian",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "bohemian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_cottage_bohemian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_1_exterior_cottage_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_cottage_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_2_exterior_cottage_rustic_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_cottage_rustic_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_3_exterior_cottage_cozy_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "cozy",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_cottage_cozy_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_4_exterior_cottage_cozy_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "cozy",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_cottage_cozy_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_5_exterior_cottage_farmhouse_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_cottage_farmhouse_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_6_exterior_cottage_farmhouse_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_cottage_farmhouse_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_7_exterior_cottage_traditional_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_cottage_traditional_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_8_exterior_cottage_scandinavian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_cottage_scandinavian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_cottage_9_exterior_cottage_coastal_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "coastal",
+      "buildingType": "cottage",
+      "tags": [
+        "cottage",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_cottage_coastal_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_10_exterior_farmhouse_coastal_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_farmhouse_coastal_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_1_exterior_farmhouse_farmhouse_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_farmhouse_farmhouse_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_2_exterior_farmhouse_farmhouse_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_farmhouse_farmhouse_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_3_exterior_farmhouse_farmhouse_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_farmhouse_farmhouse_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_4_exterior_farmhouse_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_farmhouse_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_5_exterior_farmhouse_rustic_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_farmhouse_rustic_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_6_exterior_farmhouse_traditional_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_farmhouse_traditional_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_7_exterior_farmhouse_cozy_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_farmhouse_cozy_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_8_exterior_farmhouse_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_farmhouse_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_farmhouse_9_exterior_farmhouse_scandinavian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "farmhouse",
+      "tags": [
+        "farmhouse",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_farmhouse_scandinavian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_10_exterior_garage_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_garage_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_1_exterior_garage_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_garage_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_2_exterior_garage_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_garage_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_3_exterior_garage_modern_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_garage_modern_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_4_exterior_garage_industrial_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_garage_industrial_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_5_exterior_garage_industrial_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_garage_industrial_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_6_exterior_garage_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_garage_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_7_exterior_garage_minimalist_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_garage_minimalist_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_7_exterior_garage_minimalist_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_garage_minimalist_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_8_exterior_garage_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_garage_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_garage_9_exterior_garage_farmhouse_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "garage",
+      "tags": [
+        "garage",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_garage_farmhouse_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_10_exterior_house_luxury001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_house_luxury001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_1_exterior_house_modern001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_house_modern001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_2_exterior_house_modern002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_house_modern002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_3_exterior_house_farmhouse_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_house_farmhouse_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_4_exterior_house_traditional001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_house_traditional001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_5_exterior_house_contempor001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_house_contempor001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_6_exterior_house_minimalist001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_house_minimalist001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_7_exterior_house_scandinavian001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_house_scandinavian001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_8_exterior_house_coastal001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "coastal",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_house_coastal001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_house_9_exterior_house_rustic001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "house",
+      "tags": [
+        "house",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_house_rustic001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_10_exterior_mansion_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_mansion_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_1_exterior_mansion_luxury_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_mansion_luxury_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_2_exterior_mansion_luxury_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_mansion_luxury_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_3_exterior_mansion_luxury_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_mansion_luxury_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_4_exterior_mansion_luxury_004",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_mansion_luxury_004.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_5_exterior_mansion_artdeco_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "artDeco",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_mansion_artdeco_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_6_exterior_mansion_artdeco_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "artDeco",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_mansion_artdeco_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_7_exterior_mansion_traditional_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_mansion_traditional_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_8_exterior_mansion_traditional_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_mansion_traditional_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_mansion_9_exterior_mansion_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "mansion",
+      "tags": [
+        "mansion",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_mansion_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_10_exterior_townhouse_luxury_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_townhouse_luxury_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_1_exterior_townhouse_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_townhouse_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_2_exterior_townhouse_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_townhouse_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_3_exterior_townhouse_traditional_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_townhouse_traditional_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_4_exterior_townhouse_traditional_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "traditional",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "traditional"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_townhouse_traditional_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_5_exterior_townhouse_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_townhouse_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_6_exterior_townhouse_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_townhouse_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_7_exterior_townhouse_scandinavian_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "scandinavian",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "scandinavian"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_townhouse_scandinavian_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_8_exterior_townhouse_industrial_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_townhouse_industrial_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_townhouse_9_exterior_townhouse_farmhouse_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "farmhouse",
+      "buildingType": "townhouse",
+      "tags": [
+        "townhouse",
+        "farmhouse"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_townhouse_farmhouse_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_10_exterior_villa_artdeco_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "artDeco",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "artDeco"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_villa_artdeco_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_2_exterior_villa_luxury_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_villa_luxury_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_2_exterior_villa_luxury_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_villa_luxury_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_3_exterior_villa_luxury_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "luxury",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "luxury"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_villa_luxury_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_4_exterior_villa_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_villa_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_5_exterior_villa_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_villa_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_6_exterior_villa_tropical_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "tropical",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_villa_tropical_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_6_exterior_villa_tropical_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "tropical",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_villa_tropical_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_8_exterior_villa_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_villa_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_villa_9_exterior_villa_coastal_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "coastal",
+      "buildingType": "villa",
+      "tags": [
+        "villa",
+        "coastal"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_villa_coastal_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_10_exterior_warehouse_rustic_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "rustic",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_warehouse_rustic_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_1_exterior_warehouse_contemporary_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "contemporary",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "contemporary"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_warehouse_contemporary_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_2_exterior_warehouse_industrial_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_warehouse_industrial_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_3_exterior_warehouse_industrial_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_warehouse_industrial_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_4_exterior_warehouse_industrial_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_warehouse_industrial_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_5_exterior_warehouse_industrial_004",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "industrial",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "industrial"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_warehouse_industrial_004.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_6_exterior_warehouse_minimalist_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "minimalist",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "minimalist"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_warehouse_minimalist_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_7_exterior_warehouse_modern_001",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_warehouse_modern_001.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_8_exterior_warehouse_modern_002",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_warehouse_modern_002.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "exterior_warehouse_9_exterior_warehouse_modern_003",
+      "kind": "roomPhoto",
+      "toolType": "exteriorDesign",
+      "designStyle": "modern",
+      "buildingType": "warehouse",
+      "tags": [
+        "warehouse",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_warehouse_modern_003.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_christmas_Christmas_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "christmas",
+      "tags": [
+        "garden",
+        "christmas"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_french_French_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_french_French_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "french"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "french"
+    },
+    {
+      "id": "garden_japanese_Japanese_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_japanese_Japanese_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "japandi",
+      "tags": [
+        "garden",
+        "japandi",
+        "japanese"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "japanese"
+    },
+    {
+      "id": "garden_modern_Modern_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_modern_Modern_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "modern",
+      "tags": [
+        "garden",
+        "modern"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_rustic_Rustic_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_tropical_Tropical_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "tropical",
+      "tags": [
+        "garden",
+        "tropical"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_cozy_Cozy_garden_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "cozy",
+      "tags": [
+        "garden",
+        "cozy"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_englishCottage_englishCottage_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "traditional",
+      "tags": [
+        "garden",
+        "traditional",
+        "englishCottage"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "englishCottage"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_01",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_01.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_010",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_010.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_02",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_02.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_03",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_03.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_04",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_04.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_05",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_05.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_06",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_06.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_07",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_07.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_08",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_08.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_mediterranean_Mediterranean_09",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "coastal",
+      "tags": [
+        "garden",
+        "coastal",
+        "mediterranean"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_09.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "mediterranean"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_01_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_01%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_010_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_010%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_02_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_02%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_03_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_03%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_04_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_04%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_05_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_05%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_06_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_06%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_07_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_07%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_08_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_08%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    },
+    {
+      "id": "garden_wildflower_Wildflower_09_copy",
+      "kind": "roomPhoto",
+      "toolType": "gardenDesign",
+      "designStyle": "rustic",
+      "tags": [
+        "garden",
+        "rustic",
+        "wildflower"
+      ],
+      "featured": false,
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_09%20copy.jpeg",
+      "imageWidth": 768,
+      "imageHeight": 1376,
+      "imageMime": "image/jpeg",
+      "gardenStyle": "wildflower"
+    }
+  ]
+}
