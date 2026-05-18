@@ -13,7 +13,9 @@ import {
   runRemoval,
   runSegmentationAndPersistMask,
 } from "../lib/generation/segment-remove.js";
-import { runPromptInpaint } from "../lib/generation/prompt-inpaint.js";
+import { runMultiImageEdit } from "../lib/generation/multi-image-edit.js";
+import { getActiveObjectInspirationOrNull } from "../lib/objectInspiration/firestore.js";
+import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -403,69 +405,178 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
       tempOutputUrl = result.outputImageUrl;
       provider = result.provider;
       durationMs = result.durationMs;
-    } else if (mode === "inpaint-with-prompt") {
-      // Replace & Add Object: client mask + inspiration prompt → Flux Fill.
-      // `maskUrl` is a client-uploaded artifact (host-allowlisted by the
-      // controller, same SSRF guard as remove-only). The prompt comes from
-      // `promptResult.prompt` — builder is pass-through over the iOS
-      // inspiration library's authored per-item string, so an empty prompt
-      // means a misconfigured builder, not a user input gap.
+    } else if (mode === "multi-image-edit-with-mask") {
+      // Replace & Add Object (v4.0): client mask + inspiration image →
+      // Nano Banana multi-image instructional edit → composite post-
+      // process. `maskUrl` is a client-uploaded artifact (host-
+      // allowlisted by the controller, same SSRF guard as remove-only).
+      // `inspirationImageUrl` was resolved server-side by
+      // `preEnqueueValidate` (tool-types.ts) from
+      // `objectInspirations/{inspirationId}.imageUrl` — never accepted
+      // from the client body.
       const maskUrl = params["maskUrl"];
       if (typeof maskUrl !== "string" || maskUrl.length === 0) {
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.maskUrl is missing`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.maskUrl is missing`,
         };
+      }
+      let inspirationImageUrl =
+        typeof params["inspirationImageUrl"] === "string"
+          ? (params["inspirationImageUrl"] as string)
+          : "";
+      let inspirationTitle =
+        typeof params["inspirationTitle"] === "string"
+          ? (params["inspirationTitle"] as string)
+          : "";
+      if (inspirationImageUrl.length === 0) {
+        // Pre-v4.0 deploy-boundary fallback. Cloud Tasks jobs that
+        // were enqueued under v3.x (before this rebuild shipped) have
+        // a toolParams blob that lacks inspirationImageUrl /
+        // inspirationTitle — preEnqueueValidate did not populate them
+        // because they did not exist in the schema. Failing closed
+        // here would mark every in-flight v3.x generation as
+        // permanently failed at the deploy cut-over. Instead, inline
+        // the Firestore lookup that preEnqueueValidate would have
+        // run — same trust gate (active=true), same SSRF check on
+        // the resolved URL. If the inspiration is no longer active
+        // we still fail with CONTENT_UNAVAILABLE so the user sees a
+        // sensible "pick another item" message rather than
+        // VALIDATION_FAILED.
+        const inspirationId = params["inspirationId"];
+        if (typeof inspirationId !== "string" || inspirationId.length === 0) {
+          logger.error(
+            {
+              event: "processor.inpaint.multi.inspiration_id_missing",
+              toolType,
+              generationId,
+            },
+            "multi-image-edit-with-mask guard fired — inspirationId missing from params, cannot recover",
+          );
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.inspirationId is missing — cannot resolve inspiration server-side.`,
+          };
+        }
+        logger.info(
+          {
+            event: "processor.inpaint.multi.inspiration_image_recovery",
+            toolType,
+            generationId,
+            inspirationId,
+          },
+          "Pre-v4.0 toolParams detected (no inspirationImageUrl) — resolving inline from Firestore",
+        );
+        const doc = await getActiveObjectInspirationOrNull(inspirationId);
+        if (
+          doc === null ||
+          typeof doc.imageUrl !== "string" ||
+          doc.imageUrl.length === 0
+        ) {
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message:
+              "Selected inspiration is no longer available. Please pick another.",
+          };
+        }
+        const urlCheck = validatePublicImageUrl(
+          doc.imageUrl,
+          "inspirationImageUrl",
+        );
+        if (!urlCheck.ok) {
+          logger.error(
+            {
+              event: "processor.inpaint.multi.inspiration_url_unsafe",
+              toolType,
+              generationId,
+              inspirationId,
+              reason: urlCheck.message,
+            },
+            "Inline-resolved inspiration imageUrl failed SSRF validation",
+          );
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message:
+              "Selected inspiration is no longer available. Please pick another.",
+          };
+        }
+        inspirationImageUrl = doc.imageUrl;
+        inspirationTitle =
+          typeof doc.title.en === "string" ? doc.title.en.trim() : "";
+        // Rebuild the prompt with the recovered title so the inline-
+        // resolved inspiration gets the same high-quality v4.0
+        // instructional template as fresh requests, instead of the
+        // FALLBACK_CATEGORY ("object") prompt the builder emits when
+        // inspirationTitle is empty. Without this rebuild, pre-v4.0
+        // recovered jobs would run with a generic noun phrase even
+        // though we just resolved the real title from Firestore.
+        try {
+          promptResult = tool.buildPrompt({
+            ...params,
+            inspirationImageUrl,
+            inspirationTitle,
+          } as typeof params);
+        } catch (err) {
+          return {
+            kind: "failed",
+            code: "VALIDATION_FAILED",
+            message: err instanceof Error ? err.message : String(err),
+          };
+        }
       }
       if (!promptResult.prompt) {
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but buildPrompt returned empty prompt`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but buildPrompt returned empty prompt`,
         };
       }
       // `mode` is on `CreateReplaceAddObjectBody` with a Zod
       // `.default("replace")`, so any request that survived the
       // controller's Zod parse has `mode` populated. The guard below
-      // is defense-in-depth for a future inpaint-with-prompt tool
-      // whose schema lacks `mode` — its toolParams would route into
-      // this branch without the field, and silently defaulting here
-      // would mask the misconfiguration.
+      // is defense-in-depth for a future multi-image-edit-with-mask
+      // tool whose schema lacks `mode` — its toolParams would route
+      // into this branch without the field, and silently defaulting
+      // here would mask the misconfiguration.
       //
       // The code is `VALIDATION_FAILED` only because it is the
       // closest member of `GenerationErrorCode` — semantically this
-      // is a tool-registration error, NOT a client-input error. The
-      // distinct event name on the log line below
-      // (`processor.inpaint.mode_guard_fired`) is what ops alerting
-      // should key on to separate this from genuine client-input
-      // rejections. Adding a dedicated `INTERNAL_CONFIG_ERROR`
-      // member would be the cleaner expression but is a cross-
-      // cutting change (backend types + iOS mapping) that should be
-      // batched with other taxonomy work.
+      // is a tool-registration error, NOT a client-input error.
+      // Adding a dedicated `INTERNAL_CONFIG_ERROR` member would be
+      // the cleaner expression but is a cross-cutting change
+      // (backend types + iOS mapping) that should be batched with
+      // other taxonomy work.
       const requestMode = params["mode"];
       if (requestMode !== "replace" && requestMode !== "add") {
         logger.error(
           {
-            event: "processor.inpaint.mode_guard_fired",
+            event: "processor.inpaint.multi.mode_guard_fired",
             toolType,
             generationId,
-            requestMode: requestMode === undefined ? "<missing>" : JSON.stringify(requestMode),
+            requestMode:
+              requestMode === undefined
+                ? "<missing>"
+                : JSON.stringify(requestMode),
           },
-          "inpaint-with-prompt mode guard fired — possible tool misconfiguration",
+          "multi-image-edit-with-mask mode guard fired — possible tool misconfiguration",
         );
         return {
           kind: "failed",
           code: "VALIDATION_FAILED",
-          message: `Tool ${toolType} is mode=inpaint-with-prompt but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
+          message: `Tool ${toolType} is mode=multi-image-edit-with-mask but toolParams.mode is ${requestMode === undefined ? "<missing>" : JSON.stringify(requestMode)} (expected "replace" or "add"). This is a server-side tool-registration error, not a client input problem.`,
         };
       }
-      const result = await runPromptInpaint({
+      const result = await runMultiImageEdit({
         imageUrl: inputImageUrl,
+        inspirationImageUrl,
         maskUrl,
         prompt: promptResult.prompt,
-        guidanceScale: promptResult.guidanceScale,
         mode: requestMode,
+        models: tool.models,
         userId,
         generationId,
       });

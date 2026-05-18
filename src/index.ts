@@ -120,11 +120,13 @@ app.listen({ port, host: "0.0.0.0" }, (err) => {
   }
 
   // Boot-time model resolution log. Surfaces the active AI provider
-  // model slugs so a default flip (e.g. env.ts switching the inpaint
-  // default from Dev to Pro) is visible in deployment logs — not just
-  // in the billing dashboard after the fact. `flux-fill-pro` runs
-  // ~5× the per-call cost of `flux-fill-dev`; ops needs to confirm
-  // the env actually deployed the intended model.
+  // model slugs so a default flip (e.g. env.ts switching the removal
+  // model) is visible in deployment logs — not just in the billing
+  // dashboard after the fact. `inpaintModel` is logged for
+  // completeness during the v4.0 transition window even though the
+  // Replace & Add Object tool no longer routes through callInpaint
+  // (see env.ts comment block on REPLICATE_INPAINT_MODEL); it stays
+  // in the boot log until the cleanup pass removes the env var.
   logger.info(
     {
       event: "boot.active_models",

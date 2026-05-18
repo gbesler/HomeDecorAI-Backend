@@ -20,6 +20,7 @@ import { resolveLanguage } from "../lib/notifications/i18n.js";
 import type { SupportedLanguage } from "../lib/generation/types.js";
 import { TOOL_TYPES, type ToolTypeConfig } from "../lib/tool-types.js";
 import { env } from "../lib/env.js";
+import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
 
 // ─── Language resolution ────────────────────────────────────────────────────
 
@@ -52,34 +53,13 @@ function resolveGenerationLanguage(
 // metadata services (e.g. AWS IMDSv1 at 169.254.169.254). DNS-based
 // rebinding attacks are out of scope here — the provider performs its own
 // fetch, so DNS resolution happens in the provider's network namespace.
-const PRIVATE_HOST_RE =
-  /^(?:127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0$|localhost$|::1$|fc[0-9a-f][0-9a-f]:|fe80:|172\.(?:1[6-9]|2[0-9]|3[01])\.)/i;
-
-function validateImageUrlScheme(
-  imageUrl: unknown,
-  fieldName: string,
-): { ok: true } | { ok: false; message: string } {
-  if (typeof imageUrl !== "string" || !/^https?:\/\//i.test(imageUrl)) {
-    return {
-      ok: false,
-      message: `${fieldName} must use http or https scheme`,
-    };
-  }
-  let parsed: URL;
-  try {
-    parsed = new URL(imageUrl);
-  } catch {
-    return { ok: false, message: `${fieldName} is not a valid URL` };
-  }
-  const host = parsed.hostname.toLowerCase();
-  if (PRIVATE_HOST_RE.test(host)) {
-    return {
-      ok: false,
-      message: `${fieldName} resolves to a disallowed host range`,
-    };
-  }
-  return { ok: true };
-}
+// `validateImageUrlScheme` + the private-host regex live in
+// `src/lib/storage/url-validation.ts` so the same SSRF defense also
+// guards server-side URL substitution paths (preEnqueueValidate
+// resolving Firestore-sourced URLs that bypass this controller's
+// request-time validation loop). Re-exported under the existing
+// local name to keep the request-loop call sites below readable.
+const validateImageUrlScheme = validatePublicImageUrl;
 
 // Hosts our iOS clients upload to directly via Cognito-minted credentials.
 // Computed once at module load — env is frozen by the zod parse in env.ts.

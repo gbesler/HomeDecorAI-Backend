@@ -94,11 +94,16 @@ export const rateLimits: Record<string, RateLimitConfig> = {
     hourlyLimit: 30,
     dailyLimit: 100,
   },
-  // Replace & Add Object runs one Flux Fill call per submission. Flux Fill
-  // Dev is ~$0.04/run, Pro ~$0.20. Daily limit halved from 100 (Dev envelope)
-  // to 50 to match Pro's ~5× per-run cost — caps per-user daily spend at
-  // ~$10 instead of unbounded $20. If REPLICATE_INPAINT_MODEL is reverted
-  // to flux-fill-dev via env override, raise dailyLimit back to 100.
+  // Replace & Add Object runs one Nano Banana (`google/nano-banana`,
+  // Gemini 2.5 Flash Image) multi-image edit call per submission, plus
+  // a sharp-based composite post-process step. Nano Banana is
+  // ~$0.020/run on Replicate (≈60% cheaper than the v3.x Flux Fill Pro
+  // path it replaced, which was ~$0.05/run). Daily limit kept at 50
+  // for now to preserve operational continuity through the v4.0
+  // rollout; can safely be raised to 100+ once production cost
+  // telemetry confirms the lower per-call profile. Composite step
+  // adds ~1-2s of latency and a single extra S3 write — both
+  // negligible against the rate-limit envelope.
   replaceAddObject: {
     minuteLimit: 5,
     hourlyLimit: 30,

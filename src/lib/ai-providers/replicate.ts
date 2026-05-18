@@ -4,6 +4,7 @@ import { logger } from "../logger.js";
 import { getCapabilities } from "./capabilities.js";
 import {
   NoMaskDetectedError,
+  resolveExtraImageUrls,
   type GenerationInput,
   type GenerationOutput,
   type InpaintInput,
@@ -33,6 +34,19 @@ const TIMEOUT_MS = 60_000;
 // `provider.replicate.empty_response` and burning two retries before we
 // fell back to fal.ai. Match the realistic upper bound for the model.
 const INPAINT_TIMEOUT_MS = 240_000;
+// Nano Banana (Gemini 2.5 Flash Image) is an instruction-following
+// multi-image edit model. Median latency is 3-6s for typical room +
+// inspiration + mask payloads, but the high-res tail (4032×3024
+// portrait iPhone captures, 3+ reference images) can stretch past
+// 60s — the same reason Flux Fill needed INPAINT_TIMEOUT_MS above.
+// Without this carve-out, every slow Nano Banana call would fire
+// AbortSignal.timeout, surface as an empty response, burn the retry
+// budget twice, and route through to the fal.ai fallback (which is
+// degraded for this tool — see callFalAI's structural warning). Pin
+// to the same 240s ceiling as the inpaint-era constant; the model
+// will almost always return well before that, but the ceiling
+// matches the observed worst-case tail for multi-image edits.
+const MULTI_IMAGE_EDIT_TIMEOUT_MS = 240_000;
 
 export async function callReplicate(
   model: `${string}/${string}`,
@@ -63,9 +77,17 @@ export async function callReplicate(
   // treat images[0] as the primary; the prompt then invokes images[1] as
   // "image 2". Nano Banana reuses the same [target, ref] ordering without
   // needing a primary-index flag.
+  //
+  // `extraImageUrls` is appended after the reference slot — used by the
+  // Replace & Add Object multi-image-edit pipeline to send a brush mask
+  // as image 3. Capability gate matches `referenceImageUrl`: a model
+  // whose matrix entry sets `supportsReferenceImage: false` will not
+  // receive any of the extras (and shouldn't — the instructional
+  // prompt would reference images the model wasn't told to expect).
+  const extras = resolveExtraImageUrls(capabilities, input);
   const images = hasReference
-    ? [input.imageUrl, input.referenceImageUrl as string]
-    : [input.imageUrl];
+    ? [input.imageUrl, input.referenceImageUrl as string, ...extras]
+    : [input.imageUrl, ...extras];
 
   const replicateInput: Record<string, unknown> = {};
   const baseSlug = model.split(":")[0];
@@ -151,9 +173,17 @@ export async function callReplicate(
     replicateInput.aspect_ratio = input.aspectRatio;
   }
 
+  // Per-slug timeout selection. Nano Banana (multi-image instructional
+  // edit) shares the slow-tail risk profile of Flux Fill rather than
+  // the fast-edit profile of Pruna — see MULTI_IMAGE_EDIT_TIMEOUT_MS
+  // comment block above for the rationale.
+  const timeoutMs =
+    baseSlug === "google/nano-banana"
+      ? MULTI_IMAGE_EDIT_TIMEOUT_MS
+      : TIMEOUT_MS;
   const output = (await replicate.run(model, {
     input: replicateInput,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   })) as unknown;
 
   const durationMs = Date.now() - start;

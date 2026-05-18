@@ -5,6 +5,7 @@ import { logger } from "../logger.js";
 import { getCapabilities } from "./capabilities.js";
 import {
   NoMaskDetectedError,
+  resolveExtraImageUrls,
   type GenerationInput,
   type GenerationOutput,
   type InpaintInput,
@@ -39,9 +40,41 @@ export async function callFalAI(
     typeof input.referenceImageUrl === "string" &&
     input.referenceImageUrl.length > 0;
 
+  // `extraImageUrls` is appended after the reference slot. Used by the
+  // Replace & Add Object multi-image-edit pipeline to send a brush mask
+  // as image 3. Gated on `supportsReferenceImage` same as the primary
+  // reference slot — a model without multi-image support has no way to
+  // disambiguate the extras and would silently drop or schema-reject.
+  const extras = resolveExtraImageUrls(capabilities, input);
   const imageUrls = hasReference
-    ? [input.imageUrl, input.referenceImageUrl as string]
-    : [input.imageUrl];
+    ? [input.imageUrl, input.referenceImageUrl as string, ...extras]
+    : [input.imageUrl, ...extras];
+
+  // Degraded-fallback warning. fal-ai/flux-2/edit (the Replace & Add
+  // Object tool's fal.ai fallback) is a Flux 2 reference-style edit
+  // model, not an instruction-following multi-image edit model.
+  // When this adapter receives an `extraImageUrls` payload — used
+  // today only by the Replace & Add Object pipeline to send a brush
+  // mask as image 3 — fal.ai's flux-2/edit treats the mask as a
+  // third aesthetic reference rather than a semantic edit region.
+  // The pipeline's composite post-process still applies the mask
+  // afterward, so output is not garbage, but mask-precision is lost
+  // and inside-mask content may diverge from the inspiration the
+  // user picked. Loud structured warn here so operator dashboards
+  // can alert on sustained fallback fires (which would signal a
+  // Replicate-side Nano Banana outage AND a quality regression for
+  // affected users in the same window).
+  if (extras.length > 0) {
+    logger.warn(
+      {
+        event: "provider.falai.degraded_fallback",
+        model,
+        imagesCount: imageUrls.length,
+        extrasCount: extras.length,
+      },
+      "fal.ai fallback for multi-image-edit pipeline — model lacks semantic mask understanding; output quality is degraded but composite post-process still applies the mask region",
+    );
+  }
 
   if (hasReference) {
     // Log every multi-image call so a silent "model ignored image_urls[1]"

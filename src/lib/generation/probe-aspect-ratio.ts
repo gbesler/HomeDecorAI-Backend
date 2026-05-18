@@ -69,7 +69,14 @@ export async function probeImageAspectRatio(
   }
 }
 
-function snapToSupportedRatio(measured: number): string {
+/**
+ * Snap a raw width/height ratio to the nearest supported `aspect_ratio`
+ * enum label. Exported so callers who already know the dimensions
+ * (e.g. `normalizeImageMaskPair` returns post-normalize dims) can skip
+ * the full image download `probeImageAspectRatio` performs and call
+ * this helper directly with the in-memory width/height.
+ */
+export function snapToSupportedRatio(measured: number): string {
   let best = SUPPORTED_RATIOS[0];
   let bestDelta = Math.abs(Math.log(measured / best.value));
   for (const candidate of SUPPORTED_RATIOS) {

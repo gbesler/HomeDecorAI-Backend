@@ -166,19 +166,23 @@ export const envSchema = z.object({
     .default("allenhooo/lama:cdac78a1bec5b23c07fd29692fb70baa513ea403a39e643c48ec5edadb15fe72")
     .transform((v) => v as `${string}/${string}`),
   // Prompt-driven inpainting: Flux Fill (BFL). Image + mask + prompt → image.
-  // Used by Replace & Add Object.
   //
-  // Default flipped to `flux-fill-pro` after staging confirmed Dev was
-  // producing the original failure modes (silhouette preservation on
-  // replace, no-op / texture extension on add) even with the v2.0
-  // mode-aware prompt + dilation tuning. Pro's higher base prompt
-  // fidelity overcomes Dev's "spurious elements" bias on blank-area
-  // masks (per BFL model card). Cost is ~5× Dev's ~$0.04/run; if
-  // sustained run rate makes that unaffordable, revert to Dev via env
-  // override and re-tune `FLUX_FILL_GUIDANCE` in
-  // `src/lib/prompts/tools/replace-add-object.ts` against fresh Dev
-  // staging output (v3.0 collapsed the per-mode split — both modes
-  // share one guidance value now).
+  // ORPHANED AS OF v4.0 — the Replace & Add Object tool no longer
+  // routes through the `inpaint` role / `callInpaint` pipeline. v4.0
+  // rebuilt the tool on `google/nano-banana` (Gemini 2.5 Flash Image)
+  // multi-image edit via the `edit` role; the registry entry's
+  // `models.replicate` field is now the source of truth for that tool.
+  // This env var + the FALAI_INPAINT_MODEL pair + their boot-log
+  // entries below + the `callInpaint` exports in router.ts + the
+  // `flux-fill-*` and `fal-ai/flux-pro/v1/fill` entries in
+  // capabilities.ts are all scheduled for a single cleanup pass once
+  // the v4.0 path observes a clean 7-day window in production. The
+  // env var is left in place during that window for two reasons:
+  // (1) a quick env-driven rollback to a Flux Fill-shaped path would
+  // require this knob if Unit 6's deletion of prompt-inpaint.ts is
+  // also reverted; (2) keeping the env validation prevents accidental
+  // staging configs that still set the variable from being rejected
+  // at boot.
   REPLICATE_INPAINT_MODEL: z
     .string()
     .regex(/^[^/]+\/[^/]+$/, "must be in 'owner/name' form")

@@ -646,20 +646,29 @@ export const CreateRemoveObjectsBody = zod.object({
 });
 
 /**
- * Replace & Add Object — prompt-driven inpainting of a user-painted region.
+ * Replace & Add Object — multi-image instructional edit of a user-painted region.
  *
- * Distinct from Remove Objects (which uses LaMa to extend surroundings): this
- * tool generates NEW content inside the masked region guided by an inspiration
- * prompt curated from a 40×20 item library on the client.
+ * v4.0 pipeline (Nano Banana / Gemini 2.5 Flash Image): sends room photo,
+ * inspiration reference photo, and brush mask to a multi-image edit model
+ * with an instruction template referencing image 1 / image 2 / image 3.
+ * A sharp-based composite post-process enforces outside-mask pixel
+ * preservation against the original room photo. Distinct from Remove
+ * Objects (which uses LaMa to extend surroundings); this tool generates a
+ * NEW object inside the masked region matching the visual identity of the
+ * inspiration the user picked.
  *
- * Mask encoding: white pixels = replace, black pixels = preserve. Both
+ * Mask encoding: white pixels = modify, black pixels = preserve. Both
  * `imageUrl` and `maskUrl` must be hosted on an allowlisted host (CloudFront
  * or S3) — SSRF guard, same as Remove Objects.
  *
- * `categoryId` + `inspirationId` ride along for analytics (never reach the
- * AI provider); they live inside `toolParams` on the `GenerationDoc`.
+ * `categoryId` + `inspirationId` are admin-curated lookup keys. The server
+ * resolves `inspirationImageUrl` and `inspirationTitle` from
+ * `objectInspirations/{inspirationId}` in `preEnqueueValidate`; iOS clients
+ * do not need to set those fields. Any client-supplied value for those
+ * server-internal fields is overwritten with the Firestore-authoritative
+ * value.
  *
- * @summary Enqueue a replace/add object inpainting
+ * @summary Enqueue a replace/add object multi-image edit
  */
 export const CreateReplaceAddObjectBody = zod.object({
   imageUrl: zod
@@ -677,7 +686,7 @@ export const CreateReplaceAddObjectBody = zod.object({
     .min(1)
     .max(500)
     .describe(
-      "Inspiration prompt describing what to place in the masked region",
+      "Vestigial field preserved for v3.x backward compatibility and analytics logging. The v4.0 multi-image-edit pipeline does NOT consume this value — it reads `inspirationTitle` (server-resolved from Firestore) as the noun phrase in the instructional prompt. preEnqueueValidate also overwrites this field with the Firestore-authoritative `objectInspirations/{inspirationId}.prompt` value before it reaches the processor, so a dummy or stale value sent by the client has no behavioral effect. Required (not optional) to keep older iOS clients that send a non-empty value passing Zod validation without a wire-breaking schema change.",
     ),
   categoryId: zod
     .string()
@@ -703,7 +712,29 @@ export const CreateReplaceAddObjectBody = zod.object({
     .optional()
     .default("replace")
     .describe(
-      "User intent for the masked region. `replace` swaps an existing object inside the painted region; `add` places the object into empty space. Optional during the rollout window: missing values default server-side to `\"replace\"` so older iOS clients that pre-date the mode-aware split continue to work. Drives prompt wording, mask dilation, and Flux Fill guidance. Recommended explicit value for non-UI callers: `\"replace\"` if the painted region contains an object, `\"add\"` for blank wall/floor.",
+      "User intent for the masked region. `replace` swaps an existing object inside the painted region; `add` places the object into empty space. Optional during the rollout window: missing values default server-side to `\"replace\"` so older iOS clients that pre-date the mode-aware split continue to work. Drives prompt wording and the multi-image instructional template branch. Recommended explicit value for non-UI callers: `\"replace\"` if the painted region contains an object, `\"add\"` for blank wall/floor.",
+    ),
+  // Hand-edited — NOT produced by orval. Server-internal fields populated
+  // by `preEnqueueValidate` from `objectInspirations/{inspirationId}`. The
+  // fields are accepted as optional in the wire schema so the existing
+  // zod parse + serializer round-trip continues to work; any client-
+  // supplied value is overwritten by the server-authoritative Firestore
+  // lookup before the params reach the generation processor. Same pattern
+  // as the `prompt` / `categoryId` substitution above. iOS clients do not
+  // need to set either field.
+  inspirationImageUrl: zod
+    .string()
+    .url()
+    .optional()
+    .describe(
+      "Server-resolved URL of the inspiration item's reference photo (from `objectInspirations/{id}.imageUrl`). Client-supplied values are ignored — preEnqueueValidate overwrites with the Firestore-authoritative value.",
+    ),
+  inspirationTitle: zod
+    .string()
+    .max(200)
+    .optional()
+    .describe(
+      "Server-resolved English title of the inspiration item (from `objectInspirations/{id}.title.en`). Used as the noun phrase in the v4.0 instructional prompt. Client-supplied values are ignored.",
     ),
   language: zod.enum(["tr", "en"]).optional(),
 });
