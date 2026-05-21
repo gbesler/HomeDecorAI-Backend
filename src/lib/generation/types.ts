@@ -30,7 +30,34 @@ export type GenerationStatus =
   | "failed";
 
 /** Supported UI languages for push notification localization (R10). */
-export type SupportedLanguage = "tr" | "en";
+export type SupportedLanguage =
+  | "tr"
+  | "en"
+  | "ar"
+  | "zh-Hans"
+  | "zh-Hant"
+  | "hr"
+  | "cs"
+  | "da"
+  | "nl"
+  | "fi"
+  | "fr"
+  | "de"
+  | "el"
+  | "he"
+  | "hu"
+  | "id"
+  | "it"
+  | "ja"
+  | "ko"
+  | "ms"
+  | "nb"
+  | "pl"
+  | "pt"
+  | "ro"
+  | "ru"
+  | "sk"
+  | "es";
 
 /**
  * Typed error codes surfaced to iOS so the client can render differentiated
