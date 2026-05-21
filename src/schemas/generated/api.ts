@@ -52,6 +52,7 @@ export const CreateInteriorDesignBody = zod.object({
   roomType: zod.enum([
     "livingRoom",
     "bedroom",
+    "kidRoom",
     "kitchen",
     "underStairSpace",
     "diningRoom",
@@ -525,6 +526,7 @@ export const CreateVirtualStagingBody = zod.object({
   roomType: zod.enum([
     "livingRoom",
     "bedroom",
+    "kidRoom",
     "kitchen",
     "underStairSpace",
     "diningRoom",
