@@ -286,7 +286,7 @@ export const CreateReferenceStyleBody = zod
     // Optional UI language snapshot — controller falls back to Accept-Language
     // header then "en". Including it on the schema (vs only on the
     // controller-side extend) keeps the Zod type self-contained for codegen.
-    language: zod.enum(["tr", "en"]).optional(),
+    language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
   })
   // Reject same-URL self-reference: a user (or a buggy iOS flow) sending the
   // same URL for both room and reference would burn a generation credit on a
@@ -344,7 +344,7 @@ export const CreatePaintWallsBody = zod
     // forwarded to the provider as the reference image (paint the walls in
     // the aesthetic of this reference while preserving room geometry).
     referenceImageUrl: zod.string().url().optional(),
-    language: zod.enum(["tr", "en"]).optional(),
+    language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
   })
   .refine(
     (b) => (b.wallStyleMode === "texture" ? b.textureId !== undefined : true),
@@ -440,7 +440,7 @@ export const CreateFloorRestyleBody = zod
     // forwarded to the provider as the reference image (restyle the flooring
     // in the aesthetic of this reference while preserving room geometry).
     referenceImageUrl: zod.string().url().optional(),
-    language: zod.enum(["tr", "en"]).optional(),
+    language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
   })
   .refine(
     (b) => (b.floorStyleMode === "texture" ? b.textureId !== undefined : true),
@@ -540,7 +540,7 @@ export const CreateVirtualStagingBody = zod.object({
   ]),
   designStyle: zod.enum(DESIGN_STYLE_VALUES),
   colorPalette: zod.enum(STAGING_PALETTE_VALUES),
-  language: zod.enum(["tr", "en"]).optional(),
+  language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
 });
 
 /**
@@ -588,7 +588,7 @@ export const CreateExteriorPaintingBody = zod.object({
     "desertSand",
   ]),
   material: zod.enum(EXTERIOR_MATERIAL_VALUES),
-  language: zod.enum(["tr", "en"]).optional(),
+  language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
 });
 
 /**
@@ -608,7 +608,7 @@ export const CreateCleanOrganizeBody = zod.object({
     .url()
     .describe("Public URL of the room photo to declutter"),
   declutterLevel: zod.enum(["full", "light"]),
-  language: zod.enum(["tr", "en"]).optional(),
+  language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
 });
 
 /**
@@ -644,7 +644,7 @@ export const CreateRemoveObjectsBody = zod.object({
     .describe(
       "Optional caption describing what should replace the removed area. Defaults to a surface-completion prompt.",
     ),
-  language: zod.enum(["tr", "en"]).optional(),
+  language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
 });
 
 /**
@@ -738,7 +738,7 @@ export const CreateReplaceAddObjectBody = zod.object({
     .describe(
       "Server-resolved English title of the inspiration item (from `objectInspirations/{id}.title.en`). Used as the noun phrase in the v4.0 instructional prompt. Client-supplied values are ignored.",
     ),
-  language: zod.enum(["tr", "en"]).optional(),
+  language: zod.enum(["tr","en","ar","zh-Hans","zh-Hant","hr","cs","da","nl","fi","fr","de","el","he","hu","id","it","ja","ko","ms","nb","pl","pt","ro","ru","sk","es"]).optional(),
 });
 
 export const CreateInteriorDesignResponse = zod.object({
