@@ -1,5 +1,5 @@
 /**
- * Rooms dictionary — 12 entries covering every value in the iOS `RoomType`
+ * Rooms dictionary — 13 entries covering every value in the iOS `RoomType`
  * enum. Each entry provides the per-room `focusSlots` that the builder uses
  * to compose the R3 room-focus layer.
  *
@@ -43,6 +43,19 @@ export const rooms: RoomsDict = {
     },
     preservationHint:
       "If a bed, bedside tables, dresser, wardrobe, reading chair, or other primary bedroom furniture are visible, restyle them in place — keep their footprint and the bed's orientation exactly as in the source.",
+  },
+
+  [RoomType.kidRoom]: {
+    focusSlots: {
+      furnitureDialect:
+        "a child-sized bed or bunk bed, a low play table with small chairs, open toy storage bins, a soft area rug for play, a bookshelf at a reachable height, a wardrobe sized for kids",
+      lightingDialect:
+        "soft warm ceiling light, a bedside nightlight, a focused desk or reading lamp, gentle accent lighting near the play area",
+      personalization:
+        "playful wall art, plush toys arranged thoughtfully, a name banner or growth chart, a small canopy or tent reading nook",
+    },
+    preservationHint:
+      "If a bed, bunk bed, play table, bookshelf, wardrobe, or other primary kid-room furniture is visible, restyle in place — keep the bed orientation, storage layout, and any visible window or doorway exactly as in the source.",
   },
 
   [RoomType.kitchen]: {

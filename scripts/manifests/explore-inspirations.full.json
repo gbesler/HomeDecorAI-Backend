@@ -4092,7 +4092,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_01.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_010",
@@ -4107,7 +4108,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_010.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_02",
@@ -4122,7 +4124,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_02.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_03",
@@ -4137,7 +4140,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_03.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_04",
@@ -4152,7 +4156,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_04.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_05",
@@ -4167,7 +4172,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_05.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_06",
@@ -4182,7 +4188,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_06.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_07",
@@ -4197,7 +4204,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_07.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_08",
@@ -4212,7 +4220,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_08.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_christmas_Christmas_09",
@@ -4227,7 +4236,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_09.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "christmas"
   },
   {
     "id": "garden_french_French_01",
@@ -4582,7 +4592,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_01.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_010",
@@ -4597,7 +4608,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_010.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_02",
@@ -4612,7 +4624,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_02.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_03",
@@ -4627,7 +4640,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_03.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_04",
@@ -4642,7 +4656,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_04.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_05",
@@ -4657,7 +4672,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_05.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_06",
@@ -4672,7 +4688,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_06.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_07",
@@ -4687,7 +4704,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_07.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_08",
@@ -4702,7 +4720,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_08.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_modern_Modern_09",
@@ -4717,7 +4736,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_09.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "modern"
   },
   {
     "id": "garden_rustic_Rustic_01",
@@ -4732,7 +4752,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_01.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_010",
@@ -4747,7 +4768,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_010.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_02",
@@ -4762,7 +4784,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_02.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_03",
@@ -4777,7 +4800,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_03.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_04",
@@ -4792,7 +4816,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_04.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_05",
@@ -4807,7 +4832,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_05.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_06",
@@ -4822,7 +4848,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_06.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_07",
@@ -4837,7 +4864,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_07.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_08",
@@ -4852,7 +4880,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_08.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_rustic_Rustic_09",
@@ -4867,7 +4896,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_09.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "rustic"
   },
   {
     "id": "garden_tropical_Tropical_01",
@@ -4882,7 +4912,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_01.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_010",
@@ -4897,7 +4928,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_010.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_02",
@@ -4912,7 +4944,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_02.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_03",
@@ -4927,7 +4960,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_03.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_04",
@@ -4942,7 +4976,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_04.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_05",
@@ -4957,7 +4992,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_05.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_06",
@@ -4972,7 +5008,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_06.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_07",
@@ -4987,7 +5024,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_07.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_08",
@@ -5002,7 +5040,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_08.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_tropical_Tropical_09",
@@ -5017,7 +5056,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_09.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "tropical"
   },
   {
     "id": "garden_cozy_Cozy_garden_01",
@@ -5032,7 +5072,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_01.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_010",
@@ -5047,7 +5088,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_010.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_02",
@@ -5062,7 +5104,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_02.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_03",
@@ -5077,7 +5120,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_03.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_04",
@@ -5092,7 +5136,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_04.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_05",
@@ -5107,7 +5152,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_05.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_06",
@@ -5122,7 +5168,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_06.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_07",
@@ -5137,7 +5184,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_07.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_08",
@@ -5152,7 +5200,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_08.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_cozy_Cozy_garden_09",
@@ -5167,7 +5216,8 @@
     "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_09.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
-    "imageMime": "image/jpeg"
+    "imageMime": "image/jpeg",
+    "gardenStyle": "cozy"
   },
   {
     "id": "garden_englishCottage_englishCottage_01",
