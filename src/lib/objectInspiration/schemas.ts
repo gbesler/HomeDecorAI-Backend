@@ -25,9 +25,14 @@ import {
  *   • `toolTypes` is non-empty (the spread literal preserves Zod's tuple
  *     non-emptiness check) so an admin cannot ship a row hidden from
  *     both tools by mistake.
- *   • `title.en` / `title.tr` both trimmed + min 1; the iOS-side
- *     fallback chain (requested → en → tr → "") still applies if one is
- *     somehow empty, but the seed gate rejects accidentally-empty docs.
+ *   • `title.en` / `title.tr` both required + trimmed + min 1. The 30
+ *     other supported language codes (see `OPTIONAL_LANGUAGES` in
+ *     types.ts) are optional, also trim+min-1 when present so an
+ *     accidentally-empty translation row is rejected at the edge — a
+ *     silently-empty `de` masquerading as a German title is the
+ *     concrete failure mode this prevents. The iOS-side fallback
+ *     chain (requested → en → tr → first non-empty) still applies if
+ *     a translation is omitted entirely.
  */
 
 const ObjectCategoryIdSchema = z
@@ -41,10 +46,53 @@ const ObjectItemIdSchema = z
     "item id must be `<categoryId>_<index>` (e.g. sofas_1)",
   );
 
+const TitleStringSchema = z.string().trim().min(1).max(120);
+const OptionalTitleStringSchema = TitleStringSchema.optional();
+
+/**
+ * `en` + `tr` are required; the 30 other languages from
+ * `OPTIONAL_LANGUAGES` are optional but, when present, must be
+ * non-empty (TitleStringSchema applies `trim().min(1)`). `.strict()`
+ * so an unknown locale code (typo, retired locale) is rejected at the
+ * edge — adding a new language is an explicit schema bump in
+ * types.ts + this file + iOS `AppLanguage`. The 30 optional fields
+ * are listed explicitly so zod's `.infer` carries each into
+ * `LocalizedTitle`.
+ */
 const LocalizedTitleSchema = z
   .object({
-    en: z.string().trim().min(1).max(120),
-    tr: z.string().trim().min(1).max(120),
+    en: TitleStringSchema,
+    tr: TitleStringSchema,
+    ar: OptionalTitleStringSchema,
+    hy: OptionalTitleStringSchema,
+    "zh-Hans": OptionalTitleStringSchema,
+    "zh-Hant": OptionalTitleStringSchema,
+    hr: OptionalTitleStringSchema,
+    cs: OptionalTitleStringSchema,
+    da: OptionalTitleStringSchema,
+    nl: OptionalTitleStringSchema,
+    fi: OptionalTitleStringSchema,
+    fr: OptionalTitleStringSchema,
+    de: OptionalTitleStringSchema,
+    el: OptionalTitleStringSchema,
+    he: OptionalTitleStringSchema,
+    hu: OptionalTitleStringSchema,
+    id: OptionalTitleStringSchema,
+    it: OptionalTitleStringSchema,
+    ja: OptionalTitleStringSchema,
+    ko: OptionalTitleStringSchema,
+    ms: OptionalTitleStringSchema,
+    nb: OptionalTitleStringSchema,
+    pl: OptionalTitleStringSchema,
+    pt: OptionalTitleStringSchema,
+    ro: OptionalTitleStringSchema,
+    ru: OptionalTitleStringSchema,
+    sk: OptionalTitleStringSchema,
+    es: OptionalTitleStringSchema,
+    sv: OptionalTitleStringSchema,
+    th: OptionalTitleStringSchema,
+    uk: OptionalTitleStringSchema,
+    vi: OptionalTitleStringSchema,
   })
   .strict();
 

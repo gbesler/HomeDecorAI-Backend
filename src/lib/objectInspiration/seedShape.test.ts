@@ -90,6 +90,26 @@ describe("buildObjectCategoryDoc", () => {
     assert.equal(doc.title.en, "A");
     assert.deepEqual(doc.toolTypes, ["replaceObject"]);
   });
+
+  it("carries optional-locale translations through to the Firestore doc", () => {
+    const row: ObjectCategorySeedInput = {
+      ...sampleCategoryRow,
+      title: {
+        en: "Sofas",
+        tr: "Koltuklar",
+        de: "Sofas",
+        ja: "ソファ",
+        "zh-Hans": "沙发",
+      },
+    };
+    const doc = buildObjectCategoryDoc(row);
+    assert.equal(doc.title.de, "Sofas");
+    assert.equal(doc.title.ja, "ソファ");
+    assert.equal(doc.title["zh-Hans"], "沙发");
+    // Untouched optional locales stay absent — `Object.keys` is the
+    // contract the merge-fields write uses.
+    assert.equal(doc.title.fr, undefined);
+  });
 });
 
 describe("buildObjectInspirationDoc", () => {
