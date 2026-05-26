@@ -334,6 +334,42 @@ describe("ObjectInspirationSeedInputSchema", () => {
   });
 });
 
+describe("object-inspirations.searchTerms.example.json", () => {
+  // Smoke test: keep the reference manifest in lockstep with the
+  // schema. If a future contributor tightens a bound (e.g. drops the
+  // term length to 30) the example file must update too — this test
+  // would catch the drift before a runbook ships stale.
+  it("each item parses through ObjectInspirationSeedInputSchema", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const manifestPath = path.resolve(
+      here,
+      "../../../scripts/manifests/object-inspirations.searchTerms.example.json",
+    );
+    const raw = await readFile(manifestPath, "utf-8");
+    const parsed = JSON.parse(raw) as { items: unknown[] };
+    assert.ok(Array.isArray(parsed.items));
+    assert.ok(parsed.items.length >= 1);
+    for (const item of parsed.items) {
+      const result = ObjectInspirationSeedInputSchema.safeParse(item);
+      if (!result.success) {
+        assert.fail(
+          `example item failed schema validation: ${JSON.stringify(result.error.format())}`,
+        );
+      }
+      // Every example item carries searchTerms (that's the whole
+      // point of the reference file) — fail loudly if a future edit
+      // drops the field.
+      assert.ok(
+        result.data.searchTerms !== undefined,
+        `example item ${result.data.id} is missing searchTerms`,
+      );
+    }
+  });
+});
+
 describe("ObjectInspirationPatchSchema", () => {
   it("accepts active-only patch", () => {
     const parsed = ObjectInspirationPatchSchema.parse({ active: false });

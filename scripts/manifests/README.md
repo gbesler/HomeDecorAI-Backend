@@ -109,6 +109,38 @@ Build the JSON manually or with a generator. Required minimum:
 }
 ```
 
+### Optional: per-item `searchTerms`
+
+Items may carry a per-language alternate-search vocabulary. Feeds the
+iOS matcher's literal-weight third channel so a TR user typing
+`"kanepe"` matches Koltuk items whose title noun does not contain that
+word, with no iOS release needed to extend coverage.
+
+```jsonc
+{
+  "id": "sofas_1",
+  "categoryId": "sofas",
+  ...
+  "searchTerms": {
+    "tr": ["kanepe", "divan", "sedir"],
+    "en": ["couch", "settee", "loveseat"]
+  }
+}
+```
+
+- Field is **optional**: items without it fall back to title-only
+  matching (today's behaviour). Both `en` and `tr` inside the object
+  are independently optional.
+- Bounds: max 10 terms per language, each term `trim().min(1).max(40)`.
+- Multi-word terms (`"spiral candle"`) tokenise on whitespace —
+  every subtoken becomes independently searchable. Prefer single-noun
+  synonyms; multi-word terms with category-generic nouns can cause
+  cross-category bleed (see brainstorm doc §4.6).
+- Re-seed without the field **clears** an existing `searchTerms` on
+  the doc (merge-field semantics, same as `title`).
+
+Reference example: `scripts/manifests/object-inspirations.searchTerms.example.json`.
+
 ### 3. Dry-run validate
 
 Catches FK errors (item references unknown category) and JSON-schema
