@@ -256,10 +256,32 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.deepEqual(parsed.searchTerms?.tr, ["kanepe", "divan", "sedir"]);
   });
 
-  it("accepts partial-language payload (tr omitted, defaults to [])", () => {
+  it("rejects partial-language payload — en + tr are both required when searchTerms is present", () => {
+    // Partial-language payload would silently erase the unspecified
+    // language on Firestore re-seed (merge-field semantics replace
+    // the entire `searchTerms` map). Both arrays must be present so
+    // the clear-vs-preserve intent is explicit; an empty array
+    // explicitly clears that language.
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["couch"] },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { tr: ["kanepe"] },
+      }),
+    );
+  });
+
+  it("accepts explicit empty array for one language", () => {
+    // Explicit `[]` is the contract for "this language has no
+    // alternate terms" — distinct from omitting the field entirely.
     const parsed = ObjectInspirationSeedInputSchema.parse({
       ...validItemBody,
-      searchTerms: { en: ["couch"] },
+      searchTerms: { en: ["couch"], tr: [] },
     });
     assert.deepEqual(parsed.searchTerms?.en, ["couch"]);
     assert.deepEqual(parsed.searchTerms?.tr, []);
@@ -278,7 +300,7 @@ describe("ObjectInspirationSeedInputSchema", () => {
     const at40 = "a".repeat(40);
     const parsed = ObjectInspirationSeedInputSchema.parse({
       ...validItemBody,
-      searchTerms: { en: [`  ${at40}  `] },
+      searchTerms: { en: [`  ${at40}  `], tr: [] },
     });
     assert.deepEqual(parsed.searchTerms?.en, [at40]);
   });
@@ -288,7 +310,7 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { en: [at41] },
+        searchTerms: { en: [at41], tr: [] },
       }),
     );
   });
@@ -297,13 +319,13 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { en: ["valid", ""] },
+        searchTerms: { en: ["valid", ""], tr: [] },
       }),
     );
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { tr: ["   "] },
+        searchTerms: { en: [], tr: ["   "] },
       }),
     );
   });
@@ -313,13 +335,13 @@ describe("ObjectInspirationSeedInputSchema", () => {
     const eleven = Array.from({ length: 11 }, (_, i) => `term${i}`);
     const parsed = ObjectInspirationSeedInputSchema.parse({
       ...validItemBody,
-      searchTerms: { en: ten },
+      searchTerms: { en: ten, tr: [] },
     });
     assert.equal(parsed.searchTerms?.en?.length, 10);
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { en: eleven },
+        searchTerms: { en: eleven, tr: [] },
       }),
     );
   });
@@ -328,7 +350,7 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { en: ["couch"], fr: ["canapé"] },
+        searchTerms: { en: ["couch"], tr: [], fr: ["canapé"] },
       }),
     );
   });

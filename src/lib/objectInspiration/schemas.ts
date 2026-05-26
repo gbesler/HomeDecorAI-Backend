@@ -103,17 +103,31 @@ const ToolTypesSchema = z
 
 /**
  * Per-language alternate-search vocabulary. Feeds the iOS matcher's
- * literal-weight searchTerms channel. Both `en` and `tr` are optional —
- * a partial payload (`{ en: ["couch"] }`) is legal — but each present
- * array is bounded to keep authoring sane and to cap the index-build
- * token budget. Empty arrays default to `[]` (semantically equivalent
- * to omitting the field; the seedShape projection drops the field
- * when both arrays are empty so Firestore round-trips identical).
+ * literal-weight searchTerms channel.
+ *
+ * **Both `en` and `tr` are REQUIRED arrays** when the object is
+ * present (mirrors `LocalizedTitle`'s required-en+tr contract).
+ * Empty arrays are allowed — explicit `[]` means "this language
+ * has no alternate terms"; the seedShape projection omits empty
+ * arrays from the Firestore doc so `undefined` and `{en:[],tr:[]}`
+ * round-trip identical at rest.
+ *
+ * **Why required, not optional-per-language:** `searchTerms` is in
+ * the merge-field write list, so Firestore's `set(..., {mergeFields})`
+ * replaces the entire map. A partial-language payload (`{en:[...]}`
+ * with `tr` absent) would silently erase any existing `tr` array on
+ * the doc — a footgun documented as a P1 in this review. Forcing
+ * operators to write both arrays makes the clear-vs-preserve
+ * distinction explicit: `[]` clears, populated array writes content.
+ *
+ * The outer object stays `.optional()` so an item without any
+ * alternate vocabulary continues to omit the field entirely
+ * (backward-compatible with legacy items).
  */
 const SearchTermsSchema = z
   .object({
-    en: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
-    tr: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+    en: z.array(z.string().trim().min(1).max(40)).max(10),
+    tr: z.array(z.string().trim().min(1).max(40)).max(10),
   })
   .strict()
   .optional();
