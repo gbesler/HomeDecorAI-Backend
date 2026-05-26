@@ -106,6 +106,26 @@ export type LocalizedTitle = {
 } & Partial<Record<OptionalLanguage, string>>;
 
 /**
+ * Localized alternate-search terms map. Used by the iOS search matcher
+ * as a third literal-weight token channel alongside the item title and
+ * the parent category title, so a TR user typing `"kanepe"` matches
+ * Koltuk items whose title noun does not contain that word.
+ *
+ * Per-language arrays; both keys optional at the Firestore layer so a
+ * partial-language payload (only `en`, only `tr`) round-trips without
+ * needing the schema to enforce both. The iOS index iterates whatever
+ * keys are present.
+ *
+ * v1 only carries `en` + `tr`; the 30 optional title languages do not
+ * have a parallel field yet — searchTerms remains opt-in coverage for
+ * the two highest-volume locales.
+ */
+export interface LocalizedSearchTerms {
+  en?: string[];
+  tr?: string[];
+}
+
+/**
  * Firestore document at `objectCategories/{categoryId}`. The category
  * grid (40 tiles) is the entry surface of the wizard step; `heroImageUrl`
  * is its primary visual signal — the migration plan calls out Phase 2
@@ -162,6 +182,12 @@ export interface ObjectInspirationItemDoc {
   imageHeight: number;
   imageMime: string;
   toolTypes: ObjectToolType[];
+  /**
+   * Optional alternate-search vocabulary. Omitted on legacy items; the
+   * iOS matcher falls back to title-only matching when absent. See
+   * `LocalizedSearchTerms` for shape semantics.
+   */
+  searchTerms?: LocalizedSearchTerms;
   createdAt: admin.firestore.Timestamp;
   updatedAt: admin.firestore.Timestamp;
 }

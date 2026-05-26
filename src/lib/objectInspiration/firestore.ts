@@ -13,6 +13,7 @@ import {
   OBJECT_CATEGORIES_COLLECTION,
   OBJECT_INSPIRATIONS_COLLECTION,
   OPTIONAL_LANGUAGES,
+  type LocalizedSearchTerms,
   type LocalizedTitle,
   type ObjectInspirationCategoryDoc,
   type ObjectInspirationCategoryDTO,
@@ -88,6 +89,36 @@ function decodeToolTypes(raw: unknown): ObjectToolType[] {
   );
 }
 
+/**
+ * Decode a Firestore `searchTerms` map. Returns `undefined` when the
+ * field is absent OR when both language arrays are empty / malformed
+ * — that way legacy items (no field) and the boundary case of an
+ * empty payload both surface as "no alternate terms" downstream. Any
+ * non-string entry inside an array is dropped silently to mirror
+ * `decodeTitle`'s defensive style.
+ */
+function decodeSearchTerms(raw: unknown): LocalizedSearchTerms | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const obj = raw as Record<string, unknown>;
+  const out: LocalizedSearchTerms = {};
+  const en = obj["en"];
+  if (Array.isArray(en)) {
+    const filtered = en.filter(
+      (v): v is string => typeof v === "string" && v.length > 0,
+    );
+    if (filtered.length > 0) out.en = filtered;
+  }
+  const tr = obj["tr"];
+  if (Array.isArray(tr)) {
+    const filtered = tr.filter(
+      (v): v is string => typeof v === "string" && v.length > 0,
+    );
+    if (filtered.length > 0) out.tr = filtered;
+  }
+  if (out.en === undefined && out.tr === undefined) return undefined;
+  return out;
+}
+
 export function mapDocToObjectCategory(
   doc:
     | FirebaseFirestore.QueryDocumentSnapshot
@@ -125,7 +156,7 @@ export function mapDocToObjectInspiration(
     | FirebaseFirestore.DocumentSnapshot,
 ): ObjectInspirationItemDoc {
   const data = doc.data() ?? {};
-  return {
+  const result: ObjectInspirationItemDoc = {
     schemaVersion:
       typeof data["schemaVersion"] === "number" ? data["schemaVersion"] : 1,
     id: doc.id,
@@ -148,6 +179,9 @@ export function mapDocToObjectInspiration(
     createdAt: isTimestamp(data["createdAt"]) ? data["createdAt"] : EPOCH,
     updatedAt: isTimestamp(data["updatedAt"]) ? data["updatedAt"] : EPOCH,
   };
+  const searchTerms = decodeSearchTerms(data["searchTerms"]);
+  if (searchTerms) result.searchTerms = searchTerms;
+  return result;
 }
 
 export function objectCategoryToDTO(

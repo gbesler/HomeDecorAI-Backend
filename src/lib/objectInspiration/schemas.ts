@@ -101,6 +101,23 @@ const ToolTypesSchema = z
   .min(1)
   .max(OBJECT_TOOL_TYPE_VALUES.length);
 
+/**
+ * Per-language alternate-search vocabulary. Feeds the iOS matcher's
+ * literal-weight searchTerms channel. Both `en` and `tr` are optional —
+ * a partial payload (`{ en: ["couch"] }`) is legal — but each present
+ * array is bounded to keep authoring sane and to cap the index-build
+ * token budget. Empty arrays default to `[]` (semantically equivalent
+ * to omitting the field; the seedShape projection drops the field
+ * when both arrays are empty so Firestore round-trips identical).
+ */
+const SearchTermsSchema = z
+  .object({
+    en: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+    tr: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+  })
+  .strict()
+  .optional();
+
 const ImageUrlSchema = z
   .string()
   .trim()
@@ -157,6 +174,7 @@ export const ObjectInspirationSeedInputSchema = z
     imageHeight: z.number().int().positive().max(20_000),
     imageMime: ImageMimeSchema.optional(),
     toolTypes: ToolTypesSchema,
+    searchTerms: SearchTermsSchema,
   })
   .strict();
 

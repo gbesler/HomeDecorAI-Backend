@@ -234,6 +234,104 @@ describe("ObjectInspirationSeedInputSchema", () => {
       }),
     );
   });
+
+  // searchTerms — optional alternate-search vocabulary feeding the iOS
+  // matcher's literal-weight third channel. Absence is the backward-
+  // compat path; presence is opt-in. Both languages independently
+  // optional inside the object, so a partial payload is legal.
+  it("accepts a body without searchTerms (backward compat)", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse(validItemBody);
+    assert.equal(parsed.searchTerms, undefined);
+  });
+
+  it("accepts searchTerms with both en + tr arrays", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: {
+        en: ["couch", "settee", "loveseat"],
+        tr: ["kanepe", "divan", "sedir"],
+      },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, ["couch", "settee", "loveseat"]);
+    assert.deepEqual(parsed.searchTerms?.tr, ["kanepe", "divan", "sedir"]);
+  });
+
+  it("accepts partial-language payload (tr omitted, defaults to [])", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: ["couch"] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, ["couch"]);
+    assert.deepEqual(parsed.searchTerms?.tr, []);
+  });
+
+  it("accepts both arrays empty (treated as absent downstream)", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: [], tr: [] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, []);
+    assert.deepEqual(parsed.searchTerms?.tr, []);
+  });
+
+  it("trims and accepts terms at the 40-char boundary", () => {
+    const at40 = "a".repeat(40);
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: [`  ${at40}  `] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, [at40]);
+  });
+
+  it("rejects a term longer than 40 chars after trim", () => {
+    const at41 = "a".repeat(41);
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: [at41] },
+      }),
+    );
+  });
+
+  it("rejects empty-string / whitespace-only terms (trim then min(1))", () => {
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["valid", ""] },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { tr: ["   "] },
+      }),
+    );
+  });
+
+  it("accepts exactly 10 terms in a language; rejects 11", () => {
+    const ten = Array.from({ length: 10 }, (_, i) => `term${i}`);
+    const eleven = Array.from({ length: 11 }, (_, i) => `term${i}`);
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: ten },
+    });
+    assert.equal(parsed.searchTerms?.en?.length, 10);
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: eleven },
+      }),
+    );
+  });
+
+  it("rejects searchTerms with an unknown language key (strict)", () => {
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["couch"], fr: ["canapé"] },
+      }),
+    );
+  });
 });
 
 describe("ObjectInspirationPatchSchema", () => {
