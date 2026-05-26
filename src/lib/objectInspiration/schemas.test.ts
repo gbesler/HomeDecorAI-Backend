@@ -113,6 +113,51 @@ describe("ObjectCategorySeedInputSchema", () => {
       }),
     );
   });
+
+  it("accepts title with optional locales alongside required en+tr", () => {
+    const parsed = ObjectCategorySeedInputSchema.parse({
+      ...validCategoryBody,
+      title: {
+        en: "Sofas",
+        tr: "Koltuklar",
+        de: "Sofas",
+        ja: "ソファ",
+        "zh-Hans": "沙发",
+        ar: "أرائك",
+      },
+    });
+    assert.equal(parsed.title.de, "Sofas");
+    assert.equal(parsed.title.ja, "ソファ");
+    assert.equal(parsed.title["zh-Hans"], "沙发");
+    assert.equal(parsed.title.ar, "أرائك");
+  });
+
+  it("rejects title missing the required `tr` (en alone is not enough)", () => {
+    assert.throws(() =>
+      ObjectCategorySeedInputSchema.parse({
+        ...validCategoryBody,
+        title: { en: "Sofas" },
+      }),
+    );
+  });
+
+  it("rejects title with an unknown locale key (strict)", () => {
+    assert.throws(() =>
+      ObjectCategorySeedInputSchema.parse({
+        ...validCategoryBody,
+        title: { en: "Sofas", tr: "Koltuklar", xx: "bogus" },
+      }),
+    );
+  });
+
+  it("rejects empty optional-locale value (non-empty when present)", () => {
+    assert.throws(() =>
+      ObjectCategorySeedInputSchema.parse({
+        ...validCategoryBody,
+        title: { en: "Sofas", tr: "Koltuklar", de: "" },
+      }),
+    );
+  });
 });
 
 describe("ObjectInspirationSeedInputSchema", () => {
@@ -276,6 +321,31 @@ describe("ObjectInspirationTitleUpdateInputSchema", () => {
       ObjectInspirationTitleUpdateInputSchema.parse({
         id: "sofas_1",
         title: { en: "x" },
+      }),
+    );
+  });
+
+  it("accepts a title-update row with optional locales", () => {
+    const parsed = ObjectInspirationTitleUpdateInputSchema.parse({
+      id: "sofas_1",
+      title: {
+        en: "Sectional Sofa",
+        tr: "Köşe Koltuk",
+        de: "Ecksofa",
+        fr: "Canapé d'Angle",
+        ko: "섹셔널 소파",
+      },
+    });
+    assert.equal(parsed.title.de, "Ecksofa");
+    assert.equal(parsed.title.fr, "Canapé d'Angle");
+    assert.equal(parsed.title.ko, "섹셔널 소파");
+  });
+
+  it("rejects title-update with unknown locale (strict)", () => {
+    assert.throws(() =>
+      ObjectInspirationTitleUpdateInputSchema.parse({
+        id: "sofas_1",
+        title: { en: "x", tr: "y", xx: "bogus" },
       }),
     );
   });

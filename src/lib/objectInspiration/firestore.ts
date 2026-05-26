@@ -12,6 +12,7 @@ import type {
 import {
   OBJECT_CATEGORIES_COLLECTION,
   OBJECT_INSPIRATIONS_COLLECTION,
+  OPTIONAL_LANGUAGES,
   type LocalizedTitle,
   type ObjectInspirationCategoryDoc,
   type ObjectInspirationCategoryDTO,
@@ -51,15 +52,32 @@ export class ObjectInspirationNotFoundError extends Error {
 const EMPTY_TITLE: LocalizedTitle = { en: "", tr: "" };
 const EPOCH = admin.firestore.Timestamp.fromMillis(0);
 
+/**
+ * Decode a Firestore `title` map. Required `en` + `tr` fields always
+ * surface (empty string fallback so the iOS resolve chain always has a
+ * terminal). Each optional language code is included only when the doc
+ * actually carries a non-empty translation, so callers can use a
+ * presence check (`title["de"] !== undefined`) as a proxy for "this
+ * translation exists". Unknown keys (typos, retired locales) are
+ * dropped silently — defense against a stale field leaking into the
+ * UI.
+ */
 function decodeTitle(raw: unknown): LocalizedTitle {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const obj = raw as Record<string, unknown>;
-    return {
-      en: typeof obj["en"] === "string" ? obj["en"] : "",
-      tr: typeof obj["tr"] === "string" ? obj["tr"] : "",
-    };
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { ...EMPTY_TITLE };
   }
-  return EMPTY_TITLE;
+  const obj = raw as Record<string, unknown>;
+  const title: LocalizedTitle = {
+    en: typeof obj["en"] === "string" ? obj["en"] : "",
+    tr: typeof obj["tr"] === "string" ? obj["tr"] : "",
+  };
+  for (const code of OPTIONAL_LANGUAGES) {
+    const value = obj[code];
+    if (typeof value === "string" && value.length > 0) {
+      title[code] = value;
+    }
+  }
+  return title;
 }
 
 function decodeToolTypes(raw: unknown): ObjectToolType[] {
@@ -344,8 +362,13 @@ export async function updateObjectInspirationTitleDoc(
   const snap = await docRef.get();
   if (!snap.exists) throw new ObjectInspirationNotFoundError(id);
 
+  // Whole-title replacement so omitted optional locales fall back to
+  // unset on the doc — callers must include every translation they
+  // want preserved. Matches the zod schema's `.strict()` semantics
+  // upstream: there is one canonical `title` value, not a partial
+  // patch surface.
   await docRef.update({
-    title: { en: title.en, tr: title.tr },
+    title: { ...title },
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 }

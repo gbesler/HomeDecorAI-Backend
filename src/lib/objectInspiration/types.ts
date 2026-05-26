@@ -32,12 +32,78 @@ export type ObjectToolType = (typeof OBJECT_TOOL_TYPE_VALUES)[number];
 export const OBJECT_CATEGORIES_COLLECTION = "objectCategories";
 export const OBJECT_INSPIRATIONS_COLLECTION = "objectInspirations";
 
-/** Localized title map. Lookup order on iOS: requested locale → en → first
- *  non-empty. Adding a new language is a write, not a schema change. */
-export interface LocalizedTitle {
+/**
+ * Supported language codes for object-inspiration titles. Kept in sync
+ * with iOS `AppLanguage` (HomeDecorAI/Shared/Utilities/LanguageManager.swift).
+ *
+ * `en` + `tr` are required at the schema level so existing manifests
+ * (and the curated seed pipeline) stay valid without a backfill. The
+ * other 30 codes are optional: a missing translation degrades on iOS
+ * to English via `LocalizedTitle.resolve`. Adding a translation is a
+ * Firestore write — no schema bump needed.
+ *
+ * Adding a NEW language code: append it here, mirror the case in
+ * iOS `AppLanguage`, and add the matching `.optional()` field in
+ * `LocalizedTitleSchema` (schemas.ts). All three surfaces must stay
+ * aligned.
+ */
+export const REQUIRED_LANGUAGES = ["en", "tr"] as const;
+
+export const OPTIONAL_LANGUAGES = [
+  "ar",
+  "hy",
+  "zh-Hans",
+  "zh-Hant",
+  "hr",
+  "cs",
+  "da",
+  "nl",
+  "fi",
+  "fr",
+  "de",
+  "el",
+  "he",
+  "hu",
+  "id",
+  "it",
+  "ja",
+  "ko",
+  "ms",
+  "nb",
+  "pl",
+  "pt",
+  "ro",
+  "ru",
+  "sk",
+  "es",
+  "sv",
+  "th",
+  "uk",
+  "vi",
+] as const;
+
+export const SUPPORTED_LANGUAGES = [
+  ...REQUIRED_LANGUAGES,
+  ...OPTIONAL_LANGUAGES,
+] as const;
+
+export type RequiredLanguage = (typeof REQUIRED_LANGUAGES)[number];
+export type OptionalLanguage = (typeof OPTIONAL_LANGUAGES)[number];
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+/**
+ * Localized title map. Lookup order on iOS: requested locale → en → tr
+ * → first non-empty. `en` and `tr` are required; the 30 other
+ * supported languages are optional and absent on legacy documents.
+ *
+ * Adding a new translation is a Firestore write, not a schema change.
+ * Adding a new LANGUAGE (i.e. a new code) is a 3-surface change — see
+ * `OPTIONAL_LANGUAGES` above.
+ */
+export type LocalizedTitle = {
   en: string;
   tr: string;
-}
+} & Partial<Record<OptionalLanguage, string>>;
 
 /**
  * Firestore document at `objectCategories/{categoryId}`. The category

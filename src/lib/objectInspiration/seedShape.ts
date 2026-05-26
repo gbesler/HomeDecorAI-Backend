@@ -69,7 +69,11 @@ const SCHEMA_VERSION = 1;
 const DEFAULT_IMAGE_MIME = "image/jpeg";
 
 function copyTitle(title: LocalizedTitle): LocalizedTitle {
-  return { en: title.en, tr: title.tr };
+  // Spread carries every present optional language (de, fr, ja, …)
+  // through to the Firestore document without enumerating each code.
+  // `en` + `tr` are required by the type so the result still satisfies
+  // `LocalizedTitle`'s base contract.
+  return { ...title };
 }
 
 function copyToolTypes(toolTypes: readonly ObjectToolType[]): ObjectToolType[] {
