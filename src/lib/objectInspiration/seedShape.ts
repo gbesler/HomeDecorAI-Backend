@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "./types.js";
 import type {
   LocalizedSearchTerms,
   LocalizedTitle,
@@ -84,16 +85,17 @@ function copyToolTypes(toolTypes: readonly ObjectToolType[]): ObjectToolType[] {
 
 /**
  * Project a Zod-parsed `searchTerms` value into the Firestore data block.
- * Returns `undefined` when the value is absent OR when every language
- * array is empty — that way `searchTerms: undefined` and
- * `searchTerms: { en: [], tr: [] }` round-trip identical (no field
- * stored, no needless write). When some arrays are populated and
- * others empty, the empty ones are dropped from the projection so the
- * stored doc carries only the languages that actually have content.
+ * Iterates all 32 `SUPPORTED_LANGUAGES`. Returns `undefined` when the
+ * value is absent OR when every language array is empty/absent — that
+ * way `searchTerms: undefined` and an all-empty map round-trip
+ * identical (no field stored, no needless write). Languages with
+ * content are cloned into the projection; empty/absent languages are
+ * dropped so the stored doc carries only locales that actually have
+ * terms.
  *
  * Note: `searchTerms` IS in `OBJECT_INSPIRATION_DEFAULT_MERGE_FIELDS`,
- * so a re-seed that omits the input field will silently clear an
- * existing `searchTerms` on the document. This matches the merge-field
+ * so a re-seed that omits the input field (or a given language) will
+ * silently clear it on the document. This matches the merge-field
  * semantics for every other propagated field (title, imageUrl, …) and
  * is documented as the contract in the brainstorm doc §4.5.
  */
@@ -101,13 +103,14 @@ function copySearchTerms(
   input: LocalizedSearchTerms | undefined,
 ): LocalizedSearchTerms | undefined {
   if (!input) return undefined;
-  const en = input.en ?? [];
-  const tr = input.tr ?? [];
-  if (en.length === 0 && tr.length === 0) return undefined;
   const out: LocalizedSearchTerms = {};
-  if (en.length > 0) out.en = [...en];
-  if (tr.length > 0) out.tr = [...tr];
-  return out;
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const terms = input[lang];
+    if (terms && terms.length > 0) {
+      out[lang] = [...terms];
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 /**

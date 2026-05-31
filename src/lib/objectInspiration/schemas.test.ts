@@ -256,24 +256,38 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.deepEqual(parsed.searchTerms?.tr, ["kanepe", "divan", "sedir"]);
   });
 
-  it("rejects partial-language payload — en + tr are both required when searchTerms is present", () => {
-    // Partial-language payload would silently erase the unspecified
-    // language on Firestore re-seed (merge-field semantics replace
-    // the entire `searchTerms` map). Both arrays must be present so
-    // the clear-vs-preserve intent is explicit; an empty array
-    // explicitly clears that language.
-    assert.throws(() =>
-      ObjectInspirationSeedInputSchema.parse({
-        ...validItemBody,
-        searchTerms: { en: ["couch"] },
-      }),
-    );
-    assert.throws(() =>
-      ObjectInspirationSeedInputSchema.parse({
-        ...validItemBody,
-        searchTerms: { tr: ["kanepe"] },
-      }),
-    );
+  it("accepts a partial-language payload — every language is independently optional", () => {
+    // searchTerms covers all 32 SUPPORTED_LANGUAGES, each optional. An
+    // item supplies alternate vocabulary only for the locales where it
+    // adds value. (Merge-field caveat: omitting a language on re-seed
+    // clears it on the doc — documented in copySearchTerms.)
+    const enOnly = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: ["couch"] },
+    });
+    assert.deepEqual(enOnly.searchTerms?.en, ["couch"]);
+    assert.equal(enOnly.searchTerms?.tr, undefined);
+
+    const trOnly = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { tr: ["kanepe"] },
+    });
+    assert.deepEqual(trOnly.searchTerms?.tr, ["kanepe"]);
+    assert.equal(trOnly.searchTerms?.en, undefined);
+  });
+
+  it("accepts searchTerms for non-en/tr supported languages", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: {
+        de: ["sofa", "couch"],
+        ja: ["ソファ"],
+        "zh-Hans": ["沙发"],
+      },
+    });
+    assert.deepEqual(parsed.searchTerms?.de, ["sofa", "couch"]);
+    assert.deepEqual(parsed.searchTerms?.ja, ["ソファ"]);
+    assert.deepEqual(parsed.searchTerms?.["zh-Hans"], ["沙发"]);
   });
 
   it("accepts explicit empty array for one language", () => {
@@ -350,7 +364,10 @@ describe("ObjectInspirationSeedInputSchema", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        searchTerms: { en: ["couch"], tr: [], fr: ["canapé"] },
+        // `xx` is not in SUPPORTED_LANGUAGES — the strict object rejects
+        // it. (`fr` and the other 29 optional title languages are now
+        // valid searchTerms keys.)
+        searchTerms: { en: ["couch"], xx: ["nope"] },
       }),
     );
   });

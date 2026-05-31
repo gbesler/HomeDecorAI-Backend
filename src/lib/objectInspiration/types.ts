@@ -111,19 +111,19 @@ export type LocalizedTitle = {
  * the parent category title, so a TR user typing `"kanepe"` matches
  * Koltuk items whose title noun does not contain that word.
  *
- * Per-language arrays; both keys optional at the Firestore layer so a
- * partial-language payload (only `en`, only `tr`) round-trips without
- * needing the schema to enforce both. The iOS index iterates whatever
- * keys are present.
+ * Covers the same 32 `SUPPORTED_LANGUAGES` as `LocalizedTitle`. Every
+ * language is independently optional: an item supplies alternate
+ * vocabulary only for the locales where it adds value, and the iOS
+ * index iterates whatever keys are present. Unlike `LocalizedTitle`
+ * (which requires every language), searchTerms stays opt-in per
+ * language because alternate-search synonyms are not equally
+ * meaningful in every locale.
  *
- * v1 only carries `en` + `tr`; the 30 optional title languages do not
- * have a parallel field yet — searchTerms remains opt-in coverage for
- * the two highest-volume locales.
+ * Merge-field caveat: `searchTerms` is a propagated merge field, so a
+ * re-seed replaces the entire stored map — omitting a language on
+ * re-seed clears it. See `copySearchTerms` in seedShape.ts.
  */
-export interface LocalizedSearchTerms {
-  en?: string[];
-  tr?: string[];
-}
+export type LocalizedSearchTerms = Partial<Record<SupportedLanguage, string[]>>;
 
 /**
  * Firestore document at `objectCategories/{categoryId}`. The category

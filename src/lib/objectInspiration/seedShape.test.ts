@@ -181,6 +181,23 @@ describe("buildObjectInspirationDoc", () => {
     assert.deepEqual(doc.searchTerms?.en, ["couch"]);
     assert.equal(doc.searchTerms?.tr, undefined);
   });
+
+  it("copies non-en/tr supported languages", () => {
+    const doc = buildObjectInspirationDoc({
+      ...sampleItemRow,
+      searchTerms: {
+        de: ["sofa", "couch"],
+        ja: ["ソファ"],
+        "zh-Hans": ["沙发"],
+      },
+    });
+    assert.deepEqual(doc.searchTerms?.de, ["sofa", "couch"]);
+    assert.deepEqual(doc.searchTerms?.ja, ["ソファ"]);
+    assert.deepEqual(doc.searchTerms?.["zh-Hans"], ["沙发"]);
+    // en/tr absent from the input stay absent in the projection.
+    assert.equal(doc.searchTerms?.en, undefined);
+    assert.equal(doc.searchTerms?.tr, undefined);
+  });
 });
 
 describe("OBJECT_INSPIRATION_DEFAULT_MERGE_FIELDS", () => {

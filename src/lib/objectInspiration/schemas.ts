@@ -105,29 +105,65 @@ const ToolTypesSchema = z
  * Per-language alternate-search vocabulary. Feeds the iOS matcher's
  * literal-weight searchTerms channel.
  *
- * **Both `en` and `tr` are REQUIRED arrays** when the object is
- * present (mirrors `LocalizedTitle`'s required-en+tr contract).
- * Empty arrays are allowed — explicit `[]` means "this language
- * has no alternate terms"; the seedShape projection omits empty
- * arrays from the Firestore doc so `undefined` and `{en:[],tr:[]}`
- * round-trip identical at rest.
+ * Covers the same 32 `SUPPORTED_LANGUAGES` as `LocalizedTitleSchema`.
+ * **Every language is independently `.optional()`** — an item supplies
+ * alternate terms only for the locales where they add value (synonym
+ * usefulness varies widely across locales, so unlike titles we do not
+ * force all 32). Per-language array rules: each term `trim().min(1)`,
+ * `max(40)` chars; `max(10)` terms per language. `.strict()` so an
+ * unknown locale code (typo, retired locale) is rejected at the edge —
+ * adding a language is a schema bump in types.ts + this file + iOS
+ * `AppLanguage`, mirroring the title contract.
  *
- * **Why required, not optional-per-language:** `searchTerms` is in
- * the merge-field write list, so Firestore's `set(..., {mergeFields})`
- * replaces the entire map. A partial-language payload (`{en:[...]}`
- * with `tr` absent) would silently erase any existing `tr` array on
- * the doc — a footgun documented as a P1 in this review. Forcing
- * operators to write both arrays makes the clear-vs-preserve
- * distinction explicit: `[]` clears, populated array writes content.
+ * Merge-field caveat: `searchTerms` is in the merge-field write list,
+ * so Firestore's `set(..., {mergeFields})` replaces the entire map. A
+ * re-seed that omits a language clears it on the doc — write the
+ * language (even as `[]`) to make the clear-vs-preserve intent
+ * explicit. The seedShape projection drops empty/absent arrays so
+ * `undefined` and an all-empty map round-trip identical at rest.
  *
  * The outer object stays `.optional()` so an item without any
  * alternate vocabulary continues to omit the field entirely
- * (backward-compatible with legacy items).
+ * (backward-compatible with legacy items). The 32 fields are listed
+ * explicitly so zod's `.infer` carries each into `LocalizedSearchTerms`.
  */
+const SearchTermArraySchema = z.array(z.string().trim().min(1).max(40)).max(10);
+const OptionalSearchTermArraySchema = SearchTermArraySchema.optional();
+
 const SearchTermsSchema = z
   .object({
-    en: z.array(z.string().trim().min(1).max(40)).max(10),
-    tr: z.array(z.string().trim().min(1).max(40)).max(10),
+    en: OptionalSearchTermArraySchema,
+    tr: OptionalSearchTermArraySchema,
+    ar: OptionalSearchTermArraySchema,
+    hy: OptionalSearchTermArraySchema,
+    "zh-Hans": OptionalSearchTermArraySchema,
+    "zh-Hant": OptionalSearchTermArraySchema,
+    hr: OptionalSearchTermArraySchema,
+    cs: OptionalSearchTermArraySchema,
+    da: OptionalSearchTermArraySchema,
+    nl: OptionalSearchTermArraySchema,
+    fi: OptionalSearchTermArraySchema,
+    fr: OptionalSearchTermArraySchema,
+    de: OptionalSearchTermArraySchema,
+    el: OptionalSearchTermArraySchema,
+    he: OptionalSearchTermArraySchema,
+    hu: OptionalSearchTermArraySchema,
+    id: OptionalSearchTermArraySchema,
+    it: OptionalSearchTermArraySchema,
+    ja: OptionalSearchTermArraySchema,
+    ko: OptionalSearchTermArraySchema,
+    ms: OptionalSearchTermArraySchema,
+    nb: OptionalSearchTermArraySchema,
+    pl: OptionalSearchTermArraySchema,
+    pt: OptionalSearchTermArraySchema,
+    ro: OptionalSearchTermArraySchema,
+    ru: OptionalSearchTermArraySchema,
+    sk: OptionalSearchTermArraySchema,
+    es: OptionalSearchTermArraySchema,
+    sv: OptionalSearchTermArraySchema,
+    th: OptionalSearchTermArraySchema,
+    uk: OptionalSearchTermArraySchema,
+    vi: OptionalSearchTermArraySchema,
   })
   .strict()
   .optional();
