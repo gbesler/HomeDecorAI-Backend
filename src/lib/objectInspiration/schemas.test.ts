@@ -234,6 +234,162 @@ describe("ObjectInspirationSeedInputSchema", () => {
       }),
     );
   });
+
+  // searchTerms — optional alternate-search vocabulary feeding the iOS
+  // matcher's literal-weight third channel. Absence is the backward-
+  // compat path; presence is opt-in. Both languages independently
+  // optional inside the object, so a partial payload is legal.
+  it("accepts a body without searchTerms (backward compat)", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse(validItemBody);
+    assert.equal(parsed.searchTerms, undefined);
+  });
+
+  it("accepts searchTerms with both en + tr arrays", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: {
+        en: ["couch", "settee", "loveseat"],
+        tr: ["kanepe", "divan", "sedir"],
+      },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, ["couch", "settee", "loveseat"]);
+    assert.deepEqual(parsed.searchTerms?.tr, ["kanepe", "divan", "sedir"]);
+  });
+
+  it("rejects partial-language payload — en + tr are both required when searchTerms is present", () => {
+    // Partial-language payload would silently erase the unspecified
+    // language on Firestore re-seed (merge-field semantics replace
+    // the entire `searchTerms` map). Both arrays must be present so
+    // the clear-vs-preserve intent is explicit; an empty array
+    // explicitly clears that language.
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["couch"] },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { tr: ["kanepe"] },
+      }),
+    );
+  });
+
+  it("accepts explicit empty array for one language", () => {
+    // Explicit `[]` is the contract for "this language has no
+    // alternate terms" — distinct from omitting the field entirely.
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: ["couch"], tr: [] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, ["couch"]);
+    assert.deepEqual(parsed.searchTerms?.tr, []);
+  });
+
+  it("accepts both arrays empty (treated as absent downstream)", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: [], tr: [] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, []);
+    assert.deepEqual(parsed.searchTerms?.tr, []);
+  });
+
+  it("trims and accepts terms at the 40-char boundary", () => {
+    const at40 = "a".repeat(40);
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: [`  ${at40}  `], tr: [] },
+    });
+    assert.deepEqual(parsed.searchTerms?.en, [at40]);
+  });
+
+  it("rejects a term longer than 40 chars after trim", () => {
+    const at41 = "a".repeat(41);
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: [at41], tr: [] },
+      }),
+    );
+  });
+
+  it("rejects empty-string / whitespace-only terms (trim then min(1))", () => {
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["valid", ""], tr: [] },
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: [], tr: ["   "] },
+      }),
+    );
+  });
+
+  it("accepts exactly 10 terms in a language; rejects 11", () => {
+    const ten = Array.from({ length: 10 }, (_, i) => `term${i}`);
+    const eleven = Array.from({ length: 11 }, (_, i) => `term${i}`);
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      searchTerms: { en: ten, tr: [] },
+    });
+    assert.equal(parsed.searchTerms?.en?.length, 10);
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: eleven, tr: [] },
+      }),
+    );
+  });
+
+  it("rejects searchTerms with an unknown language key (strict)", () => {
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        searchTerms: { en: ["couch"], tr: [], fr: ["canapé"] },
+      }),
+    );
+  });
+});
+
+describe("object-inspirations.searchTerms.example.json", () => {
+  // Smoke test: keep the reference manifest in lockstep with the
+  // schema. If a future contributor tightens a bound (e.g. drops the
+  // term length to 30) the example file must update too — this test
+  // would catch the drift before a runbook ships stale.
+  it("each item parses through ObjectInspirationSeedInputSchema", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const manifestPath = path.resolve(
+      here,
+      "../../../scripts/manifests/object-inspirations.searchTerms.example.json",
+    );
+    const raw = await readFile(manifestPath, "utf-8");
+    const parsed = JSON.parse(raw) as { items: unknown[] };
+    assert.ok(Array.isArray(parsed.items));
+    assert.ok(parsed.items.length >= 1);
+    for (const item of parsed.items) {
+      const result = ObjectInspirationSeedInputSchema.safeParse(item);
+      if (!result.success) {
+        assert.fail(
+          `example item failed schema validation: ${JSON.stringify(result.error.format())}`,
+        );
+      }
+      // Every example item carries searchTerms (that's the whole
+      // point of the reference file) — fail loudly if a future edit
+      // drops the field.
+      assert.ok(
+        result.data.searchTerms !== undefined,
+        `example item ${result.data.id} is missing searchTerms`,
+      );
+    }
+  });
 });
 
 describe("ObjectInspirationPatchSchema", () => {

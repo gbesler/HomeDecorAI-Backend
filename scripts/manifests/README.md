@@ -109,6 +109,48 @@ Build the JSON manually or with a generator. Required minimum:
 }
 ```
 
+### Optional: per-item `searchTerms`
+
+Items may carry a per-language alternate-search vocabulary. Feeds the
+iOS matcher's literal-weight third channel so a TR user typing
+`"kanepe"` matches Koltuk items whose title noun does not contain that
+word, with no iOS release needed to extend coverage.
+
+```jsonc
+{
+  "id": "sofas_1",
+  "categoryId": "sofas",
+  ...
+  "searchTerms": {
+    "tr": ["kanepe", "divan", "sedir"],
+    "en": ["couch", "settee", "loveseat"]
+  }
+}
+```
+
+- The outer `searchTerms` field is **optional**: items without it
+  fall back to title-only matching (today's behaviour).
+- When `searchTerms` IS present, **both `en` and `tr` are required**
+  (mirrors `title`'s required-en+tr contract). Use an explicit `[]`
+  to mark a language with no alternate terms; a partial payload like
+  `{ en: [...] }` with `tr` absent is rejected at the schema layer.
+  This avoids the silent-erasure footgun where a partial re-seed
+  would otherwise replace the entire stored map and delete the
+  unspecified language.
+- Bounds: max 10 terms per language, each term `trim().min(1).max(40)`.
+- Multi-word terms (`"spiral candle"`) tokenise on whitespace —
+  every subtoken becomes independently searchable. Prefer single-noun
+  synonyms; multi-word terms with category-generic nouns can cause
+  cross-category bleed (see brainstorm doc §4.6).
+- Re-seed without the outer `searchTerms` field **clears** an
+  existing value on the doc (merge-field semantics, same as `title`).
+  A re-seed with `searchTerms: { en: [...], tr: [...] }` REPLACES the
+  full map — operators wanting to add an alternate to one language
+  without touching the other must include the existing values for
+  the other language in the payload.
+
+Reference example: `scripts/manifests/object-inspirations.searchTerms.example.json`.
+
 ### 3. Dry-run validate
 
 Catches FK errors (item references unknown category) and JSON-schema

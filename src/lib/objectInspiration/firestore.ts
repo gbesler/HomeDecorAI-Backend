@@ -13,12 +13,15 @@ import {
   OBJECT_CATEGORIES_COLLECTION,
   OBJECT_INSPIRATIONS_COLLECTION,
   OPTIONAL_LANGUAGES,
+  REQUIRED_LANGUAGES,
+  type LocalizedSearchTerms,
   type LocalizedTitle,
   type ObjectInspirationCategoryDoc,
   type ObjectInspirationCategoryDTO,
   type ObjectInspirationItemDoc,
   type ObjectInspirationItemDTO,
   type ObjectToolType,
+  type RequiredLanguage,
 } from "./types.js";
 
 function getFirestore(): admin.firestore.Firestore {
@@ -88,6 +91,41 @@ function decodeToolTypes(raw: unknown): ObjectToolType[] {
   );
 }
 
+/**
+ * Decode a Firestore `searchTerms` map. Returns `undefined` when the
+ * field is absent OR when every language array is empty / malformed
+ * — that way legacy items (no field) and the boundary case of an
+ * empty payload both surface as "no alternate terms" downstream.
+ *
+ * Defensive filtering mirrors `decodeTitle`'s style: non-string array
+ * entries and whitespace-only strings are dropped silently. The trim
+ * predicate (`v.trim().length > 0`) matches the seed-time Zod check
+ * (`z.string().trim().min(1)`) so a doc written via a non-seed path
+ * (direct admin SDK call, future migration) cannot smuggle stale or
+ * malformed entries into the iOS index.
+ */
+function decodeSearchTerms(raw: unknown): LocalizedSearchTerms | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const obj = raw as Record<string, unknown>;
+  const out: LocalizedSearchTerms = {};
+  // Iterating REQUIRED_LANGUAGES (`en`, `tr`) instead of hardcoded
+  // string literals so a future required-language addition (a single
+  // edit in types.ts) propagates here automatically — matches the
+  // pattern decodeTitle uses for OPTIONAL_LANGUAGES.
+  for (const code of REQUIRED_LANGUAGES) {
+    const raw = obj[code];
+    if (!Array.isArray(raw)) continue;
+    const filtered = raw.filter(
+      (v): v is string => typeof v === "string" && v.trim().length > 0,
+    );
+    if (filtered.length > 0) {
+      (out as Record<RequiredLanguage, string[]>)[code] = filtered;
+    }
+  }
+  if (out.en === undefined && out.tr === undefined) return undefined;
+  return out;
+}
+
 export function mapDocToObjectCategory(
   doc:
     | FirebaseFirestore.QueryDocumentSnapshot
@@ -125,7 +163,7 @@ export function mapDocToObjectInspiration(
     | FirebaseFirestore.DocumentSnapshot,
 ): ObjectInspirationItemDoc {
   const data = doc.data() ?? {};
-  return {
+  const result: ObjectInspirationItemDoc = {
     schemaVersion:
       typeof data["schemaVersion"] === "number" ? data["schemaVersion"] : 1,
     id: doc.id,
@@ -148,6 +186,9 @@ export function mapDocToObjectInspiration(
     createdAt: isTimestamp(data["createdAt"]) ? data["createdAt"] : EPOCH,
     updatedAt: isTimestamp(data["updatedAt"]) ? data["updatedAt"] : EPOCH,
   };
+  const searchTerms = decodeSearchTerms(data["searchTerms"]);
+  if (searchTerms) result.searchTerms = searchTerms;
+  return result;
 }
 
 export function objectCategoryToDTO(

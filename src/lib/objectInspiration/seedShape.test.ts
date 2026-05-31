@@ -135,6 +135,64 @@ describe("buildObjectInspirationDoc", () => {
     const doc = buildObjectInspirationDoc(rest as ObjectInspirationSeedInput);
     assert.equal(doc.imageMime, "image/jpeg");
   });
+
+  // searchTerms projection — see `copySearchTerms` in seedShape.ts.
+  // Empty arrays MUST omit the field (round-trip identical to absent)
+  // so re-seeds don't write needless empty objects.
+  it("omits searchTerms when the input field is absent", () => {
+    const doc = buildObjectInspirationDoc(sampleItemRow);
+    assert.equal(doc.searchTerms, undefined);
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(doc, "searchTerms"),
+      false,
+    );
+  });
+
+  it("omits searchTerms when both language arrays are empty", () => {
+    const doc = buildObjectInspirationDoc({
+      ...sampleItemRow,
+      searchTerms: { en: [], tr: [] },
+    });
+    assert.equal(doc.searchTerms, undefined);
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(doc, "searchTerms"),
+      false,
+    );
+  });
+
+  it("copies a populated searchTerms map and clones arrays", () => {
+    const row: ObjectInspirationSeedInput = {
+      ...sampleItemRow,
+      searchTerms: { en: ["couch", "settee"], tr: ["kanepe", "divan"] },
+    };
+    const doc = buildObjectInspirationDoc(row);
+    assert.deepEqual(doc.searchTerms?.en, ["couch", "settee"]);
+    assert.deepEqual(doc.searchTerms?.tr, ["kanepe", "divan"]);
+    // Mutating the input must not leak into the projected doc.
+    row.searchTerms!.en!.push("MUTATED");
+    assert.deepEqual(doc.searchTerms?.en, ["couch", "settee"]);
+  });
+
+  it("drops empty language arrays from a partially-populated payload", () => {
+    const doc = buildObjectInspirationDoc({
+      ...sampleItemRow,
+      searchTerms: { en: ["couch"], tr: [] },
+    });
+    assert.deepEqual(doc.searchTerms?.en, ["couch"]);
+    assert.equal(doc.searchTerms?.tr, undefined);
+  });
+});
+
+describe("OBJECT_INSPIRATION_DEFAULT_MERGE_FIELDS", () => {
+  it("includes 'searchTerms' so re-seeds propagate the field", () => {
+    assert.ok(OBJECT_INSPIRATION_DEFAULT_MERGE_FIELDS.includes("searchTerms"));
+  });
+
+  it("'searchTerms' is also inherited by the overwrite merge list", () => {
+    assert.ok(
+      OBJECT_INSPIRATION_OVERWRITE_MERGE_FIELDS.includes("searchTerms"),
+    );
+  });
 });
 
 describe("planObjectCategorySeedWrite", () => {

@@ -1,0 +1,39 @@
+{
+  "$comment": "Reference manifest for the per-item `searchTerms` field. Two example items (one sofa with broad EN+TR coverage, one candle with mixed single-word and multi-word terms) show the intended authoring shape. Run validation through `ObjectInspirationSeedInputSchema.parse(...)` before publishing — bounds: max 10 terms/lang, each term trim().min(1).max(40), language keys restricted to `en` + `tr`. Empty/absent searchTerms is the backward-compat fallback (matcher falls back to title-only). See docs/brainstorms/2026-05-26-object-inspiration-search-terms-requirements.md §6 for the full schema decisions.",
+  "items": [
+    {
+      "id": "sofas_1",
+      "categoryId": "sofas",
+      "order": 1,
+      "active": true,
+      "title": { "en": "Modern Sofa", "tr": "Modern Koltuk" },
+      "prompt": "A modern fabric sofa with clean lines and minimalist silhouette",
+      "imageUrl": "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/1_Modern_Sofa.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"],
+      "searchTerms": {
+        "tr": ["kanepe", "divan", "sedir"],
+        "en": ["couch", "settee", "loveseat"]
+      }
+    },
+    {
+      "id": "candles_11",
+      "categoryId": "candles",
+      "order": 10,
+      "active": true,
+      "title": { "en": "Twisted Candle", "tr": "Twisted Candle" },
+      "prompt": "A candle with a clearly twisted body form, sculptural wax shape, and a decorative silhouette",
+      "imageUrl": "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/11_Twisted_Candle.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"],
+      "searchTerms": {
+        "tr": ["mum", "burgu"],
+        "en": ["spiral", "twist"]
+      }
+    }
+  ]
+}
