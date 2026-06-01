@@ -69,7 +69,7 @@ export function buildSeedDoc(
     schemaVersion: 1,
     kind: row.kind ?? "roomPhoto",
     taxonomy,
-    imageUrl: row.imageUrl,
+    path: row.path,
     imageWidth: row.imageWidth,
     imageHeight: row.imageHeight,
     imageMime:
@@ -100,7 +100,7 @@ export const INSPIRATION_UPSERT_MERGE_FIELDS = [
   "schemaVersion",
   "kind",
   "taxonomy",
-  "imageUrl",
+  "path",
   "imageWidth",
   "imageHeight",
   "imageMime",

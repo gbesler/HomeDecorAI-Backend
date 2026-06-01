@@ -191,8 +191,10 @@ export interface InspirationDoc {
   /** Asset-kind discriminator. Today only `"roomPhoto"`. */
   kind: InspirationKind;
   taxonomy: InspirationTaxonomy;
-  /** S3 (or CloudFront-rewritten) URL of the JPEG. Always present. */
-  imageUrl: string;
+  /** Bucket-relative storage path (folder + filename), no scheme/host. The
+   *  full URL is composed at read time from a trusted base. Always present.
+   *  See `PathSchema` in lib/storage/inspiration-path.ts. */
+  path: string;
   /** Pixel width captured at upload time via `sharp`'s metadata. */
   imageWidth: number;
   /** Pixel height captured at upload time via `sharp`'s metadata. */

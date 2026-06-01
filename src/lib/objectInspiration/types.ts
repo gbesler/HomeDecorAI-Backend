@@ -143,7 +143,10 @@ export interface ObjectInspirationCategoryDoc {
    *  blocks reads via `firestore.rules`. */
   active: boolean;
   title: LocalizedTitle;
-  heroImageUrl: string;
+  /** Bucket-relative storage path (folder + filename), no scheme/host. The
+   *  full URL is composed at read time from a trusted base (iOS CloudFront
+   *  host / backend env base). See `PathSchema` in lib/storage/inspiration-path.ts. */
+  path: string;
   heroImageWidth: number;
   heroImageHeight: number;
   heroImageMime: string;
@@ -177,7 +180,10 @@ export interface ObjectInspirationItemDoc {
   /** Generation prompt. Min 1 char (quality, not security — admin claim is
    *  the trust gate). Max 500 char. */
   prompt: string;
-  imageUrl: string;
+  /** Bucket-relative storage path (folder + filename), no scheme/host. The
+   *  full URL is composed at read time. On submit the AI pipeline reconstructs
+   *  the provider URL from this + the env base. See `PathSchema`. */
+  path: string;
   imageWidth: number;
   imageHeight: number;
   imageMime: string;

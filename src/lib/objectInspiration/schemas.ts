@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  isAllowedInspirationUrl,
-  // Re-using the Explorer allow-list because object inspirations share the
-  // same S3 bucket + CloudFront distribution; if a future content type
-  // needs a different origin, parameterize the host source then.
-} from "../inspiration/schemas.js";
+import { PathSchema } from "../storage/inspiration-path.js";
 import {
   OBJECT_TOOL_TYPE_VALUES,
   type ObjectToolType,
@@ -18,10 +13,10 @@ import {
  *   • `id` regex tracks the iOS-side ID parity contract. Item ids look
  *     like `sofas_1`, `outdoorSeating_12`. Category ids are bare slugs:
  *     `sofas`, `outdoorSeating`. Both lowercase-leading + camelCase tail.
- *   • `imageUrl` and `heroImageUrl` are refined through the Explorer
- *     `isAllowedInspirationUrl` allow-list (exact hostname match against
- *     env-configured CloudFront / S3 bucket; subdomain takeover surface
- *     closed).
+ *   • `path` is a bucket-relative storage path (folder + filename), NOT a
+ *     full URL — see `PathSchema` in `lib/storage/inspiration-path.ts`. The
+ *     host is composed at read time, so the row stays infra-agnostic; the
+ *     path validator rejects scheme/host/leading-slash/`..` smuggling.
  *   • `toolTypes` is non-empty (the spread literal preserves Zod's tuple
  *     non-emptiness check) so an admin cannot ship a row hidden from
  *     both tools by mistake.
@@ -168,16 +163,6 @@ const SearchTermsSchema = z
   .strict()
   .optional();
 
-const ImageUrlSchema = z
-  .string()
-  .trim()
-  .url()
-  .max(2048)
-  .refine(isAllowedInspirationUrl, {
-    message:
-      "imageUrl host is not allowed. Upload the image to the configured S3 bucket (or its CloudFront distribution) first.",
-  });
-
 const ImageMimeSchema = z
   .string()
   .trim()
@@ -194,7 +179,7 @@ export const ObjectCategorySeedInputSchema = z
     order: z.number().int().min(0).max(10_000),
     active: z.boolean().optional().default(true),
     title: LocalizedTitleSchema,
-    heroImageUrl: ImageUrlSchema,
+    path: PathSchema,
     heroImageWidth: z.number().int().positive().max(20_000),
     heroImageHeight: z.number().int().positive().max(20_000),
     heroImageMime: ImageMimeSchema.optional(),
@@ -219,7 +204,7 @@ export const ObjectInspirationSeedInputSchema = z
     active: z.boolean().optional().default(true),
     title: LocalizedTitleSchema,
     prompt: z.string().trim().min(1).max(500),
-    imageUrl: ImageUrlSchema,
+    path: PathSchema,
     imageWidth: z.number().int().positive().max(20_000),
     imageHeight: z.number().int().positive().max(20_000),
     imageMime: ImageMimeSchema.optional(),

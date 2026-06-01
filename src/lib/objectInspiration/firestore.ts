@@ -139,8 +139,7 @@ export function mapDocToObjectCategory(
     order: typeof data["order"] === "number" ? data["order"] : 0,
     active: data["active"] === true,
     title: decodeTitle(data["title"]),
-    heroImageUrl:
-      typeof data["heroImageUrl"] === "string" ? data["heroImageUrl"] : "",
+    path: typeof data["path"] === "string" ? data["path"] : "",
     heroImageWidth:
       typeof data["heroImageWidth"] === "number" ? data["heroImageWidth"] : 0,
     heroImageHeight:
@@ -173,7 +172,7 @@ export function mapDocToObjectInspiration(
     active: data["active"] === true,
     title: decodeTitle(data["title"]),
     prompt: typeof data["prompt"] === "string" ? data["prompt"] : "",
-    imageUrl: typeof data["imageUrl"] === "string" ? data["imageUrl"] : "",
+    path: typeof data["path"] === "string" ? data["path"] : "",
     imageWidth:
       typeof data["imageWidth"] === "number" ? data["imageWidth"] : 0,
     imageHeight:

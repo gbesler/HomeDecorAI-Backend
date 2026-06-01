@@ -1,5 +1,6 @@
 import admin from "firebase-admin";
 import { isTimestamp } from "../firestore-utils.js";
+import { inspirationImageUrlFromPath } from "../storage/resolve-inspiration-url.js";
 import {
   InvalidCursorError,
   decodeExploreCursor,
@@ -55,8 +56,13 @@ function mapDocToInspiration(
     tags: Array.isArray(tagsRaw)
       ? (tagsRaw as unknown[]).filter((v): v is string => typeof v === "string")
       : [],
-    imageUrl: typeof data["imageUrl"] === "string" ? data["imageUrl"] : "",
-    cdnUrl: typeof data["cdnUrl"] === "string" ? data["cdnUrl"] : null,
+    // Docs store a bucket-relative `path`; the REST DTO still exposes a
+    // fetchable `imageUrl`, composed from the trusted base at read time.
+    imageUrl:
+      typeof data["path"] === "string" && data["path"].length > 0
+        ? inspirationImageUrlFromPath(data["path"])
+        : "",
+    cdnUrl: null,
     featured: data["featured"] === true,
     sourceGenerationId:
       typeof data["sourceGenerationId"] === "string"

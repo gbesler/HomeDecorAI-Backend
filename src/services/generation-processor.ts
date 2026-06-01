@@ -16,6 +16,7 @@ import {
 import { runPromptInpaint } from "../lib/generation/prompt-inpaint.js";
 import { getActiveObjectInspirationOrNull } from "../lib/objectInspiration/firestore.js";
 import { validatePublicImageUrl } from "../lib/storage/url-validation.js";
+import { inspirationImageUrlFromPath } from "../lib/storage/resolve-inspiration-url.js";
 import type {
   GenerationDoc,
   GenerationErrorCode,
@@ -476,8 +477,8 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
         const doc = await getActiveObjectInspirationOrNull(inspirationId);
         if (
           doc === null ||
-          typeof doc.imageUrl !== "string" ||
-          doc.imageUrl.length === 0
+          typeof doc.path !== "string" ||
+          doc.path.length === 0
         ) {
           return {
             kind: "failed",
@@ -486,8 +487,11 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
               "Selected inspiration is no longer available. Please pick another.",
           };
         }
+        // Compose the reference-photo URL from the stored bucket-relative
+        // `path` + trusted env base, then SSRF-validate the composed URL.
+        const composedInspirationUrl = inspirationImageUrlFromPath(doc.path);
         const urlCheck = validatePublicImageUrl(
-          doc.imageUrl,
+          composedInspirationUrl,
           "inspirationImageUrl",
         );
         if (!urlCheck.ok) {
@@ -508,7 +512,7 @@ async function runAiGeneration(doc: GenerationDoc): Promise<AiRunResult> {
               "Selected inspiration is no longer available. Please pick another.",
           };
         }
-        inspirationImageUrl = doc.imageUrl;
+        inspirationImageUrl = composedInspirationUrl;
         inspirationTitle =
           typeof doc.title.en === "string" ? doc.title.en.trim() : "";
         // Rebuild the prompt with the recovered title so the inline-
