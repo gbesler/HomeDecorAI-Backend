@@ -1,289 +1,318 @@
-# Seeding Guide — Object Inspiration & Explorer Inspiration
+# Inspirations — Usage Guide
 
-This directory holds the seed scripts and JSON manifests that populate the
-two Firestore-backed content catalogs the app reads:
+A task-oriented guide for seeding and maintaining the two inspiration catalogs
+the app reads from Firestore:
 
-| Flow | Firestore collections | Powers (iOS) | Manifest shape |
-|------|----------------------|--------------|----------------|
-| **Object Inspiration** | `objectCategories`, `objectInspirations` | Replace & Add Object wizard (category grid → item grid) | `{ categories: [...], items: [...] }` |
-| **Explorer Inspiration** | `inspirations` | Explore tab (room-photo inspiration feed) | flat array `[ {...}, {...} ]` |
+- **Object Inspiration** → the **Replace & Add Object** wizard (category grid →
+  item grid). Stored in `objectCategories` + `objectInspirations`.
+- **Explorer Inspiration** → the **Explore** tab room-photo feed. Stored in
+  `inspirations`.
 
-Both are **admin/ops content pipelines**, not user-facing. Both validate every
-row against the same Zod schemas the HTTP endpoints use, so a row that would be
-rejected over HTTP is rejected by the CLI too.
+You drive both from the `scripts/` CLI tools. Every change is an **idempotent
+upsert** — re-running is always safe.
 
-> Deep object-inspiration operator runbook (image upload layout, soft/hard
-> delete, audit logging): see [`manifests/README.md`](./manifests/README.md).
-
----
-
-## Prerequisites
-
-### Environment variables
-
-| Var | Required | Used for |
-|-----|----------|----------|
-| `FIREBASE_SERVICE_ACCOUNT_KEY` | yes (backend) | Admin SDK credential the **HTTP server** uses |
-| `GOOGLE_APPLICATION_CREDENTIALS` | yes (CLI) | Service-account JSON path the **seed scripts** use (or pass `--service-account=`) |
-| `AWS_S3_BUCKET` | yes | Builds the image-URL allow-list (`<bucket>.s3[.<region>].amazonaws.com`) |
-| `AWS_S3_REGION` | yes | Regional S3 host in the allow-list |
-| `AWS_CLOUDFRONT_HOST` | recommended | CloudFront host in the allow-list. **If unset, every CloudFront `imageUrl` is rejected** — a boot warning is logged |
-
-The allow-list is built in `src/lib/inspiration/schemas.ts` (`allowedInspirationHosts`)
-and shared by both flows. Every `imageUrl` / `heroImageUrl` must be HTTPS, on a
-default port, and match one of: the CloudFront host, `<bucket>.s3.amazonaws.com`,
-or `<bucket>.s3.<region>.amazonaws.com`.
-
-### Auth model
-
-- **CLI scripts** write directly via the Firebase Admin SDK (service account).
-  No HTTP call, no ID-token mint, no admin claim. This is the recommended path
-  for bulk seeding.
-- **HTTP endpoints** are guarded by `app.authenticate` — a **valid Firebase
-  Bearer token**, identical to every other route. (There is no separate
-  `admin: true` custom-claim gate today; the inline comments referencing one
-  describe a possible future tightening, not current behavior.)
+> Looking for field-by-field schema detail or the image-upload runbook?
+> See [`manifests/README.md`](./manifests/README.md). This guide is the
+> "how do I do X" companion.
 
 ---
 
-## Object Inspiration
+## "I want to…" → start here
 
-Two-collection model. Categories are the wizard's entry grid (~40 tiles); items
-(~800) reference a category via a soft FK (`categoryId`).
+| Goal | Go to |
+|------|-------|
+| Stand up a new object **category** with its items | [Add a category + items](#add-a-new-category-with-its-items) |
+| Add more **items** to a category that already exists | [Add items only](#add-items-to-an-existing-category) |
+| Fix a typo in many **prompts** at once | [Overwrite prompts](#fix-prompts-across-many-items) |
+| Add or fix a **translation** without touching anything else | [Update titles only](#update-titles-only-add-a-language) |
+| Add **search synonyms** (e.g. "kanepe" → Koltuk) | [Add search terms](#add-search-synonyms) |
+| Hide an item/category from the app | [Take content down](#take-an-item-or-category-down) |
+| Add room-photo inspirations to the **Explore tab** | [Seed explorer inspirations](#explorer-inspiration--tasks) |
 
-### Schema (row shapes)
+---
 
-Source of truth: `src/lib/objectInspiration/schemas.ts`.
+## One-time setup
 
-**Category** (`objectCategories/{id}`)
-
-```jsonc
-{
-  "id": "sofas",                  // ^[a-z][a-zA-Z]*$  (lowerCamelCase slug)
-  "order": 0,                     // 0–10000
-  "active": true,                 // optional, default true
-  "title": { "en": "...", "tr": "...", /* +30 optional langs */ },
-  "heroImageUrl": "https://<allow-listed-host>/...",
-  "heroImageWidth": 1024,
-  "heroImageHeight": 1024,
-  "heroImageMime": "image/jpeg",  // optional, default image/jpeg
-  "toolTypes": ["replaceObject", "addObject"]   // ≥1, from this set
-}
-```
-
-**Item** (`objectInspirations/{id}`)
-
-```jsonc
-{
-  "id": "sofas_1",                // ^[a-z][a-zA-Z]*_[0-9]+$
-  "categoryId": "sofas",          // soft FK → objectCategories
-  "order": 0,
-  "active": true,
-  "title": { "en": "...", "tr": "...", /* +30 optional langs */ },
-  "prompt": "...",                // required, 1–500 chars (feeds the AI pipeline)
-  "imageUrl": "https://<allow-listed-host>/...",
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "imageMime": "image/jpeg",      // optional
-  "toolTypes": ["replaceObject", "addObject"],
-  "searchTerms": { /* optional, see below */ }
-}
-```
-
-**`title` — 32 languages.** `en` + `tr` are required; the other 30
-(`ar, hy, zh-Hans, zh-Hant, hr, cs, da, nl, fi, fr, de, el, he, hu, id, it, ja,
-ko, ms, nb, pl, pt, ro, ru, sk, es, sv, th, uk, vi`) are optional. Each value is
-`trim().min(1).max(120)`. The schema is `.strict()` — an unknown locale key is
-rejected. A missing translation degrades to English on iOS.
-
-**`searchTerms` — optional, 32 languages, each independently optional.** Feeds
-the iOS search matcher's literal-weight third channel (e.g. a TR user typing
-`"kanepe"` matches a Koltuk item). Each language array: `max(10)` terms, each
-`trim().min(1).max(40)`. `.strict()`.
-
-```jsonc
-"searchTerms": {
-  "en": ["couch", "sectional", "corner sofa"],
-  "tr": ["kanepe", "köşe koltuk"],
-  "de": ["ecksofa"]
-  // any subset of the 32 supported languages
-}
-```
-
-> ⚠️ `searchTerms` is a merge field: a re-seed **replaces** the entire stored
-> map. Omitting a language on re-seed **clears** it. Include the languages you
-> want to keep.
-
-### CLI
+You need a Firebase **service account** JSON and the image-host env vars set:
 
 ```bash
-# npm alias (recommended)
-npm run seed:object-inspirations -- \
-  --manifest=scripts/manifests/object-inspirations.full.json
-
-# or directly
-tsx scripts/seed-object-inspirations.ts \
-  --manifest=scripts/manifests/object-inspirations.full.json \
-  --concurrency=5
-```
-
-| Flag | Default | Meaning |
-|------|---------|---------|
-| `--manifest=<path>` | — (required) | Manifest JSON (`{categories, items}`) |
-| `--service-account=<path>` | `$GOOGLE_APPLICATION_CREDENTIALS` | Firebase service account JSON |
-| `--overwrite-prompts` | `false` | Sends `X-Seed-Mode: overwrite` semantics (replace `prompt` on re-seed) |
-| `--dry-run` | `false` | Validate + FK-check only; no Firestore writes, no credentials needed |
-| `--concurrency=<n>` | `5` | Parallel upsert workers |
-
-Output: JSONL per-doc outcomes on stdout, human summary on stderr. Exit code `1`
-if any row failed.
-
-### HTTP endpoints
-
-| Method · Path | Body | Notes |
-|---------------|------|-------|
-| `POST /api/object-inspirations/bulk-seed` | `{ categories?, items? }` (≥1; categories ≤200, items ≤5000) | Header `X-Seed-Mode: overwrite` to replace prompts |
-| `POST /api/object-inspirations/bulk-update-titles` | `{ titleUpdates: [{ id, title }] }` (≤5000) | Patches `title` only; missing docs report `failed` (never creates) |
-
-Response (200): `{ summary: {total, created, updated, skipped, failed}, outcomes: [{kind, id, status, reason?, ts}] }`.
-
-### Upsert semantics (re-seed)
-
-Each write is an idempotent upsert. On an existing doc:
-
-- **Preserved by default:** `prompt`, `createdAt`.
-- **Always propagated (overwritten):** `title`, `imageUrl`+dims+mime, `order`,
-  `active`, `toolTypes`, `searchTerms`, `updatedAt`.
-- **`--overwrite-prompts` / `X-Seed-Mode: overwrite`:** adds `prompt` to the
-  overwritten set.
-- `id` / `categoryId` / `createdAt` are never rewritten.
-
----
-
-## Explorer Inspiration
-
-Single-collection model (`inspirations`). Each doc is one room-photo inspiration
-with a free-form taxonomy keyed by tool axis.
-
-### Schema (row shape)
-
-Source of truth: `src/lib/inspiration/schemas.ts`.
-
-```jsonc
-{
-  "id": "interior_bathroom_coastal001",   // ID_PATTERN
-  "kind": "roomPhoto",                     // optional, default "roomPhoto"
-  "toolType": "interiorDesign",            // required enum
-  "designStyle": "coastal",                // required enum
-  "roomType": "bathroom",                  // optional axis (interior)
-  "buildingType": null,                    // optional axis (exterior)
-  "gardenStyle": null,                     // optional axis (garden)
-  "patioStyle": null,
-  "poolStyle": null,
-  "outdoorLightingStyle": null,
-  "colorPaletteId": null,                  // optional palette ref
-  "tags": ["bathroom", "coastal"],         // optional, ≤20, each 1–40 chars
-  "featured": false,                       // optional
-  "imageUrl": "https://<allow-listed-host>/...",
-  "imageWidth": 768,
-  "imageHeight": 1376,
-  "imageMime": "image/jpeg",               // optional
-  "prompt": "..."                          // optional, 1–8000 chars
-}
-```
-
-On write these flatten into the stored `InspirationDoc` whose `taxonomy`
-sub-object groups `toolType / designStyle / tags / roomType / …`
-(`src/lib/inspiration/types.ts`).
-
-### CLI
-
-No npm alias yet — invoke directly:
-
-```bash
-tsx scripts/seed-explore-inspirations.ts \
-  --manifest=scripts/manifests/explore-inspirations.full.json \
-  --concurrency=5
-```
-
-| Flag | Default | Meaning |
-|------|---------|---------|
-| `--manifest=<path>` | — (required) | Manifest JSON (flat array of rows) |
-| `--service-account=<path>` | `$GOOGLE_APPLICATION_CREDENTIALS` | Firebase service account JSON |
-| `--dry-run` | `false` | Validate only; no writes |
-| `--concurrency=<n>` | `5` | Parallel upsert workers |
-
-There is **no** `--overwrite-prompts` flag — see prompt rule below.
-
-### HTTP endpoints
-
-| Method · Path | Body | Notes |
-|---------------|------|-------|
-| `POST /api/explore/inspirations` | single row | Returns `{id, created}`; `201` + `Location` when newly created |
-| `POST /api/explore/inspirations/bulk-seed` | `{ items: [...] }` (1–2000) | All rows validated up front; any invalid row rejects the whole batch (400) |
-
-Response (200, bulk): `{ summary: {total, created, updated, failed}, outcomes: [{id, status, reason?, ts}] }`.
-
-### Upsert semantics (re-seed)
-
-- **First write:** full doc written, `createdAt` stamped.
-- **Re-seed (existing doc):** `schemaVersion, kind, taxonomy, imageUrl`+dims+mime,
-  `featured, updatedAt` are overwritten.
-- **`prompt` is preserve-on-existing:** written only when the doc is new *or* its
-  stored prompt was previously empty. To change an already-set prompt, clear it
-  first (or edit the doc directly). This is the explorer analog of the object
-  flow's default prompt-preservation.
-
----
-
-## Common workflow
-
-```bash
-# 1. Upload images to S3 so URLs resolve via the allow-listed host
-rclone copy ./out/ myremote:$AWS_S3_BUCKET/in_app_images/ --s3-acl public-read
-
-# 2. Compose / generate the manifest (match the schema above)
-
-# 3. Dry-run — catches FK errors + schema typos, no credentials needed
-tsx scripts/seed-object-inspirations.ts --manifest=<path> --dry-run
-
-# 4. Seed for real
 export GOOGLE_APPLICATION_CREDENTIALS=/abs/path/to/prod-sa.json
-npm run seed:object-inspirations -- --manifest=<path>
+export AWS_S3_BUCKET=home-interior-ai-app
+export AWS_S3_REGION=us-east-1
+export AWS_CLOUDFRONT_HOST=cdn.yourdomain.com   # if you serve images via CloudFront
+```
 
-# 5. Re-run anytime — upserts are idempotent (prompts preserved unless --overwrite-prompts)
+Why the AWS vars? Every `imageUrl` / `heroImageUrl` is checked against an
+**allow-list** built from these. A URL on any other host is rejected. Allowed
+forms:
+
+```
+https://<AWS_CLOUDFRONT_HOST>/...
+https://<bucket>.s3.amazonaws.com/...
+https://<bucket>.s3.<region>.amazonaws.com/...
+```
+
+> The seed CLI writes straight to Firestore with the service account — no login,
+> no token, no admin panel. (The HTTP endpoints exist too and just need a normal
+> Firebase Bearer token, but the CLI is the recommended path for bulk work.)
+
+**Golden rule: always `--dry-run` first.** It validates every row and checks
+that each item points at a real category — without writing anything, and without
+needing credentials:
+
+```bash
+tsx scripts/seed-object-inspirations.ts --manifest=<your-file> --dry-run
 ```
 
 ---
 
-## Manifest file reference
+## Object Inspiration — tasks
 
-`scripts/manifests/`
+All object tasks use one manifest shape:
 
-| File | Flow | Contents |
-|------|------|----------|
-| `object-inspirations.full.json` | object | Production catalog (~40 categories × ~800 items) |
-| `object-inspirations.initial.json` | object | Small pilot sample |
-| `object-inspirations.categories-only.json` | object | Categories without items (partial-manifest workflow) |
-| `object-inspirations.searchTerms.example.json` | object | Reference showing per-language `searchTerms` |
-| `object-inspiration-titles.json` | object | Title-only payload for `/bulk-update-titles` |
-| `object-inspiration-titles.example.json` | object | Single title-update example row |
-| `object-inspirations.fix-broken-urls.json` | object | Example re-seed correcting image URLs |
-| `explore-inspirations.full.json` | explore | Production explore catalog (~340 rows, flat array) |
-| `explore-inspirations.bulk.json` | explore | Small explore sample |
+```json
+{ "categories": [ … ], "items": [ … ] }
+```
+
+Both keys are optional — send only what you're changing.
+
+### Add a new category with its items
+
+1. Upload the images so their URLs resolve on the allow-listed host.
+2. Write a manifest with the category **and** its items (items reference the
+   category by `categoryId`):
+
+```jsonc
+{
+  "categories": [
+    {
+      "id": "floorLamps",            // lowerCamelCase, matches the doc id
+      "order": 20,
+      "active": true,
+      "title": { "en": "Floor Lamps", "tr": "Yer Lambaları" /* +optional langs */ },
+      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Arc_Floor_Lamp.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    }
+  ],
+  "items": [
+    {
+      "id": "floorLamps_1",          // must be <categoryId>_<number>
+      "categoryId": "floorLamps",
+      "order": 0,
+      "active": true,
+      "title": { "en": "Arc Floor Lamp", "tr": "Yay Lambader" },
+      "prompt": "A floor lamp with a long arcing arm and a graceful curved silhouette",
+      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Arc_Floor_Lamp.jpeg",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "imageMime": "image/jpeg",
+      "toolTypes": ["replaceObject", "addObject"]
+    }
+  ]
+}
+```
+
+3. Dry-run, then seed:
+
+```bash
+tsx scripts/seed-object-inspirations.ts --manifest=scripts/manifests/new-category.json --dry-run
+npm run seed:object-inspirations -- --manifest=scripts/manifests/new-category.json
+```
+
+### Add items to an existing category
+
+Send a manifest with **only** `items`. The category is already in Firestore, so
+you don't need to re-send it — the foreign-key check falls back to a Firestore
+lookup:
+
+```json
+{ "items": [ { "id": "floorLamps_2", "categoryId": "floorLamps", … } ] }
+```
+
+### Fix prompts across many items
+
+By default a re-seed **preserves existing prompts** (so you can correct an image
+or title without disturbing prompts). To intentionally replace prompts, add
+`--overwrite-prompts`:
+
+```bash
+npm run seed:object-inspirations -- \
+  --manifest=scripts/manifests/object-inspirations.full.json \
+  --overwrite-prompts
+```
+
+### Update titles only (add a language)
+
+Use the dedicated title path — it patches `title` and leaves
+prompt/image/order/active untouched. It will **not** create new items (a missing
+id reports `failed`).
+
+Manifest (`{ titleUpdates: [...] }`):
+
+```json
+{
+  "titleUpdates": [
+    { "id": "sofas_1", "title": { "en": "Sectional Sofa", "tr": "Köşe Koltuk", "de": "Ecksofa" } }
+  ]
+}
+```
+
+Send it to `POST /api/object-inspirations/bulk-update-titles` (Bearer token), or
+re-seed the full item rows with the new `title` via the normal seed (titles are
+always overwritten on re-seed).
+
+> `title` supports **32 languages** — `en` + `tr` are required, the other 30 are
+> optional. A locale you omit falls back to English on the device.
+
+### Add search synonyms
+
+Put a `searchTerms` map on the item. It feeds the in-app search so a user typing
+a synonym still finds the item, with no app release needed.
+
+```jsonc
+{
+  "id": "sofas_1",
+  "categoryId": "sofas",
+  /* …all the normal item fields… */
+  "searchTerms": {
+    "tr": ["kanepe", "köşe koltuk", "oturma grubu"],
+    "en": ["couch", "sectional", "corner sofa"],
+    "de": ["ecksofa"]
+    // any subset of the 32 supported languages — each one optional
+  }
+}
+```
+
+- Limits: ≤10 terms per language, each 1–40 chars.
+- **Re-seeding replaces the whole map.** If you re-seed an item and drop a
+  language from `searchTerms`, that language's terms are cleared. Include the
+  ones you want to keep.
+
+### Take an item or category down
+
+Set `active: false` and re-seed that row (it's a normal field that's overwritten
+on every seed). `active: false` hides it in the app **and** blocks reads at the
+security-rules layer:
+
+```json
+{ "items": [ { "id": "sofas_1", "categoryId": "sofas", "active": false, /* other fields */ } ] }
+```
+
+To bring it back, re-seed with `active: true`.
 
 ---
 
-## Troubleshooting
+## Explorer Inspiration — tasks
 
-- **`host not allowed` (400 on every row):** `AWS_CLOUDFRONT_HOST` unset or the
-  URL host doesn't match the allow-list. Check the boot warning.
-- **`references unknown categoryId` (object):** the item's `categoryId` isn't in
-  the manifest's `categories` and doesn't exist in Firestore. Seed the category
-  first or include it in the same manifest.
-- **Titles don't change per language on iOS:** the doc must carry that language
-  in `title`. Re-seed with the missing translations — a missing locale falls
-  back to English. (Simplified/Traditional Chinese also required an iOS-side
-  resolver fix; ensure the app build includes it.)
-- **`searchTerms` cleared after re-seed:** expected — it's a merge field that
-  replaces the whole map. Include all languages you want to keep.
+Explorer uses a **flat array** manifest (not `{categories, items}`):
+
+```json
+[ { "id": "…", "toolType": "…", "designStyle": "…", "imageUrl": "…", … } ]
+```
+
+### Seed explorer inspirations (bulk)
+
+1. Compose the array — each row is one room photo with its taxonomy:
+
+```jsonc
+[
+  {
+    "id": "interior_bathroom_coastal001",
+    "kind": "roomPhoto",
+    "toolType": "interiorDesign",
+    "designStyle": "coastal",
+    "roomType": "bathroom",            // optional axis per tool
+    "tags": ["bathroom", "coastal"],   // optional, ≤20
+    "featured": false,
+    "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_coastal001.jpeg",
+    "imageWidth": 768,
+    "imageHeight": 1376,
+    "imageMime": "image/jpeg",
+    "prompt": "Use the provided empty bathroom image as the master reference. …"
+  }
+]
+```
+
+2. Dry-run, then seed:
+
+```bash
+tsx scripts/seed-explore-inspirations.ts --manifest=scripts/manifests/explore-inspirations.full.json --dry-run
+tsx scripts/seed-explore-inspirations.ts --manifest=scripts/manifests/explore-inspirations.full.json
+```
+
+> There's no npm alias for the explorer script yet — call it with `tsx` directly.
+
+### A note on explorer prompts
+
+Unlike object items, explorer **preserves an existing prompt** on re-seed and
+only writes a prompt when the doc is new or its stored prompt was empty. To
+change an already-set prompt, clear it first (or edit the doc directly). There's
+no `--overwrite-prompts` flag here.
+
+---
+
+## Reading the output
+
+Both scripts print **one JSONL line per doc** to stdout and a human summary to
+stderr:
+
+```
+{"kind":"item","id":"sofas_1","status":"created","ts":"…"}
+{"kind":"item","id":"sofas_2","status":"updated","ts":"…"}
+```
+
+`status` is `created` / `updated` / `skipped` / `failed`. A non-zero exit code
+means at least one row failed — check the `failed` lines for the `reason`, fix
+the manifest, and re-run (upserts make re-runs safe).
+
+---
+
+## CLI flags at a glance
+
+```bash
+tsx scripts/seed-object-inspirations.ts \
+  --manifest=<path>            # required: the JSON manifest
+  [--overwrite-prompts]        # replace prompts on re-seed (object only)
+  [--dry-run]                  # validate only, no writes, no creds needed
+  [--concurrency=5]            # parallel workers
+  [--service-account=<path>]   # or set GOOGLE_APPLICATION_CREDENTIALS
+
+tsx scripts/seed-explore-inspirations.ts \
+  --manifest=<path> [--dry-run] [--concurrency=5] [--service-account=<path>]
+```
+
+---
+
+## Gotchas
+
+- **`host not allowed`** → your `imageUrl` host isn't in the allow-list. Check
+  `AWS_CLOUDFRONT_HOST` / `AWS_S3_BUCKET` / `AWS_S3_REGION`.
+- **`references unknown categoryId`** (object) → the category isn't in your
+  manifest and doesn't exist in Firestore yet. Seed the category first, or
+  include it in the same file.
+- **Titles don't switch language in the app** → that locale isn't in the doc's
+  `title`. Re-seed with the missing translations; an omitted locale falls back
+  to English. (Chinese 简体/繁體 also needed an iOS resolver fix — make sure the
+  app build includes it.)
+- **A language's search terms disappeared after a re-seed** → expected;
+  `searchTerms` replaces the whole map on write. Include every language you want
+  to keep.
+- **You only updated 2 items but expected the whole catalog to change** → each
+  row is independent. The other docs keep their old data until you re-seed them
+  too.
+
+---
+
+## File map
+
+| File | What it's for |
+|------|---------------|
+| `seed-object-inspirations.ts` | Object catalog seeder (`npm run seed:object-inspirations`) |
+| `seed-explore-inspirations.ts` | Explorer catalog seeder (`tsx` direct) |
+| `manifests/object-inspirations.full.json` | Production object catalog (~40 cat × ~800 items) |
+| `manifests/explore-inspirations.full.json` | Production explorer catalog (~340 rows) |
+| `manifests/*.example.json` | Copy-paste starting points |
+| `manifests/README.md` | Field-by-field schema + image-upload runbook |
