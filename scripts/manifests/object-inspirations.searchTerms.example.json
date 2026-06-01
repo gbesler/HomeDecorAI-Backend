@@ -7,7 +7,37 @@
       "active": true,
       "title": {
         "en": "Sofas",
-        "tr": "Koltuklar"
+        "tr": "Koltuklar",
+        "ar": "أرائك",
+        "hy": "Բազմոցներ",
+        "zh-Hans": "沙发",
+        "zh-Hant": "沙發",
+        "hr": "Sofe",
+        "cs": "Pohovky",
+        "da": "Sofaer",
+        "nl": "Banken",
+        "fi": "Sohvat",
+        "fr": "Canapés",
+        "de": "Sofas",
+        "el": "Καναπέδες",
+        "he": "ספות",
+        "hu": "Kanapék",
+        "id": "Sofa",
+        "it": "Divani",
+        "ja": "ソファ",
+        "ko": "소파",
+        "ms": "Sofa",
+        "nb": "Sofaer",
+        "pl": "Sofy",
+        "pt": "Sofás",
+        "ro": "Canapele",
+        "ru": "Диваны",
+        "sk": "Pohovky",
+        "es": "Sofás",
+        "sv": "Soffor",
+        "th": "โซฟา",
+        "uk": "Дивани",
+        "vi": "Ghế sofa"
       },
       "path": "in_app_images/01_Sectional_Sofa.jpeg",
       "heroImageWidth": 1024,
@@ -24,7 +54,37 @@
       "active": true,
       "title": {
         "en": "Candles",
-        "tr": "Mumlar"
+        "tr": "Mumlar",
+        "ar": "شموع",
+        "hy": "Մոմեր",
+        "zh-Hans": "蜡烛",
+        "zh-Hant": "蠟燭",
+        "hr": "Svijeće",
+        "cs": "Svíčky",
+        "da": "Stearinlys",
+        "nl": "Kaarsen",
+        "fi": "Kynttilät",
+        "fr": "Bougies",
+        "de": "Kerzen",
+        "el": "Κεριά",
+        "he": "נרות",
+        "hu": "Gyertyák",
+        "id": "Lilin",
+        "it": "Candele",
+        "ja": "キャンドル",
+        "ko": "양초",
+        "ms": "Lilin",
+        "nb": "Stearinlys",
+        "pl": "Świece",
+        "pt": "Velas",
+        "ro": "Lumânări",
+        "ru": "Свечи",
+        "sk": "Sviečky",
+        "es": "Velas",
+        "sv": "Ljus",
+        "th": "เทียน",
+        "uk": "Свічки",
+        "vi": "Nến"
       },
       "path": "in_app_images/01_Pillar_Candle.jpeg",
       "heroImageWidth": 1024,
@@ -44,7 +104,37 @@
       "active": true,
       "title": {
         "en": "Modern Sofa",
-        "tr": "Modern Koltuk"
+        "tr": "Modern Koltuk",
+        "ar": "أريكة عصرية",
+        "hy": "Ժամանակակից բազմոց",
+        "zh-Hans": "现代沙发",
+        "zh-Hant": "現代沙發",
+        "hr": "Moderna sofa",
+        "cs": "Moderní pohovka",
+        "da": "Moderne sofa",
+        "nl": "Moderne bank",
+        "fi": "Moderni sohva",
+        "fr": "Canapé moderne",
+        "de": "Modernes Sofa",
+        "el": "Μοντέρνος καναπές",
+        "he": "ספה מודרנית",
+        "hu": "Modern kanapé",
+        "id": "Sofa modern",
+        "it": "Divano moderno",
+        "ja": "モダンソファ",
+        "ko": "모던 소파",
+        "ms": "Sofa moden",
+        "nb": "Moderne sofa",
+        "pl": "Nowoczesna sofa",
+        "pt": "Sofá moderno",
+        "ro": "Canapea modernă",
+        "ru": "Современный диван",
+        "sk": "Moderná pohovka",
+        "es": "Sofá moderno",
+        "sv": "Modern soffa",
+        "th": "โซฟาโมเดิร์น",
+        "uk": "Сучасний диван",
+        "vi": "Ghế sofa hiện đại"
       },
       "prompt": "A modern fabric sofa with clean lines and minimalist silhouette",
       "imageWidth": 1024,
@@ -55,15 +145,165 @@
         "addObject"
       ],
       "searchTerms": {
-        "tr": [
-          "kanepe",
-          "divan",
-          "sedir"
-        ],
         "en": [
           "couch",
-          "settee",
-          "loveseat"
+          "sectional",
+          "corner sofa"
+        ],
+        "tr": [
+          "kanepe",
+          "köşe koltuk",
+          "oturma grubu"
+        ],
+        "ar": [
+          "كنبة",
+          "أريكة ركنية",
+          "صوفا"
+        ],
+        "hy": [
+          "բազմոց",
+          "անկյունային բազմոց",
+          "կանապե"
+        ],
+        "zh-Hans": [
+          "沙发",
+          "转角沙发",
+          "组合沙发"
+        ],
+        "zh-Hant": [
+          "沙發",
+          "轉角沙發",
+          "組合沙發"
+        ],
+        "hr": [
+          "kauč",
+          "kutna garnitura",
+          "trosjed"
+        ],
+        "cs": [
+          "gauč",
+          "rohová pohovka",
+          "sedačka"
+        ],
+        "da": [
+          "sofa",
+          "hjørnesofa",
+          "sofagruppe"
+        ],
+        "nl": [
+          "bank",
+          "hoekbank",
+          "zitbank"
+        ],
+        "fi": [
+          "sohva",
+          "kulmasohva",
+          "sohvakaluste"
+        ],
+        "fr": [
+          "canapé",
+          "canapé d'angle",
+          "sofa"
+        ],
+        "de": [
+          "couch",
+          "ecksofa",
+          "sofagarnitur"
+        ],
+        "el": [
+          "καναπές",
+          "γωνιακός καναπές",
+          "σαλόνι"
+        ],
+        "he": [
+          "ספה",
+          "ספה פינתית",
+          "כורסה"
+        ],
+        "hu": [
+          "kanapé",
+          "sarokkanapé",
+          "ülőgarnitúra"
+        ],
+        "id": [
+          "sofa",
+          "sofa sudut",
+          "kursi panjang"
+        ],
+        "it": [
+          "divano",
+          "divano angolare",
+          "sofà"
+        ],
+        "ja": [
+          "ソファ",
+          "コーナーソファ",
+          "カウチ"
+        ],
+        "ko": [
+          "소파",
+          "코너 소파",
+          "카우치"
+        ],
+        "ms": [
+          "sofa",
+          "sofa sudut",
+          "kerusi panjang"
+        ],
+        "nb": [
+          "sofa",
+          "hjørnesofa",
+          "sofagruppe"
+        ],
+        "pl": [
+          "kanapa",
+          "narożnik",
+          "sofa"
+        ],
+        "pt": [
+          "sofá",
+          "sofá de canto",
+          "sofá modular"
+        ],
+        "ro": [
+          "canapea",
+          "colțar",
+          "canapea modulară"
+        ],
+        "ru": [
+          "диван",
+          "угловой диван",
+          "софа"
+        ],
+        "sk": [
+          "gauč",
+          "rohová sedačka",
+          "pohovka"
+        ],
+        "es": [
+          "sofá",
+          "sofá rinconera",
+          "sofá modular"
+        ],
+        "sv": [
+          "soffa",
+          "hörnsoffa",
+          "soffgrupp"
+        ],
+        "th": [
+          "โซฟา",
+          "โซฟาเข้ามุม",
+          "เก้าอี้ยาว"
+        ],
+        "uk": [
+          "диван",
+          "кутовий диван",
+          "софа"
+        ],
+        "vi": [
+          "ghế sofa",
+          "sofa góc",
+          "ghế dài"
         ]
       },
       "path": "in_app_images/01_Sectional_Sofa.jpeg"
@@ -75,7 +315,37 @@
       "active": true,
       "title": {
         "en": "Twisted Candle",
-        "tr": "Twisted Candle"
+        "tr": "Burgu Mum",
+        "ar": "شمعة ملتوية",
+        "hy": "Ոլորված մոմ",
+        "zh-Hans": "螺旋蜡烛",
+        "zh-Hant": "螺旋蠟燭",
+        "hr": "Uvijena svijeća",
+        "cs": "Kroucená svíčka",
+        "da": "Snoet stearinlys",
+        "nl": "Gedraaide kaars",
+        "fi": "Kierretty kynttilä",
+        "fr": "Bougie torsadée",
+        "de": "Gedrehte Kerze",
+        "el": "Στριφτό κερί",
+        "he": "נר מפותל",
+        "hu": "Csavart gyertya",
+        "id": "Lilin pilin",
+        "it": "Candela ritorta",
+        "ja": "ツイストキャンドル",
+        "ko": "트위스트 양초",
+        "ms": "Lilin berpilin",
+        "nb": "Vridd stearinlys",
+        "pl": "Skręcona świeca",
+        "pt": "Vela torcida",
+        "ro": "Lumânare răsucită",
+        "ru": "Витая свеча",
+        "sk": "Krútená sviečka",
+        "es": "Vela retorcida",
+        "sv": "Tvinnat ljus",
+        "th": "เทียนเกลียว",
+        "uk": "Кручена свічка",
+        "vi": "Nến xoắn"
       },
       "prompt": "A candle with a clearly twisted body form, sculptural wax shape, and a decorative silhouette",
       "imageWidth": 1024,
@@ -86,13 +356,165 @@
         "addObject"
       ],
       "searchTerms": {
-        "tr": [
-          "mum",
-          "burgu"
-        ],
         "en": [
+          "candle",
           "spiral",
           "twist"
+        ],
+        "tr": [
+          "mum",
+          "burgu",
+          "spiral"
+        ],
+        "ar": [
+          "شمعة",
+          "حلزوني",
+          "ملتوي"
+        ],
+        "hy": [
+          "մոմ",
+          "պարուրաձև",
+          "ոլորված"
+        ],
+        "zh-Hans": [
+          "蜡烛",
+          "螺旋",
+          "扭纹"
+        ],
+        "zh-Hant": [
+          "蠟燭",
+          "螺旋",
+          "扭紋"
+        ],
+        "hr": [
+          "svijeća",
+          "spirala",
+          "uvijeno"
+        ],
+        "cs": [
+          "svíčka",
+          "spirála",
+          "kroucená"
+        ],
+        "da": [
+          "stearinlys",
+          "spiral",
+          "snoet"
+        ],
+        "nl": [
+          "kaars",
+          "spiraal",
+          "gedraaid"
+        ],
+        "fi": [
+          "kynttilä",
+          "spiraali",
+          "kierretty"
+        ],
+        "fr": [
+          "bougie",
+          "spirale",
+          "torsadée"
+        ],
+        "de": [
+          "kerze",
+          "spirale",
+          "gedreht"
+        ],
+        "el": [
+          "κερί",
+          "σπιράλ",
+          "στριφτό"
+        ],
+        "he": [
+          "נר",
+          "ספירלה",
+          "מפותל"
+        ],
+        "hu": [
+          "gyertya",
+          "spirál",
+          "csavart"
+        ],
+        "id": [
+          "lilin",
+          "spiral",
+          "pilin"
+        ],
+        "it": [
+          "candela",
+          "spirale",
+          "ritorta"
+        ],
+        "ja": [
+          "キャンドル",
+          "スパイラル",
+          "ねじれ"
+        ],
+        "ko": [
+          "양초",
+          "나선",
+          "트위스트"
+        ],
+        "ms": [
+          "lilin",
+          "lingkaran",
+          "berpilin"
+        ],
+        "nb": [
+          "stearinlys",
+          "spiral",
+          "vridd"
+        ],
+        "pl": [
+          "świeca",
+          "spirala",
+          "skręcona"
+        ],
+        "pt": [
+          "vela",
+          "espiral",
+          "torcida"
+        ],
+        "ro": [
+          "lumânare",
+          "spirală",
+          "răsucită"
+        ],
+        "ru": [
+          "свеча",
+          "спираль",
+          "витая"
+        ],
+        "sk": [
+          "sviečka",
+          "špirála",
+          "krútená"
+        ],
+        "es": [
+          "vela",
+          "espiral",
+          "retorcida"
+        ],
+        "sv": [
+          "ljus",
+          "spiral",
+          "tvinnat"
+        ],
+        "th": [
+          "เทียน",
+          "เกลียว",
+          "บิด"
+        ],
+        "uk": [
+          "свічка",
+          "спіраль",
+          "кручена"
+        ],
+        "vi": [
+          "nến",
+          "xoắn ốc",
+          "xoắn"
         ]
       },
       "path": "in_app_images/11_Twisted_Candle.jpeg"
