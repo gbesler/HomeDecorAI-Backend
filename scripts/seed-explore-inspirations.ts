@@ -30,6 +30,10 @@ import {
   InspirationSeedInputSchema,
   type InspirationSeedInput,
 } from "../src/lib/inspiration/schemas.js";
+import {
+  collectTaxonomyWarningsForRows,
+  formatTaxonomyWarnings,
+} from "../src/lib/inspiration/taxonomy-warnings.js";
 
 interface ScriptOptions {
   manifestPath: string;
@@ -225,6 +229,19 @@ async function main(): Promise<void> {
       (opts.dryRun ? " (DRY RUN)" : "") +
       ` — concurrency=${opts.concurrency}`,
   );
+
+  // Soft-warn (does not block the write): surface taxonomy values that fall
+  // outside the system-defined closed sets. The loose axes accept unknown
+  // values on purpose (iOS may lead the backend enum), so this is advisory.
+  const taxonomyWarnings = collectTaxonomyWarningsForRows(items);
+  if (taxonomyWarnings.length > 0) {
+    console.error(
+      `[seed] taxonomy: ${taxonomyWarnings.length} value(s) outside the defined enum sets (accepted, not blocking):`,
+    );
+    for (const line of formatTaxonomyWarnings(taxonomyWarnings)) {
+      console.error(`  - ${line}`);
+    }
+  }
 
   if (!opts.dryRun) {
     await initializeFirebase(opts.serviceAccountPath);

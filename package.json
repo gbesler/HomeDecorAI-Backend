@@ -9,7 +9,7 @@
     "dev": "NODE_ENV=development npm run build && npm run start",
     "typecheck": "tsc --noEmit",
     "test:seed-shape": "tsx --test src/lib/inspiration/seedShape.test.ts",
-    "test:taxonomy": "tsx --test src/lib/taxonomy/registry.test.ts src/lib/inspiration/types.test.ts",
+    "test:taxonomy": "tsx --test src/lib/taxonomy/registry.test.ts src/lib/inspiration/types.test.ts src/lib/inspiration/taxonomy-warnings.test.ts",
     "test:inspiration": "tsx --test src/lib/inspiration/seedShape.test.ts src/lib/inspiration/schemas.test.ts",
     "test:object-inspiration": "PORT=3000 REPLICATE_API_TOKEN=test FAL_AI_API_KEY=test FIREBASE_SERVICE_ACCOUNT_KEY=$(printf '{\"project_id\":\"t\",\"private_key\":\"k\",\"client_email\":\"e\"}' | base64) AWS_S3_BUCKET=bucket AWS_S3_REGION=us-east-1 AWS_COGNITO_IDENTITY_POOL_ID=us-east-1:00000000-0000-0000-0000-000000000000 AWS_CLOUDFRONT_HOST=cdn.test.local tsx --test src/lib/objectInspiration/seedShape.test.ts src/lib/objectInspiration/schemas.test.ts src/lib/objectInspiration/seed-helpers.test.ts",
     "test:prompts": "tsx --test src/lib/prompts/tools/replace-add-object.test.ts",
