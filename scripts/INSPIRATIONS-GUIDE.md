@@ -28,6 +28,7 @@ upsert** — re-running is always safe.
 | Add **search synonyms** (e.g. "kanepe" → Koltuk) | [Add search terms](#add-search-synonyms) |
 | Hide an item/category from the app | [Take content down](#take-an-item-or-category-down) |
 | Add room-photo inspirations to the **Explore tab** | [Seed explorer inspirations](#explorer-inspiration--tasks) |
+| Seed over **HTTP** instead of the CLI (admin panel / CI / Swagger) | [Using the HTTP routes](#using-the-http-routes-instead-of-the-cli) |
 
 ---
 
@@ -251,6 +252,92 @@ Unlike object items, explorer **preserves an existing prompt** on re-seed and
 only writes a prompt when the doc is new or its stored prompt was empty. To
 change an already-set prompt, clear it first (or edit the doc directly). There's
 no `--overwrite-prompts` flag here.
+
+---
+
+## Using the HTTP routes (instead of the CLI)
+
+The same seeding is exposed over HTTP. Use this when you can't run the CLI
+(e.g. seeding from an admin panel, a CI job, or Swagger) — the request bodies
+are the **exact same manifests** the CLI validates.
+
+**Auth:** every route below is guarded by `app.authenticate` — send a valid
+Firebase **ID token** as a Bearer header. (A `SWAGGER_API_KEY` via `x-api-key`
+only works for read-only GETs; mutating seed routes reject it.)
+
+```bash
+API_BASE="https://your-backend.example.com/api"   # or http://localhost:3000/api
+TOKEN="<firebase-id-token>"
+```
+
+### Object — bulk seed
+
+`POST /api/object-inspirations/bulk-seed` — body is `{ categories?, items? }`
+(at least one; categories ≤200, items ≤5000). Add `X-Seed-Mode: overwrite` to
+replace prompts (default preserves them).
+
+```bash
+curl -X POST "$API_BASE/object-inspirations/bulk-seed" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "X-Seed-Mode: overwrite" \           # optional — omit to preserve prompts
+  --data @scripts/manifests/object-inspirations.full.json
+```
+
+Response `200`:
+
+```json
+{
+  "summary": { "total": 802, "created": 0, "updated": 802, "skipped": 0, "failed": 0 },
+  "outcomes": [ { "kind": "item", "id": "sofas_1", "status": "updated", "ts": "…" } ]
+}
+```
+
+A `400` means row validation failed — the `issues` array names each bad row.
+Item-phase failures still return `200` with `summary.failed > 0`; inspect
+`outcomes[].reason` and re-submit (upserts are idempotent).
+
+### Object — update titles only
+
+`POST /api/object-inspirations/bulk-update-titles` — body `{ titleUpdates: [...] }`
+(≤5000). Patches `title` only; a missing id reports `failed` (never creates).
+
+```bash
+curl -X POST "$API_BASE/object-inspirations/bulk-update-titles" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "titleUpdates": [ { "id": "sofas_1", "title": { "en": "Sectional Sofa", "tr": "Köşe Koltuk", "de": "Ecksofa" } } ] }'
+```
+
+### Explorer — bulk seed
+
+`POST /api/explore/inspirations/bulk-seed` — body `{ items: [...] }` (1–2000).
+Any invalid row rejects the whole batch (`400`).
+
+```bash
+curl -X POST "$API_BASE/explore/inspirations/bulk-seed" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "items": [ { "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "imageUrl": "https://…", "imageWidth": 768, "imageHeight": 1376 } ] }'
+```
+
+> The explorer bulk body wraps the rows in `{ items: [...] }`, whereas the
+> **CLI manifest is a bare array** `[ … ]`. Same row shape, different envelope.
+
+### Explorer — single inspiration
+
+`POST /api/explore/inspirations` — body is one row (no envelope). Returns
+`{ id, created }`, with `201` + a `Location` header when newly created.
+
+```bash
+curl -X POST "$API_BASE/explore/inspirations" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "imageUrl": "https://…", "imageWidth": 768, "imageHeight": 1376 }'
+```
+
+> The HTTP routes have **no dry-run**. To validate without writing, run the CLI
+> with `--dry-run` against the same manifest first.
 
 ---
 
