@@ -62,20 +62,6 @@ async function cloudTasksAuthPlugin(fastify: FastifyInstance) {
   fastify.decorate(
     "verifyCloudTask",
     async function (request: FastifyRequest, reply: FastifyReply) {
-      // Async path env vars are optional while /sync testing is active.
-      // If this handler is invoked without them configured, fail fast —
-      // the internal endpoint is unreachable anyway without them.
-      if (!env.INTERNAL_TASK_AUDIENCE || !env.GCP_SERVICE_ACCOUNT_EMAIL) {
-        request.log.warn(
-          { event: "cloudtasks.auth.not_configured" },
-          "Cloud Tasks env vars not configured — async pipeline disabled",
-        );
-        reply.code(503).send({
-          error: "Service Unavailable",
-          message: "Async Cloud Tasks pipeline is not configured",
-        });
-        return;
-      }
       const expectedAudience = env.INTERNAL_TASK_AUDIENCE;
       const expectedEmail = env.GCP_SERVICE_ACCOUNT_EMAIL;
 

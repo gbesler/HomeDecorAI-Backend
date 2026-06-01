@@ -243,10 +243,10 @@ export function applyIpThrottleHeaders(
 
 // ─── Per-user concurrency limiter ─────────────────────────────────────────
 //
-// Caps in-flight HTTP requests per user (sync + async tool POSTs + retry).
-// Protects the Render worker pool from a single user holding 5+ /sync
-// requests open. Decrement runs in `onResponse` so handler exceptions still
-// release the slot.
+// Caps in-flight HTTP requests per user (async tool POSTs + retry).
+// Protects the Render worker pool from a single user holding many enqueue
+// requests open at once. Decrement runs in `onResponse` so handler
+// exceptions still release the slot.
 
 const inFlight: Map<string, number> = new Map();
 

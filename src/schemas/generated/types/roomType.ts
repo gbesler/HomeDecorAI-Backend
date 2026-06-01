@@ -11,7 +11,7 @@ export type RoomType = (typeof RoomType)[keyof typeof RoomType];
 export const RoomType = {
   livingRoom: "livingRoom",
   bedroom: "bedroom",
-  kidRoom: "kidRoom",
+  babyRoom: "babyRoom",
   kitchen: "kitchen",
   underStairSpace: "underStairSpace",
   diningRoom: "diningRoom",

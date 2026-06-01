@@ -33,16 +33,12 @@ export const envSchema = z.object({
     }),
   // GCP service account used for Cloud Tasks (enqueue auth + OIDC token
   // minting for the internal processor callback). Base64-encoded JSON, same
-  // shape as the Firebase key. The embedded `project_id` is the single
-  // source of truth for the Cloud Tasks queue project — no separate
-  // GCP_PROJECT_ID env var required. Optional while the /sync endpoints are
-  // the only code path in use; required before async is re-enabled.
+  // shape as the Firebase key. The embedded `project_id` is cross-checked
+  // against GCP_PROJECT_ID at boot (see the cross-field invariants below).
   GOOGLE_APPLICATION_CREDENTIALS: z
     .string()
     .min(1)
-    .optional()
     .transform((val) => {
-      if (val === undefined) return undefined;
       let parsed: Record<string, unknown>;
       try {
         const decoded = Buffer.from(val, "base64").toString("utf-8");
@@ -93,23 +89,21 @@ export const envSchema = z.object({
     .optional()
     .default("strict"),
   // ─── Async generation pipeline (Cloud Tasks + FCM) ───────────────────────
-  // TEMPORARY: These variables are optional while the /sync tool endpoints
-  // are used for manual testing. The async Cloud Tasks path throws at
-  // runtime if invoked without them — see `enqueueGenerationTask` and
-  // `verifyCloudTask`. Make them required again before re-enabling async.
-  // GCP_PROJECT_ID must match GOOGLE_APPLICATION_CREDENTIALS.project_id —
-  // enforced at the entry of requireAsyncEnv so a mismatch fails fast
-  // instead of producing opaque Cloud Tasks auth errors.
-  GCP_PROJECT_ID: z.string().min(1).optional(),
+  // The async Cloud Tasks path is the sole generation pipeline, so these
+  // variables are required at boot. GCP_PROJECT_ID must match
+  // GOOGLE_APPLICATION_CREDENTIALS.project_id — enforced in the cross-field
+  // invariants below so a mismatch fails fast at boot instead of producing
+  // opaque Cloud Tasks auth errors at the first enqueue.
+  GCP_PROJECT_ID: z.string().min(1),
   GCP_LOCATION: z.string().min(1).optional().default("us-central1"),
   GCP_QUEUE_NAME: z.string().min(1).optional().default("design-generation"),
-  GCP_SERVICE_ACCOUNT_EMAIL: z.string().email().optional(),
+  GCP_SERVICE_ACCOUNT_EMAIL: z.string().email(),
   // Public URL of this backend, used by Cloud Tasks as the HTTP target.
   // Example: https://homedecorai-backend-pv3k.onrender.com
-  BACKEND_PUBLIC_URL: z.string().url().optional(),
+  BACKEND_PUBLIC_URL: z.string().url(),
   // OIDC audience the internal endpoint validates tokens against.
   // Typically equals BACKEND_PUBLIC_URL + "/internal/process-generation".
-  INTERNAL_TASK_AUDIENCE: z.string().url().optional(),
+  INTERNAL_TASK_AUDIENCE: z.string().url(),
   // Hard kill-switch for FCM. Useful during staging/dev.
   FCM_ENABLED: z
     .enum(["true", "false"])
@@ -284,6 +278,23 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+// Fail fast at boot if GCP_PROJECT_ID disagrees with the project_id embedded
+// in GOOGLE_APPLICATION_CREDENTIALS. The Cloud Tasks client authenticates
+// against the credentials' project while queuePath() builds a resource name
+// for GCP_PROJECT_ID — a mismatch produces an opaque PERMISSION_DENIED at the
+// first enqueue that is hard to attribute back to the env config.
+{
+  const credsProjectId = env.GOOGLE_APPLICATION_CREDENTIALS["project_id"] as string;
+  if (credsProjectId !== env.GCP_PROJECT_ID) {
+    console.error(
+      `GCP_PROJECT_ID ("${env.GCP_PROJECT_ID}") does not match ` +
+        `GOOGLE_APPLICATION_CREDENTIALS.project_id ("${credsProjectId}"). ` +
+        `Align the two env vars and restart — queue writes will PERMISSION_DENIED otherwise.`,
+    );
+    process.exit(1);
+  }
+}
 
 // ─── Cross-field invariants ────────────────────────────────────────────────
 // Fail fast at boot if the operator pointed a role-specific model env at a

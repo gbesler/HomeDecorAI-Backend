@@ -223,11 +223,4 @@ export interface ProcessGenerationInput {
   generationId: string;
   /** Cloud Tasks retry count header, 0 for the first execution. */
   retryCount: number;
-  /**
-   * Skip the 30–60s loading-window pad applied before the `completed`
-   * transition. Set by the temporary sync HTTP handler, where the client
-   * waits on the HTTP response rather than a Firestore listener and the
-   * UX pad only wastes request time. Defaults to false (async path).
-   */
-  skipLoadingPad?: boolean;
 }
