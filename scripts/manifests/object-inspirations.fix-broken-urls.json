@@ -8,14 +8,14 @@
         "en": "Sofas",
         "tr": "Koltuklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Sectional_Sofa.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Sectional_Sofa.jpeg"
     },
     {
       "id": "armchairs",
@@ -25,14 +25,14 @@
         "en": "Armchairs",
         "tr": "Berjerler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Wingback_Chair.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Wingback_Chair.jpeg"
     },
     {
       "id": "accentChairs",
@@ -42,14 +42,14 @@
         "en": "Accent Chairs",
         "tr": "Aksesuar Sandalyeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Cane_Chair.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Cane_Chair.jpeg"
     },
     {
       "id": "bookshelves",
@@ -59,14 +59,14 @@
         "en": "Bookshelves",
         "tr": "Kitaplıklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Ladder_Bookshelf.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Ladder_Bookshelf.jpeg"
     },
     {
       "id": "diningChairs",
@@ -76,14 +76,14 @@
         "en": "Dining Chairs",
         "tr": "Yemek Sandalyeleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Wishbone_Chair.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Wishbone_Chair.jpeg"
     },
     {
       "id": "barStools",
@@ -93,14 +93,14 @@
         "en": "Bar Stools",
         "tr": "Bar Tabureleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Upholstered_Bar_Stool.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Upholstered_Bar_Stool.jpeg"
     },
     {
       "id": "beds",
@@ -110,14 +110,14 @@
         "en": "Beds",
         "tr": "Yataklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Upholstered_Bed.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Upholstered_Bed.jpeg"
     },
     {
       "id": "officeChairs",
@@ -127,14 +127,14 @@
         "en": "Office Chairs",
         "tr": "Ofis Sandalyeleri"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Ergonomic_Office_Chair.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Ergonomic_Office_Chair.jpeg"
     },
     {
       "id": "curtains",
@@ -144,14 +144,14 @@
         "en": "Curtains",
         "tr": "Perdeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Linen_Curtains.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Linen_Curtains.jpeg"
     },
     {
       "id": "pillows",
@@ -161,14 +161,14 @@
         "en": "Pillows",
         "tr": "Yastıklar"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Linen_Pillow.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Linen_Pillow.jpeg"
     },
     {
       "id": "throws",
@@ -178,14 +178,14 @@
         "en": "Throws",
         "tr": "Battaniyeler"
       },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Cashmere_Throw.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/01_Cashmere_Throw.jpeg"
     }
   ],
   "items": [
@@ -199,14 +199,14 @@
         "tr": "Bouclé Sofa"
       },
       "prompt": "A bouclé sofa suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/14_Bouclé_Sofa.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/14_Bouclé_Sofa.jpeg"
     },
     {
       "id": "armchairs_11",
@@ -218,14 +218,14 @@
         "tr": "Bouclé Armchair"
       },
       "prompt": "A bouclé armchair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/11_Bouclé_Armchair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/11_Bouclé_Armchair.jpeg"
     },
     {
       "id": "armchairs_15",
@@ -237,14 +237,14 @@
         "tr": "Bergère Chair"
       },
       "prompt": "A bergère chair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/15_Bergère_Chair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/15_Bergère_Chair.jpeg"
     },
     {
       "id": "accentChairs_2",
@@ -256,14 +256,14 @@
         "tr": "Bouclé Accent Chair"
       },
       "prompt": "A bouclé accent chair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/02_Bouclé_Accent_Chair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/02_Bouclé_Accent_Chair.jpeg"
     },
     {
       "id": "accentChairs_7",
@@ -275,14 +275,14 @@
         "tr": "Panton Chair"
       },
       "prompt": "A panton chair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/07_Pantone_Chair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/07_Pantone_Chair.jpeg"
     },
     {
       "id": "bookshelves_6",
@@ -294,14 +294,14 @@
         "tr": "Étagère"
       },
       "prompt": "A étagère suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Étagère.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/06_Étagère.jpeg"
     },
     {
       "id": "diningChairs_5",
@@ -313,14 +313,14 @@
         "tr": "Bouclé Dining Chair"
       },
       "prompt": "A bouclé dining chair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/05_Bouclé_Dining_Chair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/05_Bouclé_Dining_Chair.jpeg"
     },
     {
       "id": "barStools_11",
@@ -332,14 +332,14 @@
         "tr": "Bouclé Bar Stool"
       },
       "prompt": "A bouclé bar stool suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/11_Bouclé_Bar_Stool.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/11_Bouclé_Bar_Stool.jpeg"
     },
     {
       "id": "beds_9",
@@ -351,14 +351,14 @@
         "tr": "Bouclé Bed"
       },
       "prompt": "A bouclé bed suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/09_Bouclé_Bed.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/09_Bouclé_Bed.jpeg"
     },
     {
       "id": "officeChairs_6",
@@ -370,14 +370,14 @@
         "tr": "Bouclé Office Chair"
       },
       "prompt": "A bouclé office chair suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Bouclé_Office_Chair.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/06_Bouclé_Office_Chair.jpeg"
     },
     {
       "id": "curtains_9",
@@ -389,14 +389,14 @@
         "tr": "Bouclé Curtains"
       },
       "prompt": "A bouclé curtains suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/09_Bouclé_Curtains.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/09_Bouclé_Curtains.jpeg"
     },
     {
       "id": "curtains_12",
@@ -408,14 +408,14 @@
         "tr": "Café Curtains"
       },
       "prompt": "A café curtains suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/12_Café_Curtains.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/12_Café_Curtains.jpeg"
     },
     {
       "id": "pillows_3",
@@ -427,14 +427,14 @@
         "tr": "Bouclé Pillow"
       },
       "prompt": "A bouclé pillow suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/03_Bouclé_Pillow.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/03_Bouclé_Pillow.jpeg"
     },
     {
       "id": "throws_6",
@@ -446,14 +446,14 @@
         "tr": "Bouclé Throw"
       },
       "prompt": "A bouclé throw suitable for interior design placement.",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/06_Bouclé_Throw.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
       "toolTypes": [
         "replaceObject",
         "addObject"
-      ]
+      ],
+      "path": "in_app_images/06_Bouclé_Throw.jpeg"
     }
   ]
 }

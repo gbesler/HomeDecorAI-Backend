@@ -18,7 +18,7 @@ const validBaseRow = {
   toolType: "interiorDesign",
   designStyle: "modern",
   roomType: "livingRoom",
-  imageUrl: `https://${process.env.AWS_S3_BUCKET ?? "test-bucket"}.s3.${process.env.AWS_S3_REGION ?? "us-east-1"}.amazonaws.com/inspirations/livingroom-modern-001.jpg`,
+  path: "inspirations/livingroom-modern-001.jpg",
   imageWidth: 1280,
   imageHeight: 1707,
 };
@@ -171,11 +171,19 @@ describe("InspirationSeedInputSchema", () => {
     });
   });
 
-  describe("imageUrl host allow-list", () => {
-    it("rejects a non-https scheme (http)", () => {
+  describe("path validation (PathSchema)", () => {
+    it("accepts a bucket-relative path", () => {
       const result = InspirationSeedInputSchema.safeParse({
         ...validBaseRow,
-        imageUrl: "http://example.com/x.jpg",
+        path: "inspirations/livingroom-modern-001.jpg",
+      });
+      assert.equal(result.success, true);
+    });
+
+    it("rejects a full https URL (scheme not allowed in a path)", () => {
+      const result = InspirationSeedInputSchema.safeParse({
+        ...validBaseRow,
+        path: "https://cdn.example.com/inspirations/x.jpg",
       });
       assert.equal(result.success, false);
     });
@@ -183,43 +191,25 @@ describe("InspirationSeedInputSchema", () => {
     it("rejects a data: URI", () => {
       const result = InspirationSeedInputSchema.safeParse({
         ...validBaseRow,
-        imageUrl: "data:image/jpeg;base64,AAAA",
+        path: "data:image/jpeg;base64,AAAA",
       });
       assert.equal(result.success, false);
     });
 
-    it("rejects a javascript: scheme", () => {
+    it("rejects a leading slash", () => {
       const result = InspirationSeedInputSchema.safeParse({
         ...validBaseRow,
-        imageUrl: "javascript:alert(1)",
+        path: "/inspirations/x.jpg",
       });
       assert.equal(result.success, false);
     });
 
-    it("rejects an unrelated https host", () => {
+    it("rejects a '..' traversal segment", () => {
       const result = InspirationSeedInputSchema.safeParse({
         ...validBaseRow,
-        imageUrl: "https://attacker.example.com/img.jpg",
+        path: "inspirations/../../etc/passwd",
       });
       assert.equal(result.success, false);
-    });
-
-    it("rejects a non-default port on an allowed host", () => {
-      const bucket = process.env.AWS_S3_BUCKET ?? "test-bucket";
-      const result = InspirationSeedInputSchema.safeParse({
-        ...validBaseRow,
-        imageUrl: `https://${bucket}.s3.amazonaws.com:9000/img.jpg`,
-      });
-      assert.equal(result.success, false);
-    });
-
-    it("accepts a trailing-dot FQDN on an allowed host (normalized)", () => {
-      const bucket = process.env.AWS_S3_BUCKET ?? "test-bucket";
-      const result = InspirationSeedInputSchema.safeParse({
-        ...validBaseRow,
-        imageUrl: `https://${bucket}.s3.amazonaws.com./img.jpg`,
-      });
-      assert.equal(result.success, true);
     });
   });
 });

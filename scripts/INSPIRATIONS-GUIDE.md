@@ -34,24 +34,24 @@ upsert** — re-running is always safe.
 
 ## One-time setup
 
-You need a Firebase **service account** JSON and the image-host env vars set:
+You need a Firebase **service account** JSON. The image-host env vars are only
+needed for the backend's read-time URL composition (CLI seeding validates the
+relative `path` without them):
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/abs/path/to/prod-sa.json
 export AWS_S3_BUCKET=home-interior-ai-app
 export AWS_S3_REGION=us-east-1
-export AWS_CLOUDFRONT_HOST=cdn.yourdomain.com   # if you serve images via CloudFront
+export AWS_CLOUDFRONT_HOST=cdn.yourdomain.com   # base used to compose full URLs at read time
 ```
 
-Why the AWS vars? Every `imageUrl` / `heroImageUrl` is checked against an
-**allow-list** built from these. A URL on any other host is rejected. Allowed
-forms:
-
-```
-https://<AWS_CLOUDFRONT_HOST>/...
-https://<bucket>.s3.amazonaws.com/...
-https://<bucket>.s3.<region>.amazonaws.com/...
-```
+**Docs store a relative `path`, not a full URL.** Each inspiration row carries a
+bucket-relative `path` (folder + filename, e.g. `in_app_images/01_Sofa.jpeg`) —
+no scheme, no host. The full URL is composed at read time from a trusted base
+(iOS uses its cached CloudFront host; the backend AI pipeline uses
+`AWS_CLOUDFRONT_HOST` / S3). This keeps rows infra-agnostic — the bucket or CDN
+can change without rewriting every doc. `path` is validated at the edge: no
+scheme, no host, no leading slash, no `..` traversal.
 
 > The seed CLI writes straight to Firestore with the service account — no login,
 > no token, no admin panel. (The HTTP endpoints exist too and just need a normal
@@ -79,7 +79,8 @@ Both keys are optional — send only what you're changing.
 
 ### Add a new category with its items
 
-1. Upload the images so their URLs resolve on the allow-listed host.
+1. Upload the images to the bucket; note each one's relative path (the
+   folder + filename, e.g. `in_app_images/01_Arc_Floor_Lamp.jpeg`).
 2. Write a manifest with the category **and** its items (items reference the
    category by `categoryId`):
 
@@ -91,7 +92,7 @@ Both keys are optional — send only what you're changing.
       "order": 20,
       "active": true,
       "title": { "en": "Floor Lamps", "tr": "Yer Lambaları" /* +optional langs */ },
-      "heroImageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Arc_Floor_Lamp.jpeg",
+      "path": "in_app_images/01_Arc_Floor_Lamp.jpeg",
       "heroImageWidth": 1024,
       "heroImageHeight": 1024,
       "heroImageMime": "image/jpeg",
@@ -106,7 +107,7 @@ Both keys are optional — send only what you're changing.
       "active": true,
       "title": { "en": "Arc Floor Lamp", "tr": "Yay Lambader" },
       "prompt": "A floor lamp with a long arcing arm and a graceful curved silhouette",
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/01_Arc_Floor_Lamp.jpeg",
+      "path": "in_app_images/01_Arc_Floor_Lamp.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
@@ -211,7 +212,7 @@ To bring it back, re-seed with `active: true`.
 Explorer uses a **flat array** manifest (not `{categories, items}`):
 
 ```json
-[ { "id": "…", "toolType": "…", "designStyle": "…", "imageUrl": "…", … } ]
+[ { "id": "…", "toolType": "…", "designStyle": "…", "path": "…", … } ]
 ```
 
 ### Seed explorer inspirations (bulk)
@@ -228,7 +229,7 @@ Explorer uses a **flat array** manifest (not `{categories, items}`):
     "roomType": "bathroom",            // optional axis per tool
     "tags": ["bathroom", "coastal"],   // optional, ≤20
     "featured": false,
-    "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_coastal001.jpeg",
+    "path": "in_app_images/bathroom_coastal001.jpeg",
     "imageWidth": 768,
     "imageHeight": 1376,
     "imageMime": "image/jpeg",
@@ -318,7 +319,7 @@ Any invalid row rejects the whole batch (`400`).
 curl -X POST "$API_BASE/explore/inspirations/bulk-seed" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{ "items": [ { "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "imageUrl": "https://…", "imageWidth": 768, "imageHeight": 1376 } ] }'
+  -d '{ "items": [ { "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "path": "in_app_images/bathroom_coastal001.jpeg", "imageWidth": 768, "imageHeight": 1376 } ] }'
 ```
 
 > The explorer bulk body wraps the rows in `{ items: [...] }`, whereas the
@@ -333,7 +334,7 @@ curl -X POST "$API_BASE/explore/inspirations/bulk-seed" \
 curl -X POST "$API_BASE/explore/inspirations" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{ "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "imageUrl": "https://…", "imageWidth": 768, "imageHeight": 1376 }'
+  -d '{ "id": "interior_bathroom_coastal001", "toolType": "interiorDesign", "designStyle": "coastal", "path": "in_app_images/bathroom_coastal001.jpeg", "imageWidth": 768, "imageHeight": 1376 }'
 ```
 
 > The HTTP routes have **no dry-run**. To validate without writing, run the CLI
@@ -375,8 +376,12 @@ tsx scripts/seed-explore-inspirations.ts \
 
 ## Gotchas
 
-- **`host not allowed`** → your `imageUrl` host isn't in the allow-list. Check
-  `AWS_CLOUDFRONT_HOST` / `AWS_S3_BUCKET` / `AWS_S3_REGION`.
+- **`path must be a bucket-relative storage path`** → you passed a full URL,
+  a leading-slash path, or a `..` traversal. Use just `folder/name.ext`
+  (e.g. `in_app_images/foo.jpeg`) — no scheme, no host.
+- **Images don't load in the app** → the path is correct but the client/backend
+  base isn't configured. Check `AWS_CLOUDFRONT_HOST` (the base the full URL is
+  composed from at read time).
 - **`references unknown categoryId`** (object) → the category isn't in your
   manifest and doesn't exist in Firestore yet. Seed the category first, or
   include it in the same file.

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ID_PATTERN } from "../controller-helpers.js";
 import { env } from "../env.js";
+import { PathSchema } from "../storage/inspiration-path.js";
 import {
   DESIGN_STYLE_VALUES,
   EXPLORE_DEFAULT_LIMIT,
@@ -76,13 +77,6 @@ export const RoomTypeSchema = z.enum([...ROOM_TYPE_VALUES]);
 export const DesignStyleSchema = z.enum([...DESIGN_STYLE_VALUES]);
 export const ToolTypeSchema = z.enum([...TOOL_TYPE_VALUES]);
 
-/** A trimmed, sane URL accepted both for source images and CDN-fronted ones. */
-const ImageUrlSchema = z
-  .string()
-  .trim()
-  .url()
-  .max(2048);
-
 // MARK: - Envelope seed (iOS plan 2026-05-12-001)
 //
 // Body schema for the admin seed endpoint that writes the new `InspirationDoc`
@@ -116,10 +110,7 @@ export const InspirationSeedInputSchema = z
     colorPaletteId: TaxonomyStringSchema,
     tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
     featured: z.boolean().optional(),
-    imageUrl: ImageUrlSchema.refine(isAllowedInspirationUrl, {
-      message:
-        "imageUrl host is not allowed. Upload the image to the configured S3 bucket (or its CloudFront distribution) first.",
-    }),
+    path: PathSchema,
     imageWidth: z.number().int().positive().max(20_000),
     imageHeight: z.number().int().positive().max(20_000),
     imageMime: z

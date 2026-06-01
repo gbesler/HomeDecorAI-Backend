@@ -11,10 +11,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_coastal001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_coastal001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_contemporary001",
@@ -27,10 +27,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_contemporary001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_japandi001",
@@ -43,10 +43,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_japandi001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_luxury001",
@@ -59,10 +59,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_luxury001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_luxury002",
@@ -75,10 +75,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_luxury002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_luxury002.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_minimalist001",
@@ -91,10 +91,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_minimalist001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_minimalist002",
@@ -107,10 +107,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_minimalist002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_minimalist002.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_modern001",
@@ -123,10 +123,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_modern001.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_modern002",
@@ -139,10 +139,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_modern002.jpeg"
     },
     {
       "id": "interior_bathroom_bathroom_scandinavian001",
@@ -155,10 +155,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bathroom_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bathroom_scandinavian001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroombohemian001",
@@ -171,10 +171,10 @@
         "bohemian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroombohemian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroombohemian001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomcoastal001",
@@ -187,10 +187,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcoastal001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomcoastal001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomcozy001",
@@ -203,10 +203,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcozy001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomcozy001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomcozy002",
@@ -219,10 +219,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomcozy002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomcozy002.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomjapandi001",
@@ -235,10 +235,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomjapandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomjapandi001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomjapandi002",
@@ -251,10 +251,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomjapandi002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomjapandi002.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomluxury001",
@@ -267,10 +267,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomluxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomluxury001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomminimalist001",
@@ -283,10 +283,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomminimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomminimalist001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroommodern001",
@@ -299,10 +299,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroommodern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroommodern001.jpeg"
     },
     {
       "id": "interior_bedroom_bedroomscandinavian001",
@@ -315,10 +315,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bedroomscandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bedroomscandinavian001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_contemporary001",
@@ -331,10 +331,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_contemporary001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_farmhouse001",
@@ -347,10 +347,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_farmhouse001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_farmhouse001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_japandi001",
@@ -363,10 +363,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_japandi001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_luxury001",
@@ -379,10 +379,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_luxury001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_midcentury001",
@@ -395,10 +395,10 @@
         "midCentury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_midcentury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_midcentury001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_midcentury002",
@@ -411,10 +411,10 @@
         "midCentury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_midcentury002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_midcentury002.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_minimalist001",
@@ -427,10 +427,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_minimalist001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_modern001",
@@ -443,10 +443,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_modern001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_scandinavian001",
@@ -459,10 +459,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_scandinavian001.jpeg"
     },
     {
       "id": "interior_diningRoom_diningroom_traditional001",
@@ -475,10 +475,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/diningroom_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/diningroom_traditional001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_coastal001",
@@ -491,10 +491,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_coastal001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_coastal001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_contemporary001",
@@ -507,10 +507,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_contemporary001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_farmhouse001",
@@ -523,10 +523,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_farmhouse001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_farmhouse001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_japandi001",
@@ -539,10 +539,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_japandi001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_luxury001",
@@ -555,10 +555,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_luxury001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_minimalist001",
@@ -571,10 +571,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_minimalist001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_modern001",
@@ -587,10 +587,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_modern001.jpeg"
     },
     {
       "id": "interior_entryway_entryway_modern002",
@@ -603,10 +603,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_modern002.jpeg"
     },
     {
       "id": "interior_entryway_entryway_scandinavian00",
@@ -619,10 +619,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_scandinavian00.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_scandinavian00.jpeg"
     },
     {
       "id": "interior_entryway_entryway_traditional001",
@@ -635,10 +635,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/entryway_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/entryway_traditional001.jpeg"
     },
     {
       "id": "interior_gamingRoom_10_gamingroom_japandi001",
@@ -651,10 +651,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_gamingroom_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_gamingroom_japandi001.jpeg"
     },
     {
       "id": "interior_gamingRoom_1_gamingroom_modern001",
@@ -667,10 +667,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_gamingroom_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_gamingroom_modern001.jpeg"
     },
     {
       "id": "interior_gamingRoom_2_gamingroom_modern002",
@@ -683,10 +683,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_gamingroom_modern002.jpeg",
       "imageWidth": 1536,
       "imageHeight": 2752,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_gamingroom_modern002.jpeg"
     },
     {
       "id": "interior_gamingRoom_3_gamingroom_modern003",
@@ -699,10 +699,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_gamingroom_modern003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_gamingroom_modern003.jpeg"
     },
     {
       "id": "interior_gamingRoom_4_gamingroom_industrial001",
@@ -715,10 +715,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_gamingroom_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_gamingroom_industrial001.jpeg"
     },
     {
       "id": "interior_gamingRoom_5_gamingroom_industrial002",
@@ -731,10 +731,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_gamingroom_industrial002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_gamingroom_industrial002.jpeg"
     },
     {
       "id": "interior_gamingRoom_6_gamingroom_minimalist001",
@@ -747,10 +747,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_gamingroom_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_gamingroom_minimalist001.jpeg"
     },
     {
       "id": "interior_gamingRoom_7_gamingroom_contemporary",
@@ -763,10 +763,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_gamingroom_contemporary.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_gamingroom_contemporary.jpeg"
     },
     {
       "id": "interior_gamingRoom_8_gamingroom_cozy001",
@@ -779,10 +779,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_gamingroom_cozy001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_gamingroom_cozy001.jpeg"
     },
     {
       "id": "interior_gamingRoom_9_gamingroom_luxury001",
@@ -795,10 +795,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_gamingroom_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_gamingroom_luxury001.jpeg"
     },
     {
       "id": "interior_homeOffice_10_homeoffice_bohemian001",
@@ -811,10 +811,10 @@
         "bohemian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_homeoffice_bohemian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_homeoffice_bohemian001.jpeg"
     },
     {
       "id": "interior_homeOffice_1_homeoffice_modern001",
@@ -827,10 +827,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_homeoffice_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_homeoffice_modern001.jpeg"
     },
     {
       "id": "interior_homeOffice_2_homeoffice_modern002",
@@ -843,10 +843,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_homeoffice_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_homeoffice_modern002.jpeg"
     },
     {
       "id": "interior_homeOffice_3_homeoffice_scandinavian001",
@@ -859,10 +859,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_homeoffice_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_homeoffice_scandinavian001.jpeg"
     },
     {
       "id": "interior_homeOffice_4_homeoffice_scandinavian002",
@@ -875,10 +875,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_homeoffice_scandinavian002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_homeoffice_scandinavian002.jpeg"
     },
     {
       "id": "interior_homeOffice_5_homeoffice_minimalist001",
@@ -891,10 +891,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_homeoffice_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_homeoffice_minimalist001.jpeg"
     },
     {
       "id": "interior_homeOffice_6_homeoffice_minimalist002",
@@ -907,10 +907,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_homeoffice_minimalist002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_homeoffice_minimalist002.jpeg"
     },
     {
       "id": "interior_homeOffice_7_homeoffice_japandi001",
@@ -923,10 +923,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_homeoffice_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_homeoffice_japandi001.jpeg"
     },
     {
       "id": "interior_homeOffice_8_homeoffice_cozy001",
@@ -939,10 +939,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_homeoffice_cozy001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_homeoffice_cozy001.jpeg"
     },
     {
       "id": "interior_homeOffice_9_homeoffice_industrial001",
@@ -955,10 +955,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_homeoffice_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_homeoffice_industrial001.jpeg"
     },
     {
       "id": "interior_kitchen_10_kitchen_luxury001",
@@ -971,10 +971,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_kitchen_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_kitchen_luxury001.jpeg"
     },
     {
       "id": "interior_kitchen_1_kitchen_modern001",
@@ -987,10 +987,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_kitchen_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_kitchen_modern001.jpeg"
     },
     {
       "id": "interior_kitchen_2_kitchen_modern002",
@@ -1003,10 +1003,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_kitchen_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_kitchen_modern002.jpeg"
     },
     {
       "id": "interior_kitchen_3_kitchen_farmhouse001",
@@ -1019,10 +1019,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_kitchen_farmhouse001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_kitchen_farmhouse001.jpeg"
     },
     {
       "id": "interior_kitchen_4_kitchen_farmhouse002",
@@ -1035,10 +1035,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_kitchen_farmhouse002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_kitchen_farmhouse002.jpeg"
     },
     {
       "id": "interior_kitchen_5_kitchen_scandinavian001",
@@ -1051,10 +1051,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_kitchen_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_kitchen_scandinavian001.jpeg"
     },
     {
       "id": "interior_kitchen_6_kitchen_industrial001",
@@ -1067,10 +1067,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_kitchen_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_kitchen_industrial001.jpeg"
     },
     {
       "id": "interior_kitchen_7_kitchen_minimalist001",
@@ -1083,10 +1083,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_kitchen_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_kitchen_minimalist001.jpeg"
     },
     {
       "id": "interior_kitchen_8_kitchen_contemporary001",
@@ -1099,10 +1099,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_kitchen_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_kitchen_contemporary001.jpeg"
     },
     {
       "id": "interior_kitchen_9_kitchen_rustic001",
@@ -1115,10 +1115,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_kitchen_rustic001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_kitchen_rustic001.jpeg"
     },
     {
       "id": "interior_livingRoom_Japandi",
@@ -1131,10 +1131,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japandi.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Japandi.jpeg"
     },
     {
       "id": "interior_livingRoom_Scandinavian",
@@ -1147,10 +1147,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Scandinavian.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Scandinavian.jpeg"
     },
     {
       "id": "interior_livingRoom_bohemian",
@@ -1163,10 +1163,10 @@
         "bohemian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/bohemian.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/bohemian.jpeg"
     },
     {
       "id": "interior_livingRoom_coastal",
@@ -1179,10 +1179,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/coastal.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/coastal.jpeg"
     },
     {
       "id": "interior_livingRoom_contemporary",
@@ -1195,10 +1195,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/contemporary.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/contemporary.jpeg"
     },
     {
       "id": "interior_livingRoom_cozy",
@@ -1211,10 +1211,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/cozy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/cozy.jpeg"
     },
     {
       "id": "interior_livingRoom_luxury",
@@ -1227,10 +1227,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/luxury.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/luxury.jpeg"
     },
     {
       "id": "interior_livingRoom_minimalist",
@@ -1243,10 +1243,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/minimalist.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/minimalist.jpeg"
     },
     {
       "id": "interior_livingRoom_modern_01",
@@ -1259,10 +1259,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/modern_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/modern_01.jpeg"
     },
     {
       "id": "interior_livingRoom_modern_02",
@@ -1275,10 +1275,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/modern_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/modern_02.jpeg"
     },
     {
       "id": "interior_office_10_office_traditional001",
@@ -1291,10 +1291,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_office_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_office_traditional001.jpeg"
     },
     {
       "id": "interior_office_1_office_modern001",
@@ -1307,10 +1307,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_office_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_office_modern001.jpeg"
     },
     {
       "id": "interior_office_2_office_modern002",
@@ -1323,10 +1323,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_office_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_office_modern002.jpeg"
     },
     {
       "id": "interior_office_3_office_industrial001",
@@ -1339,10 +1339,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_office_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_office_industrial001.jpeg"
     },
     {
       "id": "interior_office_4_office_industrial002",
@@ -1355,10 +1355,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_office_industrial002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_office_industrial002.jpeg"
     },
     {
       "id": "interior_office_5_office_minimalist001",
@@ -1371,10 +1371,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_office_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_office_minimalist001.jpeg"
     },
     {
       "id": "interior_office_6_office_contemporary001",
@@ -1387,10 +1387,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_office_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_office_contemporary001.jpeg"
     },
     {
       "id": "interior_office_7_office_scandinavian001",
@@ -1403,10 +1403,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_office_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_office_scandinavian001.jpeg"
     },
     {
       "id": "interior_office_8_office_luxury001",
@@ -1419,10 +1419,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_office_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_office_luxury001.jpeg"
     },
     {
       "id": "interior_office_9_office_midcentury001",
@@ -1435,10 +1435,10 @@
         "midCentury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_office_midcentury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_office_midcentury001.jpeg"
     },
     {
       "id": "interior_stairway_10_stairway_artdeco001",
@@ -1451,10 +1451,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_stairway_artdeco001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_stairway_artdeco001.jpeg"
     },
     {
       "id": "interior_stairway_1_stairway_modern001",
@@ -1467,10 +1467,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_stairway_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_stairway_modern001.jpeg"
     },
     {
       "id": "interior_stairway_2_stairway_modern002",
@@ -1483,10 +1483,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_stairway_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_stairway_modern002.jpeg"
     },
     {
       "id": "interior_stairway_3_stairway_luxury001",
@@ -1499,10 +1499,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_stairway_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_stairway_luxury001.jpeg"
     },
     {
       "id": "interior_stairway_4_stairway_luxury002",
@@ -1515,10 +1515,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_stairway_luxury002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_stairway_luxury002.jpeg"
     },
     {
       "id": "interior_stairway_5_stairway_contemporary001",
@@ -1531,10 +1531,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_stairway_contemporary001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_stairway_contemporary001.jpeg"
     },
     {
       "id": "interior_stairway_6_stairway_minimalist001",
@@ -1547,10 +1547,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_stairway_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_stairway_minimalist001.jpeg"
     },
     {
       "id": "interior_stairway_7_stairway_traditional001",
@@ -1563,10 +1563,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_stairway_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_stairway_traditional001.jpeg"
     },
     {
       "id": "interior_stairway_8_stairway_industrial001",
@@ -1579,10 +1579,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_stairway_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_stairway_industrial001.jpeg"
     },
     {
       "id": "interior_stairway_9_stairway_scandinavian001",
@@ -1595,10 +1595,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_stairway_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_stairway_scandinavian001.jpeg"
     },
     {
       "id": "interior_studyRoom_10_studyroom_industrial001",
@@ -1611,10 +1611,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_studyroom_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_studyroom_industrial001.jpeg"
     },
     {
       "id": "interior_studyRoom_1_studyroom_traditional001",
@@ -1627,10 +1627,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_studyroom_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_studyroom_traditional001.jpeg"
     },
     {
       "id": "interior_studyRoom_3_studyroom_modern001",
@@ -1643,10 +1643,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_studyroom_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_studyroom_modern001.jpeg"
     },
     {
       "id": "interior_studyRoom_4_studyroom_artdeco001",
@@ -1659,10 +1659,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_studyroom_artdeco001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_studyroom_artdeco001.jpeg"
     },
     {
       "id": "interior_studyRoom_5_studyroom_midcentury001",
@@ -1675,10 +1675,10 @@
         "midCentury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_studyroom_midcentury001.jpeg",
       "imageWidth": 1536,
       "imageHeight": 2752,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_studyroom_midcentury001.jpeg"
     },
     {
       "id": "interior_studyRoom_6_studyroom_minimalist001",
@@ -1691,10 +1691,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_studyroom_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_studyroom_minimalist001.jpeg"
     },
     {
       "id": "interior_studyRoom_7_studyroom_scandinavian001",
@@ -1707,10 +1707,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_studyroom_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_studyroom_scandinavian001.jpeg"
     },
     {
       "id": "interior_studyRoom_8_studyroom_luxury001",
@@ -1723,10 +1723,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_studyroom_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_studyroom_luxury001.jpeg"
     },
     {
       "id": "interior_studyRoom_9_studyroom_cozy001",
@@ -1739,10 +1739,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_studyroom_cozy001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_studyroom_cozy001.jpeg"
     },
     {
       "id": "interior_underStairSpace_10_understair_japandi001",
@@ -1755,10 +1755,10 @@
         "japandi"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_understair_japandi001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_understair_japandi001.jpeg"
     },
     {
       "id": "interior_underStairSpace_1_understair_cozy001",
@@ -1771,10 +1771,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_understair_cozy001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_understair_cozy001.jpeg"
     },
     {
       "id": "interior_underStairSpace_2_understair_cozy002",
@@ -1787,10 +1787,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_understair_cozy002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_understair_cozy002.jpeg"
     },
     {
       "id": "interior_underStairSpace_3_understair_modern001",
@@ -1803,10 +1803,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_understair_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_understair_modern001.jpeg"
     },
     {
       "id": "interior_underStairSpace_4_understair_modern002",
@@ -1819,10 +1819,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_understair_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_understair_modern002.jpeg"
     },
     {
       "id": "interior_underStairSpace_5_understair_minimalist001",
@@ -1835,10 +1835,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_understair_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_understair_minimalist001.jpeg"
     },
     {
       "id": "interior_underStairSpace_6_understair_scandinavian",
@@ -1851,10 +1851,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_understair_scandinavian.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_understair_scandinavian.jpeg"
     },
     {
       "id": "interior_underStairSpace_7_understair_farmhouse001",
@@ -1867,10 +1867,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_understair_farmhouse001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_understair_farmhouse001.jpeg"
     },
     {
       "id": "interior_underStairSpace_8_understair_industrial001",
@@ -1883,10 +1883,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_understair_industrial001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_understair_industrial001.jpeg"
     },
     {
       "id": "interior_underStairSpace_9_understair_bohemian001",
@@ -1899,10 +1899,10 @@
         "bohemian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_understair_bohemian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_understair_bohemian001.jpeg"
     },
     {
       "id": "exterior_apartment_10_apartment_artdeco_001",
@@ -1915,10 +1915,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_apartment_artdeco_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_apartment_artdeco_001.jpeg"
     },
     {
       "id": "exterior_apartment_1_apartment_modern_001",
@@ -1931,10 +1931,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_apartment_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_apartment_modern_001.jpeg"
     },
     {
       "id": "exterior_apartment_2_apartment_modern_002",
@@ -1947,10 +1947,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_apartment_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_apartment_modern_002.jpeg"
     },
     {
       "id": "exterior_apartment_3_apartment_modern_003",
@@ -1963,10 +1963,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_apartment_modern_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_apartment_modern_003.jpeg"
     },
     {
       "id": "exterior_apartment_4_apartment_contemporary_001",
@@ -1979,10 +1979,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_apartment_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_apartment_contemporary_001.jpeg"
     },
     {
       "id": "exterior_apartment_5_apartment_contemporary_002",
@@ -1995,10 +1995,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_apartment_contemporary_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_apartment_contemporary_002.jpeg"
     },
     {
       "id": "exterior_apartment_6_apartment_minimalist_001",
@@ -2011,10 +2011,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_apartment_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_apartment_minimalist_001.jpeg"
     },
     {
       "id": "exterior_apartment_7_apartment_minimalist_002",
@@ -2027,10 +2027,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_apartment_minimalist_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_apartment_minimalist_002.jpeg"
     },
     {
       "id": "exterior_apartment_8_apartment_industrial_001",
@@ -2043,10 +2043,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_apartment_industrial_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_apartment_industrial_001.jpeg"
     },
     {
       "id": "exterior_apartment_9_apartment_luxury_001",
@@ -2059,10 +2059,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_apartment_luxury_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_apartment_luxury_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_coastal_001",
@@ -2075,10 +2075,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_coastal_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_coastal_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_coastal_002",
@@ -2091,10 +2091,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_coastal_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_coastal_002.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_cozy_001",
@@ -2107,10 +2107,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_cozy_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_cozy_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_minimalist_001",
@@ -2123,10 +2123,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_minimalist_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_modern_001",
@@ -2139,10 +2139,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_modern_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_modern_002",
@@ -2155,10 +2155,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_modern_002.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_rustic_001",
@@ -2171,10 +2171,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_rustic_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_scandinavian_001",
@@ -2187,10 +2187,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_scandinavian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_scandinavian_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_tropical_001",
@@ -2203,10 +2203,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_tropical_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_tropical_001.jpeg"
     },
     {
       "id": "exterior_bungalow_exterior_bungalow_tropical_002",
@@ -2219,10 +2219,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_bungalow_tropical_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_bungalow_tropical_002.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_cozy_001",
@@ -2235,10 +2235,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_cozy_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_cozy_001.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_cozy_002",
@@ -2251,10 +2251,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_cozy_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_cozy_002.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_minimalist_001",
@@ -2267,10 +2267,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_minimalist_001.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_modern_001",
@@ -2283,10 +2283,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_modern_001.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_rustic_001",
@@ -2299,10 +2299,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_rustic_001.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_rustic_002",
@@ -2315,10 +2315,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_rustic_002.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_rustic_003",
@@ -2331,10 +2331,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_rustic_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_rustic_003.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_scandinavian_001",
@@ -2347,10 +2347,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_scandinavian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_scandinavian_001.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_scandinavian_002",
@@ -2363,10 +2363,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_scandinavian_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_scandinavian_002.jpeg"
     },
     {
       "id": "exterior_cabin_exterior_cabin_traditional_001",
@@ -2379,10 +2379,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/exterior_cabin_traditional_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/exterior_cabin_traditional_001.jpeg"
     },
     {
       "id": "exterior_commercial_10_exterior_commercial_luxury_001",
@@ -2395,10 +2395,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_commercial_luxury_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_commercial_luxury_001.jpeg"
     },
     {
       "id": "exterior_commercial_1_exterior_commercial_modern_001",
@@ -2411,10 +2411,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_commercial_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_commercial_modern_001.jpeg"
     },
     {
       "id": "exterior_commercial_2_exterior_commercial_modern_002",
@@ -2427,10 +2427,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_commercial_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_commercial_modern_002.jpeg"
     },
     {
       "id": "exterior_commercial_3_exterior_commercial_modern_003",
@@ -2443,10 +2443,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_commercial_modern_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_commercial_modern_003.jpeg"
     },
     {
       "id": "exterior_commercial_4_exterior_commercial_industrial_001",
@@ -2459,10 +2459,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_commercial_industrial_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_commercial_industrial_001.jpeg"
     },
     {
       "id": "exterior_commercial_5_exterior_commercial_industrial_002",
@@ -2475,10 +2475,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_commercial_industrial_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_commercial_industrial_002.jpeg"
     },
     {
       "id": "exterior_commercial_6_exterior_commercial_contemporary_001",
@@ -2491,10 +2491,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_commercial_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_commercial_contemporary_001.jpeg"
     },
     {
       "id": "exterior_commercial_7_exterior_commercial_contemporary_002",
@@ -2507,10 +2507,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_commercial_contemporary_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_commercial_contemporary_002.jpeg"
     },
     {
       "id": "exterior_commercial_8_exterior_commercial_minimalist_001",
@@ -2523,10 +2523,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_commercial_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_commercial_minimalist_001.jpeg"
     },
     {
       "id": "exterior_commercial_9_exterior_commercial_minimalist_002",
@@ -2539,10 +2539,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_commercial_minimalist_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_commercial_minimalist_002.jpeg"
     },
     {
       "id": "exterior_cottage_10_exterior_cottage_bohemian_001",
@@ -2555,10 +2555,10 @@
         "bohemian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_cottage_bohemian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_cottage_bohemian_001.jpeg"
     },
     {
       "id": "exterior_cottage_1_exterior_cottage_rustic_001",
@@ -2571,10 +2571,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_cottage_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_cottage_rustic_001.jpeg"
     },
     {
       "id": "exterior_cottage_2_exterior_cottage_rustic_002",
@@ -2587,10 +2587,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_cottage_rustic_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_cottage_rustic_002.jpeg"
     },
     {
       "id": "exterior_cottage_3_exterior_cottage_cozy_001",
@@ -2603,10 +2603,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_cottage_cozy_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_cottage_cozy_001.jpeg"
     },
     {
       "id": "exterior_cottage_4_exterior_cottage_cozy_002",
@@ -2619,10 +2619,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_cottage_cozy_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_cottage_cozy_002.jpeg"
     },
     {
       "id": "exterior_cottage_5_exterior_cottage_farmhouse_001",
@@ -2635,10 +2635,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_cottage_farmhouse_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_cottage_farmhouse_001.jpeg"
     },
     {
       "id": "exterior_cottage_6_exterior_cottage_farmhouse_002",
@@ -2651,10 +2651,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_cottage_farmhouse_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_cottage_farmhouse_002.jpeg"
     },
     {
       "id": "exterior_cottage_7_exterior_cottage_traditional_001",
@@ -2667,10 +2667,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_cottage_traditional_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_cottage_traditional_001.jpeg"
     },
     {
       "id": "exterior_cottage_8_exterior_cottage_scandinavian_001",
@@ -2683,10 +2683,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_cottage_scandinavian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_cottage_scandinavian_001.jpeg"
     },
     {
       "id": "exterior_cottage_9_exterior_cottage_coastal_001",
@@ -2699,10 +2699,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_cottage_coastal_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_cottage_coastal_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_10_exterior_farmhouse_coastal_001",
@@ -2715,10 +2715,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_farmhouse_coastal_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_farmhouse_coastal_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_1_exterior_farmhouse_farmhouse_001",
@@ -2731,10 +2731,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_farmhouse_farmhouse_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_farmhouse_farmhouse_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_2_exterior_farmhouse_farmhouse_002",
@@ -2747,10 +2747,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_farmhouse_farmhouse_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_farmhouse_farmhouse_002.jpeg"
     },
     {
       "id": "exterior_farmhouse_3_exterior_farmhouse_farmhouse_003",
@@ -2763,10 +2763,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_farmhouse_farmhouse_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_farmhouse_farmhouse_003.jpeg"
     },
     {
       "id": "exterior_farmhouse_4_exterior_farmhouse_rustic_001",
@@ -2779,10 +2779,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_farmhouse_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_farmhouse_rustic_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_5_exterior_farmhouse_rustic_002",
@@ -2795,10 +2795,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_farmhouse_rustic_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_farmhouse_rustic_002.jpeg"
     },
     {
       "id": "exterior_farmhouse_6_exterior_farmhouse_traditional_001",
@@ -2811,10 +2811,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_farmhouse_traditional_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_farmhouse_traditional_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_7_exterior_farmhouse_cozy_001",
@@ -2827,10 +2827,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_farmhouse_cozy_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_farmhouse_cozy_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_8_exterior_farmhouse_modern_001",
@@ -2843,10 +2843,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_farmhouse_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_farmhouse_modern_001.jpeg"
     },
     {
       "id": "exterior_farmhouse_9_exterior_farmhouse_scandinavian_001",
@@ -2859,10 +2859,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_farmhouse_scandinavian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_farmhouse_scandinavian_001.jpeg"
     },
     {
       "id": "exterior_garage_10_exterior_garage_rustic_001",
@@ -2875,10 +2875,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_garage_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_garage_rustic_001.jpeg"
     },
     {
       "id": "exterior_garage_1_exterior_garage_modern_001",
@@ -2891,10 +2891,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_garage_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_garage_modern_001.jpeg"
     },
     {
       "id": "exterior_garage_2_exterior_garage_modern_002",
@@ -2907,10 +2907,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_garage_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_garage_modern_002.jpeg"
     },
     {
       "id": "exterior_garage_3_exterior_garage_modern_003",
@@ -2923,10 +2923,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_garage_modern_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_garage_modern_003.jpeg"
     },
     {
       "id": "exterior_garage_4_exterior_garage_industrial_001",
@@ -2939,10 +2939,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_garage_industrial_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_garage_industrial_001.jpeg"
     },
     {
       "id": "exterior_garage_5_exterior_garage_industrial_002",
@@ -2955,10 +2955,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_garage_industrial_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_garage_industrial_002.jpeg"
     },
     {
       "id": "exterior_garage_6_exterior_garage_minimalist_001",
@@ -2971,10 +2971,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_garage_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_garage_minimalist_001.jpeg"
     },
     {
       "id": "exterior_garage_7_exterior_garage_minimalist_002",
@@ -2987,10 +2987,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_garage_minimalist_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_garage_minimalist_002.jpeg"
     },
     {
       "id": "exterior_garage_7_exterior_garage_minimalist_003",
@@ -3003,10 +3003,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_garage_minimalist_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_garage_minimalist_003.jpeg"
     },
     {
       "id": "exterior_garage_8_exterior_garage_contemporary_001",
@@ -3019,10 +3019,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_garage_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_garage_contemporary_001.jpeg"
     },
     {
       "id": "exterior_garage_9_exterior_garage_farmhouse_001",
@@ -3035,10 +3035,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_garage_farmhouse_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_garage_farmhouse_001.jpeg"
     },
     {
       "id": "exterior_house_10_exterior_house_luxury001",
@@ -3051,10 +3051,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_house_luxury001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_house_luxury001.jpeg"
     },
     {
       "id": "exterior_house_1_exterior_house_modern001",
@@ -3067,10 +3067,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_house_modern001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_house_modern001.jpeg"
     },
     {
       "id": "exterior_house_2_exterior_house_modern002",
@@ -3083,10 +3083,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_house_modern002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_house_modern002.jpeg"
     },
     {
       "id": "exterior_house_3_exterior_house_farmhouse_001",
@@ -3099,10 +3099,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_house_farmhouse_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_house_farmhouse_001.jpeg"
     },
     {
       "id": "exterior_house_4_exterior_house_traditional001",
@@ -3115,10 +3115,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_house_traditional001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_house_traditional001.jpeg"
     },
     {
       "id": "exterior_house_5_exterior_house_contempor001",
@@ -3131,10 +3131,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_house_contempor001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_house_contempor001.jpeg"
     },
     {
       "id": "exterior_house_6_exterior_house_minimalist001",
@@ -3147,10 +3147,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_house_minimalist001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_house_minimalist001.jpeg"
     },
     {
       "id": "exterior_house_7_exterior_house_scandinavian001",
@@ -3163,10 +3163,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_house_scandinavian001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_house_scandinavian001.jpeg"
     },
     {
       "id": "exterior_house_8_exterior_house_coastal001",
@@ -3179,10 +3179,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_house_coastal001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_house_coastal001.jpeg"
     },
     {
       "id": "exterior_house_9_exterior_house_rustic001",
@@ -3195,10 +3195,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_house_rustic001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_house_rustic001.jpeg"
     },
     {
       "id": "exterior_mansion_10_exterior_mansion_contemporary_001",
@@ -3211,10 +3211,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_mansion_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_mansion_contemporary_001.jpeg"
     },
     {
       "id": "exterior_mansion_1_exterior_mansion_luxury_001",
@@ -3227,10 +3227,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_mansion_luxury_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_mansion_luxury_001.jpeg"
     },
     {
       "id": "exterior_mansion_2_exterior_mansion_luxury_002",
@@ -3243,10 +3243,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_mansion_luxury_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_mansion_luxury_002.jpeg"
     },
     {
       "id": "exterior_mansion_3_exterior_mansion_luxury_003",
@@ -3259,10 +3259,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_mansion_luxury_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_mansion_luxury_003.jpeg"
     },
     {
       "id": "exterior_mansion_4_exterior_mansion_luxury_004",
@@ -3275,10 +3275,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_mansion_luxury_004.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_mansion_luxury_004.jpeg"
     },
     {
       "id": "exterior_mansion_5_exterior_mansion_artdeco_001",
@@ -3291,10 +3291,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_mansion_artdeco_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_mansion_artdeco_001.jpeg"
     },
     {
       "id": "exterior_mansion_6_exterior_mansion_artdeco_002",
@@ -3307,10 +3307,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_mansion_artdeco_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_mansion_artdeco_002.jpeg"
     },
     {
       "id": "exterior_mansion_7_exterior_mansion_traditional_001",
@@ -3323,10 +3323,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_mansion_traditional_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_mansion_traditional_001.jpeg"
     },
     {
       "id": "exterior_mansion_8_exterior_mansion_traditional_002",
@@ -3339,10 +3339,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_mansion_traditional_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_mansion_traditional_002.jpeg"
     },
     {
       "id": "exterior_mansion_9_exterior_mansion_modern_001",
@@ -3355,10 +3355,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_mansion_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_mansion_modern_001.jpeg"
     },
     {
       "id": "exterior_townhouse_10_exterior_townhouse_luxury_001",
@@ -3371,10 +3371,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_townhouse_luxury_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_townhouse_luxury_001.jpeg"
     },
     {
       "id": "exterior_townhouse_1_exterior_townhouse_modern_001",
@@ -3387,10 +3387,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_townhouse_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_townhouse_modern_001.jpeg"
     },
     {
       "id": "exterior_townhouse_2_exterior_townhouse_modern_002",
@@ -3403,10 +3403,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_townhouse_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_townhouse_modern_002.jpeg"
     },
     {
       "id": "exterior_townhouse_3_exterior_townhouse_traditional_001",
@@ -3419,10 +3419,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_townhouse_traditional_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_townhouse_traditional_001.jpeg"
     },
     {
       "id": "exterior_townhouse_4_exterior_townhouse_traditional_002",
@@ -3435,10 +3435,10 @@
         "traditional"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_townhouse_traditional_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_townhouse_traditional_002.jpeg"
     },
     {
       "id": "exterior_townhouse_5_exterior_townhouse_contemporary_001",
@@ -3451,10 +3451,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_townhouse_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_townhouse_contemporary_001.jpeg"
     },
     {
       "id": "exterior_townhouse_6_exterior_townhouse_minimalist_001",
@@ -3467,10 +3467,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_townhouse_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_townhouse_minimalist_001.jpeg"
     },
     {
       "id": "exterior_townhouse_7_exterior_townhouse_scandinavian_001",
@@ -3483,10 +3483,10 @@
         "scandinavian"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_townhouse_scandinavian_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_townhouse_scandinavian_001.jpeg"
     },
     {
       "id": "exterior_townhouse_8_exterior_townhouse_industrial_001",
@@ -3499,10 +3499,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_townhouse_industrial_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_townhouse_industrial_001.jpeg"
     },
     {
       "id": "exterior_townhouse_9_exterior_townhouse_farmhouse_001",
@@ -3515,10 +3515,10 @@
         "farmhouse"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_townhouse_farmhouse_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_townhouse_farmhouse_001.jpeg"
     },
     {
       "id": "exterior_villa_10_exterior_villa_artdeco_001",
@@ -3531,10 +3531,10 @@
         "artDeco"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_villa_artdeco_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_villa_artdeco_001.jpeg"
     },
     {
       "id": "exterior_villa_2_exterior_villa_luxury_001",
@@ -3547,10 +3547,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_villa_luxury_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_villa_luxury_001.jpeg"
     },
     {
       "id": "exterior_villa_2_exterior_villa_luxury_002",
@@ -3563,10 +3563,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_villa_luxury_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_villa_luxury_002.jpeg"
     },
     {
       "id": "exterior_villa_3_exterior_villa_luxury_003",
@@ -3579,10 +3579,10 @@
         "luxury"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_villa_luxury_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_villa_luxury_003.jpeg"
     },
     {
       "id": "exterior_villa_4_exterior_villa_modern_001",
@@ -3595,10 +3595,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_villa_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_villa_modern_001.jpeg"
     },
     {
       "id": "exterior_villa_5_exterior_villa_modern_002",
@@ -3611,10 +3611,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_villa_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_villa_modern_002.jpeg"
     },
     {
       "id": "exterior_villa_6_exterior_villa_tropical_001",
@@ -3627,10 +3627,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_villa_tropical_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_villa_tropical_001.jpeg"
     },
     {
       "id": "exterior_villa_6_exterior_villa_tropical_002",
@@ -3643,10 +3643,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_villa_tropical_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_villa_tropical_002.jpeg"
     },
     {
       "id": "exterior_villa_8_exterior_villa_contemporary_001",
@@ -3659,10 +3659,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_villa_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_villa_contemporary_001.jpeg"
     },
     {
       "id": "exterior_villa_9_exterior_villa_coastal_001",
@@ -3675,10 +3675,10 @@
         "coastal"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_villa_coastal_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_villa_coastal_001.jpeg"
     },
     {
       "id": "exterior_warehouse_10_exterior_warehouse_rustic_001",
@@ -3691,10 +3691,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/10_exterior_warehouse_rustic_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/10_exterior_warehouse_rustic_001.jpeg"
     },
     {
       "id": "exterior_warehouse_1_exterior_warehouse_contemporary_001",
@@ -3707,10 +3707,10 @@
         "contemporary"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/1_exterior_warehouse_contemporary_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/1_exterior_warehouse_contemporary_001.jpeg"
     },
     {
       "id": "exterior_warehouse_2_exterior_warehouse_industrial_001",
@@ -3723,10 +3723,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/2_exterior_warehouse_industrial_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/2_exterior_warehouse_industrial_001.jpeg"
     },
     {
       "id": "exterior_warehouse_3_exterior_warehouse_industrial_002",
@@ -3739,10 +3739,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/3_exterior_warehouse_industrial_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/3_exterior_warehouse_industrial_002.jpeg"
     },
     {
       "id": "exterior_warehouse_4_exterior_warehouse_industrial_003",
@@ -3755,10 +3755,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/4_exterior_warehouse_industrial_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/4_exterior_warehouse_industrial_003.jpeg"
     },
     {
       "id": "exterior_warehouse_5_exterior_warehouse_industrial_004",
@@ -3771,10 +3771,10 @@
         "industrial"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/5_exterior_warehouse_industrial_004.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/5_exterior_warehouse_industrial_004.jpeg"
     },
     {
       "id": "exterior_warehouse_6_exterior_warehouse_minimalist_001",
@@ -3787,10 +3787,10 @@
         "minimalist"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/6_exterior_warehouse_minimalist_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/6_exterior_warehouse_minimalist_001.jpeg"
     },
     {
       "id": "exterior_warehouse_7_exterior_warehouse_modern_001",
@@ -3803,10 +3803,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/7_exterior_warehouse_modern_001.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/7_exterior_warehouse_modern_001.jpeg"
     },
     {
       "id": "exterior_warehouse_8_exterior_warehouse_modern_002",
@@ -3819,10 +3819,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/8_exterior_warehouse_modern_002.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/8_exterior_warehouse_modern_002.jpeg"
     },
     {
       "id": "exterior_warehouse_9_exterior_warehouse_modern_003",
@@ -3835,10 +3835,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/9_exterior_warehouse_modern_003.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/9_exterior_warehouse_modern_003.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_01",
@@ -3850,10 +3850,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_01.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_010",
@@ -3865,10 +3865,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_010.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_02",
@@ -3880,10 +3880,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_02.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_03",
@@ -3895,10 +3895,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_03.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_04",
@@ -3910,10 +3910,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_04.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_05",
@@ -3925,10 +3925,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_05.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_06",
@@ -3940,10 +3940,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_06.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_07",
@@ -3955,10 +3955,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_07.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_08",
@@ -3970,10 +3970,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_08.jpeg"
     },
     {
       "id": "garden_christmas_Christmas_09",
@@ -3985,10 +3985,10 @@
         "christmas"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Christmas_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Christmas_09.jpeg"
     },
     {
       "id": "garden_french_French_01",
@@ -4001,11 +4001,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_01.jpeg"
     },
     {
       "id": "garden_french_French_010",
@@ -4018,11 +4018,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_010.jpeg"
     },
     {
       "id": "garden_french_French_02",
@@ -4035,11 +4035,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_02.jpeg"
     },
     {
       "id": "garden_french_French_03",
@@ -4052,11 +4052,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_03.jpeg"
     },
     {
       "id": "garden_french_French_04",
@@ -4069,11 +4069,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_04.jpeg"
     },
     {
       "id": "garden_french_French_05",
@@ -4086,11 +4086,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_05.jpeg"
     },
     {
       "id": "garden_french_French_06",
@@ -4103,11 +4103,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_06.jpeg"
     },
     {
       "id": "garden_french_French_07",
@@ -4120,11 +4120,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_07.jpeg"
     },
     {
       "id": "garden_french_French_08",
@@ -4137,11 +4137,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_08.jpeg"
     },
     {
       "id": "garden_french_French_09",
@@ -4154,11 +4154,11 @@
         "french"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/French_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "french"
+      "gardenStyle": "french",
+      "path": "in_app_images/French_09.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_01",
@@ -4171,11 +4171,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_01.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_010",
@@ -4188,11 +4188,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_010.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_02",
@@ -4205,11 +4205,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_02.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_03",
@@ -4222,11 +4222,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_03.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_04",
@@ -4239,11 +4239,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_04.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_05",
@@ -4256,11 +4256,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_05.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_06",
@@ -4273,11 +4273,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_06.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_07",
@@ -4290,11 +4290,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_07.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_08",
@@ -4307,11 +4307,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_08.jpeg"
     },
     {
       "id": "garden_japanese_Japanese_09",
@@ -4324,11 +4324,11 @@
         "japanese"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Japanese_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "japanese"
+      "gardenStyle": "japanese",
+      "path": "in_app_images/Japanese_09.jpeg"
     },
     {
       "id": "garden_modern_Modern_01",
@@ -4340,10 +4340,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_01.jpeg"
     },
     {
       "id": "garden_modern_Modern_010",
@@ -4355,10 +4355,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_010.jpeg"
     },
     {
       "id": "garden_modern_Modern_02",
@@ -4370,10 +4370,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_02.jpeg"
     },
     {
       "id": "garden_modern_Modern_03",
@@ -4385,10 +4385,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_03.jpeg"
     },
     {
       "id": "garden_modern_Modern_04",
@@ -4400,10 +4400,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_04.jpeg"
     },
     {
       "id": "garden_modern_Modern_05",
@@ -4415,10 +4415,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_05.jpeg"
     },
     {
       "id": "garden_modern_Modern_06",
@@ -4430,10 +4430,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_06.jpeg"
     },
     {
       "id": "garden_modern_Modern_07",
@@ -4445,10 +4445,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_07.jpeg"
     },
     {
       "id": "garden_modern_Modern_08",
@@ -4460,10 +4460,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_08.jpeg"
     },
     {
       "id": "garden_modern_Modern_09",
@@ -4475,10 +4475,10 @@
         "modern"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Modern_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Modern_09.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_01",
@@ -4490,10 +4490,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_01.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_010",
@@ -4505,10 +4505,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_010.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_02",
@@ -4520,10 +4520,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_02.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_03",
@@ -4535,10 +4535,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_03.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_04",
@@ -4550,10 +4550,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_04.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_05",
@@ -4565,10 +4565,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_05.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_06",
@@ -4580,10 +4580,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_06.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_07",
@@ -4595,10 +4595,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_07.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_08",
@@ -4610,10 +4610,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_08.jpeg"
     },
     {
       "id": "garden_rustic_Rustic_09",
@@ -4625,10 +4625,10 @@
         "rustic"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Rustic_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Rustic_09.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_01",
@@ -4640,10 +4640,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_01.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_010",
@@ -4655,10 +4655,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_010.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_02",
@@ -4670,10 +4670,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_02.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_03",
@@ -4685,10 +4685,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_03.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_04",
@@ -4700,10 +4700,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_04.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_05",
@@ -4715,10 +4715,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_05.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_06",
@@ -4730,10 +4730,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_06.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_07",
@@ -4745,10 +4745,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_07.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_08",
@@ -4760,10 +4760,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_08.jpeg"
     },
     {
       "id": "garden_tropical_Tropical_09",
@@ -4775,10 +4775,10 @@
         "tropical"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Tropical_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Tropical_09.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_01",
@@ -4790,10 +4790,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_01.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_010",
@@ -4805,10 +4805,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_010.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_02",
@@ -4820,10 +4820,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_02.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_03",
@@ -4835,10 +4835,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_03.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_04",
@@ -4850,10 +4850,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_04.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_05",
@@ -4865,10 +4865,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_05.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_06",
@@ -4880,10 +4880,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_06.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_07",
@@ -4895,10 +4895,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_07.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_08",
@@ -4910,10 +4910,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_08.jpeg"
     },
     {
       "id": "garden_cozy_Cozy_garden_09",
@@ -4925,10 +4925,10 @@
         "cozy"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Cozy_garden_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
-      "imageMime": "image/jpeg"
+      "imageMime": "image/jpeg",
+      "path": "in_app_images/Cozy_garden_09.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_01",
@@ -4941,11 +4941,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_01.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_010",
@@ -4958,11 +4958,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_010.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_02",
@@ -4975,11 +4975,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_02.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_03",
@@ -4992,11 +4992,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_03.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_04",
@@ -5009,11 +5009,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_04.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_05",
@@ -5026,11 +5026,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_05.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_06",
@@ -5043,11 +5043,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_06.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_07",
@@ -5060,11 +5060,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_07.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_08",
@@ -5077,11 +5077,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_08.jpeg"
     },
     {
       "id": "garden_englishCottage_englishCottage_09",
@@ -5094,11 +5094,11 @@
         "englishCottage"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/englishCottage_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "englishCottage"
+      "gardenStyle": "englishCottage",
+      "path": "in_app_images/englishCottage_09.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_01",
@@ -5111,11 +5111,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_01.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_01.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_010",
@@ -5128,11 +5128,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_010.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_010.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_02",
@@ -5145,11 +5145,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_02.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_02.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_03",
@@ -5162,11 +5162,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_03.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_03.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_04",
@@ -5179,11 +5179,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_04.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_04.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_05",
@@ -5196,11 +5196,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_05.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_05.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_06",
@@ -5213,11 +5213,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_06.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_06.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_07",
@@ -5230,11 +5230,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_07.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_07.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_08",
@@ -5247,11 +5247,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_08.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_08.jpeg"
     },
     {
       "id": "garden_mediterranean_Mediterranean_09",
@@ -5264,11 +5264,11 @@
         "mediterranean"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Mediterranean_09.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "mediterranean"
+      "gardenStyle": "mediterranean",
+      "path": "in_app_images/Mediterranean_09.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_01_copy",
@@ -5281,11 +5281,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_01%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_01%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_010_copy",
@@ -5298,11 +5298,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_010%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_010%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_02_copy",
@@ -5315,11 +5315,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_02%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_02%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_03_copy",
@@ -5332,11 +5332,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_03%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_03%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_04_copy",
@@ -5349,11 +5349,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_04%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_04%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_05_copy",
@@ -5366,11 +5366,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_05%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_05%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_06_copy",
@@ -5383,11 +5383,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_06%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_06%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_07_copy",
@@ -5400,11 +5400,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_07%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_07%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_08_copy",
@@ -5417,11 +5417,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_08%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_08%20copy.jpeg"
     },
     {
       "id": "garden_wildflower_Wildflower_09_copy",
@@ -5434,11 +5434,11 @@
         "wildflower"
       ],
       "featured": false,
-      "imageUrl": "https://home-interior-ai-app.s3.us-east-1.amazonaws.com/in_app_images/Wildflower_09%20copy.jpeg",
       "imageWidth": 768,
       "imageHeight": 1376,
       "imageMime": "image/jpeg",
-      "gardenStyle": "wildflower"
+      "gardenStyle": "wildflower",
+      "path": "in_app_images/Wildflower_09%20copy.jpeg"
     }
   ]
 }

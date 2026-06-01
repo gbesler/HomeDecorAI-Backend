@@ -12,7 +12,7 @@ import {
 // spread it into each row so the per-test focus stays on the taxonomy /
 // prompt mapping.
 const stubImage = {
-  imageUrl: "https://bucket.s3.us-east-1.amazonaws.com/inspirations/x.jpg",
+  path: "in_app_images/x.jpg",
   imageWidth: 1280,
   imageHeight: 1707,
   imageMime: "image/jpeg",
@@ -48,7 +48,7 @@ describe("buildSeedDoc", () => {
 
       const doc = buildSeedDoc({ row });
 
-      assert.equal(doc.imageUrl, stubImage.imageUrl);
+      assert.equal(doc.path, stubImage.path);
       assert.equal(doc.imageWidth, 1280);
       assert.equal(doc.imageHeight, 1707);
       assert.equal(doc.imageMime, "image/jpeg");
@@ -60,7 +60,7 @@ describe("buildSeedDoc", () => {
         roomType: "livingRoom",
         designStyle: "modern",
         toolType: "interiorDesign",
-        imageUrl: stubImage.imageUrl,
+        path: stubImage.path,
         imageWidth: 1280,
         imageHeight: 1707,
       };

@@ -6,34 +6,60 @@
       "categoryId": "sofas",
       "order": 1,
       "active": true,
-      "title": { "en": "Modern Sofa", "tr": "Modern Koltuk" },
+      "title": {
+        "en": "Modern Sofa",
+        "tr": "Modern Koltuk"
+      },
       "prompt": "A modern fabric sofa with clean lines and minimalist silhouette",
-      "imageUrl": "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/1_Modern_Sofa.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"],
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
       "searchTerms": {
-        "tr": ["kanepe", "divan", "sedir"],
-        "en": ["couch", "settee", "loveseat"]
-      }
+        "tr": [
+          "kanepe",
+          "divan",
+          "sedir"
+        ],
+        "en": [
+          "couch",
+          "settee",
+          "loveseat"
+        ]
+      },
+      "path": "object-inspirations/1_Modern_Sofa.jpeg"
     },
     {
       "id": "candles_11",
       "categoryId": "candles",
       "order": 10,
       "active": true,
-      "title": { "en": "Twisted Candle", "tr": "Twisted Candle" },
+      "title": {
+        "en": "Twisted Candle",
+        "tr": "Twisted Candle"
+      },
       "prompt": "A candle with a clearly twisted body form, sculptural wax shape, and a decorative silhouette",
-      "imageUrl": "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/11_Twisted_Candle.jpeg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"],
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
       "searchTerms": {
-        "tr": ["mum", "burgu"],
-        "en": ["spiral", "twist"]
-      }
+        "tr": [
+          "mum",
+          "burgu"
+        ],
+        "en": [
+          "spiral",
+          "twist"
+        ]
+      },
+      "path": "object-inspirations/11_Twisted_Candle.jpeg"
     }
   ]
 }

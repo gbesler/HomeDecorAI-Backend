@@ -3,6 +3,7 @@ import { type z } from "zod";
 import { env } from "./env.js";
 import { logger } from "./logger.js";
 import { getActiveObjectInspirationOrNull } from "./objectInspiration/firestore.js";
+import { inspirationImageUrlFromPath } from "./storage/resolve-inspiration-url.js";
 import { validatePublicImageUrl } from "./storage/url-validation.js";
 import { buildInteriorPromptLegacy } from "./prompts/legacy.js";
 import {
@@ -1504,13 +1505,13 @@ export const TOOL_TYPES = {
       // structured log so the operator-side data-quality issue is
       // visible. Pre-v4.0 this defense was unnecessary because the
       // pipeline only consumed the prompt string.
-      if (typeof doc.imageUrl !== "string" || doc.imageUrl.length === 0) {
+      if (typeof doc.path !== "string" || doc.path.length === 0) {
         logger.warn(
           {
-            event: "preEnqueueValidate.inspiration.image_url_missing",
+            event: "preEnqueueValidate.inspiration.image_path_missing",
             inspirationId: params.inspirationId,
           },
-          "Inspiration doc missing imageUrl — data quality issue, refusing to dispatch",
+          "Inspiration doc missing path — data quality issue, refusing to dispatch",
         );
         return {
           ok: false,
@@ -1520,15 +1521,17 @@ export const TOOL_TYPES = {
             "Selected inspiration is missing required content. Please pick another.",
         };
       }
-      // SSRF defense — the Firestore-resolved `imageUrl` is forwarded
-      // to Replicate / fal.ai as image 2 in the multi-image array.
-      // Admin-curated content is trusted at the auth layer but NOT at
-      // the SSRF layer: a compromised or malicious admin who writes
-      // `http://169.254.169.254/...` (AWS IMDS) or any RFC-1918 host
-      // would otherwise have the provider worker fetch that URL from
-      // its own (cloud datacenter) network namespace. Same private-host
-      // regex the controller applies to client-supplied URLs.
-      const urlCheck = validatePublicImageUrl(doc.imageUrl, "inspirationImageUrl");
+      // Compose the full reference-photo URL from the stored bucket-relative
+      // `path` + the trusted env base, then run the SSRF gate on the COMPOSED
+      // URL before forwarding it to Replicate / fal.ai as image 2. The base
+      // is env-trusted and the `path` was PathSchema-validated at seed time;
+      // this re-check is defense-in-depth against a hand-edited doc (the same
+      // private-host regex the controller applies to client-supplied URLs).
+      const inspirationImageUrl = inspirationImageUrlFromPath(doc.path);
+      const urlCheck = validatePublicImageUrl(
+        inspirationImageUrl,
+        "inspirationImageUrl",
+      );
       if (!urlCheck.ok) {
         logger.error(
           {
@@ -1579,7 +1582,7 @@ export const TOOL_TYPES = {
           ...params,
           prompt: doc.prompt,
           categoryId: doc.categoryId,
-          inspirationImageUrl: doc.imageUrl,
+          inspirationImageUrl,
           inspirationTitle: sanitizedTitle,
         },
       };

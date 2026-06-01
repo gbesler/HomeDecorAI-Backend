@@ -18,16 +18,16 @@ import {
 // needs to be a plausible https URL. The zod allow-list itself is
 // covered in `schemas.test.ts`.
 const stubHero = {
-  heroImageUrl:
-    "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas-hero.jpg",
+  path:
+    "object-inspirations/sofas-hero.jpg",
   heroImageWidth: 1200,
   heroImageHeight: 800,
   heroImageMime: "image/jpeg",
 } as const;
 
 const stubItemImage = {
-  imageUrl:
-    "https://bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas-1.jpg",
+  path:
+    "in_app_images/sofas-1.jpg",
   imageWidth: 1024,
   imageHeight: 1024,
   imageMime: "image/jpeg",
@@ -62,7 +62,7 @@ describe("buildObjectCategoryDoc", () => {
     assert.equal(doc.order, 0);
     assert.equal(doc.active, true);
     assert.deepEqual(doc.title, { en: "Sofas", tr: "Koltuklar" });
-    assert.equal(doc.heroImageUrl, stubHero.heroImageUrl);
+    assert.equal(doc.path, stubHero.path);
     assert.equal(doc.heroImageWidth, stubHero.heroImageWidth);
     assert.equal(doc.heroImageHeight, stubHero.heroImageHeight);
     assert.equal(doc.heroImageMime, "image/jpeg");
@@ -123,7 +123,7 @@ describe("buildObjectInspirationDoc", () => {
     assert.equal(doc.active, true);
     assert.deepEqual(doc.title, { en: "Sectional Sofa", tr: "Köşe Koltuk" });
     assert.equal(doc.prompt, "A sectional sofa for a modern living room.");
-    assert.equal(doc.imageUrl, stubItemImage.imageUrl);
+    assert.equal(doc.path, stubItemImage.path);
     assert.equal(doc.imageWidth, 1024);
     assert.equal(doc.imageHeight, 1024);
     assert.equal(doc.imageMime, "image/jpeg");
@@ -260,7 +260,7 @@ describe("planObjectInspirationSeedWrite", () => {
       "default mode must not include prompt in mergeFields",
     );
     // All non-prompt fields still propagate.
-    assert.ok(fields.has("imageUrl"));
+    assert.ok(fields.has("path"));
     assert.ok(fields.has("title"));
     assert.ok(fields.has("toolTypes"));
     assert.ok(fields.has("active"));

@@ -134,7 +134,7 @@ const exploreRoutes: FastifyPluginAsync = async (app) => {
             "id",
             "toolType",
             "designStyle",
-            "imageUrl",
+            "path",
             "imageWidth",
             "imageHeight",
           ],
@@ -156,7 +156,7 @@ const exploreRoutes: FastifyPluginAsync = async (app) => {
               maxItems: 20,
             },
             featured: { type: "boolean" },
-            imageUrl: { type: "string", format: "uri", maxLength: 2048 },
+            path: { type: "string", minLength: 1, maxLength: 1024 },
             imageWidth: { type: "integer", minimum: 1, maximum: 20000 },
             imageHeight: { type: "integer", minimum: 1, maximum: 20000 },
             imageMime: {

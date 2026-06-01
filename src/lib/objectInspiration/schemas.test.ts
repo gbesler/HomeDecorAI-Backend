@@ -23,7 +23,7 @@ const validCategoryBody = {
   order: 0,
   active: true,
   title: { en: "Sofas", tr: "Koltuklar" },
-  heroImageUrl: "https://bucket.s3.us-east-1.amazonaws.com/h.jpg",
+  path: "object-inspirations/h.jpg",
   heroImageWidth: 1200,
   heroImageHeight: 800,
   heroImageMime: "image/jpeg",
@@ -37,7 +37,7 @@ const validItemBody = {
   active: true,
   title: { en: "Sectional Sofa", tr: "Köşe Koltuk" },
   prompt: "A sectional sofa for a modern living room.",
-  imageUrl: "https://bucket.s3.us-east-1.amazonaws.com/sofas-1.jpg",
+  path: "in_app_images/sofas-1.jpg",
   imageWidth: 1024,
   imageHeight: 1024,
   imageMime: "image/jpeg",
@@ -87,20 +87,20 @@ describe("ObjectCategorySeedInputSchema", () => {
     );
   });
 
-  it("rejects non-allow-listed image hosts", () => {
+  it("rejects a full URL as path (scheme not allowed)", () => {
     assert.throws(() =>
       ObjectCategorySeedInputSchema.parse({
         ...validCategoryBody,
-        heroImageUrl: "https://attacker.example.com/h.jpg",
+        path: "https://cdn.test.local/object-inspirations/h.jpg",
       }),
     );
   });
 
-  it("rejects http:// (non-https)", () => {
+  it("rejects a leading-slash path", () => {
     assert.throws(() =>
       ObjectCategorySeedInputSchema.parse({
         ...validCategoryBody,
-        heroImageUrl: "http://bucket.s3.us-east-1.amazonaws.com/h.jpg",
+        path: "/object-inspirations/h.jpg",
       }),
     );
   });
@@ -200,28 +200,34 @@ describe("ObjectInspirationSeedInputSchema", () => {
     );
   });
 
-  it("rejects non-allow-listed imageUrl", () => {
+  it("accepts a bucket-relative path", () => {
+    const parsed = ObjectInspirationSeedInputSchema.parse({
+      ...validItemBody,
+      path: "in_app_images/sofas-1.jpg",
+    });
+    assert.equal(parsed.path, "in_app_images/sofas-1.jpg");
+  });
+
+  it("rejects a full URL as path (scheme not allowed)", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        imageUrl: "https://evil.example/x.jpg",
+        path: "https://cdn.test.local/in_app_images/sofas-1.jpg",
       }),
     );
   });
 
-  it("accepts CloudFront host (env.AWS_CLOUDFRONT_HOST)", () => {
-    const parsed = ObjectInspirationSeedInputSchema.parse({
-      ...validItemBody,
-      imageUrl: "https://cdn.test.local/sofas-1.jpg",
-    });
-    assert.equal(parsed.imageUrl, "https://cdn.test.local/sofas-1.jpg");
-  });
-
-  it("rejects port-suffixed URLs", () => {
+  it("rejects a leading-slash or traversal path", () => {
     assert.throws(() =>
       ObjectInspirationSeedInputSchema.parse({
         ...validItemBody,
-        imageUrl: "https://bucket.s3.us-east-1.amazonaws.com:9000/sofas-1.jpg",
+        path: "/in_app_images/sofas-1.jpg",
+      }),
+    );
+    assert.throws(() =>
+      ObjectInspirationSeedInputSchema.parse({
+        ...validItemBody,
+        path: "../secret.jpg",
       }),
     );
   });
@@ -435,7 +441,7 @@ describe("ObjectInspirationPatchSchema", () => {
       ObjectInspirationPatchSchema.parse({ active: false, prompt: "evil" }),
     );
     assert.throws(() =>
-      ObjectInspirationPatchSchema.parse({ imageUrl: "https://..." }),
+      ObjectInspirationPatchSchema.parse({ path: "https://..." }),
     );
   });
 });

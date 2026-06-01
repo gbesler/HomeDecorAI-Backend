@@ -64,14 +64,16 @@ rclone copy ./out/object-inspirations/ \
   --s3-acl public-read --progress
 ```
 
-CloudFront URLs in the manifest look like:
+The manifest stores the **bucket-relative path**, not a full URL — just the
+key under the bucket:
 
 ```
-https://<AWS_CLOUDFRONT_HOST>/object-inspirations/sofas/sofas_1.jpg
+object-inspirations/sofas/sofas_1.jpg
 ```
 
-Virtual-hosted bucket URLs are also accepted by the allow-list — both
-forms pass validation.
+The host is composed at read time (iOS CloudFront host / backend env base), so
+the row stays infra-agnostic. `path` is validated at the edge: no scheme, no
+host, no leading slash, no `..` traversal.
 
 ### 2. Compose the manifest
 
@@ -85,7 +87,7 @@ Build the JSON manually or with a generator. Required minimum:
       "order": 0,
       "active": true,
       "title": { "en": "Sofas", "tr": "Koltuklar" },
-      "heroImageUrl": "https://cdn.example.com/object-inspirations/sofas/hero.jpg",
+      "path": "object-inspirations/sofas/hero.jpg",
       "heroImageWidth": 1200,
       "heroImageHeight": 800,
       "heroImageMime": "image/jpeg",
@@ -100,7 +102,7 @@ Build the JSON manually or with a generator. Required minimum:
       "active": true,
       "title": { "en": "Sectional Sofa", "tr": "Köşe Koltuk" },
       "prompt": "A modern sectional sofa in a living room",
-      "imageUrl": "https://cdn.example.com/object-inspirations/sofas/sofas_1.jpg",
+      "path": "object-inspirations/sofas/sofas_1.jpg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",

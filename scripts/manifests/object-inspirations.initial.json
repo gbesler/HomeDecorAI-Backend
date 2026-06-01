@@ -5,23 +5,35 @@
       "id": "sofas",
       "order": 0,
       "active": true,
-      "title": { "en": "Sofas", "tr": "Koltuklar" },
-      "heroImageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/hero.jpg",
+      "title": {
+        "en": "Sofas",
+        "tr": "Koltuklar"
+      },
       "heroImageWidth": 1200,
       "heroImageHeight": 800,
       "heroImageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"]
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
+      "path": "object-inspirations/sofas/hero.jpg"
     },
     {
       "id": "lamps",
       "order": 1,
       "active": true,
-      "title": { "en": "Lamps", "tr": "Lambalar" },
-      "heroImageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/lamps/hero.jpg",
+      "title": {
+        "en": "Lamps",
+        "tr": "Lambalar"
+      },
       "heroImageWidth": 1200,
       "heroImageHeight": 800,
       "heroImageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"]
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
+      "path": "object-inspirations/lamps/hero.jpg"
     }
   ],
   "items": [
@@ -30,39 +42,57 @@
       "categoryId": "sofas",
       "order": 0,
       "active": true,
-      "title": { "en": "Sectional Sofa", "tr": "Köşe Koltuk" },
+      "title": {
+        "en": "Sectional Sofa",
+        "tr": "Köşe Koltuk"
+      },
       "prompt": "A modern sectional sofa for a living room",
-      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/sofas_1.jpg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"]
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
+      "path": "object-inspirations/sofas/sofas_1.jpg"
     },
     {
       "id": "sofas_2",
       "categoryId": "sofas",
       "order": 1,
       "active": true,
-      "title": { "en": "Chesterfield Sofa", "tr": "Chesterfield Koltuk" },
+      "title": {
+        "en": "Chesterfield Sofa",
+        "tr": "Chesterfield Koltuk"
+      },
       "prompt": "A leather Chesterfield sofa with tufted upholstery",
-      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/sofas/sofas_2.jpg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"]
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
+      "path": "object-inspirations/sofas/sofas_2.jpg"
     },
     {
       "id": "lamps_1",
       "categoryId": "lamps",
       "order": 0,
       "active": true,
-      "title": { "en": "Floor Lamp", "tr": "Yer Lambası" },
+      "title": {
+        "en": "Floor Lamp",
+        "tr": "Yer Lambası"
+      },
       "prompt": "A minimalist tripod floor lamp",
-      "imageUrl": "https://example-bucket.s3.us-east-1.amazonaws.com/object-inspirations/lamps/lamps_1.jpg",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "imageMime": "image/jpeg",
-      "toolTypes": ["replaceObject", "addObject"]
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ],
+      "path": "object-inspirations/lamps/lamps_1.jpg"
     }
   ]
 }
