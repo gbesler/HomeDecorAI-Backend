@@ -45,17 +45,17 @@ export const rooms: RoomsDict = {
       "If a bed, bedside tables, dresser, wardrobe, reading chair, or other primary bedroom furniture are visible, restyle them in place — keep their footprint and the bed's orientation exactly as in the source.",
   },
 
-  [RoomType.kidRoom]: {
+  [RoomType.babyRoom]: {
     focusSlots: {
       furnitureDialect:
-        "a child-sized bed or bunk bed, a low play table with small chairs, open toy storage bins, a soft area rug for play, a bookshelf at a reachable height, a wardrobe sized for kids",
+        "a crib or cot, a changing table or dresser with a changing top, a nursing or rocking chair, a soft area rug, open storage baskets for toys and supplies, a low bookshelf at a reachable height",
       lightingDialect:
-        "soft warm ceiling light, a bedside nightlight, a focused desk or reading lamp, gentle accent lighting near the play area",
+        "soft warm ceiling light, a gentle nightlight, a focused reading lamp near the nursing chair, gentle accent lighting near the crib",
       personalization:
-        "playful wall art, plush toys arranged thoughtfully, a name banner or growth chart, a small canopy or tent reading nook",
+        "soft pastel or playful wall art, a mobile above the crib, plush toys arranged thoughtfully, a name banner or growth chart, a small canopy reading nook",
     },
     preservationHint:
-      "If a bed, bunk bed, play table, bookshelf, wardrobe, or other primary kid-room furniture is visible, restyle in place — keep the bed orientation, storage layout, and any visible window or doorway exactly as in the source.",
+      "If a crib, changing table, dresser, nursing chair, bookshelf, or other primary baby-room furniture is visible, restyle in place — keep the crib orientation, storage layout, and any visible window or doorway exactly as in the source.",
   },
 
   [RoomType.kitchen]: {

@@ -322,7 +322,7 @@ const DESIGN_STYLES = [
 const ROOM_TYPES = [
   "livingRoom",
   "bedroom",
-  "kidRoom",
+  "babyRoom",
   "kitchen",
   "underStairSpace",
   "diningRoom",

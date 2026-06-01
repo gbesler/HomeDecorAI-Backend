@@ -67,7 +67,7 @@ export interface InspirationDTO {
 export const ROOM_TYPE_VALUES = [
   "livingRoom",
   "bedroom",
-  "kidRoom",
+  "babyRoom",
   "kitchen",
   "underStairSpace",
   "diningRoom",
