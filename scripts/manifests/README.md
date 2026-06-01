@@ -19,6 +19,27 @@ imports those schemas directly, so any row that would be rejected by
 the HTTP endpoint is rejected here too (allow-listed host, id regex,
 prompt length, ...).
 
+## Object taxonomy — what's a closed set, and what isn't
+
+When generating object content, only two axes are constrained by
+system-defined values:
+
+- **`toolTypes`** — closed enum (`OBJECT_TOOL_TYPE_VALUES`:
+  `replaceObject`, `addObject`). Hard-enforced by zod; an unknown value
+  is rejected at validation time.
+- **Object categories** — the set of category slugs that already exist
+  (the ~40 in `object-inspirations.full.json` / Firestore). A manifest
+  that introduces a category id not already in Firestore triggers an
+  **advisory, non-blocking** soft-warn from the seed script
+  (`generation-guardrails.ts`) — new categories are legitimate, but the
+  warning flags a possibly-invented one for review.
+
+There is intentionally **no closed `material`, `style`, or "object type"
+taxonomy** for objects — neither the iOS app nor the backend models
+those. An object is identified by `categoryId` + localized `title` +
+`prompt` (+ optional `searchTerms`). A generator must **not** invent
+`material`/`style` fields; they are not part of the domain model.
+
 ## Auth — Service account only
 
 The seed script writes to Firestore via the Firebase Admin SDK using

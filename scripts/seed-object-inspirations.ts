@@ -51,6 +51,10 @@ import {
   type SeedOutcome,
 } from "../src/lib/objectInspiration/seed-helpers.js";
 import {
+  collectObjectTaxonomyWarnings,
+  formatObjectTaxonomyWarnings,
+} from "../src/lib/objectInspiration/generation-guardrails.js";
+import {
   getExistingObjectCategoryIds,
   seedObjectCategoryDoc,
   seedObjectInspirationDoc,
@@ -225,6 +229,30 @@ async function main(): Promise<void> {
         console.error("Manifest pre-flight FK validation failed (after Firestore resolve):");
         for (const e of remainingFkErrors) console.error(`  - ${e}`);
         process.exit(1);
+      }
+    }
+
+    // Soft-warn (advisory, non-blocking): flag manifest categories that do
+    // not already exist in Firestore. Objects have no closed material/style
+    // taxonomy — the only system-defined sets are `toolTypes` (hard-enforced
+    // by zod) and the existing category set — so a brand-new category is the
+    // one "invented value" signal worth surfacing. New categories are
+    // legitimate, hence advisory rather than a hard fail.
+    if (categories.length > 0) {
+      const existingCategoryIds = await getExistingObjectCategoryIds(
+        categories.map((c) => c.id),
+      );
+      const taxonomyWarnings = collectObjectTaxonomyWarnings(
+        { categories, items },
+        existingCategoryIds,
+      );
+      if (taxonomyWarnings.length > 0) {
+        console.error(
+          `[seed] taxonomy: ${taxonomyWarnings.length} advisory note(s) (non-blocking):`,
+        );
+        for (const line of formatObjectTaxonomyWarnings(taxonomyWarnings)) {
+          console.error(`  - ${line}`);
+        }
       }
     }
   }
