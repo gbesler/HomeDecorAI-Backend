@@ -127,9 +127,9 @@ export type LocalizedSearchTerms = Partial<Record<SupportedLanguage, string[]>>;
 
 /**
  * Firestore document at `objectCategories/{categoryId}`. The category
- * grid (40 tiles) is the entry surface of the wizard step; `heroImageUrl`
- * is its primary visual signal — the migration plan calls out Phase 2
- * content scope must include 40 hero images.
+ * grid (40 tiles) is the entry surface of the wizard step; the hero image
+ * (resolved at read time from `path`) is its primary visual signal — the
+ * migration plan calls out Phase 2 content scope must include 40 hero images.
  */
 export interface ObjectInspirationCategoryDoc {
   /** Bump on breaking shape changes. Today's value is `1`. */
