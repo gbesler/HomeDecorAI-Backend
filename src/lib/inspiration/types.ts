@@ -70,20 +70,30 @@ export interface InspirationDTO {
   schemaVersion: number | null;
 }
 
+/** Assert a derived enum value array is non-empty before handing it to
+ *  `z.enum`, which throws an opaque error if given `[]`. A generated enum
+ *  should never be empty; if codegen ever produces one, fail loudly at module
+ *  load with an attributable message instead of a cryptic Zod construction
+ *  error deep in the schema layer. The cast is safe because it is guarded. */
+function nonEmpty<T extends string>(values: T[], label: string): [T, ...T[]] {
+  if (values.length === 0) {
+    throw new Error(
+      `${label} derived an empty value set — the generated enum is missing or corrupted (check orval output).`,
+    );
+  }
+  return values as [T, ...T[]];
+}
+
 /** Allowed RoomType strings — derived from the canonical generated `RoomType`
- *  enum (orval, mirrors iOS). The `as [..]` cast asserts non-emptiness so the
- *  array still satisfies Zod's `z.enum` tuple requirement at the call sites. */
-export const ROOM_TYPE_VALUES = Object.values(RoomType) as [
-  RoomType,
-  ...RoomType[],
-];
+ *  enum (orval, mirrors iOS). */
+export const ROOM_TYPE_VALUES = nonEmpty(Object.values(RoomType), "RoomType");
 
 /** Allowed DesignStyle strings — derived from the canonical generated
  *  `DesignStyle` enum (orval, mirrors iOS). */
-export const DESIGN_STYLE_VALUES = Object.values(DesignStyle) as [
-  DesignStyle,
-  ...DesignStyle[],
-];
+export const DESIGN_STYLE_VALUES = nonEmpty(
+  Object.values(DesignStyle),
+  "DesignStyle",
+);
 
 /** Allowed ToolType keys for inspirations — the full set of `TOOL_TYPES`
  *  keys, surfaced via the taxonomy registry's `TOOL_TYPE_KEYS` tuple (which is

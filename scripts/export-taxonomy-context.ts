@@ -28,66 +28,61 @@ import { parseArgs } from "node:util";
 import { join } from "node:path";
 
 import { serializeTaxonomyContext } from "../src/lib/taxonomy/serialize-context.js";
+import { extractCategoryIds } from "../src/lib/taxonomy/read-category-ids.js";
 
 const DEFAULT_CATEGORIES_MANIFEST =
   "scripts/manifests/object-inspirations.full.json";
 
-/** Read object category ids from a `{ categories, items }` manifest. Uses the
- *  `categories[].id` list; if a manifest carries only items, falls back to the
- *  distinct `categoryId`s referenced by items. Returns a sorted, de-duped set. */
-async function readCategoryIds(manifestPath: string): Promise<string[]> {
-  const raw = await readFile(manifestPath, "utf-8");
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    throw new Error(
-      `Categories manifest is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
-  const obj =
-    parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
-  const ids = new Set<string>();
-
-  const categories = Array.isArray(obj.categories) ? obj.categories : [];
-  for (const c of categories) {
-    if (c && typeof c === "object" && typeof (c as { id?: unknown }).id === "string") {
-      ids.add((c as { id: string }).id);
-    }
-  }
-  if (ids.size === 0) {
-    const items = Array.isArray(obj.items) ? obj.items : [];
-    for (const it of items) {
-      if (
-        it &&
-        typeof it === "object" &&
-        typeof (it as { categoryId?: unknown }).categoryId === "string"
-      ) {
-        ids.add((it as { categoryId: string }).categoryId);
-      }
-    }
-  }
-  return [...ids].sort();
+/** Bad-args exit. Distinct from runtime errors (exit 1) so an automated caller
+ *  can tell "I invoked it wrong" from "it failed while running". */
+function failArgs(message: string): never {
+  console.error(message);
+  process.exit(2);
 }
 
 async function main(): Promise<void> {
-  const { values } = parseArgs({
-    options: {
-      "categories-manifest": { type: "string" },
-      format: { type: "string", default: "json" },
-      out: { type: "string" },
-    },
-    strict: true,
-  });
+  let values: { "categories-manifest"?: string; format?: string; out?: string };
+  try {
+    ({ values } = parseArgs({
+      options: {
+        "categories-manifest": { type: "string" },
+        format: { type: "string", default: "json" },
+        out: { type: "string" },
+      },
+      strict: true,
+    }));
+  } catch (err) {
+    // Unknown/malformed flag → bad args (exit 2), not a runtime error.
+    failArgs(err instanceof Error ? err.message : String(err));
+  }
 
   const format = values.format ?? "json";
   if (format !== "json" && format !== "markdown" && format !== "both") {
-    console.error("--format must be one of: json | markdown | both");
-    process.exit(2);
+    failArgs(`--format must be one of: json | markdown | both (got "${format}")`);
+  }
+  // `both` would interleave a JSON document and Markdown prose on one stdout
+  // stream, which no parser can split. Require --out so each goes to its file.
+  if (format === "both" && !values.out) {
+    failArgs("--format=both requires --out (cannot emit two formats to stdout)");
   }
 
   const manifestPath = values["categories-manifest"] ?? DEFAULT_CATEGORIES_MANIFEST;
-  const objectCategoryIds = await readCategoryIds(manifestPath);
+  let raw: string;
+  try {
+    raw = await readFile(manifestPath, "utf-8");
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") {
+      failArgs(`--categories-manifest file not found: ${manifestPath}`);
+    }
+    throw err;
+  }
+  const objectCategoryIds = extractCategoryIds(raw);
+  if (objectCategoryIds.length === 0) {
+    console.error(
+      `[taxonomy] warning: no object category ids found in ${manifestPath} — ` +
+        `the exported context will have an empty category set.`,
+    );
+  }
 
   const { json, markdown } = serializeTaxonomyContext({ objectCategoryIds });
 
@@ -107,9 +102,6 @@ async function main(): Promise<void> {
   }
 
   if (format === "markdown") {
-    process.stdout.write(markdown);
-  } else if (format === "both") {
-    process.stdout.write(json + "\n\n");
     process.stdout.write(markdown);
   } else {
     process.stdout.write(json + "\n");

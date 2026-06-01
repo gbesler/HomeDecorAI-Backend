@@ -1,4 +1,8 @@
-import { TAXONOMY_REGISTRY, getAxes } from "./registry.js";
+import {
+  TAXONOMY_REGISTRY,
+  getAxes,
+  type TaxonomyAxis,
+} from "./registry.js";
 
 /**
  * Serializes the taxonomy registry into an "allowed-values context" artifact
@@ -19,8 +23,8 @@ const INSTRUCTION =
 
 /** Axes that belong to the Explore / design surface (everything except the
  *  object-specific `objectToolType`, which is reported under `objectInspiration`). */
-function exploreAxisKeys(): string[] {
-  return getAxes().filter((axis) => axis !== "objectToolType");
+function exploreAxisKeys(): TaxonomyAxis[] {
+  return getAxes().filter((axis): axis is TaxonomyAxis => axis !== "objectToolType");
 }
 
 export interface TaxonomyContextInput {
@@ -51,7 +55,7 @@ export function buildTaxonomyContext(
   input: TaxonomyContextInput,
 ): TaxonomyContextJson {
   const exploreAxes: TaxonomyContextAxis[] = exploreAxisKeys().map((axis) => {
-    const def = TAXONOMY_REGISTRY[axis as keyof typeof TAXONOMY_REGISTRY];
+    const def = TAXONOMY_REGISTRY[axis];
     return {
       axis: def.axis,
       label: def.label,

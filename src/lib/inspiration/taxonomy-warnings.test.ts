@@ -49,6 +49,12 @@ describe("collectTaxonomyWarnings", () => {
       collectTaxonomyWarnings({ ...baseRow, gardenStyle: undefined }),
       [],
     );
+    // Empty string is a distinct branch (passes the string check, fails length)
+    // and must be skipped, not warned on.
+    assert.deepEqual(
+      collectTaxonomyWarnings({ ...baseRow, gardenStyle: "" }),
+      [],
+    );
   });
 
   it("collects one warning per invalid axis in the same row", () => {

@@ -64,21 +64,28 @@ export interface TaxonomyAxisDefinition {
  * tool in `TOOL_TYPES` and `tsc --noEmit` fails until this tuple is updated.
  * That converts the old silent hand-copy into a CI-enforced sync point.
  */
+//
+// Order matters: these values are spread into the Fastify JSON-schema `enum`
+// arrays in `routes/explore.ts` (and thus the OpenAPI/Swagger spec the iOS
+// client consumes). Keep this order identical to the historically-shipped
+// `TOOL_TYPE_VALUES` order so the wire contract does not shift. The parity
+// guard below only checks set membership, NOT order — `tools-order.test.ts`
+// locks the order.
 export const TOOL_TYPE_KEYS = [
   "interiorDesign",
   "exteriorDesign",
   "gardenDesign",
   "patioDesign",
   "poolDesign",
-  "outdoorLightingDesign",
+  "referenceStyle",
+  "replaceAddObject",
   "paintWalls",
   "floorRestyle",
-  "referenceStyle",
   "virtualStaging",
-  "exteriorPainting",
   "cleanOrganize",
   "removeObjects",
-  "replaceAddObject",
+  "exteriorPainting",
+  "outdoorLightingDesign",
 ] as const;
 
 /** `true` only when TOOL_TYPE_KEYS and `ToolTypeKey` are mutually assignable
@@ -90,6 +97,9 @@ type ToolKeyParity =
       ? true
       : never
     : never;
+// If the next line fails typecheck with "Type 'never' is not assignable to
+// type 'true'", TOOL_TYPE_KEYS is out of sync with TOOL_TYPES (tool-types.ts):
+// add or remove the diverging key from TOOL_TYPE_KEYS above.
 const _toolKeyParity: ToolKeyParity = true;
 void _toolKeyParity;
 
@@ -102,7 +112,9 @@ const COLOR_PALETTE_VALUES: readonly string[] = [
     ...Object.values(ExteriorColorPalette),
     ...Object.values(GardenColorPalette),
   ]),
-];
+  // Sorted so the exported context artifact is stable regardless of the
+  // (hand-edited) enum key order in the two palette source files.
+].sort();
 
 /**
  * The registry. Each entry's `values` is derived from its canonical `source`

@@ -18,28 +18,27 @@ import {
 
 describe("taxonomy registry", () => {
   describe("getAllowedValues — derived from canonical sources", () => {
-    it("roomType equals Object.values(RoomType) (13 values)", () => {
+    // Note: no hardcoded counts — the deepEqual against the canonical source
+    // already proves both membership AND count, and stays correct when an enum
+    // legitimately grows (which is the whole point of deriving the values).
+    it("roomType equals Object.values(RoomType)", () => {
       const values = getAllowedValues("roomType");
       assert.deepEqual([...values], Object.values(RoomType));
-      assert.equal(values.length, 13);
     });
 
-    it("designStyle has all 18 canonical values", () => {
+    it("designStyle equals Object.values(DesignStyle)", () => {
       const values = getAllowedValues("designStyle");
       assert.deepEqual([...values], Object.values(DesignStyle));
-      assert.equal(values.length, 18);
     });
 
-    it("gardenStyle has 10 canonical values", () => {
+    it("gardenStyle equals Object.values(GardenStyle)", () => {
       const values = getAllowedValues("gardenStyle");
       assert.deepEqual([...values], Object.values(GardenStyle));
-      assert.equal(values.length, 10);
     });
 
-    it("toolType equals the TOOL_TYPE_KEYS tuple (14 tools)", () => {
+    it("toolType equals the TOOL_TYPE_KEYS tuple", () => {
       const values = getAllowedValues("toolType");
       assert.deepEqual([...values], [...TOOL_TYPE_KEYS]);
-      assert.equal(values.length, 14);
     });
 
     it("objectToolType mirrors OBJECT_TOOL_TYPE_VALUES", () => {
@@ -47,17 +46,46 @@ describe("taxonomy registry", () => {
       assert.deepEqual([...values], [...OBJECT_TOOL_TYPE_VALUES]);
     });
 
-    it("colorPalette is the deduped union of exterior + garden palettes", () => {
+    it("colorPalette is the deduped, sorted union of exterior + garden palettes", () => {
       const values = getAllowedValues("colorPalette");
       const expected = [
         ...new Set([
           ...Object.values(ExteriorColorPalette),
           ...Object.values(GardenColorPalette),
         ]),
-      ];
+      ].sort();
       assert.deepEqual([...values], expected);
       // No duplicates survived the union.
       assert.equal(new Set(values).size, values.length);
+      // "surpriseMe" exists in both palette sets — it must appear exactly once.
+      assert.equal(values.filter((v) => v === "surpriseMe").length, 1);
+    });
+  });
+
+  describe("TOOL_TYPE_KEYS order", () => {
+    // The tool keys are spread into the Fastify/Swagger enum arrays consumed by
+    // iOS, so their ORDER is a wire contract (the parity guard only checks the
+    // SET). This locks the historically-shipped order.
+    it("matches the historically-shipped explore tool order", () => {
+      assert.deepEqual(
+        [...TOOL_TYPE_KEYS],
+        [
+          "interiorDesign",
+          "exteriorDesign",
+          "gardenDesign",
+          "patioDesign",
+          "poolDesign",
+          "referenceStyle",
+          "replaceAddObject",
+          "paintWalls",
+          "floorRestyle",
+          "virtualStaging",
+          "cleanOrganize",
+          "removeObjects",
+          "exteriorPainting",
+          "outdoorLightingDesign",
+        ],
+      );
     });
   });
 

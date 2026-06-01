@@ -238,21 +238,37 @@ async function main(): Promise<void> {
     // by zod) and the existing category set — so a brand-new category is the
     // one "invented value" signal worth surfacing. New categories are
     // legitimate, hence advisory rather than a hard fail.
-    if (categories.length > 0) {
-      const existingCategoryIds = await getExistingObjectCategoryIds(
-        categories.map((c) => c.id),
-      );
-      const taxonomyWarnings = collectObjectTaxonomyWarnings(
-        { categories, items },
-        existingCategoryIds,
-      );
-      if (taxonomyWarnings.length > 0) {
-        console.error(
-          `[seed] taxonomy: ${taxonomyWarnings.length} advisory note(s) (non-blocking):`,
+    if (categories.length > 0 || items.length > 0) {
+      // Candidate set spans both proposed categories and the categories items
+      // reference, so an items-only manifest with invented categoryIds is also
+      // checked (not just manifests that inline categories).
+      const candidateCategoryIds = [
+        ...new Set([
+          ...categories.map((c) => c.id),
+          ...items.map((it) => it.categoryId),
+        ]),
+      ];
+      try {
+        const existingCategoryIds =
+          await getExistingObjectCategoryIds(candidateCategoryIds);
+        const taxonomyWarnings = collectObjectTaxonomyWarnings(
+          { categories, items },
+          existingCategoryIds,
         );
-        for (const line of formatObjectTaxonomyWarnings(taxonomyWarnings)) {
-          console.error(`  - ${line}`);
+        if (taxonomyWarnings.length > 0) {
+          console.error(
+            `[seed] taxonomy: ${taxonomyWarnings.length} advisory note(s) (non-blocking):`,
+          );
+          for (const line of formatObjectTaxonomyWarnings(taxonomyWarnings)) {
+            console.error(`  - ${line}`);
+          }
         }
+      } catch (err) {
+        // Advisory only — a Firestore hiccup here must never block the seed.
+        // The hard FK check above already gated correctness.
+        console.error(
+          `[seed] taxonomy: skipped advisory category check (${err instanceof Error ? err.message : String(err)})`,
+        );
       }
     }
   }
