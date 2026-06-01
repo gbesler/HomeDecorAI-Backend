@@ -29,6 +29,7 @@ upsert** — re-running is always safe.
 | Hide an item/category from the app | [Take content down](#take-an-item-or-category-down) |
 | Add room-photo inspirations to the **Explore tab** | [Seed explorer inspirations](#explorer-inspiration--tasks) |
 | Seed over **HTTP** instead of the CLI (admin panel / CI / Swagger) | [Using the HTTP routes](#using-the-http-routes-instead-of-the-cli) |
+| Get the **allowed taxonomy values** for a generator/LLM | [Export taxonomy context](#export-taxonomy-context) |
 
 ---
 
@@ -253,6 +254,33 @@ Unlike object items, explorer **preserves an existing prompt** on re-seed and
 only writes a prompt when the doc is new or its stored prompt was empty. To
 change an already-set prompt, clear it first (or edit the doc directly). There's
 no `--overwrite-prompts` flag here.
+
+---
+
+## Export taxonomy context
+
+When generating seed content (manually or with an LLM), emit the system's
+allowed-value sets so the generator only picks defined values — never invents
+new ones. The context is derived live from the canonical enums
+(`src/schemas/generated/types/*`, the tool registry) plus the existing object
+categories, so it stays in sync as enums change.
+
+```bash
+# JSON to stdout (default)
+npm run taxonomy:context
+
+# Markdown (paste into an LLM prompt)
+npx tsx scripts/export-taxonomy-context.ts --format=markdown
+
+# Write both files to a folder
+npx tsx scripts/export-taxonomy-context.ts --format=both --out=scripts/manifests/_generated
+```
+
+No Firebase/env needed — object categories are read from the full manifest
+(`--categories-manifest=` to override). The output covers explore axes
+(roomType, designStyle, gardenStyle, toolType, color palettes, …) and the
+object side (`toolTypes` + existing categories). Note: objects have **no**
+material/style/object-type taxonomy — the context says so explicitly.
 
 ---
 
