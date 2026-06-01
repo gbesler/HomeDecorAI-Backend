@@ -22,11 +22,12 @@ prompt length, ...).
 ## Auth — Service account only
 
 The seed script writes to Firestore via the Firebase Admin SDK using
-a service account. It does NOT call the `POST /api/object-categories`
-or `POST /api/object-inspirations` HTTP endpoints — those exist for
-future admin-panel / Swagger usage and require an `admin: true`
-custom claim on the caller's Firebase user. Bulk seed is an ops job,
-not a user-facing operation, so it skips HTTP entirely.
+a service account. It does NOT call the
+`POST /api/object-inspirations/bulk-seed` HTTP endpoint — that exists
+for admin-panel / Swagger usage and is guarded by `app.authenticate`
+(a valid Firebase **Bearer token**, same as every other route; there
+is no separate `admin: true` custom-claim gate today). Bulk seed is an
+ops job, not a user-facing operation, so it skips HTTP entirely.
 
 You can supply the service account in two ways:
 
@@ -130,13 +131,10 @@ word, with no iOS release needed to extend coverage.
 
 - The outer `searchTerms` field is **optional**: items without it
   fall back to title-only matching (today's behaviour).
-- When `searchTerms` IS present, **both `en` and `tr` are required**
-  (mirrors `title`'s required-en+tr contract). Use an explicit `[]`
-  to mark a language with no alternate terms; a partial payload like
-  `{ en: [...] }` with `tr` absent is rejected at the schema layer.
-  This avoids the silent-erasure footgun where a partial re-seed
-  would otherwise replace the entire stored map and delete the
-  unspecified language.
+- When `searchTerms` IS present it covers the same **32 languages** as
+  `title`, and **every language is independently optional** — supply
+  alternate terms only for the locales where they add value. An unknown
+  locale key is still rejected (`.strict()`).
 - Bounds: max 10 terms per language, each term `trim().min(1).max(40)`.
 - Multi-word terms (`"spiral candle"`) tokenise on whitespace —
   every subtoken becomes independently searchable. Prefer single-noun
