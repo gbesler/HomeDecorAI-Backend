@@ -1,5 +1,41 @@
 {
-  "$comment": "Reference manifest for the per-item `searchTerms` field. Two example items (one sofa with broad EN+TR coverage, one candle with mixed single-word and multi-word terms) show the intended authoring shape. Run validation through `ObjectInspirationSeedInputSchema.parse(...)` before publishing — bounds: max 10 terms/lang, each term trim().min(1).max(40), language keys restricted to `en` + `tr`. Empty/absent searchTerms is the backward-compat fallback (matcher falls back to title-only). See docs/brainstorms/2026-05-26-object-inspiration-search-terms-requirements.md §6 for the full schema decisions.",
+  "$comment": "Reference manifest for the per-item `searchTerms` field. Two example items (one sofa with broad EN+TR coverage, one candle with mixed single-word and multi-word terms) show the intended authoring shape. The two referenced categories (sofas, candles) are included so the manifest is self-contained and seedable on its own. Run validation through `ObjectInspirationSeedInputSchema.parse(...)` before publishing — bounds: max 10 terms/lang, each term trim().min(1).max(40), language keys may be any of the 32 supported locales, each independently optional. Empty/absent searchTerms is the backward-compat fallback (matcher falls back to title-only). See docs/brainstorms/2026-05-26-object-inspiration-search-terms-requirements.md §6 for the full schema decisions.",
+  "categories": [
+    {
+      "id": "sofas",
+      "order": 0,
+      "active": true,
+      "title": {
+        "en": "Sofas",
+        "tr": "Koltuklar"
+      },
+      "path": "in_app_images/01_Sectional_Sofa.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    },
+    {
+      "id": "candles",
+      "order": 36,
+      "active": true,
+      "title": {
+        "en": "Candles",
+        "tr": "Mumlar"
+      },
+      "path": "in_app_images/01_Pillar_Candle.jpeg",
+      "heroImageWidth": 1024,
+      "heroImageHeight": 1024,
+      "heroImageMime": "image/jpeg",
+      "toolTypes": [
+        "replaceObject",
+        "addObject"
+      ]
+    }
+  ],
   "items": [
     {
       "id": "sofas_1",
