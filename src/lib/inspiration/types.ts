@@ -1,5 +1,9 @@
 import type admin from "firebase-admin";
 
+import { RoomType } from "../../schemas/generated/types/roomType.js";
+import { DesignStyle } from "../../schemas/generated/types/designStyle.js";
+import { TOOL_TYPE_KEYS } from "../taxonomy/registry.js";
+
 /**
  * Inspiration domain type. Curated AI-generated room images used by the iOS
  * Explore tab. Documents are written by admins (or later, an admin pipeline)
@@ -7,10 +11,13 @@ import type admin from "firebase-admin";
  *
  * Stored at: `inspirations/{id}` (root collection, public-read).
  *
- * `roomType`, `designStyle`, and `toolType` strings are kept in lockstep with
- * the iOS RoomType / DesignStyle enums + the tool registry in
- * `src/lib/tool-types.ts`. Filters on the iOS side rely on exact-string match,
- * so any new value must be added to both sides simultaneously.
+ * `roomType`, `designStyle`, and `toolType` allowed-value sets are no longer
+ * hand-copied here — they are *derived* from the canonical sources (the
+ * generated `RoomType`/`DesignStyle` enums and the `TOOL_TYPES` registry via
+ * `TOOL_TYPE_KEYS`). Adding a value to the canonical enum propagates here
+ * automatically; the taxonomy registry's compile-time guard catches tool-key
+ * drift. iOS still relies on exact-string match, so the canonical enums
+ * remain the iOS-parity contract.
  */
 export interface Inspiration {
   id: string;
@@ -63,64 +70,26 @@ export interface InspirationDTO {
   schemaVersion: number | null;
 }
 
-/** Allowed RoomType strings, mirrors iOS `RoomType` enum. */
-export const ROOM_TYPE_VALUES = [
-  "livingRoom",
-  "bedroom",
-  "babyRoom",
-  "kitchen",
-  "underStairSpace",
-  "diningRoom",
-  "bathroom",
-  "entryway",
-  "stairway",
-  "office",
-  "homeOffice",
-  "studyRoom",
-  "gamingRoom",
-] as const;
+/** Allowed RoomType strings — derived from the canonical generated `RoomType`
+ *  enum (orval, mirrors iOS). The `as [..]` cast asserts non-emptiness so the
+ *  array still satisfies Zod's `z.enum` tuple requirement at the call sites. */
+export const ROOM_TYPE_VALUES = Object.values(RoomType) as [
+  RoomType,
+  ...RoomType[],
+];
 
-/** Allowed DesignStyle strings, mirrors iOS `DesignStyle` enum. */
-export const DESIGN_STYLE_VALUES = [
-  "modern",
-  "minimalist",
-  "scandinavian",
-  "industrial",
-  "bohemian",
-  "contemporary",
-  "midCentury",
-  "coastal",
-  "farmhouse",
-  "japandi",
-  "artDeco",
-  "traditional",
-  "tropical",
-  "rustic",
-  "luxury",
-  "cozy",
-  "christmas",
-  "airbnb",
-] as const;
+/** Allowed DesignStyle strings — derived from the canonical generated
+ *  `DesignStyle` enum (orval, mirrors iOS). */
+export const DESIGN_STYLE_VALUES = Object.values(DesignStyle) as [
+  DesignStyle,
+  ...DesignStyle[],
+];
 
-/** Allowed ToolType keys for inspirations. Mirrors the iOS
- *  `InspirationToolType` enum — every tool surfaced on the Home grid is
+/** Allowed ToolType keys for inspirations — the full set of `TOOL_TYPES`
+ *  keys, surfaced via the taxonomy registry's `TOOL_TYPE_KEYS` tuple (which is
+ *  compile-time-guarded against `TOOL_TYPES`). Every tool on the Home grid is
  *  filterable in Explore. */
-export const TOOL_TYPE_VALUES = [
-  "interiorDesign",
-  "exteriorDesign",
-  "gardenDesign",
-  "patioDesign",
-  "poolDesign",
-  "referenceStyle",
-  "replaceAddObject",
-  "paintWalls",
-  "floorRestyle",
-  "virtualStaging",
-  "cleanOrganize",
-  "removeObjects",
-  "exteriorPainting",
-  "outdoorLightingDesign",
-] as const;
+export const TOOL_TYPE_VALUES = TOOL_TYPE_KEYS;
 
 export type RoomTypeValue = (typeof ROOM_TYPE_VALUES)[number];
 export type DesignStyleValue = (typeof DESIGN_STYLE_VALUES)[number];
