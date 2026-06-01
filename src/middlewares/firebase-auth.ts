@@ -135,7 +135,7 @@ async function firebaseAuthPlugin(fastify: FastifyInstance) {
       } else if (hasValidApiKey) {
         // Swagger-only path (no Bearer): synthetic user for read-only endpoints
         // (e.g. GET /history). Reject mutating methods so the synthetic user
-        // cannot reach create/sync handlers, burn AI provider credits, or
+        // cannot reach create handlers, burn AI provider credits, or
         // write under a shared `generations/swagger-test-user/...` S3 prefix.
         if (request.method !== "GET" && request.method !== "HEAD") {
           reply.code(401).send({

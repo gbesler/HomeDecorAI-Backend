@@ -30,57 +30,6 @@ import { logger } from "./logger.js";
 // In production the credentials are static and the map stays at size 1.
 const clientCache = new Map<string, CloudTasksClient>();
 
-/**
- * Assert that the async-pipeline env vars are configured. Called at the entry
- * of `enqueueGenerationTask`. While the temporary /sync endpoints are in use
- * these env vars are optional — invoking the async path without them is a
- * configuration error surfaced here rather than hiding as a null reference.
- *
- * Also fails fast when `GCP_PROJECT_ID` disagrees with the `project_id`
- * embedded in `GOOGLE_APPLICATION_CREDENTIALS`. Without this check the
- * Cloud Tasks client authenticates against the credentials' project while
- * `queuePath()` builds a resource name for `GCP_PROJECT_ID` — the resulting
- * PERMISSION_DENIED is opaque and hard to attribute to the env mismatch.
- */
-function requireAsyncEnv(): {
-  projectId: string;
-  serviceAccountEmail: string;
-  backendUrl: string;
-  internalAudience: string;
-} {
-  const missing: string[] = [];
-  if (!env.GCP_PROJECT_ID) missing.push("GCP_PROJECT_ID");
-  if (!env.GCP_SERVICE_ACCOUNT_EMAIL) missing.push("GCP_SERVICE_ACCOUNT_EMAIL");
-  if (!env.BACKEND_PUBLIC_URL) missing.push("BACKEND_PUBLIC_URL");
-  if (!env.INTERNAL_TASK_AUDIENCE) missing.push("INTERNAL_TASK_AUDIENCE");
-  if (!env.GOOGLE_APPLICATION_CREDENTIALS)
-    missing.push("GOOGLE_APPLICATION_CREDENTIALS");
-  if (missing.length > 0) {
-    throw new Error(
-      `Async Cloud Tasks pipeline is not configured. Missing env: ${missing.join(", ")}. ` +
-        `Use the /sync endpoints for testing, or set these to enable async.`,
-    );
-  }
-
-  const credsProjectId = env.GOOGLE_APPLICATION_CREDENTIALS![
-    "project_id"
-  ] as string;
-  if (credsProjectId !== env.GCP_PROJECT_ID) {
-    throw new Error(
-      `GCP_PROJECT_ID ("${env.GCP_PROJECT_ID}") does not match ` +
-        `GOOGLE_APPLICATION_CREDENTIALS.project_id ("${credsProjectId}"). ` +
-        `Align the two env vars and restart — queue writes will PERMISSION_DENIED otherwise.`,
-    );
-  }
-
-  return {
-    projectId: env.GCP_PROJECT_ID!,
-    serviceAccountEmail: env.GCP_SERVICE_ACCOUNT_EMAIL!,
-    backendUrl: env.BACKEND_PUBLIC_URL!,
-    internalAudience: env.INTERNAL_TASK_AUDIENCE!,
-  };
-}
-
 function getClient(projectId: string): CloudTasksClient {
   const cached = clientCache.get(projectId);
   if (cached) return cached;
@@ -88,7 +37,7 @@ function getClient(projectId: string): CloudTasksClient {
   // Use the GCP service account from GOOGLE_APPLICATION_CREDENTIALS. The
   // credential JSON is decoded + validated at process boot in env.ts, so we
   // can read the parsed fields directly here.
-  const creds = env.GOOGLE_APPLICATION_CREDENTIALS!;
+  const creds = env.GOOGLE_APPLICATION_CREDENTIALS;
   const client = new CloudTasksClient({
     credentials: {
       client_email: creds["client_email"] as string,
@@ -152,10 +101,10 @@ const GRPC_ALREADY_EXISTS = 6;
 export async function enqueueGenerationTask(
   input: EnqueueGenerationTaskInput,
 ): Promise<void> {
-  const asyncEnv = requireAsyncEnv();
-  const client = getClient(asyncEnv.projectId);
-  const parent = queuePath(asyncEnv.projectId);
-  const url = `${asyncEnv.backendUrl}${PROCESS_GENERATION_PATH}`;
+  const projectId = env.GCP_PROJECT_ID;
+  const client = getClient(projectId);
+  const parent = queuePath(projectId);
+  const url = `${env.BACKEND_PUBLIC_URL}${PROCESS_GENERATION_PATH}`;
   const mode: EnqueueGenerationTaskMode = input.mode ?? "create";
 
   const payload = JSON.stringify({
@@ -167,7 +116,7 @@ export async function enqueueGenerationTask(
     // Cloud Tasks auto-assign the name so a same-id tombstone from the
     // prior run can't block this createTask.
     ...(mode === "create"
-      ? { name: taskPath(asyncEnv.projectId, input.generationId) }
+      ? { name: taskPath(projectId, input.generationId) }
       : {}),
     httpRequest: {
       httpMethod: "POST",
@@ -177,8 +126,8 @@ export async function enqueueGenerationTask(
       },
       body: Buffer.from(payload).toString("base64"),
       oidcToken: {
-        serviceAccountEmail: asyncEnv.serviceAccountEmail,
-        audience: asyncEnv.internalAudience,
+        serviceAccountEmail: env.GCP_SERVICE_ACCOUNT_EMAIL,
+        audience: env.INTERNAL_TASK_AUDIENCE,
       },
     },
     dispatchDeadline: {

@@ -24,6 +24,20 @@ function minimalEnv(): Record<string, string> {
     AWS_S3_REGION: "us-east-1",
     AWS_COGNITO_IDENTITY_POOL_ID: "us-east-1:00000000-0000-0000-0000-000000000000",
     AWS_CLOUDFRONT_HOST: "cdn.test.local",
+    // Async Cloud Tasks pipeline vars (required at boot). GCP_PROJECT_ID
+    // must match GOOGLE_APPLICATION_CREDENTIALS.project_id ("t").
+    GCP_PROJECT_ID: "t",
+    GCP_SERVICE_ACCOUNT_EMAIL: "sa@t.iam.gserviceaccount.com",
+    BACKEND_PUBLIC_URL: "https://backend.test.local",
+    INTERNAL_TASK_AUDIENCE:
+      "https://backend.test.local/internal/process-generation",
+    GOOGLE_APPLICATION_CREDENTIALS: Buffer.from(
+      JSON.stringify({
+        project_id: "t",
+        private_key: "k",
+        client_email: "e",
+      }),
+    ).toString("base64"),
   };
 }
 
